@@ -1,8 +1,9 @@
 package ua.knu.knudev.taskmanager.domain;
 
-import jakarta.persistence.Entity;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
-@Data
+@Getter
+@Setter
 public class Task {
 }

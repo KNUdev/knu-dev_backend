@@ -13,7 +13,6 @@ import ua.knu.knudev.taskmanagerapi.config.TaskManagerApiConfig;
 import ua.knu.knudev.teammanager.config.TeamManagerConfig;
 import ua.knu.knudev.teammanagerapi.config.TeamManagerApiConfig;
 
-
 @SpringBootApplication
 @Import({CommonConfig.class, LiquibaseConfig.class, RestConfig.class, SecurityConfig.class, SecurityApiConfig.class,
         TaskManagerConfig.class, TaskManagerApiConfig.class, TeamManagerConfig.class, TeamManagerApiConfig.class})
