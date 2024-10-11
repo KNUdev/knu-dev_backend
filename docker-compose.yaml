@@ -1,0 +1,10 @@
+services:
+  postgres:
+    image: 'postgres:latest'
+    container_name: KnuDevDatabase
+    ports:
+      - '5432:5432'
+    environment:
+      POSTGRES_USER: postgres          # Define the default username
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-knudevpass}  # Use the provided DB_PASSWORD or fallback to knudevpass
+      POSTGRES_DB: knudev_db           # Define the default database name

@@ -1,4 +1,4 @@
-package ua.knu.knudev.taskmanager.domain;
+package ua.knu.knudev.teammanager.domain;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
@@ -8,18 +8,16 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.util.UUID;
-
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Table(schema = "task_management", name = "task")
-public class Task {
+@Table(schema = "team_management", name = "account")
+public class Account {
 
     @Id
-    private UUID id;
-    private String name;
-    private String body;
+    private Integer id;
+    private String email;
+    private String password;
 }

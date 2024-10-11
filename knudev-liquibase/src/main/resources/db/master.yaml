@@ -1,0 +1,7 @@
+databaseChangeLog:
+  - includeAll:
+      path: changelog/task_management/
+      relativeToChangelogFile: true
+  - includeAll:
+      path: changelog/team_management/
+      relativeToChangelogFile: true

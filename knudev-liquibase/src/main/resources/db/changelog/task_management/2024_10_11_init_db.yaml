@@ -1,0 +1,26 @@
+databaseChangeLog:
+  - changeSet:
+      id: create_task_management_table
+      author: cumbainer
+      changes:
+        - createTable:
+            schemaName: task_management
+            tableName: task
+            columns:
+              - column:
+                  name: id
+                  type: uuid
+                  constraints:
+                    primaryKey: true
+                    primaryKeyName: task_pk
+                    nullable: false
+              - column:
+                  name: name
+                  type: varchar(100)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: body
+                  type: varchar(255)
+                  constraints:
+                    nullable: false

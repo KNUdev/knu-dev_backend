@@ -12,5 +12,17 @@
 
     <artifactId>knudev-liquibase</artifactId>
 
+    <dependencies>
+        <dependency>
+            <groupId>org.liquibase</groupId>
+            <artifactId>liquibase-core</artifactId>
+        </dependency>
+<!--        todo use spring boot version dep-->
+        <dependency>
+            <groupId>net.lbruun.springboot</groupId>
+            <artifactId>preliquibase-spring-boot-starter</artifactId>
+            <version>1.5.1</version>
+        </dependency>
+    </dependencies>
     
 </project>

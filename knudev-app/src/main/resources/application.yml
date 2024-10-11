@@ -1,0 +1,20 @@
+spring:
+  datasource:
+    url: ${DB_URI:jdbc:postgresql://localhost:5432/knudev_db}
+    username: ${DB_USERNAME:postgres}          # This should match POSTGRES_USER from Docker
+    password: ${DB_PASSWORD:knudevpass}         # This should match POSTGRES_PASSWORD from Docker
+  liquibase:
+    default-schema: liquibase
+    change-log: classpath:db/master.yaml
+  jackson:
+    time-zone: Europe/Kiev
+
+logging:
+  level:
+    org:
+      springframework:
+        transaction:
+          support:
+            TransactionSynchronizationUtils: info
+
+baseUrl: ${BASE_URL:http://localhost:9090}

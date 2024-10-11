@@ -1,0 +1,28 @@
+databaseChangeLog:
+  - changeSet:
+      id: create_team_management_table
+      author: denys
+      changes:
+        - createTable:
+            schemaName: team_management
+            tableName: account
+            columns:
+              - column:
+                  name: id
+                  type: integer
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    primaryKeyName: account_pk
+                    nullable: false
+              - column:
+                  name: email
+                  type: varchar(75)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: password
+                  type: varchar(255)
+                  constraints:
+                    nullable: false
+
