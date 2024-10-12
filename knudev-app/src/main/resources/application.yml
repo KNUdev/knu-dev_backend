@@ -1,8 +1,9 @@
 spring:
   datasource:
     url: ${DB_URI:jdbc:postgresql://localhost:5432/knudev_db}
-    username: ${DB_USERNAME:postgres}          # This should match POSTGRES_USER from Docker
-    password: ${DB_PASSWORD:knudevpass}         # This should match POSTGRES_PASSWORD from Docker
+    username: ${POSTGRES_USERNAME:postgres}
+    password: ${POSTGRES_PASSWORD:knudevpass}
+    driver-class-name: org.postgresql.Driver
   liquibase:
     default-schema: liquibase
     change-log: classpath:db/master.yaml
@@ -17,4 +18,9 @@ logging:
           support:
             TransactionSynchronizationUtils: info
 
-baseUrl: ${BASE_URL:http://localhost:9090}
+minio:
+  bucket: ${MINIO_BUCKET}
+  url: ${MINIO_URL}
+  accessKey: ${MINIO_ACCESS_KEY}
+  secretKey: ${MINIO_SECRET_KEY}
+baseUrl: ${BASE_URL:http://localhost:5000}

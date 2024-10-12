@@ -6,4 +6,5 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 @ComponentScan("ua.knu.knudev.taskmanager")
 public class TaskManagerConfig {
+
 }

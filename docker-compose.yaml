@@ -1,10 +1,21 @@
 services:
   postgres:
-    image: 'postgres:latest'
+    image: 'postgres:16.3-alpine'
     container_name: KnuDevDatabase
     ports:
       - '5432:5432'
     environment:
-      POSTGRES_USER: postgres          # Define the default username
-      POSTGRES_PASSWORD: ${DB_PASSWORD:-knudevpass}  # Use the provided DB_PASSWORD or fallback to knudevpass
-      POSTGRES_DB: knudev_db           # Define the default database name
+      POSTGRES_USER: ${POSTGRES_PASSWORD:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-knudevpass}
+      POSTGRES_DB: knudev_db
+
+  minio:
+    image: minio/minio:latest
+    container_name: minio
+    environment:
+      - MINIO_ROOT_USER=${MINIO_ACCESS_KEY}
+      - MINIO_ROOT_PASSWORD=${MINIO_SECRET_KEY}
+    command: server ~/minio --console-address :9090
+    ports:
+      - '9090:9090'
+      - '9000:9000'
