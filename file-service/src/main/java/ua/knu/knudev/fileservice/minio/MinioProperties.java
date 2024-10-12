@@ -1,4 +1,4 @@
-package ua.knu.knudevapp.config;
+package ua.knu.knudev.fileservice.minio;
 
 import lombok.Getter;
 import lombok.Setter;

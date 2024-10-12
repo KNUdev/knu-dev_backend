@@ -1,4 +1,4 @@
-package ua.knu.knudev.knudevrest.controller;
+package ua.knu.knudev.fileserviceapi.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
