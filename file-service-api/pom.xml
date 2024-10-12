@@ -10,14 +10,7 @@
         <version>0.0.1-SNAPSHOT</version>
     </parent>
 
-    <artifactId>task-manager</artifactId>
-
-    <dependencies>
-        <dependency>
-            <groupId>ua.knu</groupId>
-            <artifactId>task-manager-api</artifactId>
-        </dependency>
-    </dependencies>
+    <artifactId>file-service-api</artifactId>
 
 
 </project>

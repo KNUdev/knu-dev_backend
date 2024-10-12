@@ -12,5 +12,12 @@
 
     <artifactId>knudev-rest</artifactId>
 
+    <dependencies>
+        <dependency>
+            <groupId>ua.knu</groupId>
+            <artifactId>task-manager-api</artifactId>
+        </dependency>
+    </dependencies>
+
     
 </project>

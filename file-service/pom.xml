@@ -10,14 +10,18 @@
         <version>0.0.1-SNAPSHOT</version>
     </parent>
 
-    <artifactId>task-manager</artifactId>
+    <artifactId>file-service</artifactId>
 
     <dependencies>
         <dependency>
+            <groupId>io.minio</groupId>
+            <artifactId>minio</artifactId>
+            <version>8.5.10</version>
+        </dependency>
+        <dependency>
             <groupId>ua.knu</groupId>
-            <artifactId>task-manager-api</artifactId>
+            <artifactId>file-service-api</artifactId>
         </dependency>
     </dependencies>
-
 
 </project>
