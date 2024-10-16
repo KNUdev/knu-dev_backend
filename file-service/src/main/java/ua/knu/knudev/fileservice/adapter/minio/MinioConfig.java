@@ -1,4 +1,4 @@
-package ua.knu.knudev.fileservice.minio;
+package ua.knu.knudev.fileservice.adapter.minio;
 
 import io.minio.MinioClient;
 import lombok.RequiredArgsConstructor;
