@@ -12,7 +12,7 @@ public class MinioConfig {
     private final MinioProperties minioProperties;
 
     @Bean
-    public MinioClient minioClient() {
+    MinioClient minioClient() {
         return MinioClient.builder()
                 .endpoint(minioProperties.getUrl())
                 .credentials(minioProperties.getAccessKey(),

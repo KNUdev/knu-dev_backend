@@ -17,7 +17,7 @@ import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
-public class ImageFileServiceApi implements FileServiceApi {
+public class FileService implements FileServiceApi {
     private final FileUploadAdapter fileUploadAdapter;
 
     @Override
