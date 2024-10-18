@@ -19,9 +19,9 @@ public class MinioAdapter implements FileUploadAdapter {
 
     @Override
     public String saveFile(FileUploadPayload payload) {
-        createBucket(payload.getFolderPath().getPath());
+        createBucket(payload.folderPath().path());
         saveImage(payload);
-        return payload.getFileName();
+        return payload.fileName();
     }
 
     @SneakyThrows
@@ -42,11 +42,11 @@ public class MinioAdapter implements FileUploadAdapter {
 
     @SneakyThrows
     void saveImage(FileUploadPayload payload) {
-        String filePath = payload.getFolderPath().getSubfolderPath() + "/" + payload.getFileName();
+        String filePath = payload.folderPath().subfolderPath() + "/" + payload.fileName();
 
         minioClient.putObject(PutObjectArgs.builder()
-                .stream(payload.getInputStream(), payload.getInputStream().available(), -1)
-                .bucket(payload.getFolderPath().getPath())
+                .stream(payload.inputStream(), payload.inputStream().available(), -1)
+                .bucket(payload.folderPath().path())
                 .object(filePath)
                 .build());
     }

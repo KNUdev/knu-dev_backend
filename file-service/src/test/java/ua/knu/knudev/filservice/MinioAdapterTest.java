@@ -57,19 +57,22 @@ public class MinioAdapterTest {
         when(minioClient.bucketExists(BucketExistsArgs.builder().bucket(BUCKET_NAME).build()))
                 .thenReturn(false);
 
-        minioAdapter.saveFile(fileUploadPayload);
+        saveFile();
 
         verify(minioClient).makeBucket(MakeBucketArgs.builder().bucket(BUCKET_NAME).build());
     }
 
     @Test
     @DisplayName("Should not create the bucket if it already exists when saving a file")
-    void should_NotCreateBucket_When_BucketAlreadyExists() throws Exception{
-        when(minioClient.bucketExists(any(BucketExistsArgs.class)))
+    void should_NotCreateBucket_When_BucketAlreadyExists() throws Exception {
+        when(minioClient.bucketExists(BucketExistsArgs.builder().bucket(BUCKET_NAME).build()))
                 .thenReturn(true);
 
+        saveFile();
+
         verify(minioClient, times(0)).makeBucket(any(MakeBucketArgs.class));
-//        verify(minioClient, times(0)).putObject(any(PutObjectArgs.class));
+
+        verify(minioClient).putObject(any(PutObjectArgs.class));
     }
 
     @Test
@@ -78,7 +81,7 @@ public class MinioAdapterTest {
         when(minioClient.bucketExists(BucketExistsArgs.builder().bucket(BUCKET_NAME).build()))
                 .thenReturn(true);
 
-        minioAdapter.saveFile(fileUploadPayload);
+        saveFile();
 
         ArgumentCaptor<PutObjectArgs> captor = ArgumentCaptor.forClass(PutObjectArgs.class);
         verify(minioClient).putObject(captor.capture());
@@ -88,5 +91,9 @@ public class MinioAdapterTest {
         assertEquals(SUBFOLDER_PATH + "/" + RANDOM_FILENAME, actualArgs.object(),
                 "Object path should be correct."
         );
+    }
+
+    private void saveFile() {
+        minioAdapter.saveFile(fileUploadPayload);
     }
 }

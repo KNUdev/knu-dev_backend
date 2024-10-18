@@ -88,10 +88,10 @@ public class FileServiceTest {
         verify(fileUploadAdapter).saveFile(captor.capture());
         FileUploadPayload capturedPayload = captor.getValue();
 
-        assertEquals(FOLDER_NAME, capturedPayload.getFolderPath().getPath(),
+        assertEquals(FOLDER_NAME, capturedPayload.folderPath().path(),
                 "Folder path should be correct."
         );
-        assertEquals(SUBFOLDER_PATH, capturedPayload.getFolderPath().getSubfolderPath(),
+        assertEquals(SUBFOLDER_PATH, capturedPayload.folderPath().subfolderPath(),
                 "Subfolder path should be correct."
         );
     }
@@ -107,7 +107,7 @@ public class FileServiceTest {
         verify(fileUploadAdapter).saveFile(captor.capture());
 
         FileUploadPayload capturedPayload = captor.getValue();
-        assertNotNull(capturedPayload.getInputStream(), "Input stream should not be null.");
+        assertNotNull(capturedPayload.inputStream(), "Input stream should not be null.");
     }
 
     @Test
@@ -121,7 +121,7 @@ public class FileServiceTest {
         verify(fileUploadAdapter).saveFile(captor.capture());
 
         FileUploadPayload capturedPayload = captor.getValue();
-        String content = new String(capturedPayload.getInputStream().readAllBytes());
+        String content = new String(capturedPayload.inputStream().readAllBytes());
         assertEquals(DUMMY_CONTENT, content, "Input stream content should match expected content.");
     }
 
