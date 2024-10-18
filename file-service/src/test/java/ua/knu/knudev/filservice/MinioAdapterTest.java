@@ -5,6 +5,7 @@ import io.minio.MakeBucketArgs;
 import io.minio.MinioClient;
 import io.minio.PutObjectArgs;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -20,8 +21,7 @@ import java.io.InputStream;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 public class MinioAdapterTest {
@@ -39,7 +39,10 @@ public class MinioAdapterTest {
     @BeforeEach
     void setUp() {
         InputStream inputStream = new ByteArrayInputStream("dummy content".getBytes());
-        FolderPath folderPath = FolderPath.builder().path(BUCKET_NAME).subfolderPath(SUBFOLDER_PATH).build();
+        FolderPath folderPath = FolderPath.builder()
+                .path(BUCKET_NAME)
+                .subfolderPath(SUBFOLDER_PATH)
+                .build();
 
         fileUploadPayload = FileUploadPayload.builder()
                 .inputStream(inputStream)
@@ -49,8 +52,10 @@ public class MinioAdapterTest {
     }
 
     @Test
-    void should_CreateBucketIfNotExists_When_BucketIsCreated() throws Exception {
-        when(minioClient.bucketExists(BucketExistsArgs.builder().bucket(BUCKET_NAME).build())).thenReturn(false);
+    @DisplayName("Should create the bucket if it does not exist when saving a file")
+    void should_CreateBucketIfNotExists_When_SavingFile() throws Exception {
+        when(minioClient.bucketExists(BucketExistsArgs.builder().bucket(BUCKET_NAME).build()))
+                .thenReturn(false);
 
         minioAdapter.saveFile(fileUploadPayload);
 
@@ -58,15 +63,20 @@ public class MinioAdapterTest {
     }
 
     @Test
-    void should_NotCreateBucket_When_BucketIsAlreadyCreated() {
-        //todo create
+    @DisplayName("Should not create the bucket if it already exists when saving a file")
+    void should_NotCreateBucket_When_BucketAlreadyExists() throws Exception{
+        when(minioClient.bucketExists(any(BucketExistsArgs.class)))
+                .thenReturn(true);
 
-
+        verify(minioClient, times(0)).makeBucket(any(MakeBucketArgs.class));
+//        verify(minioClient, times(0)).putObject(any(PutObjectArgs.class));
     }
 
     @Test
+    @DisplayName("Should save the file with correct bucket name and object path when saving a file")
     void should_SaveFileWithCorrectParameters_When_FileIsSaved() throws Exception {
-        when(minioClient.bucketExists(BucketExistsArgs.builder().bucket(BUCKET_NAME).build())).thenReturn(true);
+        when(minioClient.bucketExists(BucketExistsArgs.builder().bucket(BUCKET_NAME).build()))
+                .thenReturn(true);
 
         minioAdapter.saveFile(fileUploadPayload);
 

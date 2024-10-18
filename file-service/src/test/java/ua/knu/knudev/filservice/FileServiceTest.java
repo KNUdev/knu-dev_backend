@@ -3,6 +3,7 @@ package ua.knu.knudev.filservice;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.DisplayName;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -63,6 +64,7 @@ public class FileServiceTest {
     }
 
     @Test
+    @DisplayName("Should return generated file name when file is uploaded")
     void should_ReturnGeneratedFileName_When_FileIsUploaded() {
         when(fileUploadAdapter.saveFile(any(FileUploadPayload.class)))
                 .thenReturn(UUID.randomUUID() + TEST_FILE_EXTENSION);
@@ -76,6 +78,7 @@ public class FileServiceTest {
     }
 
     @Test
+    @DisplayName("Should call saveFile with correct payload when file is uploaded")
     void should_CallSaveFileWithCorrectPayload_When_FileIsUploaded() {
         mockMultipartFile();
 
@@ -94,6 +97,7 @@ public class FileServiceTest {
     }
 
     @Test
+    @DisplayName("Should have non-null InputStream when file is uploaded")
     void should_HaveNonNullInputStream_When_FileIsUploaded() {
         mockMultipartFile();
 
@@ -107,6 +111,7 @@ public class FileServiceTest {
     }
 
     @Test
+    @DisplayName("Should have correct InputStream content when file is uploaded")
     void should_HaveCorrectInputStreamContent_When_FileIsUploaded() throws IOException {
         mockMultipartFile();
 
@@ -121,6 +126,7 @@ public class FileServiceTest {
     }
 
     @Test
+    @DisplayName("Should throw exception when file is corrupted")
     void should_ThrowException_When_FileIsCorrupted() throws IOException {
         when(multipartFile.getInputStream()).thenThrow(new IOException("Test file corrupted exception"));
 
