@@ -1,4 +1,4 @@
-package ua.knu.knudev.fileservice.minio;
+package ua.knu.knudev.fileservice.adapter.minio;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -10,7 +10,6 @@ import org.springframework.stereotype.Component;
 @Setter
 @ConfigurationProperties(prefix = "minio")
 public class MinioProperties {
-    private String bucket;
     private String url;
     private String accessKey;
     private String secretKey;
