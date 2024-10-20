@@ -1,11 +1,11 @@
 databaseChangeLog:
   - changeSet:
-      id: create_team_management_table
-      author: denys
+      id: create_team_management_account_profile_table
+      author: Vladyslav Shtaiier
       changes:
         - createTable:
             schemaName: team_management
-            tableName: account
+            tableName: account_profile
             columns:
               - column:
                   name: id
@@ -13,16 +13,22 @@ databaseChangeLog:
                   autoIncrement: true
                   constraints:
                     primaryKey: true
-                    primaryKeyName: account_pk
+                    primaryKeyName: pk_account_profile
                     nullable: false
               - column:
-                  name: email
+                  name: first_name
                   type: varchar(75)
                   constraints:
                     nullable: false
               - column:
-                  name: password
-                  type: varchar(255)
+                  name: last_name
+                  type: varchar(75)
                   constraints:
                     nullable: false
+              - column:
+                  name: middle_name
+                  type: varchar(75)
+                  constraints:
+                    nullable: false
+
 
