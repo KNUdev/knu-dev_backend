@@ -1,0 +1,29 @@
+package ua.knu.knudev.knudevcommon.config;
+
+import com.querydsl.jpa.JPQLTemplates;
+import com.querydsl.jpa.impl.JPAQueryFactory;
+import jakarta.annotation.PostConstruct;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import org.springframework.stereotype.Component;
+
+@Component
+public class QEntityManagerUtil {
+
+    @PersistenceContext
+    private EntityManager entityManager;
+
+    private static JPAQueryFactory queryFactory;
+
+    @PostConstruct
+    private void init() {
+        queryFactory = new JPAQueryFactory(JPQLTemplates.DEFAULT, entityManager);
+    }
+
+//    todo not delete because with it we can make static calls to queryFactory
+    public static JPAQueryFactory getQueryFactory() {
+        return queryFactory;
+    }
+
+}
+
