@@ -1,0 +1,80 @@
+databaseChangeLog:
+  - changeSet:
+      id: create_account_auth_table
+      author: Vladyslav Shtaiier
+      comment: "Create security_account table"
+      changes:
+        - createTable:
+            schemaName: security_management
+            tableName: account_auth
+            columns:
+              - column:
+                  name: id
+                  type: uuid
+                  autoIncrement: false
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: email
+                  type: varchar(255)
+                  constraints:
+                    unique: true
+                    nullable: false
+              - column:
+                  name: password
+                  type: varchar(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: is_enabled
+                  type: boolean
+                  defaultValueBoolean: true
+                  constraints:
+                    nullable: false
+              - column:
+                  name: is_locked
+                  type: boolean
+                  defaultValueBoolean: false
+                  constraints:
+                    nullable: false
+
+  - changeSet:
+      id: create_account_auth_roles_table
+      author: Vladyslav Shtaiier
+      comment: "Create security_account_roles table"
+      changes:
+        - createTable:
+            schemaName: security_management
+            tableName: account_auth_role
+            columns:
+              - column:
+                  name: account_auth_id
+                  type: uuid
+                  constraints:
+                    nullable: false
+              - column:
+                  name: role
+                  type: varchar(50)
+                  constraints:
+                    nullable: false
+
+  - changeSet:
+      id: add_constraints_to_account_auth_roles
+      author: Vladyslav Shtaiier
+      comment: "Add primary key and foreign key constraints to security_account_role table"
+      changes:
+        - addPrimaryKey:
+            tableName: account_auth_role
+            schemaName: security_management
+            columnNames: account_auth_id, role
+            constraintName: pk_account_auth_roles
+        - addForeignKeyConstraint:
+            referencedTableSchemaName: security_management
+            baseTableSchemaName: security_management
+            baseTableName: account_auth_role
+            baseColumnNames: account_auth_id
+            referencedTableName: account_auth
+            referencedColumnNames: id
+            constraintName: fk_account_auth_roles_account_auth
+            onDelete: cascade

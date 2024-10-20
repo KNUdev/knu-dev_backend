@@ -1,7 +1,7 @@
 databaseChangeLog:
   - changeSet:
       id: create_task_management_table
-      author: cumbainer
+      author: Vladyslav Shtaiier
       changes:
         - createTable:
             schemaName: task_management
