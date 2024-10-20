@@ -31,4 +31,85 @@ databaseChangeLog:
                   constraints:
                     nullable: false
 
+  - changeSet:
+      id: add_columns_to_account_profile_page
+      author: DenysLeonenko
+      changes:
+        - addColumn:
+            schemaName: team_management
+            tableName: account_profile
+            columns:
+              - column:
+                  name: email
+                  type: varchar(75)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: avatar
+                  type: varchar(75)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: password
+                  type: varchar(100)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: account_role
+                  type: varchar(14)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: registration_date
+                  type: date
+              - column:
+                  name: last_role_update_date
+                  type: date
+              - column:
+                  name: is_enabled
+                  type: boolean
+                  constraints:
+                    nullable: false
+              - column:
+                  name: is_locked
+                  type: boolean
+                  constraints:
+                    nullable: false
 
+  - changeSet:
+      id: create_department_table
+      author: DenysLeonenko
+      changes:
+        - createTable:
+            schemaName: team_management
+            tableName: department
+            columns:
+              - column:
+                  name: id
+                  type: uuid
+                  constraints:
+                    nullable: false
+              - column:
+                  name: name
+                  type: varchar(255)
+                  constraints:
+                    nullable: false
+
+  - changeSet:
+      id: create_specialty_table
+      author: DenysLeonenko
+      changes:
+        - createTable:
+            schemaName: team_management
+            tableName: specialty
+            columns:
+              - column:
+                   name: code_name
+                   type: double
+                   constraints:
+                     nullable: false
+              - column:
+                  name: name
+                  type: varchar(255)
+                  constraints:
+                    nullable: false
