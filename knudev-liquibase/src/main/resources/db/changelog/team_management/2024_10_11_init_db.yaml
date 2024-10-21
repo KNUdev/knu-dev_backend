@@ -104,12 +104,32 @@ databaseChangeLog:
             tableName: specialty
             columns:
               - column:
-                   name: code_name
-                   type: double
-                   constraints:
-                     nullable: false
+                  name: code_name
+                  type: double
+                  constraints:
+                    nullable: false
               - column:
                   name: name
                   type: varchar(255)
                   constraints:
                     nullable: false
+
+  - changeSet:
+      id: add_department_id_and_specialty_code_number_columns
+      author: DenysLeonenko
+      changes:
+        - addColumn:
+            schemaName: team_management
+            tableName: account_profile
+            columns:
+              - column:
+                  name: department_id
+                  type: uuid
+                  constraints:
+                    nullable: false
+              - column:
+                  name: specialtyCodeName
+                  type: double
+                  constraints:
+                    nullable: false
+

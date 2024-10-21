@@ -25,7 +25,7 @@ public class Department {
     private String name;
 
     @ManyToMany(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.DETACH, CascadeType.REFRESH})
-    @JoinTable(name = "department_specialty_mapping", joinColumns = @JoinColumn(name = "department_id"),
+    @JoinTable(name = "department_specialty", joinColumns = @JoinColumn(name = "department_id"),
             inverseJoinColumns = @JoinColumn(name = "specialty_code_name"))
     private Set<Specialty> specialties;
 

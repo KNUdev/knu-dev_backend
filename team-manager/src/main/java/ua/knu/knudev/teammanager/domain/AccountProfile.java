@@ -10,6 +10,7 @@ import org.springframework.data.annotation.LastModifiedDate;
 import ua.knu.knudev.knudevsecurityapi.security.AccountRole;
 
 import java.time.LocalDate;
+import java.util.UUID;
 
 @Getter
 @Setter
@@ -32,7 +33,7 @@ public class AccountProfile {
     @Column(nullable = false)
     private String middleName;
 
-//    todo add validation by @knu.ua
+    //    todo add validation by @knu.ua
     @Column(nullable = false)
     private String email;
 
@@ -53,11 +54,11 @@ public class AccountProfile {
     @LastModifiedDate
     private LocalDate lastRoleUpdateDate;
 
-//    @Column(nullable = false)
-//    private Department department;
-//
-//    @Column(nullable = false)
-//    private Specialty specialty;
+    @Column(nullable = false)
+    private UUID departmentId;
+
+    @Column(nullable = false)
+    private Double specialtyCodeName;
 
     @Column
     private boolean isEnabled;
