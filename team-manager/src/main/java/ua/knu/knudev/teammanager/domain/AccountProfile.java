@@ -1,17 +1,15 @@
 package ua.knu.knudev.teammanager.domain;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
+@Entity
+@Table(schema = "team_management", name = "account_profile")
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-@Entity
-@Table(schema = "team_management", name = "account_profile")
+@Builder
 public class AccountProfile {
 
     @Id

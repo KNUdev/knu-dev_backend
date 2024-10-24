@@ -1,3 +1,5 @@
+server:
+  port: 5000
 spring:
   datasource:
     url: ${DB_URI:jdbc:postgresql://localhost:5432/knudev_db}
@@ -22,4 +24,16 @@ minio:
   url: ${MINIO_URL}
   accessKey: ${MINIO_ACCESS_KEY}
   secretKey: ${MINIO_SECRET_KEY}
-baseUrl: ${BASE_URL:http://localhost:5000}
+
+application:
+  baseUrl: ${BASE_URL:http://localhost:5000}
+  email_verification_token:
+    expiration: 60 #60 minutes
+  jwt:
+    secret_base64_key: OblBr1u8BlwbqA61vt0yk4TC/mPlvT2O+t2m9SCci6g=
+    issuer: KNUdev
+    expiration: 600000 #10 minutes
+    #    expiration: 3000 #30 seconds
+    refresh-token:
+      #      expiration: 20000 #30 seconds
+      expiration: 1440000 #24 hours
