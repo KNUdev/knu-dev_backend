@@ -1,10 +1,7 @@
 package ua.knu.knudev.teammanager.domain;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
 import ua.knu.knudev.knudevsecurityapi.security.AccountRole;
 
@@ -14,6 +11,7 @@ import java.time.LocalDateTime;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
+@Builder
 @Entity
 @Table(schema = "team_management", name = "account_profile")
 public class AccountProfile {

@@ -1,15 +1,18 @@
 package ua.knu.knudev.knudevsecurity.domain;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import org.hibernate.annotations.UuidGenerator;
-import ua.knu.knudev.knudevsecurityapi.security.AccountRole;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
+import ua.knu.knudev.knudevsecurityapi.constant.AccountRole;
 
+import java.io.Serializable;
+import java.util.Collection;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Table(schema = "security_management", name = "account_auth")
 @Entity
@@ -17,7 +20,8 @@ import java.util.UUID;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class AccountAuth {
+@Builder
+public class AccountAuth implements Serializable, UserDetails {
 
     @Id
     @UuidGenerator
@@ -41,8 +45,35 @@ public class AccountAuth {
     private Set<AccountRole> roles;
 
     @Column(name = "is_enabled", nullable = false)
-    private boolean isEnabled = true;
+    private boolean enabled;
 
-    @Column(name = "is_locked", nullable = false)
-    private boolean isLocked = false;
+    @Column(name = "is_non_locked", nullable = false)
+    private boolean nonLocked;
+
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return roles.stream()
+                .map(role -> new SimpleGrantedAuthority(role.name()))
+                .collect(Collectors.toSet());
+    }
+
+    @Override
+    public String getUsername() {
+        return email;
+    }
+
+    @Override
+    public boolean isAccountNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isAccountNonLocked() {
+        return nonLocked;
+    }
+
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return true;
+    }
 }
