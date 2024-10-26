@@ -1,10 +1,6 @@
 package ua.knu.knudev.knudevsecurity.service;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.authentication.DisabledException;
-import org.springframework.security.authentication.LockedException;
-import org.springframework.security.core.AuthenticationException;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import ua.knu.knudev.knudevsecurity.domain.AccountAuth;
@@ -49,23 +45,6 @@ public class AccountAuthService implements AccountAuthServiceApi {
         AccountAuth account = Optional.ofNullable(accountAuthRepository.findAccountAuthByEmail(email))
                 .orElseThrow(() -> new AccountAuthException(errorMessage));
         return accountAuthMapper.toDto(account);
-    }
-
-    public void checkAccountValidity(AccountAuth account, String email) throws AuthenticationException {
-        if (account == null) {
-            String accDoesNotExistErrorMsg = String.format("Account with email %s does not exist", email);
-            throw new UsernameNotFoundException(accDoesNotExistErrorMsg);
-        }
-
-        if (!account.isEnabled()) {
-            String disabledAccMsg = "Your account is disabled. Please activate it via link on email: " + account.getEmail();
-            throw new DisabledException(disabledAccMsg);
-        }
-
-        if (!account.isNonLocked()) {
-            String disabledAccMsg = "Your account is locked. Please please contact support at EMAIL";
-            throw new LockedException(disabledAccMsg);
-        }
     }
 
 

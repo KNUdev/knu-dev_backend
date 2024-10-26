@@ -20,22 +20,24 @@ import java.io.IOException;
 
 import static ua.knu.knudev.knudevsecurity.security.config.UrlRegistry.AUTH_EXCLUDED_URLS;
 import static ua.knu.knudev.knudevsecurity.security.config.UrlRegistry.AUTH_URL;
-import static ua.knu.knudev.knudevsecurity.security.filters.FiltersSharedLogicContainer.extractJWTHeader;
-import static ua.knu.knudev.knudevsecurity.security.filters.FiltersSharedLogicContainer.writeMessageInResponse;
 
 
 @Component
 @RequiredArgsConstructor
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final JWTService jwtService;
+    private final FiltersSharedLogicContainer sharedLogicContainer;
 
     @Override
     protected void doFilterInternal(@NotNull HttpServletRequest request,
                                     @NonNull HttpServletResponse response,
                                     @NonNull FilterChain filterChain) throws ServletException, IOException {
-        if (isPublicUrlRequest(request, response, filterChain)) return;
+        if (isPublicUrlRequest(request)) {
+            filterChain.doFilter(request, response);
+            return;
+        }
 
-        String authHeader = extractJWTHeader(request);
+        String authHeader = sharedLogicContainer.extractJWTHeader(request);
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             filterChain.doFilter(request, response);
             return;
@@ -46,7 +48,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         if (accountUsername != null && SecurityContextHolder.getContext().getAuthentication() == null) {
             if (!jwtService.isAccessToken(jwt)) {
                 String message = "Please enter an access token";
-                writeMessageInResponse(response, 403, message);
+                sharedLogicContainer.writeMessageInResponse(response, 403, message);
                 return;
             }
 
@@ -73,15 +75,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         SecurityContextHolder.getContext().setAuthentication(authToken);
     }
 
-    private boolean isPublicUrlRequest(HttpServletRequest request,
-                                       HttpServletResponse response,
-                                       FilterChain filterChain) throws IOException, ServletException {
-
+    private boolean isPublicUrlRequest(HttpServletRequest request)  {
         String servletPath = request.getServletPath();
-        if (servletPath.contains(AUTH_URL) && !AUTH_EXCLUDED_URLS.contains(servletPath)) {
-            filterChain.doFilter(request, response);
-            return true;
-        }
-        return false;
+        return servletPath.contains(AUTH_URL) && !AUTH_EXCLUDED_URLS.contains(servletPath);
     }
+
 }

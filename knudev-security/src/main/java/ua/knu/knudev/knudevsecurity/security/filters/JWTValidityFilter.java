@@ -7,39 +7,42 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
+import ua.knu.knudev.knudevsecurity.utils.JWTSigningKeyProvider;
 
 import java.io.IOException;
 
-import static ua.knu.knudev.knudevsecurity.security.filters.FiltersSharedLogicContainer.extractJWTHeader;
-import static ua.knu.knudev.knudevsecurity.security.filters.FiltersSharedLogicContainer.writeMessageInResponse;
-import static ua.knu.knudev.knudevsecurity.service.JWTService.getSigningKey;
-
 @Component
+@RequiredArgsConstructor
 public class JWTValidityFilter extends OncePerRequestFilter {
+
+    private final FiltersSharedLogicContainer sharedLogicContainer;
+    private final JWTSigningKeyProvider jwtSigningKeyProvider;
+
     @Override
     protected void doFilterInternal(@NonNull HttpServletRequest request,
                                     @NonNull HttpServletResponse response,
                                     @NonNull FilterChain filterChain) throws ServletException, IOException {
-        String jwtHeader = extractJWTHeader(request);
+        String jwtHeader = sharedLogicContainer.extractJWTHeader(request);
         if (jwtHeader != null && jwtHeader.startsWith("Bearer ")
                 && !StringUtils.containsIgnoreCase(request.getServletPath(), "refresh-token")) {
             String jwt = jwtHeader.substring(7);
 
             try {
-                Jwts.parser().verifyWith(getSigningKey()).build().parseSignedClaims(jwt);
+                Jwts.parser().verifyWith(jwtSigningKeyProvider.getSigningKey()).build().parseSignedClaims(jwt);
             } catch (JwtException ex) {
                 String message;
-                if(ex instanceof ExpiredJwtException) {
+                if (ex instanceof ExpiredJwtException) {
                     message = "Your token has expired";
-                    writeMessageInResponse(response, 401, message);
+                    sharedLogicContainer.writeMessageInResponse(response, 401, message);
                     return;
                 }
                 message = "Your JWT token is invalid";
-                writeMessageInResponse(response, 401, message);
+                sharedLogicContainer.writeMessageInResponse(response, 401, message);
                 return;
             }
         }
