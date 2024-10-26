@@ -12,5 +12,12 @@
 
     <artifactId>team-manager-api</artifactId>
 
+    <dependencies>
+        <dependency>
+            <groupId>ua.knu</groupId>
+            <artifactId>knudev-security-api</artifactId>
+        </dependency>
+    </dependencies>
+
 
 </project>

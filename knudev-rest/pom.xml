@@ -17,6 +17,11 @@
             <groupId>ua.knu</groupId>
             <artifactId>task-manager-api</artifactId>
         </dependency>
+        <dependency>
+            <groupId>ua.knu</groupId>
+            <artifactId>knudev-security-api</artifactId>
+        </dependency>
+
     </dependencies>
 
     
