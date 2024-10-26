@@ -6,11 +6,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.LastModifiedDate;
 import ua.knu.knudev.knudevsecurityapi.security.AccountRole;
 
-import java.time.LocalDate;
-import java.util.UUID;
+import java.time.LocalDateTime;
 
 @Getter
 @Setter
@@ -37,32 +35,28 @@ public class AccountProfile {
     @Column(nullable = false)
     private String email;
 
-    @Column(nullable = false)
+    @Column
     private String avatar;
 
     @Column(nullable = false)
     private String password;
 
     @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
     private AccountRole accountRole;
 
-    @Column
+    @Column(nullable = false, updatable = false)
     @CreatedDate
-    private LocalDate registrationDate;
+    private LocalDateTime registrationDate;
 
     @Column
-    @LastModifiedDate
-    private LocalDate lastRoleUpdateDate;
+    private LocalDateTime lastRoleUpdateDate;
 
-    @Column(nullable = false)
-    private UUID departmentId;
+    @OneToOne(cascade = CascadeType.PERSIST)
+    @JoinColumn(name = "department_id", referencedColumnName = "id")
+    private Department department;
 
-    @Column(nullable = false)
-    private Double specialtyCodeName;
-
-    @Column
-    private boolean isEnabled;
-
-    @Column
-    private boolean isLocked;
+    @OneToOne(cascade = CascadeType.PERSIST)
+    @JoinColumn(name = "specialty_id", referencedColumnName = "codeName")
+    private Specialty specialty;
 }

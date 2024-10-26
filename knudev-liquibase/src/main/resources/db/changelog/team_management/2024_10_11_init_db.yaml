@@ -61,10 +61,10 @@ databaseChangeLog:
                     nullable: false
               - column:
                   name: registration_date
-                  type: date
+                  type: datetime
               - column:
                   name: last_role_update_date
-                  type: date
+                  type: datetime
               - column:
                   name: is_enabled
                   type: boolean
@@ -133,3 +133,61 @@ databaseChangeLog:
                   constraints:
                     nullable: false
 
+  - changeSet:
+      id: create_account_department_table
+      author: DenysLeonenko
+      changes:
+        - createTable:
+            schemaName: team_management
+            tableName: account_department
+            columns:
+              - column:
+                  name: account_id
+                  type: integer
+                  constraints:
+                    nullable: false
+                    unique: true
+              - column:
+                  name: department_id
+                  type: uuid
+                  constraints:
+                    nullable: false
+
+  - changeSet:
+      id: create_account_specialty_table
+      author: DenysLeonenko
+      changes:
+        - createTable:
+            schemaName: team_management
+            tableName: account_specialty
+            columns:
+              - column:
+                  name: account_id
+                  type: integer
+                  constraints:
+                    nullable: false
+                    unique: true
+              - column:
+                  name: specialty_id
+                  type: double
+                  constraints:
+                    nullable: false
+
+  - changeSet:
+      id: create_departments_to_speciaties_table
+      author: DenysLeonenko
+      changes:
+        - createTable:
+            schemaName: team_management
+            tableName: departments_specialties
+            columns:
+              - column:
+                   name: specialties
+                   type: double
+                   constraints:
+                     nullable: false
+              - column:
+                  name: departments
+                  type: uuid
+                  constraints:
+                    nullable: false

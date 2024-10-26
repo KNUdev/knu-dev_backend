@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.HashSet;
 import java.util.Set;
 
 @Getter
@@ -17,14 +18,13 @@ import java.util.Set;
 public class Specialty {
 
     @Id
-    @Column(nullable = false)
+    @Column(nullable = false, updatable = false)
     private Double codeName;
 
-    @Column(nullable = false)
+    @Column(nullable = false, updatable = false)
     private String name;
 
-    @ManyToMany(mappedBy = "specialties", fetch = FetchType.LAZY,
-            cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.DETACH, CascadeType.REFRESH})
-    private Set<Department> departments;
+    @ManyToMany(mappedBy = "specialties", fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
+    private Set<Department> departments = new HashSet<>();
 
 }

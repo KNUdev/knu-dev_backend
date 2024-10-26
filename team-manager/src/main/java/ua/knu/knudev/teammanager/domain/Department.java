@@ -5,7 +5,9 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.UuidGenerator;
 
+import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 
@@ -18,15 +20,17 @@ import java.util.UUID;
 public class Department {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @UuidGenerator
+    @Column(updatable = false, nullable = false)
     private UUID id;
 
     @Column(nullable = false)
     private String name;
 
-    @ManyToMany(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.DETACH, CascadeType.REFRESH})
-    @JoinTable(name = "department_specialty", joinColumns = @JoinColumn(name = "department_id"),
-            inverseJoinColumns = @JoinColumn(name = "specialty_code_name"))
-    private Set<Specialty> specialties;
+    @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
+    @JoinTable(name = "departments_specialties",
+            joinColumns = @JoinColumn(name = "departments"),
+            inverseJoinColumns = @JoinColumn(name = "specialties"))
+    private Set<Specialty> specialties = new HashSet<>();
 
 }
