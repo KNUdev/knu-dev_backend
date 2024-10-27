@@ -8,6 +8,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
+import ua.knu.knudev.knudevsecurity.domain.AccountAuth;
 import ua.knu.knudev.knudevsecurity.dto.AccountAuthDto;
 import ua.knu.knudev.knudevsecurity.mapper.AccountAuthMapper;
 import ua.knu.knudev.knudevsecurityapi.api.AuthServiceApi;
@@ -33,7 +34,8 @@ public class AuthenticationService implements AuthServiceApi {
                 new UsernamePasswordAuthenticationToken(authReq.email(), authReq.password())
         );
 
-        Tokens tokens = jwtService.generateTokens(accountAuthMapper.toDomain(account));
+        AccountAuth accountDomain = accountAuthMapper.toDomain(account);
+        Tokens tokens = jwtService.generateTokens(accountDomain);
         return AuthenticationResponse.builder()
                 .accessToken(tokens.accessToken())
                 .refreshToken(tokens.refreshToken())
@@ -42,18 +44,21 @@ public class AuthenticationService implements AuthServiceApi {
 
     private void checkAccountValidity(AccountAuthDto account, String email) throws AuthenticationException {
         if (account == null) {
-            String accDoesNotExistErrorMsg = String.format("Account with email %s does not exist", email);
-            throw new UsernameNotFoundException(accDoesNotExistErrorMsg);
+            throw new UsernameNotFoundException(
+                    String.format("Account with email %s does not exist.", email)
+            );
         }
 
         if (!account.enabled()) {
-            String disabledAccMsg = "Your account is disabled. Please activate it via link on email: " + account.email();
-            throw new DisabledException(disabledAccMsg);
+            throw new DisabledException(
+                    "Your account is disabled. Please activate it via link on email: " + account.email()
+            );
         }
 
         if (!account.nonLocked()) {
-            String lockedAccMsg = "Your account is locked. Please please contact support at EMAIL";
-            throw new LockedException(lockedAccMsg);
+            throw new LockedException(
+                    "Your account is locked. Please please contact support."
+            );
         }
     }
 

@@ -43,7 +43,7 @@ public class JwtAuthenticationFilterTest {
     private HttpServletResponse response;
 
     @Mock
-    private FiltersSharedLogicContainer sharedLogicContainer;
+    private JWTFiltersHelper jwtFiltersHelper;
 
     @InjectMocks
     private JwtAuthenticationFilter jwtAuthenticationFilter;
@@ -56,56 +56,47 @@ public class JwtAuthenticationFilterTest {
         jwtAuthenticationFilter.doFilterInternal(request, response, filterChain);
 
         verify(filterChain).doFilter(request, response);
-        verify(sharedLogicContainer, times(0)).extractJWTHeader(request);
+        verify(jwtFiltersHelper, times(0)).extractJWTHeader(request);
         verifyNoInteractions(jwtService);
     }
 
     @Test
     @DisplayName("Should not authenticate requests without a JWT header")
     public void should_NotAuthenticate_When_RequestHasNoJWTHeader() throws ServletException, IOException {
-        // Arrange
         when(request.getServletPath()).thenReturn(SECURED_URL);
-        when(sharedLogicContainer.extractJWTHeader(request)).thenReturn(null);
+        when(jwtFiltersHelper.extractJWTHeader(request)).thenReturn(null);
 
-        // Act
         jwtAuthenticationFilter.doFilterInternal(request, response, filterChain);
 
-        // Assert
         verify(filterChain).doFilter(request, response);
-        verify(sharedLogicContainer).extractJWTHeader(request);
+        verify(jwtFiltersHelper).extractJWTHeader(request);
         verifyNoInteractions(jwtService);
     }
 
     @Test
     @DisplayName("Should not authenticate requests with JWT header missing 'Bearer' prefix")
     public void should_NotAuthenticate_When_RequestHasJWTHeaderButNoBearerPrefix() throws ServletException, IOException {
-        // Arrange
         when(request.getServletPath()).thenReturn(SECURED_URL);
-        when(sharedLogicContainer.extractJWTHeader(request)).thenReturn("SomeToken");
+        when(jwtFiltersHelper.extractJWTHeader(request)).thenReturn("SomeToken");
 
-        // Act
         jwtAuthenticationFilter.doFilterInternal(request, response, filterChain);
 
-        // Assert
         verify(filterChain).doFilter(request, response);
-        verify(sharedLogicContainer).extractJWTHeader(request);
+        verify(jwtFiltersHelper).extractJWTHeader(request);
         verifyNoInteractions(jwtService);
     }
 
     @Test
     @DisplayName("Should respond with 403 when the JWT header contains a refresh token instead of an access token")
     public void should_Throw403Exception_When_BearerHeaderIsRefreshToken() throws ServletException, IOException {
-        // Arrange
         when(request.getServletPath()).thenReturn(SECURED_URL);
-        when(sharedLogicContainer.extractJWTHeader(request)).thenReturn(getJWT());
+        when(jwtFiltersHelper.extractJWTHeader(request)).thenReturn(getJWT());
         when(jwtService.extractUsername(TEST_JWT_TOKEN)).thenReturn("user@example.com");
         when(jwtService.isAccessToken(TEST_JWT_TOKEN)).thenReturn(false);
 
-        // Act
         jwtAuthenticationFilter.doFilterInternal(request, response, filterChain);
 
-        // Assert
-        verify(sharedLogicContainer).writeMessageInResponse(
+        verify(jwtFiltersHelper).writeMessageInResponse(
                 response,
                 403,
                 "Please enter an access token"
@@ -119,7 +110,7 @@ public class JwtAuthenticationFilterTest {
     public void should_Authenticate_When_JWTHeaderIsPresentAndValid() throws ServletException, IOException {
         // Arrange
         when(request.getServletPath()).thenReturn(SECURED_URL);
-        when(sharedLogicContainer.extractJWTHeader(request)).thenReturn(buildJWT(TEST_JWT_TOKEN));
+        when(jwtFiltersHelper.extractJWTHeader(request)).thenReturn(buildJWT(TEST_JWT_TOKEN));
 
         when(jwtService.extractUsername(TEST_JWT_TOKEN)).thenReturn(TEST_USERNAME);
         when(jwtService.isAccessToken(TEST_JWT_TOKEN)).thenReturn(true);
@@ -143,7 +134,7 @@ public class JwtAuthenticationFilterTest {
     public void should_NotAuthenticate_When_JWTHeaderIsInvalid() throws ServletException, IOException {
         // Arrange
         when(request.getServletPath()).thenReturn(SECURED_URL);
-        when(sharedLogicContainer.extractJWTHeader(request)).thenReturn(getJWT());
+        when(jwtFiltersHelper.extractJWTHeader(request)).thenReturn(getJWT());
 
         when(jwtService.extractUsername(TEST_JWT_TOKEN)).thenReturn(TEST_USERNAME);
         when(jwtService.isAccessToken(TEST_JWT_TOKEN)).thenReturn(true);
@@ -165,7 +156,7 @@ public class JwtAuthenticationFilterTest {
     public void should_NotAuthenticate_When_UserIsAlreadyAuthenticated() throws ServletException, IOException {
         // Arrange
         when(request.getServletPath()).thenReturn(SECURED_URL);
-        when(sharedLogicContainer.extractJWTHeader(request)).thenReturn(getJWT());
+        when(jwtFiltersHelper.extractJWTHeader(request)).thenReturn(getJWT());
         when(jwtService.extractUsername(TEST_JWT_TOKEN)).thenReturn(TEST_USERNAME);
 
         SecurityContext securityContext = mockSecurityContext();

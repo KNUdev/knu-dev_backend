@@ -26,7 +26,7 @@ import static ua.knu.knudev.knudevsecurity.security.config.UrlRegistry.AUTH_URL;
 @RequiredArgsConstructor
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final JWTService jwtService;
-    private final FiltersSharedLogicContainer sharedLogicContainer;
+    private final JWTFiltersHelper jwtFiltersHelper;
 
     @Override
     protected void doFilterInternal(@NotNull HttpServletRequest request,
@@ -37,7 +37,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             return;
         }
 
-        String authHeader = sharedLogicContainer.extractJWTHeader(request);
+        String authHeader = jwtFiltersHelper.extractJWTHeader(request);
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             filterChain.doFilter(request, response);
             return;
@@ -47,8 +47,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         String accountUsername = jwtService.extractUsername(jwt);
         if (accountUsername != null && SecurityContextHolder.getContext().getAuthentication() == null) {
             if (!jwtService.isAccessToken(jwt)) {
-                String message = "Please enter an access token";
-                sharedLogicContainer.writeMessageInResponse(response, 403, message);
+                jwtFiltersHelper.writeMessageInResponse(
+                        response,
+                        403,
+                        "Please enter an access token"
+                );
                 return;
             }
 

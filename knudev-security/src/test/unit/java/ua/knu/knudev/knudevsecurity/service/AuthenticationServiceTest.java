@@ -24,6 +24,7 @@ import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 public class AuthenticationServiceTest {
+
     private static final String TEST_ACCESS_TOKEN = "testAccessToken123";
     private static final String TEST_REFRESH_TOKEN = "testRefreshToken123";
     private static final String TEST_EMAIL = "testUser@knu.ua";

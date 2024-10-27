@@ -36,7 +36,7 @@ public class JWTValidityFilterTest {
     private HttpServletResponse response;
 
     @Mock
-    private FiltersSharedLogicContainer sharedLogicContainer;
+    private JWTFiltersHelper sharedLogicContainer;
 
     @Mock
     private JWTSigningKeyProvider signingKeyProvider;

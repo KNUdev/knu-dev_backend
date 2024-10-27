@@ -84,19 +84,12 @@ public class JWTServiceTest {
     @DisplayName("Should throw ExpiredJwtException when validating an expired access token")
     public void should_ThrowExpiredJwtException_When_TryToValidateWithExpiredToken() {
         JWTService shortLivedJwtService = new JWTService(
-                100, // 100 milliseconds for access token
-                100, // 100 milliseconds for refresh token
+                100,
+                100,
                 TEST_ISSUER_NAME,
                 new JWTSigningKeyProvider());
 
         Tokens tokens = shortLivedJwtService.generateTokens(account);
-
-        // Wait for tokens to expire
-        try {
-            Thread.sleep(200);
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-        }
 
         assertThrows(ExpiredJwtException.class, () ->
                         shortLivedJwtService.isTokenValid(tokens.accessToken(), account),
