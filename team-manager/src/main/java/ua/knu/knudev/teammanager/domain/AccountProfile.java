@@ -3,7 +3,7 @@ package ua.knu.knudev.teammanager.domain;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
-import ua.knu.knudev.knudevsecurityapi.security.AccountRole;
+import ua.knu.knudev.knudevsecurityapi.constant.AccountRole;
 
 import java.time.LocalDateTime;
 
