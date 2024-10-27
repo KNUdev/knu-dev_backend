@@ -50,11 +50,6 @@ databaseChangeLog:
                   constraints:
                     nullable: false
               - column:
-                  name: password
-                  type: varchar(100)
-                  constraints:
-                    nullable: false
-              - column:
                   name: account_role
                   type: varchar(14)
                   constraints:
@@ -174,13 +169,13 @@ databaseChangeLog:
             tableName: departments_specialties
             columns:
               - column:
-                  name: specialties_id
-                  type: double
+                  name: department_id
+                  type: uuid
                   constraints:
                     nullable: false
               - column:
-                  name: departments_id
-                  type: uuid
+                  name: specialty_id
+                  type: double
                   constraints:
                     nullable: false
 
@@ -191,16 +186,16 @@ databaseChangeLog:
         - addPrimaryKey:
             tableName: departments_specialties
             schemaName: team_management
-            columnNames: departments_id, specialties_id
-            constraintName: pk_departments_id_specialties_id
+            columnNames: department_id, specialty_id
+            constraintName: pk_department_id_specialty_id
         - addForeignKeyConstraint:
             referencedTableSchemaName: team_management
             baseTableSchemaName: team_management
             baseTableName: departments_specialties
-            baseColumnNames: specialties_id
+            baseColumnNames: specialty_id
             referencedTableName: specialty
             referencedColumnNames: code_name
-            constraintName: fk_specialties_id_departments_id
+            constraintName: fk_specialty_id_department_id
 
   - changeSet:
       id: add_primary_and_foreign_keys_to_account_department_table

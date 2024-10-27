@@ -37,9 +37,6 @@ public class AccountProfile {
     private String avatar;
 
     @Column(nullable = false)
-    private String password;
-
-    @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private AccountRole accountRole;
 

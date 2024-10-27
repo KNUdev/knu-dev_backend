@@ -27,10 +27,17 @@ public class Department {
     @Column(nullable = false)
     private String name;
 
-    @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
-    @JoinTable(name = "departments_specialties",
-            joinColumns = @JoinColumn(name = "departments"),
-            inverseJoinColumns = @JoinColumn(name = "specialties"))
+    @ManyToMany(fetch = FetchType.LAZY, cascade= CascadeType.PERSIST)
+    @JoinTable(
+            name = "departments_specialties",
+            schema = "team_management",
+            joinColumns = @JoinColumn(name = "department_id"),
+            inverseJoinColumns = @JoinColumn(name = "specialty_id")
+    )
     private Set<Specialty> specialties = new HashSet<>();
 
+    public void addSpecialty(Specialty specialty) {
+        this.specialties.add(specialty);
+        specialty.getDepartments().add(this);
+    }
 }
