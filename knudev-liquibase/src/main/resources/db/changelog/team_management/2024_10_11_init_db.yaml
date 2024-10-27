@@ -32,7 +32,7 @@ databaseChangeLog:
                     nullable: false
 
   - changeSet:
-      id: add_columns_to_account_profile_page
+      id: add_columns_to_account_profile_table
       author: DenysLeonenko
       changes:
         - addColumn:
@@ -65,16 +65,6 @@ databaseChangeLog:
               - column:
                   name: last_role_update_date
                   type: datetime
-              - column:
-                  name: is_enabled
-                  type: boolean
-                  constraints:
-                    nullable: false
-              - column:
-                  name: is_locked
-                  type: boolean
-                  constraints:
-                    nullable: false
 
   - changeSet:
       id: create_department_table
@@ -89,6 +79,7 @@ databaseChangeLog:
                   type: uuid
                   constraints:
                     nullable: false
+                    unique: true
               - column:
                   name: name
                   type: varchar(255)
@@ -108,6 +99,7 @@ databaseChangeLog:
                   type: double
                   constraints:
                     nullable: false
+                    unique: true
               - column:
                   name: name
                   type: varchar(255)
@@ -128,7 +120,7 @@ databaseChangeLog:
                   constraints:
                     nullable: false
               - column:
-                  name: specialtyCodeName
+                  name: specialty_code_name
                   type: double
                   constraints:
                     nullable: false
@@ -174,7 +166,7 @@ databaseChangeLog:
                     nullable: false
 
   - changeSet:
-      id: create_departments_to_speciaties_table
+      id: create_departments_specialties_table
       author: DenysLeonenko
       changes:
         - createTable:
@@ -182,12 +174,66 @@ databaseChangeLog:
             tableName: departments_specialties
             columns:
               - column:
-                   name: specialties
-                   type: double
-                   constraints:
-                     nullable: false
+                  name: specialties_id
+                  type: double
+                  constraints:
+                    nullable: false
               - column:
-                  name: departments
+                  name: departments_id
                   type: uuid
                   constraints:
                     nullable: false
+
+  - changeSet:
+      id: add_primary_and_foreign_keys_to_department_specialties_table
+      author: DenysLeonenko
+      changes:
+        - addPrimaryKey:
+            tableName: departments_specialties
+            schemaName: team_management
+            columnNames: departments_id, specialties_id
+            constraintName: pk_departments_id_specialties_id
+        - addForeignKeyConstraint:
+            referencedTableSchemaName: team_management
+            baseTableSchemaName: team_management
+            baseTableName: departments_specialties
+            baseColumnNames: specialties_id
+            referencedTableName: specialty
+            referencedColumnNames: code_name
+            constraintName: fk_specialties_id_departments_id
+
+  - changeSet:
+      id: add_primary_and_foreign_keys_to_account_department_table
+      author: DenysLeonenko
+      changes:
+        - addPrimaryKey:
+            schemaName: team_management
+            tableName: account_department
+            columnNames: account_id, department_id
+            constraintName: pk_account_id_department_id
+        - addForeignKeyConstraint:
+            referencedTableSchemaName: team_management
+            baseTableSchemaName: team_management
+            baseTableName: account_department
+            baseColumnNames: department_id
+            referencedTableName: department
+            referencedColumnNames: id
+            constraintName: fk_department_id_account_id
+
+  - changeSet:
+      id: add_primary_and_foreign_keys_to_account_specialty_table
+      author: DenysLeonenko
+      changes:
+        - addPrimaryKey:
+            schemaName: team_management
+            tableName: account_specialty
+            columnNames: account_id, specialty_id
+            constraintName: pk_account_id_specialty_id
+        - addForeignKeyConstraint:
+            referencedTableSchemaName: team_management
+            baseTableSchemaName: team_management
+            baseTableName: account_specialty
+            baseColumnNames: specialty_id
+            referencedTableName: specialty
+            referencedColumnNames: code_name
+            constraintName: fk_specialty_id_account_id
