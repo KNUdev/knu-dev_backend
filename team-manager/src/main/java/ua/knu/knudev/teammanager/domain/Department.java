@@ -24,7 +24,7 @@ public class Department {
     @Column(updatable = false, nullable = false)
     private UUID id;
 
-    @Column(nullable = false)
+    @Column(nullable = false, unique = true, updatable = false)
     private String name;
 
     @ManyToMany(fetch = FetchType.LAZY, cascade= CascadeType.PERSIST)
@@ -32,7 +32,7 @@ public class Department {
             name = "departments_specialties",
             schema = "team_management",
             joinColumns = @JoinColumn(name = "department_id"),
-            inverseJoinColumns = @JoinColumn(name = "specialty_id")
+            inverseJoinColumns = @JoinColumn(name = "specialty_code_name")
     )
     private Set<Specialty> specialties = new HashSet<>();
 

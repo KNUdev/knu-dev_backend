@@ -48,4 +48,6 @@ public class AccountProfileService implements AccountProfileApi {
     private boolean accountExists(String email) {
         return accountProfileRepository.existsByFirstName(email);
     }
+
+
 }

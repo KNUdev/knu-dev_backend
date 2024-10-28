@@ -18,10 +18,10 @@ import java.util.Set;
 public class Specialty {
 
     @Id
-    @Column(nullable = false, updatable = false)
+    @Column(name = "code_name", nullable = false, updatable = false)
     private Double codeName;
 
-    @Column(nullable = false, updatable = false)
+    @Column(nullable = false, updatable = false, unique = true)
     private String name;
 
     @ManyToMany(mappedBy = "specialties", fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)

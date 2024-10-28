@@ -30,7 +30,7 @@ public class AccountProfile {
     private String middleName;
 
     //    todo add validation by @knu.ua
-    @Column(nullable = false)
+    @Column(nullable = false, updatable = false, unique = true)
     private String email;
 
     @Column
@@ -47,11 +47,11 @@ public class AccountProfile {
     @Column
     private LocalDateTime lastRoleUpdateDate;
 
-    @OneToOne(cascade = CascadeType.PERSIST)
-    @JoinColumn(name = "department_id", referencedColumnName = "id")
+    @ManyToOne(cascade = CascadeType.PERSIST)
+    @JoinColumn(name = "department_id", referencedColumnName = "id", nullable = false)
     private Department department;
 
-    @OneToOne(cascade = CascadeType.PERSIST)
-    @JoinColumn(name = "specialty_id", referencedColumnName = "codeName")
+    @ManyToOne(cascade = CascadeType.PERSIST)
+    @JoinColumn(name = "specialty_code_name", referencedColumnName = "code_name", nullable = false)
     private Specialty specialty;
 }

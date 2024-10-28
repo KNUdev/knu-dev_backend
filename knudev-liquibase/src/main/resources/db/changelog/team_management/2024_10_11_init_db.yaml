@@ -1,5 +1,117 @@
 databaseChangeLog:
   - changeSet:
+      id: create_department_table
+      author: DenysLeonenko
+      changes:
+        - createTable:
+            schemaName: team_management
+            tableName: department
+            columns:
+              - column:
+                  name: id
+                  type: uuid
+                  constraints:
+                    nullable: false
+                    unique: true
+                    primaryKey: true
+              - column:
+                  name: name
+                  type: varchar(255)
+                  constraints:
+                    nullable: false
+                    unique: true
+        - createIndex:
+            schemaName: team_management
+            tableName: department
+            indexName: idx_department_name
+            columns:
+              - column:
+                  name: name
+
+  - changeSet:
+      id: create_specialty_table
+      author: DenysLeonenko
+      changes:
+        - createTable:
+            schemaName: team_management
+            tableName: specialty
+            columns:
+              - column:
+                  name: code_name
+                  type: double
+                  constraints:
+                    nullable: false
+                    unique: true
+                    primaryKey: true
+              - column:
+                  name: name
+                  type: varchar(255)
+                  constraints:
+                    unique: true
+                    nullable: false
+        - createIndex:
+            schemaName: team_management
+            tableName: specialty
+            indexName: idx_specialty_name
+            columns:
+              - column:
+                  name: name
+
+  - changeSet:
+      id: create_departments_specialties_table
+      author: DenysLeonenko, Vladyslav Shtaiier
+      changes:
+        - createTable:
+            schemaName: team_management
+            tableName: departments_specialties
+            columns:
+              - column:
+                  name: department_id
+                  type: uuid
+                  constraints:
+                    nullable: false
+              - column:
+                  name: specialty_code_name
+                  type: double
+                  constraints:
+                    nullable: false
+        - addPrimaryKey:
+            tableName: departments_specialties
+            schemaName: team_management
+            columnNames: department_id, specialty_code_name
+            constraintName: pk_department_id_specialty_code_name
+        - addForeignKeyConstraint:
+            referencedTableSchemaName: team_management
+            baseTableSchemaName: team_management
+            baseTableName: departments_specialties
+            baseColumnNames: department_id
+            referencedTableName: department
+            referencedColumnNames: id
+            constraintName: fk_departments_specialties_department_id
+        - addForeignKeyConstraint:
+            referencedTableSchemaName: team_management
+            baseTableSchemaName: team_management
+            baseTableName: departments_specialties
+            baseColumnNames: specialty_code_name
+            referencedTableName: specialty
+            referencedColumnNames: code_name
+            constraintName: fk_departments_specialties_specialty_code_name
+        - createIndex:
+            tableName: departments_specialties
+            schemaName: team_management
+            indexName: idx_departments_specialties_department_id
+            columns:
+              - column:
+                  name: department_id
+        - createIndex:
+            tableName: departments_specialties
+            schemaName: team_management
+            indexName: idx_departments_specialties_specialty_id
+            columns:
+              - column:
+                  name: specialty_code_name
+
+  - changeSet:
       id: create_team_management_account_profile_table
       author: Vladyslav Shtaiier
       changes:
@@ -30,19 +142,11 @@ databaseChangeLog:
                   type: varchar(75)
                   constraints:
                     nullable: false
-
-  - changeSet:
-      id: add_columns_to_account_profile_table
-      author: DenysLeonenko
-      changes:
-        - addColumn:
-            schemaName: team_management
-            tableName: account_profile
-            columns:
               - column:
                   name: email
                   type: varchar(75)
                   constraints:
+                    unique: true
                     nullable: false
               - column:
                   name: avatar
@@ -56,59 +160,11 @@ databaseChangeLog:
                     nullable: false
               - column:
                   name: registration_date
+                  defaultValueComputed: "CURRENT_TIMESTAMP"
                   type: datetime
               - column:
                   name: last_role_update_date
                   type: datetime
-
-  - changeSet:
-      id: create_department_table
-      author: DenysLeonenko
-      changes:
-        - createTable:
-            schemaName: team_management
-            tableName: department
-            columns:
-              - column:
-                  name: id
-                  type: uuid
-                  constraints:
-                    nullable: false
-                    unique: true
-              - column:
-                  name: name
-                  type: varchar(255)
-                  constraints:
-                    nullable: false
-
-  - changeSet:
-      id: create_specialty_table
-      author: DenysLeonenko
-      changes:
-        - createTable:
-            schemaName: team_management
-            tableName: specialty
-            columns:
-              - column:
-                  name: code_name
-                  type: double
-                  constraints:
-                    nullable: false
-                    unique: true
-              - column:
-                  name: name
-                  type: varchar(255)
-                  constraints:
-                    nullable: false
-
-  - changeSet:
-      id: add_department_id_and_specialty_code_number_columns
-      author: DenysLeonenko
-      changes:
-        - addColumn:
-            schemaName: team_management
-            tableName: account_profile
-            columns:
               - column:
                   name: department_id
                   type: uuid
@@ -119,116 +175,38 @@ databaseChangeLog:
                   type: double
                   constraints:
                     nullable: false
-
-  - changeSet:
-      id: create_account_department_table
-      author: DenysLeonenko
-      changes:
-        - createTable:
-            schemaName: team_management
-            tableName: account_department
-            columns:
-              - column:
-                  name: account_id
-                  type: integer
-                  constraints:
-                    nullable: false
-                    unique: true
-              - column:
-                  name: department_id
-                  type: uuid
-                  constraints:
-                    nullable: false
-
-  - changeSet:
-      id: create_account_specialty_table
-      author: DenysLeonenko
-      changes:
-        - createTable:
-            schemaName: team_management
-            tableName: account_specialty
-            columns:
-              - column:
-                  name: account_id
-                  type: integer
-                  constraints:
-                    nullable: false
-                    unique: true
-              - column:
-                  name: specialty_id
-                  type: double
-                  constraints:
-                    nullable: false
-
-  - changeSet:
-      id: create_departments_specialties_table
-      author: DenysLeonenko
-      changes:
-        - createTable:
-            schemaName: team_management
-            tableName: departments_specialties
-            columns:
-              - column:
-                  name: department_id
-                  type: uuid
-                  constraints:
-                    nullable: false
-              - column:
-                  name: specialty_id
-                  type: double
-                  constraints:
-                    nullable: false
-
-  - changeSet:
-      id: add_primary_and_foreign_keys_to_department_specialties_table
-      author: DenysLeonenko
-      changes:
-        - addPrimaryKey:
-            tableName: departments_specialties
-            schemaName: team_management
-            columnNames: department_id, specialty_id
-            constraintName: pk_department_id_specialty_id
         - addForeignKeyConstraint:
             referencedTableSchemaName: team_management
             baseTableSchemaName: team_management
-            baseTableName: departments_specialties
-            baseColumnNames: specialty_id
-            referencedTableName: specialty
-            referencedColumnNames: code_name
-            constraintName: fk_specialty_id_department_id
-
-  - changeSet:
-      id: add_primary_and_foreign_keys_to_account_department_table
-      author: DenysLeonenko
-      changes:
-        - addPrimaryKey:
-            schemaName: team_management
-            tableName: account_department
-            columnNames: account_id, department_id
-            constraintName: pk_account_id_department_id
-        - addForeignKeyConstraint:
-            referencedTableSchemaName: team_management
-            baseTableSchemaName: team_management
-            baseTableName: account_department
+            baseTableName: account_profile
             baseColumnNames: department_id
             referencedTableName: department
             referencedColumnNames: id
-            constraintName: fk_department_id_account_id
-
-  - changeSet:
-      id: add_primary_and_foreign_keys_to_account_specialty_table
-      author: DenysLeonenko
-      changes:
-        - addPrimaryKey:
-            schemaName: team_management
-            tableName: account_specialty
-            columnNames: account_id, specialty_id
-            constraintName: pk_account_id_specialty_id
+            constraintName: fk_account_profile_department_id
         - addForeignKeyConstraint:
             referencedTableSchemaName: team_management
             baseTableSchemaName: team_management
-            baseTableName: account_specialty
-            baseColumnNames: specialty_id
+            baseTableName: account_profile
+            baseColumnNames: specialty_code_name
             referencedTableName: specialty
             referencedColumnNames: code_name
-            constraintName: fk_specialty_id_account_id
+            constraintName: fk_account_profile_specialty_code_name
+        - createIndex:
+            tableName: account_profile
+            schemaName: team_management
+            indexName: idx_account_profile_department_id
+            columns:
+              - column:
+                  name: department_id
+        - createIndex:
+            tableName: account_profile
+            schemaName: team_management
+            indexName: idx_account_profile_specialty_code_name
+            columns:
+              - column:
+                  name: specialty_code_name
+
+
+
+
+
