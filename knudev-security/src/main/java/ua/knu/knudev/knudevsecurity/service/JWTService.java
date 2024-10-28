@@ -2,17 +2,16 @@ package ua.knu.knudev.knudevsecurity.service;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.security.Keys;
 import io.jsonwebtoken.security.SignatureException;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 import ua.knu.knudev.knudevsecurity.domain.AccountAuth;
+import ua.knu.knudev.knudevsecurity.utils.JWTSigningKeyProvider;
 import ua.knu.knudev.knudevsecurityapi.constant.AccountRole;
 import ua.knu.knudev.knudevsecurityapi.dto.Tokens;
 
-import javax.crypto.SecretKey;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -23,19 +22,16 @@ public class JWTService {
     private final Integer accessTokenExpirationInMillis;
     private final Integer refreshTokenExpirationInMillis;
     private final String issuerName;
+    private final JWTSigningKeyProvider signingKeyProvider;
 
     public JWTService(
             @Value("${application.jwt.expiration}") Integer accessTokenExpirationInMillis,
             @Value("${application.jwt.refresh-token.expiration}") Integer refreshTokenExpirationInMillis,
-            @Value("${application.jwt.issuer}") String issuerName) {
+            @Value("${application.jwt.issuer}") String issuerName, JWTSigningKeyProvider signingKeyProvider) {
         this.accessTokenExpirationInMillis = accessTokenExpirationInMillis;
         this.refreshTokenExpirationInMillis = refreshTokenExpirationInMillis;
         this.issuerName = issuerName;
-    }
-
-    public static SecretKey getSigningKey() {
-        byte[] keyBytes = Base64.getDecoder().decode("OblBr1u8BlwbqA61vt0yk4TC/mPlvT2O+t2m9SCci6g=");
-        return Keys.hmacShaKeyFor(keyBytes);
+        this.signingKeyProvider = signingKeyProvider;
     }
 
     public String extractUsername(String token) {
@@ -44,7 +40,7 @@ public class JWTService {
 
     public <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
         Claims claims = Jwts.parser()
-                .verifyWith(getSigningKey())
+                .verifyWith(signingKeyProvider.getSigningKey())
                 .build()
                 .parseSignedClaims(token)
                 .getPayload();
@@ -109,7 +105,7 @@ public class JWTService {
                 .issuer(issuerName)
                 .issuedAt(new Date(System.currentTimeMillis()))
                 .expiration(new Date(System.currentTimeMillis() + expiration))
-                .signWith(getSigningKey())
+                .signWith(signingKeyProvider.getSigningKey())
                 .compact();
     }
 
@@ -122,7 +118,7 @@ public class JWTService {
 
     private Claims parseClaims(String token) {
         return Jwts.parser()
-                .verifyWith(getSigningKey())
+                .verifyWith(signingKeyProvider.getSigningKey())
                 .build()
                 .parseSignedClaims(token)
                 .getPayload();
