@@ -1,5 +1,117 @@
 databaseChangeLog:
   - changeSet:
+      id: create_department_table
+      author: DenysLeonenko
+      changes:
+        - createTable:
+            schemaName: team_management
+            tableName: department
+            columns:
+              - column:
+                  name: id
+                  type: uuid
+                  constraints:
+                    nullable: false
+                    unique: true
+                    primaryKey: true
+              - column:
+                  name: name
+                  type: varchar(255)
+                  constraints:
+                    nullable: false
+                    unique: true
+        - createIndex:
+            schemaName: team_management
+            tableName: department
+            indexName: idx_department_name
+            columns:
+              - column:
+                  name: name
+
+  - changeSet:
+      id: create_specialty_table
+      author: DenysLeonenko
+      changes:
+        - createTable:
+            schemaName: team_management
+            tableName: specialty
+            columns:
+              - column:
+                  name: code_name
+                  type: double
+                  constraints:
+                    nullable: false
+                    unique: true
+                    primaryKey: true
+              - column:
+                  name: name
+                  type: varchar(255)
+                  constraints:
+                    unique: true
+                    nullable: false
+        - createIndex:
+            schemaName: team_management
+            tableName: specialty
+            indexName: idx_specialty_name
+            columns:
+              - column:
+                  name: name
+
+  - changeSet:
+      id: create_departments_specialties_table
+      author: DenysLeonenko, Vladyslav Shtaiier
+      changes:
+        - createTable:
+            schemaName: team_management
+            tableName: departments_specialties
+            columns:
+              - column:
+                  name: department_id
+                  type: uuid
+                  constraints:
+                    nullable: false
+              - column:
+                  name: specialty_code_name
+                  type: double
+                  constraints:
+                    nullable: false
+        - addPrimaryKey:
+            tableName: departments_specialties
+            schemaName: team_management
+            columnNames: department_id, specialty_code_name
+            constraintName: pk_department_id_specialty_code_name
+        - addForeignKeyConstraint:
+            referencedTableSchemaName: team_management
+            baseTableSchemaName: team_management
+            baseTableName: departments_specialties
+            baseColumnNames: department_id
+            referencedTableName: department
+            referencedColumnNames: id
+            constraintName: fk_departments_specialties_department_id
+        - addForeignKeyConstraint:
+            referencedTableSchemaName: team_management
+            baseTableSchemaName: team_management
+            baseTableName: departments_specialties
+            baseColumnNames: specialty_code_name
+            referencedTableName: specialty
+            referencedColumnNames: code_name
+            constraintName: fk_departments_specialties_specialty_code_name
+        - createIndex:
+            tableName: departments_specialties
+            schemaName: team_management
+            indexName: idx_departments_specialties_department_id
+            columns:
+              - column:
+                  name: department_id
+        - createIndex:
+            tableName: departments_specialties
+            schemaName: team_management
+            indexName: idx_departments_specialties_specialty_id
+            columns:
+              - column:
+                  name: specialty_code_name
+
+  - changeSet:
       id: create_team_management_account_profile_table
       author: Vladyslav Shtaiier
       changes:
@@ -30,5 +142,71 @@ databaseChangeLog:
                   type: varchar(75)
                   constraints:
                     nullable: false
+              - column:
+                  name: email
+                  type: varchar(75)
+                  constraints:
+                    unique: true
+                    nullable: false
+              - column:
+                  name: avatar
+                  type: varchar(75)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: account_role
+                  type: varchar(14)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: registration_date
+                  defaultValueComputed: "CURRENT_TIMESTAMP"
+                  type: datetime
+              - column:
+                  name: last_role_update_date
+                  type: datetime
+              - column:
+                  name: department_id
+                  type: uuid
+                  constraints:
+                    nullable: false
+              - column:
+                  name: specialty_code_name
+                  type: double
+                  constraints:
+                    nullable: false
+        - addForeignKeyConstraint:
+            referencedTableSchemaName: team_management
+            baseTableSchemaName: team_management
+            baseTableName: account_profile
+            baseColumnNames: department_id
+            referencedTableName: department
+            referencedColumnNames: id
+            constraintName: fk_account_profile_department_id
+        - addForeignKeyConstraint:
+            referencedTableSchemaName: team_management
+            baseTableSchemaName: team_management
+            baseTableName: account_profile
+            baseColumnNames: specialty_code_name
+            referencedTableName: specialty
+            referencedColumnNames: code_name
+            constraintName: fk_account_profile_specialty_code_name
+        - createIndex:
+            tableName: account_profile
+            schemaName: team_management
+            indexName: idx_account_profile_department_id
+            columns:
+              - column:
+                  name: department_id
+        - createIndex:
+            tableName: account_profile
+            schemaName: team_management
+            indexName: idx_account_profile_specialty_code_name
+            columns:
+              - column:
+                  name: specialty_code_name
+
+
+
 
 

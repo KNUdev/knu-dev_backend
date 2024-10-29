@@ -33,7 +33,7 @@ databaseChangeLog:
                   constraints:
                     nullable: false
               - column:
-                  name: is_locked
+                  name: is_non_locked
                   type: boolean
                   defaultValueBoolean: false
                   constraints:

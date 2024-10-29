@@ -17,6 +17,14 @@
             <artifactId>knudev-common</artifactId>
         </dependency>
         <dependency>
+            <groupId>ua.knu</groupId>
+            <artifactId>team-manager-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>ua.knu</groupId>
+            <artifactId>knudev-security-api</artifactId>
+        </dependency>
+        <dependency>
             <groupId>com.querydsl</groupId>
             <artifactId>querydsl-jpa</artifactId>
             <version>5.1.0</version>
