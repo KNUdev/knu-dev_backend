@@ -47,13 +47,22 @@ public class FileService implements FileServiceApi {
 
     private String generateFileName(MultipartFile file) {
         String extension = getExtension(file);
+        validateFileExtension(extension);
         return UUID.randomUUID() + "." + extension;
     }
 
     private String getExtension(MultipartFile file) {
-        return file.getOriginalFilename()
-                .substring(file.getOriginalFilename()
-                        .lastIndexOf(".") + 1);
+        String originalFilename = file.getOriginalFilename();
+        if (originalFilename == null || !originalFilename.contains(".")) {
+            throw new FileException("Invalid file name: no extension found.");
+        }
+        return originalFilename.substring(originalFilename.lastIndexOf(".") + 1);
+    }
+
+    private void validateFileExtension(String extension) {
+        if (extension.matches(".*[<>:\"/\\\\|?*].*") || extension.contains("..")) {
+            throw new FileException("Invalid file extension.");
+        }
     }
 
 }

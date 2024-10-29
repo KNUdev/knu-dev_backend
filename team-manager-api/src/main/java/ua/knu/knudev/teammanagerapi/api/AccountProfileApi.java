@@ -6,5 +6,5 @@ import ua.knu.knudev.teammanagerapi.response.AccountRegistrationResponse;
 
 public interface AccountProfileApi {
     AccountProfileDto getByEmail(String email);
-    AccountRegistrationResponse createAccount(AccountCreationRequest registrationRequest);
+    AccountRegistrationResponse register(AccountCreationRequest registrationRequest);
 }

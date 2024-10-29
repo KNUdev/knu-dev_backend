@@ -58,12 +58,6 @@ databaseChangeLog:
                   type: varchar(50)
                   constraints:
                     nullable: false
-
-  - changeSet:
-      id: add_constraints_to_account_auth_roles
-      author: Vladyslav Shtaiier
-      comment: "Add primary key and foreign key constraints to security_account_role table"
-      changes:
         - addPrimaryKey:
             tableName: account_auth_role
             schemaName: security_management

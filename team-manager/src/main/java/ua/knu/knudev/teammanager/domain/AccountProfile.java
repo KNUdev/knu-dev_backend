@@ -3,7 +3,6 @@ package ua.knu.knudev.teammanager.domain;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
-import ua.knu.knudev.knudevsecurityapi.constant.AccountRole;
 
 import java.time.LocalDateTime;
 
@@ -36,9 +35,15 @@ public class AccountProfile {
     @Column
     private String avatar;
 
-    @Column(nullable = false)
-    @Enumerated(EnumType.STRING)
-    private AccountRole accountRole;
+//    @ElementCollection(fetch = FetchType.LAZY)
+//    @CollectionTable(
+//            schema = "team_management",
+//            name = "account_profile_role",
+//            joinColumns = @JoinColumn(name = "account_profile_id")
+//    )
+//    @Enumerated(EnumType.STRING)
+//    @Column(name = "roles", nullable = false)
+//    private Set<AccountRole> accountRole;
 
     @Column(nullable = false, updatable = false)
     @CreatedDate

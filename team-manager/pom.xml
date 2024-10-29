@@ -25,6 +25,15 @@
             <groupId>ua.knu</groupId>
             <artifactId>knudev-security-api</artifactId>
         </dependency>
+        <dependency>
+            <groupId>ua.knu</groupId>
+            <artifactId>file-service-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.h2database</groupId>
+            <artifactId>h2</artifactId>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
     
 </project>

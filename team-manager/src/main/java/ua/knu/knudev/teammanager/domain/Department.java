@@ -1,10 +1,7 @@
 package ua.knu.knudev.teammanager.domain;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import org.hibernate.annotations.UuidGenerator;
 
 import java.util.HashSet;
@@ -17,6 +14,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @Entity
 @Table(schema = "team_management", name = "department")
+@Builder
 public class Department {
 
     @Id

@@ -1,9 +1,9 @@
 package ua.knu.knudev.filservice;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.jupiter.api.DisplayName;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -127,13 +127,31 @@ public class FileServiceTest {
 
     @Test
     @DisplayName("Should throw exception when file is corrupted")
-    void should_ThrowException_When_FileIsCorrupted() throws IOException {
+    void should_ThrowFileException_When_FileIsCorrupted() throws IOException {
         when(multipartFile.getInputStream()).thenThrow(new IOException("Test file corrupted exception"));
 
         FileException exception = assertThrows(FileException.class, this::uploadFile,
                 "Expected FileException when input stream throws IOException.");
         assertEquals("Could not get input stream, because file is corrupted", exception.getMessage(),
                 "Exception message should indicate that the file is corrupted.");
+    }
+
+    @Test
+    @DisplayName("Should throw exception when file extension contains invalid characters")
+    void should_ThrowFileException_When_FileExtensionContainsInvalidCharacters() {
+        when(multipartFile.getOriginalFilename()).thenReturn("test.inva|id");
+
+        FileException exception = assertThrows(FileException.class, this::uploadFile);
+        assertEquals("Invalid file extension.", exception.getMessage());
+    }
+
+    @Test
+    @DisplayName("Should throw exception when file name does not contain extension")
+    void should_ThrowException_When_FileNameDoesNotContainExtension() {
+        when(multipartFile.getOriginalFilename()).thenReturn("testfile");
+
+        FileException exception = assertThrows(FileException.class, this::uploadFile);
+        assertEquals("Invalid file name: no extension found.", exception.getMessage());
     }
 
     private void mockMultipartFile() {

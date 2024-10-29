@@ -11,7 +11,7 @@ import ua.knu.knudev.knudevsecurityapi.api.AccountAuthServiceApi;
 import ua.knu.knudev.knudevsecurityapi.constant.AccountRole;
 import ua.knu.knudev.knudevsecurityapi.exception.AccountAuthException;
 import ua.knu.knudev.knudevsecurityapi.request.AccountCreationRequest;
-import ua.knu.knudev.knudevsecurityapi.response.AccountCreationResponse;
+import ua.knu.knudev.knudevsecurityapi.response.AuthAccountCreationResponse;
 
 import java.util.Optional;
 import java.util.Set;
@@ -24,7 +24,7 @@ public class AccountAuthService implements AccountAuthServiceApi {
     private final PasswordEncoder passwordEncoder;
 
     @Override
-    public AccountCreationResponse createAccount(AccountCreationRequest creationRequest) {
+    public AuthAccountCreationResponse createAccount(AccountCreationRequest creationRequest) {
         AccountAuth accountAuth = AccountAuth.builder()
                 .email(creationRequest.email())
                 .password(passwordEncoder.encode(creationRequest.password()))
@@ -34,7 +34,7 @@ public class AccountAuthService implements AccountAuthServiceApi {
                 .build();
 
         AccountAuth savedAccount = accountAuthRepository.save(accountAuth);
-        return AccountCreationResponse.builder()
+        return AuthAccountCreationResponse.builder()
                 .email(savedAccount.getEmail())
                 .roles(savedAccount.getRoles())
                 .build();
