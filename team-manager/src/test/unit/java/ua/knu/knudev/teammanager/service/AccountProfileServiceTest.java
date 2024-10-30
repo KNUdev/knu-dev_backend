@@ -11,6 +11,8 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.web.multipart.MultipartFile;
 import ua.knu.knudev.fileserviceapi.api.FileServiceApi;
+import ua.knu.knudev.knudevcommon.utils.AcademicUnitsIds;
+import ua.knu.knudev.knudevcommon.utils.FullName;
 import ua.knu.knudev.knudevsecurityapi.api.AccountAuthServiceApi;
 import ua.knu.knudev.knudevsecurityapi.request.AccountCreationRequest;
 import ua.knu.knudev.knudevsecurityapi.response.AuthAccountCreationResponse;
@@ -19,8 +21,6 @@ import ua.knu.knudev.teammanager.domain.Department;
 import ua.knu.knudev.teammanager.domain.Specialty;
 import ua.knu.knudev.teammanager.mapper.AccountProfileMapper;
 import ua.knu.knudev.teammanager.repository.AccountProfileRepository;
-import ua.knu.knudev.teammanager.utils.constants.AccountTestsConstants;
-import ua.knu.knudev.teammanagerapi.dto.AcademicUnitsIds;
 import ua.knu.knudev.teammanagerapi.dto.AccountProfileDto;
 import ua.knu.knudev.teammanagerapi.exception.AccountException;
 import ua.knu.knudev.teammanagerapi.exception.DepartmentException;
@@ -80,13 +80,17 @@ class AccountProfileServiceTest {
     void setUp() {
         request = AccountCreationRequest.builder()
                 .email(TEST_EMAIL)
-                .password(AccountTestsConstants.TEST_PASSWORD)
-                .departmentId(TEST_DEPARTMENT_ID)
-                .specialtyId(TEST_SPECIALTY_ID)
+                .password(TEST_PASSWORD)
+                .academicUnitsIds(AcademicUnitsIds.builder()
+                        .departmentId(TEST_DEPARTMENT_ID)
+                        .specialtyId(TEST_SPECIALTY_ID)
+                        .build())
                 .avatarFile(mockAvatarFile)
-                .firstName(AccountTestsConstants.PROFILE_FIRST_NAME)
-                .lastName(AccountTestsConstants.PROFILE_LAST_NAME)
-                .middleName(AccountTestsConstants.PROFILE_MIDDLE_NAME)
+                .fullName(FullName.builder()
+                        .firstName(PROFILE_FIRST_NAME)
+                        .lastName(PROFILE_LAST_NAME)
+                        .middleName(PROFILE_MIDDLE_NAME)
+                        .build())
                 .build();
     }
 

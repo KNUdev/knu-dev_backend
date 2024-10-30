@@ -1,4 +1,4 @@
-package ua.knu.knudev.teammanagerapi.dto;
+package ua.knu.knudev.knudevcommon.utils;
 
 import lombok.Builder;
 

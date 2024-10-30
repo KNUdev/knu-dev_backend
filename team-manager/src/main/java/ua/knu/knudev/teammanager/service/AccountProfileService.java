@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ua.knu.knudev.fileserviceapi.api.FileServiceApi;
+import ua.knu.knudev.knudevcommon.utils.FullName;
 import ua.knu.knudev.knudevsecurityapi.api.AccountAuthServiceApi;
 import ua.knu.knudev.knudevsecurityapi.request.AccountCreationRequest;
 import ua.knu.knudev.knudevsecurityapi.response.AuthAccountCreationResponse;
@@ -13,7 +14,7 @@ import ua.knu.knudev.teammanager.domain.Specialty;
 import ua.knu.knudev.teammanager.mapper.AccountProfileMapper;
 import ua.knu.knudev.teammanager.repository.AccountProfileRepository;
 import ua.knu.knudev.teammanagerapi.api.AccountProfileApi;
-import ua.knu.knudev.teammanagerapi.dto.AcademicUnitsIds;
+import ua.knu.knudev.knudevcommon.utils.AcademicUnitsIds;
 import ua.knu.knudev.teammanagerapi.dto.AccountProfileDto;
 import ua.knu.knudev.teammanagerapi.exception.AccountException;
 import ua.knu.knudev.teammanagerapi.response.AccountRegistrationResponse;
@@ -32,7 +33,7 @@ public class AccountProfileService implements AccountProfileApi {
     @Transactional
     public AccountRegistrationResponse register(AccountCreationRequest request) {
         validateEmailNotExists(request.email());
-        validateAcademicUnitExistence(request);
+        departmentService.validateAcademicUnitByIds(request.academicUnitsIds());
 
         AuthAccountCreationResponse createdAuthAccount = accountAuthServiceApi.createAccount(request);
         String uploadFilename = fileServiceApi.uploadAccountPicture(request.avatarFile());
@@ -51,33 +52,28 @@ public class AccountProfileService implements AccountProfileApi {
         }
     }
 
-    private void validateAcademicUnitExistence(AccountCreationRequest request) {
-        AcademicUnitsIds academicUnitsIds = AcademicUnitsIds.builder()
-                .departmentId(request.departmentId())
-                .specialtyId(request.specialtyId())
-                .build();
-        departmentService.validateAcademicUnitByIds(academicUnitsIds);
-    }
-
     private AccountProfile buildAccountProfile(AccountCreationRequest request,
                                                String uploadFilename,
                                                AuthAccountCreationResponse authAccount) {
-        Department department = departmentService.getById(request.departmentId());
+        FullName reqFullName = request.fullName();
+        AcademicUnitsIds reqAcademicUnitsIds = request.academicUnitsIds();
+
+        Department department = departmentService.getById(reqAcademicUnitsIds.departmentId());
         Specialty specialty = department.getSpecialties().stream()
-                .filter(s -> s.getCodeName().equals(request.specialtyId()))
+                .filter(s -> s.getCodeName().equals(reqAcademicUnitsIds.specialtyId()))
                 .findAny()
                 .orElseThrow(() -> new AccountException(
                         String.format("Specialty with id %s not found in department %s",
-                                request.specialtyId(),
-                                request.departmentId()
+                                reqAcademicUnitsIds.specialtyId(),
+                                reqAcademicUnitsIds.departmentId()
                         )
                 ));
 
         return AccountProfile.builder()
                 .email(authAccount.email())
-                .firstName(request.firstName())
-                .lastName(request.lastName())
-                .middleName(request.middleName())
+                .firstName(reqFullName.firstName())
+                .lastName(reqFullName.lastName())
+                .middleName(reqFullName.middleName())
                 .avatar(uploadFilename)
                 .department(department)
                 .specialty(specialty)

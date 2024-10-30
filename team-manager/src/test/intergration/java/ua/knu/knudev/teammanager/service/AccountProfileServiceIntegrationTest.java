@@ -25,7 +25,7 @@
 //import ua.knu.knudev.teammanager.domain.Specialty;
 //import ua.knu.knudev.teammanager.mapper.AccountProfileMapper;
 //import ua.knu.knudev.teammanager.repository.AccountProfileRepository;
-//import ua.knu.knudev.teammanagerapi.dto.AcademicUnitsIds;
+//import ua.knu.knudev.knudevcommon.utils.AcademicUnitsIds;
 //import ua.knu.knudev.teammanagerapi.exception.AccountException;
 //import ua.knu.knudev.teammanagerapi.response.AccountRegistrationResponse;
 //

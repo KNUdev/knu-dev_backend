@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import ua.knu.knudev.teammanager.domain.Department;
 import ua.knu.knudev.teammanager.repository.DepartmentRepository;
-import ua.knu.knudev.teammanagerapi.dto.AcademicUnitsIds;
+import ua.knu.knudev.knudevcommon.utils.AcademicUnitsIds;
 import ua.knu.knudev.teammanagerapi.exception.DepartmentException;
 
 import java.util.Optional;
