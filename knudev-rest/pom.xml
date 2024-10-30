@@ -22,11 +22,14 @@
             <artifactId>knudev-security-api</artifactId>
         </dependency>
         <dependency>
+            <groupId>ua.knu</groupId>
+            <artifactId>team-manager-api</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.springframework.security</groupId>
             <artifactId>spring-security-test</artifactId>
             <scope>test</scope>
         </dependency>
-
     </dependencies>
 
     
