@@ -28,22 +28,11 @@ public class AccountProfile {
     @Column(nullable = false)
     private String middleName;
 
-    //    todo add validation by @knu.ua
     @Column(nullable = false, updatable = false, unique = true)
     private String email;
 
     @Column
     private String avatar;
-
-//    @ElementCollection(fetch = FetchType.LAZY)
-//    @CollectionTable(
-//            schema = "team_management",
-//            name = "account_profile_role",
-//            joinColumns = @JoinColumn(name = "account_profile_id")
-//    )
-//    @Enumerated(EnumType.STRING)
-//    @Column(name = "roles", nullable = false)
-//    private Set<AccountRole> accountRole;
 
     @Column(nullable = false, updatable = false)
     @CreatedDate

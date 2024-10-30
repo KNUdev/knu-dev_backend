@@ -20,7 +20,6 @@ public class AccountTestUtils {
                 .firstName(PROFILE_FIRST_NAME)
                 .lastName(PROFILE_LAST_NAME)
                 .middleName(PROFILE_MIDDLE_NAME)
-//                .accountRole(TEST_ROLE)
                 .avatar(TEST_FILE_NAME)
                 .department(getTestDepartment())
                 .specialty(getTestSpecialty("Computer science"))

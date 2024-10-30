@@ -42,7 +42,6 @@ import static ua.knu.knudev.teammanager.utils.constants.DepartmentTestsConstants
 class AccountProfileServiceTest {
     private static final AuthAccountCreationResponse AUTH_RESPONSE = AuthAccountCreationResponse.builder()
             .email(TEST_EMAIL)
-//            .role(TEST_ROLE)
             .build();
 
     private static final Department testDepartment = getTestDepartment();
@@ -122,7 +121,6 @@ class AccountProfileServiceTest {
         assertEquals(PROFILE_FIRST_NAME, capturedProfile.getFirstName());
         assertEquals(PROFILE_LAST_NAME, capturedProfile.getLastName());
         assertEquals(PROFILE_MIDDLE_NAME, capturedProfile.getMiddleName());
-//        assertEquals(TEST_ROLE, capturedProfile.getAccountRole());
         assertEquals(TEST_FILE_NAME, capturedProfile.getAvatar());
         assertEquals(testDepartment, capturedProfile.getDepartment());
         assertEquals(testSpecialty.getCodeName(), capturedProfile.getSpecialty().getCodeName());
@@ -211,7 +209,7 @@ class AccountProfileServiceTest {
 
     @Test
     @DisplayName("Should correctly build registration response")
-    void shouldBuildRegistrationResponseCorrectly() {
+    void should_BuildRegistrationResponseCorrectly_When_InputDataIsValid() {
         when(accountProfileRepository.existsByEmail(TEST_EMAIL)).thenReturn(false);
         doNothing().when(departmentService).validateAcademicUnitByIds(any(AcademicUnitsIds.class));
         when(accountAuthServiceApi.createAccount(any(AccountCreationRequest.class))).thenReturn(AUTH_RESPONSE);
