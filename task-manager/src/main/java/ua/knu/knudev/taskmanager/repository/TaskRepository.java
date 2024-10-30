@@ -11,9 +11,4 @@ import static ua.knu.knudev.knudevcommon.config.QEntityManagerUtil.getQueryFacto
 @Repository
 public interface TaskRepository extends JpaRepository<Task, UUID> {
 
-
-
-//    default void getById() {
-//        getQueryFactory().selectFrom()
-//    }
 }
