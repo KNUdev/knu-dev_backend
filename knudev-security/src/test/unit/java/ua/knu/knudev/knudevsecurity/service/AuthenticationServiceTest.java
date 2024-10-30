@@ -61,7 +61,7 @@ public class AuthenticationServiceTest {
 
         Tokens tokens = new Tokens(TEST_ACCESS_TOKEN, TEST_REFRESH_TOKEN);
 
-        when(accountService.findByEmail(TEST_EMAIL)).thenReturn(accountAuthDto);
+        when(accountService.getByEmail(TEST_EMAIL)).thenReturn(accountAuthDto);
         when(accountAuthMapper.toDomain(accountAuthDto)).thenReturn(accountAuth);
 
         Authentication authentication = mock(Authentication.class);
@@ -77,7 +77,7 @@ public class AuthenticationServiceTest {
         assertEquals(TEST_ACCESS_TOKEN, response.accessToken());
         assertEquals(TEST_REFRESH_TOKEN, response.refreshToken());
 
-        verify(accountService).findByEmail(TEST_EMAIL);
+        verify(accountService).getByEmail(TEST_EMAIL);
         verify(accountAuthMapper).toDomain(accountAuthDto);
         verify(authenticationManager).authenticate(any(UsernamePasswordAuthenticationToken.class));
         verify(jwtService).generateTokens(accountAuth);
@@ -88,11 +88,11 @@ public class AuthenticationServiceTest {
     public void should_ThrowUsernameNotFoundException_When_GivenInvalidCredentials() {
         AuthenticationRequest authReq = getAuthRequest();
 
-        when(accountService.findByEmail(TEST_EMAIL)).thenReturn(null);
+        when(accountService.getByEmail(TEST_EMAIL)).thenReturn(null);
 
         assertThrows(UsernameNotFoundException.class, () -> authenticationService.authenticate(authReq));
 
-        verify(accountService).findByEmail(TEST_EMAIL);
+        verify(accountService).getByEmail(TEST_EMAIL);
         verifyNoMoreInteractions(accountAuthMapper);
         verifyNoMoreInteractions(jwtService);
         verifyNoMoreInteractions(authenticationManager);
@@ -105,11 +105,11 @@ public class AuthenticationServiceTest {
 
         AccountAuthDto accountAuthDto = buildAccountDto(true, false);
 
-        when(accountService.findByEmail(TEST_EMAIL)).thenReturn(accountAuthDto);
+        when(accountService.getByEmail(TEST_EMAIL)).thenReturn(accountAuthDto);
 
         assertThrows(LockedException.class, () -> authenticationService.authenticate(authReq));
 
-        verify(accountService).findByEmail(TEST_EMAIL);
+        verify(accountService).getByEmail(TEST_EMAIL);
         verifyNoMoreInteractions(accountAuthMapper);
         verifyNoMoreInteractions(jwtService);
         verifyNoMoreInteractions(authenticationManager);
@@ -121,11 +121,11 @@ public class AuthenticationServiceTest {
         AuthenticationRequest authReq = getAuthRequest();
 
         AccountAuthDto accountAuthDto = buildAccountDto(false, true);
-        when(accountService.findByEmail(TEST_EMAIL)).thenReturn(accountAuthDto);
+        when(accountService.getByEmail(TEST_EMAIL)).thenReturn(accountAuthDto);
 
         assertThrows(DisabledException.class, () -> authenticationService.authenticate(authReq));
 
-        verify(accountService).findByEmail(TEST_EMAIL);
+        verify(accountService).getByEmail(TEST_EMAIL);
         verifyNoMoreInteractions(accountAuthMapper);
         verifyNoMoreInteractions(jwtService);
         verifyNoMoreInteractions(authenticationManager);

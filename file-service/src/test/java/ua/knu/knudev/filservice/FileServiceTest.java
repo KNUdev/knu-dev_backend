@@ -28,11 +28,12 @@ import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 public class FileServiceTest {
-    private static final String FOLDER_NAME = "test-folder";
-    private static final String SUBFOLDER_PATH = "test-subfolder";
+
+    private static final String TEST_FOLDER_NAME = "test-folder";
+    private static final String TEST_SUBFOLDER_PATH = "test-subfolder";
     private static final String TEST_FILE_EXTENSION = ".pdf";
     private static final String TEST_FILE_NAME = "test" + TEST_FILE_EXTENSION;
-    private static final String DUMMY_CONTENT = "dummy content";
+    private static final String DUMMY_FILE_CONTENT = "dummy content";
 
     @Mock
     private FileUploadAdapter fileUploadAdapter;
@@ -57,10 +58,10 @@ public class FileServiceTest {
         when(fileFolderProperties.getFolder()).thenReturn(fileFolder);
         when(fileFolderProperties.getSubfolder()).thenReturn(fileSubfolder);
 
-        when(fileFolder.getName()).thenReturn(FOLDER_NAME);
-        when(fileSubfolder.getSubfolderPath()).thenReturn(SUBFOLDER_PATH);
+        when(fileFolder.getName()).thenReturn(TEST_FOLDER_NAME);
+        when(fileSubfolder.getSubfolderPath()).thenReturn(TEST_SUBFOLDER_PATH);
 
-        when(multipartFile.getInputStream()).thenReturn(new ByteArrayInputStream(DUMMY_CONTENT.getBytes()));
+        when(multipartFile.getInputStream()).thenReturn(new ByteArrayInputStream(DUMMY_FILE_CONTENT.getBytes()));
     }
 
     @Test
@@ -88,10 +89,10 @@ public class FileServiceTest {
         verify(fileUploadAdapter).saveFile(captor.capture());
         FileUploadPayload capturedPayload = captor.getValue();
 
-        assertEquals(FOLDER_NAME, capturedPayload.folderPath().path(),
+        assertEquals(TEST_FOLDER_NAME, capturedPayload.folderPath().path(),
                 "Folder path should be correct."
         );
-        assertEquals(SUBFOLDER_PATH, capturedPayload.folderPath().subfolderPath(),
+        assertEquals(TEST_SUBFOLDER_PATH, capturedPayload.folderPath().subfolderPath(),
                 "Subfolder path should be correct."
         );
     }
@@ -122,7 +123,7 @@ public class FileServiceTest {
 
         FileUploadPayload capturedPayload = captor.getValue();
         String content = new String(capturedPayload.inputStream().readAllBytes());
-        assertEquals(DUMMY_CONTENT, content, "Input stream content should match expected content.");
+        assertEquals(DUMMY_FILE_CONTENT, content, "Input stream content should match expected content.");
     }
 
     @Test

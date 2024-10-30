@@ -7,18 +7,20 @@ import ua.knu.knudev.teammanager.repository.DepartmentRepository;
 import ua.knu.knudev.teammanagerapi.dto.AcademicUnitsIds;
 import ua.knu.knudev.teammanagerapi.exception.DepartmentException;
 
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
 public class DepartmentService {
+
     private final DepartmentRepository departmentRepository;
 
     public Department getById(UUID id) {
-        return departmentRepository.findById(id)
-                .orElseThrow(() -> new DepartmentException(
-                        String.format("Department with id %s not found", id)
-                ));
+        Optional<Department> optionalDepartment = departmentRepository.findById(id);
+        return optionalDepartment.orElseThrow(() -> new DepartmentException(
+                String.format("Department with id %s not found", id)
+        ));
     }
 
     public void validateAcademicUnitByIds(AcademicUnitsIds academicUnitsIds) {

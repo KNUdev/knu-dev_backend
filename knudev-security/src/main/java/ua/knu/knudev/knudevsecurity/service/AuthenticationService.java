@@ -26,7 +26,7 @@ public class AuthenticationService implements AuthServiceApi {
 
     @Override
     public AuthenticationResponse authenticate(AuthenticationRequest authReq) {
-        AccountAuthDto account = accountService.findByEmail(authReq.email());
+        AccountAuthDto account = accountService.getByEmail(authReq.email());
 
         checkAccountValidity(account, authReq.email());
 

@@ -29,12 +29,6 @@ public class AccountProfileService implements AccountProfileApi {
     private final DepartmentService departmentService;
 
     @Override
-    public AccountProfileDto getByEmail(String email) {
-        // Implementation not provided
-        return null;
-    }
-
-    @Override
     @Transactional
     public AccountRegistrationResponse register(AccountCreationRequest request) {
         validateEmailNotExists(request.email());
@@ -65,11 +59,9 @@ public class AccountProfileService implements AccountProfileApi {
         departmentService.validateAcademicUnitByIds(academicUnitsIds);
     }
 
-    private AccountProfile buildAccountProfile(
-            AccountCreationRequest request,
-            String uploadFilename,
-            AuthAccountCreationResponse authAccount
-    ) {
+    private AccountProfile buildAccountProfile(AccountCreationRequest request,
+                                               String uploadFilename,
+                                               AuthAccountCreationResponse authAccount) {
         Department department = departmentService.getById(request.departmentId());
         Specialty specialty = department.getSpecialties().stream()
                 .filter(s -> s.getCodeName().equals(request.specialtyId()))
@@ -86,7 +78,6 @@ public class AccountProfileService implements AccountProfileApi {
                 .firstName(request.firstName())
                 .lastName(request.lastName())
                 .middleName(request.middleName())
-//                .accountRole(authAccount.roles())
                 .avatar(uploadFilename)
                 .department(department)
                 .specialty(specialty)

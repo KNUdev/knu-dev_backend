@@ -22,6 +22,7 @@ import static ua.knu.knudev.teammanager.utils.AcademicUnitsTestUtils.getTestDepa
 
 @ExtendWith(MockitoExtension.class)
 class DepartmentServiceTest {
+
     private static final Department TEST_DEPARTMENT = getTestDepartment();
     private static final Double TEST_SPECIALTY_ID = DepartmentTestsConstants.TEST_SPECIALTY_ID;
     private static final UUID TEST_DEPARTMENT_ID = DepartmentTestsConstants.TEST_DEPARTMENT_ID;

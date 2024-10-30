@@ -19,6 +19,7 @@ import java.util.Set;
 @Service
 @RequiredArgsConstructor
 public class AccountAuthService implements AccountAuthServiceApi {
+
     private final AccountAuthRepository accountAuthRepository;
     private final AccountAuthMapper accountAuthMapper;
     private final PasswordEncoder passwordEncoder;
@@ -28,10 +29,8 @@ public class AccountAuthService implements AccountAuthServiceApi {
         AccountAuth accountAuth = AccountAuth.builder()
                 .email(creationRequest.email())
                 .password(passwordEncoder.encode(creationRequest.password()))
-                .roles(Set.of(AccountRole.INTERN))
-                .nonLocked(true)
-                .enabled(true)
                 .build();
+        setAccountAuthDefaults(accountAuth);
 
         AccountAuth savedAccount = accountAuthRepository.save(accountAuth);
         return AuthAccountCreationResponse.builder()
@@ -40,12 +39,17 @@ public class AccountAuthService implements AccountAuthServiceApi {
                 .build();
     }
 
-    public AccountAuthDto findByEmail(String email) {
+    public AccountAuthDto getByEmail(String email) {
         String errorMessage = String.format("Account with email %s does not exist", email);
         AccountAuth account = Optional.ofNullable(accountAuthRepository.findAccountAuthByEmail(email))
                 .orElseThrow(() -> new AccountAuthException(errorMessage));
         return accountAuthMapper.toDto(account);
     }
 
+    private void setAccountAuthDefaults(AccountAuth accountAuth) {
+        accountAuth.setRoles(Set.of(AccountRole.INTERN));
+        accountAuth.setNonLocked(true);
+        accountAuth.setEnabled(true);
+    }
 
 }

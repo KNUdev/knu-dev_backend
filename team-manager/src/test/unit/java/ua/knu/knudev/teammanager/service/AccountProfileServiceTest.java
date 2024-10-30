@@ -40,6 +40,7 @@ import static ua.knu.knudev.teammanager.utils.constants.DepartmentTestsConstants
 
 @ExtendWith(MockitoExtension.class)
 class AccountProfileServiceTest {
+
     private static final AuthAccountCreationResponse AUTH_RESPONSE = AuthAccountCreationResponse.builder()
             .email(TEST_EMAIL)
             .build();
