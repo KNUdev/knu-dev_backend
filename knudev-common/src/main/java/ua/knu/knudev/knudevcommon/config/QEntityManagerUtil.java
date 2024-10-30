@@ -20,7 +20,6 @@ public class QEntityManagerUtil {
         queryFactory = new JPAQueryFactory(JPQLTemplates.DEFAULT, entityManager);
     }
 
-//    todo not delete because with it we can make static calls to queryFactory
     public static JPAQueryFactory getQueryFactory() {
         return queryFactory;
     }
