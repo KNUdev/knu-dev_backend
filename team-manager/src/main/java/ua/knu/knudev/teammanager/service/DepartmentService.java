@@ -3,6 +3,7 @@ package ua.knu.knudev.teammanager.service;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.validation.annotation.Validated;
 import ua.knu.knudev.teammanager.domain.Department;
 import ua.knu.knudev.teammanager.domain.Specialty;
 import ua.knu.knudev.teammanager.mapper.SpecialtyMapper;
@@ -12,6 +13,7 @@ import ua.knu.knudev.teammanagerapi.request.DepartmentCreationRequest;
 
 @Service
 @RequiredArgsConstructor
+@Validated
 public class DepartmentService implements DepartmentApi {
 
     private final DepartmentRepository departmentRepository;

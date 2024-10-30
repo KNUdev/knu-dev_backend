@@ -5,12 +5,14 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
+import org.springframework.validation.annotation.Validated;
 import ua.knu.knudev.teammanagerapi.dto.SpecialtyCreationDto;
 
 import java.util.Set;
 import java.util.UUID;
 
 @Builder
+@Validated
 public record DepartmentCreationRequest(
         UUID id,
         @NotNull(message = "Department name cannot be blank or empty")

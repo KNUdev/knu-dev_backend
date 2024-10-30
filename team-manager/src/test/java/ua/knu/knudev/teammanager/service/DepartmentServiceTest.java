@@ -85,6 +85,8 @@ public class DepartmentServiceTest {
 
         DepartmentCreationRequest creationRequest = buildDepartmentCreationRequest(new HashSet<>(List.of(specialtyCreationDto1, specialtyCreationDto2)), " ");
         Department department = buildDepartmentEntity(" ", specialtyCreationDto1, specialtyCreationDto2);
+        when(specialtyMapper.toDomain(specialtyCreationDto1)).thenReturn(department.getSpecialties().stream().findFirst().orElse(null));
+        when(specialtyMapper.toDomain(specialtyCreationDto2)).thenReturn(department.getSpecialties().stream().skip(1).findFirst().orElse(null));
         when(departmentRepository.findAll()).thenReturn(Collections.singletonList(department));
 
         assertThrows(ConstraintViolationException.class, () -> {
@@ -120,6 +122,8 @@ public class DepartmentServiceTest {
 
         DepartmentCreationRequest creationRequest = buildDepartmentCreationRequest(new HashSet<>(List.of(specialtyCreationDto1, specialtyCreationDto2)), departmentName);
         Department department = buildDepartmentEntity(departmentName, specialtyCreationDto1, specialtyCreationDto2);
+        when(specialtyMapper.toDomain(specialtyCreationDto1)).thenReturn(department.getSpecialties().stream().findFirst().orElse(null));
+        when(specialtyMapper.toDomain(specialtyCreationDto2)).thenReturn(department.getSpecialties().stream().skip(1).findFirst().orElse(null));
         when(departmentRepository.findAll()).thenReturn(Collections.singletonList(department));
 
         assertThrows(ConstraintViolationException.class, () -> {
@@ -137,6 +141,8 @@ public class DepartmentServiceTest {
 
         DepartmentCreationRequest creationRequest = buildDepartmentCreationRequest(new HashSet<>(List.of(specialtyCreationDto1, specialtyCreationDto2)), departmentName);
         Department department = buildDepartmentEntity(departmentName, specialtyCreationDto1, specialtyCreationDto2);
+        when(specialtyMapper.toDomain(specialtyCreationDto1)).thenReturn(department.getSpecialties().stream().findFirst().orElse(null));
+        when(specialtyMapper.toDomain(specialtyCreationDto2)).thenReturn(department.getSpecialties().stream().skip(1).findFirst().orElse(null));
         when(departmentRepository.findAll()).thenReturn(Collections.singletonList(department));
 
         assertThrows(ConstraintViolationException.class, () -> {
@@ -154,6 +160,8 @@ public class DepartmentServiceTest {
 
         DepartmentCreationRequest creationRequest = buildDepartmentCreationRequest(new HashSet<>(List.of(specialtyCreationDto1, specialtyCreationDto2)), departmentName);
         Department department = buildDepartmentEntity(departmentName, specialtyCreationDto1, specialtyCreationDto2);
+        when(specialtyMapper.toDomain(specialtyCreationDto1)).thenReturn(department.getSpecialties().stream().findFirst().orElse(null));
+        when(specialtyMapper.toDomain(specialtyCreationDto2)).thenReturn(department.getSpecialties().stream().skip(1).findFirst().orElse(null));
         when(departmentRepository.findAll()).thenReturn(Collections.singletonList(department));
 
         assertThrows(ConstraintViolationException.class, () -> {
