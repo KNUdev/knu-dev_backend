@@ -228,4 +228,24 @@ class AccountProfileServiceTest {
         assertEquals(testProfileDto, response.accountProfile());
         assertEquals("Verification email has been sent to: " + TEST_EMAIL, response.responseMessage());
     }
+
+    @Test
+    @DisplayName("Should throw AccountException when given department does not contain given specialty")
+    void should_ThrowAccountException_When_ValidDepartmentDoesNotContainGivenSpecialty() {
+        Department testDepartment = getTestDepartment();
+        testDepartment.getSpecialties().clear();
+
+        when(departmentService.getById(testDepartment.getId())).thenReturn(testDepartment);
+
+        AccountException accountException = assertThrows(
+                AccountException.class,
+                () -> accountProfileService.register(request)
+        );
+
+        String errorMessage = String.format("Specialty with id %s not found in department %s",
+                TEST_SPECIALTY_ID, TEST_DEPARTMENT_ID);
+        assertEquals(errorMessage, accountException.getMessage());
+    }
+
+
 }

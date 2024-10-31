@@ -41,7 +41,4 @@ public class DepartmentService {
         }
     }
 
-    public Department create(Department department) {
-        return departmentRepository.save(department);
-    }
 }
