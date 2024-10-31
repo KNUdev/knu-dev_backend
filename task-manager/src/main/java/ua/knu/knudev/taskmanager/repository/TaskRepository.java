@@ -6,9 +6,6 @@ import ua.knu.knudev.taskmanager.domain.Task;
 
 import java.util.UUID;
 
-import static ua.knu.knudev.knudevcommon.config.QEntityManagerUtil.getQueryFactory;
-
-@Repository
 public interface TaskRepository extends JpaRepository<Task, UUID> {
 
 }
