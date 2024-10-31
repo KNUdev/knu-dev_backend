@@ -154,11 +154,6 @@ databaseChangeLog:
                   constraints:
                     nullable: false
               - column:
-                  name: account_role
-                  type: varchar(14)
-                  constraints:
-                    nullable: false
-              - column:
                   name: registration_date
                   defaultValueComputed: "CURRENT_TIMESTAMP"
                   type: datetime

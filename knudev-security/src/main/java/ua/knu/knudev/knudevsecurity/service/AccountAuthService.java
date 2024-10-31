@@ -11,7 +11,7 @@ import ua.knu.knudev.knudevsecurityapi.api.AccountAuthServiceApi;
 import ua.knu.knudev.knudevsecurityapi.constant.AccountRole;
 import ua.knu.knudev.knudevsecurityapi.exception.AccountAuthException;
 import ua.knu.knudev.knudevsecurityapi.request.AccountCreationRequest;
-import ua.knu.knudev.knudevsecurityapi.response.AccountCreationResponse;
+import ua.knu.knudev.knudevsecurityapi.response.AuthAccountCreationResponse;
 
 import java.util.Optional;
 import java.util.Set;
@@ -19,33 +19,37 @@ import java.util.Set;
 @Service
 @RequiredArgsConstructor
 public class AccountAuthService implements AccountAuthServiceApi {
+
     private final AccountAuthRepository accountAuthRepository;
     private final AccountAuthMapper accountAuthMapper;
     private final PasswordEncoder passwordEncoder;
 
     @Override
-    public AccountCreationResponse createAccount(AccountCreationRequest creationRequest) {
+    public AuthAccountCreationResponse createAccount(AccountCreationRequest creationRequest) {
         AccountAuth accountAuth = AccountAuth.builder()
                 .email(creationRequest.email())
                 .password(passwordEncoder.encode(creationRequest.password()))
-                .roles(Set.of(AccountRole.INTERN))
-                .nonLocked(true)
-                .enabled(true)
                 .build();
+        setAccountAuthDefaults(accountAuth);
 
         AccountAuth savedAccount = accountAuthRepository.save(accountAuth);
-        return AccountCreationResponse.builder()
+        return AuthAccountCreationResponse.builder()
                 .email(savedAccount.getEmail())
                 .roles(savedAccount.getRoles())
                 .build();
     }
 
-    public AccountAuthDto findByEmail(String email) {
+    public AccountAuthDto getByEmail(String email) {
         String errorMessage = String.format("Account with email %s does not exist", email);
         AccountAuth account = Optional.ofNullable(accountAuthRepository.findAccountAuthByEmail(email))
                 .orElseThrow(() -> new AccountAuthException(errorMessage));
         return accountAuthMapper.toDto(account);
     }
 
+    private void setAccountAuthDefaults(AccountAuth accountAuth) {
+        accountAuth.setRoles(Set.of(AccountRole.INTERN));
+        accountAuth.setNonLocked(true);
+        accountAuth.setEnabled(true);
+    }
 
 }

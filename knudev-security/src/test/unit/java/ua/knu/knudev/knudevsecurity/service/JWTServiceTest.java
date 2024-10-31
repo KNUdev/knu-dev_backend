@@ -68,7 +68,7 @@ public class JWTServiceTest {
         Tokens tokens = jwtService.generateTokens(account);
 
         Set<String> rolesFromAccessToken = jwtService.extractAccountRole(tokens.accessToken());
-        assertTrue(rolesFromAccessToken.contains("INTERN"), "Access token should contain the 'INTERN' role");
+        assertTrue(rolesFromAccessToken.contains("INTERN"), "Access token should contain the 'INTERN' roles");
     }
 
     @Test

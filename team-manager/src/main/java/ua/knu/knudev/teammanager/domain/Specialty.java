@@ -1,10 +1,7 @@
 package ua.knu.knudev.teammanager.domain;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -15,6 +12,7 @@ import java.util.Set;
 @NoArgsConstructor
 @Entity
 @Table(schema = "team_management", name = "specialty")
+@Builder
 public class Specialty {
 
     @Id

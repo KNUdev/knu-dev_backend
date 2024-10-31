@@ -3,7 +3,6 @@ package ua.knu.knudev.teammanager.domain;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
-import ua.knu.knudev.knudevsecurityapi.constant.AccountRole;
 
 import java.time.LocalDateTime;
 
@@ -29,16 +28,11 @@ public class AccountProfile {
     @Column(nullable = false)
     private String middleName;
 
-    //    todo add validation by @knu.ua
     @Column(nullable = false, updatable = false, unique = true)
     private String email;
 
     @Column
     private String avatar;
-
-    @Column(nullable = false)
-    @Enumerated(EnumType.STRING)
-    private AccountRole accountRole;
 
     @Column(nullable = false, updatable = false)
     @CreatedDate
