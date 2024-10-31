@@ -21,6 +21,8 @@ import java.util.UUID;
 public class FileService implements FileServiceApi {
 
     private static final String FILE_EXTENSION_SEPARATOR = ".";
+    private static final String ALLOWED_FILENAME_CHARACTERS_PATTERN = "^[a-zA-Z0-9]+$";
+
     private final FileUploadAdapter fileUploadAdapter;
 
     @Override
@@ -65,7 +67,8 @@ public class FileService implements FileServiceApi {
     }
 
     private void validateFileExtension(String extension) {
-        if (extension.matches(".*[<>:\"/\\\\|?*].*") || extension.contains("..")) {
+        if (!extension.matches(ALLOWED_FILENAME_CHARACTERS_PATTERN)
+                || StringUtils.contains(extension, "..")) {
             throw new FileException("Invalid file extension.");
         }
     }
