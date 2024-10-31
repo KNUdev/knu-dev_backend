@@ -1,15 +1,16 @@
 package ua.knu.knudev.fileservice.service;
 
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import ua.knu.knudev.fileservice.adapter.FileUploadAdapter;
+import ua.knu.knudev.fileserviceapi.api.FileServiceApi;
+import ua.knu.knudev.fileserviceapi.dto.FileUploadPayload;
+import ua.knu.knudev.fileserviceapi.dto.FolderPath;
+import ua.knu.knudev.fileserviceapi.exception.FileException;
 import ua.knu.knudev.fileserviceapi.folder.FileFolderProperties;
 import ua.knu.knudev.fileserviceapi.subfolder.FileSubfolder;
-import ua.knu.knudev.fileserviceapi.api.FileServiceApi;
-import ua.knu.knudev.fileserviceapi.dto.FolderPath;
-import ua.knu.knudev.fileserviceapi.dto.FileUploadPayload;
-import ua.knu.knudev.fileservice.adapter.FileUploadAdapter;
-import ua.knu.knudev.fileserviceapi.exception.FileException;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -18,6 +19,10 @@ import java.util.UUID;
 @Service
 @RequiredArgsConstructor
 public class FileService implements FileServiceApi {
+
+    private static final String FILE_EXTENSION_SEPARATOR = ".";
+    private static final String ALLOWED_FILENAME_CHARACTERS_PATTERN = "^[a-zA-Z0-9]+$";
+
     private final FileUploadAdapter fileUploadAdapter;
 
     @Override
@@ -47,13 +52,25 @@ public class FileService implements FileServiceApi {
 
     private String generateFileName(MultipartFile file) {
         String extension = getExtension(file);
+        validateFileExtension(extension);
         return UUID.randomUUID() + "." + extension;
     }
 
     private String getExtension(MultipartFile file) {
-        return file.getOriginalFilename()
-                .substring(file.getOriginalFilename()
-                        .lastIndexOf(".") + 1);
+        String originalFilename = file.getOriginalFilename();
+        if (StringUtils.isEmpty(originalFilename) || !StringUtils.contains(originalFilename, ".")) {
+            throw new FileException("Invalid file name: no extension found.");
+        }
+
+        int fileExtensionIndex = originalFilename.lastIndexOf(FILE_EXTENSION_SEPARATOR) + 1;
+        return originalFilename.substring(fileExtensionIndex);
+    }
+
+    private void validateFileExtension(String extension) {
+        if (!extension.matches(ALLOWED_FILENAME_CHARACTERS_PATTERN)
+                || StringUtils.contains(extension, "..")) {
+            throw new FileException("Invalid file extension.");
+        }
     }
 
 }

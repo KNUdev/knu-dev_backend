@@ -17,5 +17,3 @@ public enum ImageFolder implements FileFolder<ImageSubfolder> {
         return List.of(ImageSubfolder.values());
     }
 }
-
-

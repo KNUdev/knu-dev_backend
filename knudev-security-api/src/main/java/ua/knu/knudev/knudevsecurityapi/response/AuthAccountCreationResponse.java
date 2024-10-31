@@ -6,7 +6,7 @@ import ua.knu.knudev.knudevsecurityapi.constant.AccountRole;
 import java.util.Set;
 
 @Builder
-public record AccountCreationResponse(
+public record AuthAccountCreationResponse(
         String email,
         Set<AccountRole> roles
 ) {

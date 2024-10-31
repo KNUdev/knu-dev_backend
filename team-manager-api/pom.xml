@@ -17,6 +17,10 @@
             <groupId>ua.knu</groupId>
             <artifactId>knudev-security-api</artifactId>
         </dependency>
+        <dependency>
+            <groupId>ua.knu</groupId>
+            <artifactId>knudev-common</artifactId>
+        </dependency>
     </dependencies>
 
 

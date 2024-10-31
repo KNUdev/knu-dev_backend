@@ -1,9 +1,9 @@
 package ua.knu.knudev.filservice;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.jupiter.api.DisplayName;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -28,11 +28,12 @@ import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 public class FileServiceTest {
-    private static final String FOLDER_NAME = "test-folder";
-    private static final String SUBFOLDER_PATH = "test-subfolder";
+
+    private static final String TEST_FOLDER_NAME = "test-folder";
+    private static final String TEST_SUBFOLDER_PATH = "test-subfolder";
     private static final String TEST_FILE_EXTENSION = ".pdf";
     private static final String TEST_FILE_NAME = "test" + TEST_FILE_EXTENSION;
-    private static final String DUMMY_CONTENT = "dummy content";
+    private static final String DUMMY_FILE_CONTENT = "dummy content";
 
     @Mock
     private FileUploadAdapter fileUploadAdapter;
@@ -57,10 +58,10 @@ public class FileServiceTest {
         when(fileFolderProperties.getFolder()).thenReturn(fileFolder);
         when(fileFolderProperties.getSubfolder()).thenReturn(fileSubfolder);
 
-        when(fileFolder.getName()).thenReturn(FOLDER_NAME);
-        when(fileSubfolder.getSubfolderPath()).thenReturn(SUBFOLDER_PATH);
+        when(fileFolder.getName()).thenReturn(TEST_FOLDER_NAME);
+        when(fileSubfolder.getSubfolderPath()).thenReturn(TEST_SUBFOLDER_PATH);
 
-        when(multipartFile.getInputStream()).thenReturn(new ByteArrayInputStream(DUMMY_CONTENT.getBytes()));
+        when(multipartFile.getInputStream()).thenReturn(new ByteArrayInputStream(DUMMY_FILE_CONTENT.getBytes()));
     }
 
     @Test
@@ -88,10 +89,10 @@ public class FileServiceTest {
         verify(fileUploadAdapter).saveFile(captor.capture());
         FileUploadPayload capturedPayload = captor.getValue();
 
-        assertEquals(FOLDER_NAME, capturedPayload.folderPath().path(),
+        assertEquals(TEST_FOLDER_NAME, capturedPayload.folderPath().path(),
                 "Folder path should be correct."
         );
-        assertEquals(SUBFOLDER_PATH, capturedPayload.folderPath().subfolderPath(),
+        assertEquals(TEST_SUBFOLDER_PATH, capturedPayload.folderPath().subfolderPath(),
                 "Subfolder path should be correct."
         );
     }
@@ -122,18 +123,36 @@ public class FileServiceTest {
 
         FileUploadPayload capturedPayload = captor.getValue();
         String content = new String(capturedPayload.inputStream().readAllBytes());
-        assertEquals(DUMMY_CONTENT, content, "Input stream content should match expected content.");
+        assertEquals(DUMMY_FILE_CONTENT, content, "Input stream content should match expected content.");
     }
 
     @Test
     @DisplayName("Should throw exception when file is corrupted")
-    void should_ThrowException_When_FileIsCorrupted() throws IOException {
+    void should_ThrowFileException_When_FileIsCorrupted() throws IOException {
         when(multipartFile.getInputStream()).thenThrow(new IOException("Test file corrupted exception"));
 
         FileException exception = assertThrows(FileException.class, this::uploadFile,
                 "Expected FileException when input stream throws IOException.");
         assertEquals("Could not get input stream, because file is corrupted", exception.getMessage(),
                 "Exception message should indicate that the file is corrupted.");
+    }
+
+    @Test
+    @DisplayName("Should throw exception when file extension contains invalid characters")
+    void should_ThrowFileException_When_FileExtensionContainsInvalidCharacters() {
+        when(multipartFile.getOriginalFilename()).thenReturn("test.inva|id");
+
+        FileException exception = assertThrows(FileException.class, this::uploadFile);
+        assertEquals("Invalid file extension.", exception.getMessage());
+    }
+
+    @Test
+    @DisplayName("Should throw exception when file name does not contain extension")
+    void should_ThrowException_When_FileNameDoesNotContainExtension() {
+        when(multipartFile.getOriginalFilename()).thenReturn("testfile");
+
+        FileException exception = assertThrows(FileException.class, this::uploadFile);
+        assertEquals("Invalid file name: no extension found.", exception.getMessage());
     }
 
     private void mockMultipartFile() {
