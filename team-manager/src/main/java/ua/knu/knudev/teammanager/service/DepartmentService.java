@@ -4,18 +4,16 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
+import ua.knu.knudev.knudevcommon.utils.AcademicUnitsIds;
 import ua.knu.knudev.teammanager.domain.Department;
 import ua.knu.knudev.teammanager.domain.Specialty;
-import ua.knu.knudev.teammanager.mapper.SpecialtyMapper;
 import ua.knu.knudev.teammanager.repository.DepartmentRepository;
-import ua.knu.knudev.knudevcommon.utils.AcademicUnitsIds;
+import ua.knu.knudev.teammanagerapi.api.DepartmentApi;
 import ua.knu.knudev.teammanagerapi.exception.DepartmentException;
+import ua.knu.knudev.teammanagerapi.request.DepartmentCreationRequest;
 
 import java.util.Optional;
 import java.util.UUID;
-
-import ua.knu.knudev.teammanagerapi.api.DepartmentApi;
-import ua.knu.knudev.teammanagerapi.request.DepartmentCreationRequest;
 
 @Service
 @RequiredArgsConstructor
@@ -23,26 +21,28 @@ import ua.knu.knudev.teammanagerapi.request.DepartmentCreationRequest;
 public class DepartmentService implements DepartmentApi {
 
     private final DepartmentRepository departmentRepository;
-    private final SpecialtyMapper specialtyMapper;
-
-    public Department getById(UUID id) {
-        Optional<Department> optionalDepartment = departmentRepository.findById(id);
-        return optionalDepartment.orElseThrow(() -> new DepartmentException(
-                String.format("Department with id %s not found", id)
-        ));
-    }
 
     @Override
     public void createDepartment(@Valid DepartmentCreationRequest departmentCreationRequest) {
         Department department = new Department();
 
         department.setName(departmentCreationRequest.name());
-        departmentCreationRequest.specialties().forEach(specialtyDto -> {
-            Specialty specialty = specialtyMapper.toDomain(specialtyDto);
-            department.addSpecialty(specialty);
-        });
+        departmentCreationRequest.specialties()
+                .forEach(specialtyDto -> {
+                    Specialty specialty = new Specialty();
+                    specialty.setCodeName(specialtyDto.codeName());
+                    specialty.setName(specialtyDto.name());
+                    department.addSpecialty(specialty);
+                });
 
         departmentRepository.save(department);
+    }
+
+    public Department getById(UUID id) {
+        Optional<Department> optionalDepartment = departmentRepository.findById(id);
+        return optionalDepartment.orElseThrow(() -> new DepartmentException(
+                String.format("Department with id %s not found", id)
+        ));
     }
 
     public void validateAcademicUnitByIds(AcademicUnitsIds academicUnitsIds) {

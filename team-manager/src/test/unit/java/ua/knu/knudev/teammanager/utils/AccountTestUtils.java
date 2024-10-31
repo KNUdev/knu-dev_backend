@@ -1,9 +1,9 @@
 package ua.knu.knudev.teammanager.utils;
 
-import ua.knu.knudev.teammanager.domain.AccountProfile;
 import ua.knu.knudev.knudevcommon.utils.AcademicUnitsIds;
-import ua.knu.knudev.teammanagerapi.dto.AccountProfileDto;
 import ua.knu.knudev.knudevcommon.utils.FullName;
+import ua.knu.knudev.teammanager.domain.AccountProfile;
+import ua.knu.knudev.teammanagerapi.dto.AccountProfileDto;
 
 import static ua.knu.knudev.teammanager.utils.AcademicUnitsTestUtils.getTestDepartment;
 import static ua.knu.knudev.teammanager.utils.AcademicUnitsTestUtils.getTestSpecialty;
