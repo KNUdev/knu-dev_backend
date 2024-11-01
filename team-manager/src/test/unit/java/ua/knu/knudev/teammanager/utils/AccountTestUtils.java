@@ -13,7 +13,7 @@ import static ua.knu.knudev.teammanager.utils.constants.DepartmentTestsConstants
 
 public class AccountTestUtils {
 
-    public static AccountProfile getTestAccountProfile() {
+    public static AccountProfile  getTestAccountProfile() {
         return AccountProfile.builder()
                 .id(1)
                 .email(TEST_EMAIL)

@@ -1,8 +1,13 @@
 package ua.knu.knudev.teammanager.service;
 
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
+import org.springframework.boot.context.event.ApplicationReadyEvent;
+import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.validation.annotation.Validated;
 import ua.knu.knudev.fileserviceapi.api.FileServiceApi;
 import ua.knu.knudev.knudevcommon.utils.FullName;
 import ua.knu.knudev.knudevsecurityapi.api.AccountAuthServiceApi;
@@ -19,8 +24,11 @@ import ua.knu.knudev.teammanagerapi.dto.AccountProfileDto;
 import ua.knu.knudev.teammanagerapi.exception.AccountException;
 import ua.knu.knudev.teammanagerapi.response.AccountRegistrationResponse;
 
+import java.util.UUID;
+
 @Service
 @RequiredArgsConstructor
+@Validated
 public class AccountProfileService implements AccountProfileApi {
 
     private final AccountProfileRepository accountProfileRepository;
@@ -31,7 +39,7 @@ public class AccountProfileService implements AccountProfileApi {
 
     @Override
     @Transactional
-    public AccountRegistrationResponse register(AccountCreationRequest request) {
+    public AccountRegistrationResponse register(@Valid AccountCreationRequest request) {
         validateEmailNotExists(request.email());
         departmentService.validateAcademicUnitByIds(request.academicUnitsIds());
 
