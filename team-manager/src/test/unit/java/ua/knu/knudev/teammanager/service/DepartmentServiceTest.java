@@ -222,9 +222,9 @@ class DepartmentServiceTest {
         );
 
         ConstraintViolationException constraintViolationException = assertThrows(
-                ConstraintViolationException.class, () -> {
-                    departmentService.createDepartment(departmentCreationRequest);
-                });
+                ConstraintViolationException.class,
+                () -> departmentService.createDepartment(departmentCreationRequest)
+        );
 
         assertEquals("Department name cannot be blank or empty", constraintViolationException.getMessage());
 
@@ -236,9 +236,9 @@ class DepartmentServiceTest {
         DepartmentCreationRequest departmentCreationRequest = buildDepartmentCreationRequest(null, TEST_DEPARTMENT_NAME);
 
         ConstraintViolationException constraintViolationException = assertThrows(
-                ConstraintViolationException.class, () -> {
-                    departmentService.createDepartment(departmentCreationRequest);
-                });
+                ConstraintViolationException.class, () ->
+                        departmentService.createDepartment(departmentCreationRequest)
+        );
 
         assertEquals("Specialties collection cannot be empty", constraintViolationException.getMessage());
 
@@ -257,9 +257,7 @@ class DepartmentServiceTest {
         );
 
         ConstraintViolationException constraintViolationException = assertThrows(
-                ConstraintViolationException.class, () -> {
-                    departmentService.createDepartment(departmentCreationRequest);
-                });
+                ConstraintViolationException.class, () -> departmentService.createDepartment(departmentCreationRequest));
 
         assertEquals("Specialty code-name cant be null or 0", constraintViolationException.getMessage());
 
@@ -278,9 +276,7 @@ class DepartmentServiceTest {
         );
 
         ConstraintViolationException constraintViolationException = assertThrows(
-                ConstraintViolationException.class, () -> {
-                    departmentService.createDepartment(departmentCreationRequest);
-                });
+                ConstraintViolationException.class, () -> departmentService.createDepartment(departmentCreationRequest));
 
         assertEquals("Specialty name can`t be null", constraintViolationException.getMessage());
 
