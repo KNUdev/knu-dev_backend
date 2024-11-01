@@ -45,7 +45,7 @@ public class DepartmentService implements DepartmentApi {
         ));
     }
 
-    public void validateAcademicUnitByIds(AcademicUnitsIds academicUnitsIds) {
+    public void validateAcademicUnitExistence(AcademicUnitsIds academicUnitsIds) {
         Department department = getById(academicUnitsIds.departmentId());
         validateSpecialtyInDepartment(department, academicUnitsIds.specialtyId());
     }
