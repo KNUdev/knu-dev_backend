@@ -25,7 +25,7 @@ public class DepartmentService {
 
     public void validateAcademicUnitByIds(AcademicUnitsIds academicUnitsIds) {
         Department department = getById(academicUnitsIds.departmentId());
-        validateSpecialtyInDepartment(department, academicUnitsIds.specialtyId());
+        validateSpecialtyInDepartment(department, academicUnitsIds.specialtyCodename());
     }
 
     private void validateSpecialtyInDepartment(Department department, Double specialtyId) {

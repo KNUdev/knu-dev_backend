@@ -21,8 +21,8 @@ public class AcademicUnitsTestUtils {
         department.setId(TEST_DEPARTMENT_ID);
         department.setName("Engineering");
 
-//        department.addSpecialty(getTestSpecialty("Cybersecurity"));
-//        department.addSpecialty(getTestSpecialty("Computer science"));
+        department.addSpecialty(getTestSpecialty("Cybersecurity"));
+        department.addSpecialty(getTestSpecialty("Computer science"));
         department.addSpecialty(getTestSpecialty("Computer electronics"));
 
         return department;

@@ -39,7 +39,7 @@ class DepartmentServiceTest {
         when(departmentRepository.findById(TEST_DEPARTMENT_ID)).thenReturn(Optional.of(TEST_DEPARTMENT));
         AcademicUnitsIds academicUnitsIds = AcademicUnitsIds.builder()
                 .departmentId(TEST_DEPARTMENT_ID)
-                .specialtyId(TEST_SPECIALTY_ID)
+                .specialtyCodename(TEST_SPECIALTY_ID)
                 .build();
 
         assertDoesNotThrow(() -> departmentService.validateAcademicUnitByIds(academicUnitsIds));
@@ -53,7 +53,7 @@ class DepartmentServiceTest {
         when(departmentRepository.findById(TEST_DEPARTMENT_ID)).thenReturn(Optional.empty());
         AcademicUnitsIds academicUnitsIds = AcademicUnitsIds.builder()
                 .departmentId(TEST_DEPARTMENT_ID)
-                .specialtyId(TEST_SPECIALTY_ID)
+                .specialtyCodename(TEST_SPECIALTY_ID)
                 .build();
 
         DepartmentException exception = assertThrows(
@@ -71,7 +71,7 @@ class DepartmentServiceTest {
         when(departmentRepository.findById(TEST_DEPARTMENT_ID)).thenReturn(Optional.of(TEST_DEPARTMENT));
         AcademicUnitsIds academicUnitsIds = AcademicUnitsIds.builder()
                 .departmentId(TEST_DEPARTMENT_ID)
-                .specialtyId(999.99)
+                .specialtyCodename(999.99)
                 .build();
 
         DepartmentException exception = assertThrows(DepartmentException.class, () ->
@@ -97,7 +97,7 @@ class DepartmentServiceTest {
         when(departmentRepository.findById(TEST_DEPARTMENT_ID)).thenReturn(Optional.of(emptyDepartment));
         AcademicUnitsIds academicUnitsIds = AcademicUnitsIds.builder()
                 .departmentId(TEST_DEPARTMENT_ID)
-                .specialtyId(TEST_SPECIALTY_ID)
+                .specialtyCodename(TEST_SPECIALTY_ID)
                 .build();
 
         // Act & Assert
@@ -117,7 +117,7 @@ class DepartmentServiceTest {
         when(departmentRepository.findById(TEST_DEPARTMENT_ID)).thenReturn(Optional.of(TEST_DEPARTMENT));
         AcademicUnitsIds academicUnitsIds = AcademicUnitsIds.builder()
                 .departmentId(TEST_DEPARTMENT_ID)
-                .specialtyId(TEST_SPECIALTY_ID)
+                .specialtyCodename(TEST_SPECIALTY_ID)
                 .build();
 
         assertDoesNotThrow(() -> departmentService.validateAcademicUnitByIds(academicUnitsIds));
