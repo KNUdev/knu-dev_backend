@@ -5,4 +5,6 @@ import ua.knu.knudev.knudevsecurityapi.response.AuthAccountCreationResponse;
 
 public interface AccountAuthServiceApi {
     AuthAccountCreationResponse createAccount(AccountCreationRequest creationRequest);
+
+    boolean existsByEmail(String email);
 }

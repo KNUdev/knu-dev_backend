@@ -1,18 +1,17 @@
 package ua.knu.knudev.fileservice.adapter.minio;
 
-import io.minio.BucketExistsArgs;
-import io.minio.MakeBucketArgs;
-import io.minio.MinioClient;
-import io.minio.PutObjectArgs;
+import io.minio.*;
+import io.minio.errors.MinioException;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import org.springframework.stereotype.Service;
 import ua.knu.knudev.fileservice.adapter.FileUploadAdapter;
 import ua.knu.knudev.fileserviceapi.dto.FileUploadPayload;
+import ua.knu.knudev.fileserviceapi.folder.FileFolderProperties;
+import ua.knu.knudev.fileserviceapi.subfolder.FileSubfolder;
 
 @Service
 @RequiredArgsConstructor
-//todo exc handling
 public class MinioAdapter implements FileUploadAdapter {
 
     private final MinioClient minioClient;
@@ -22,6 +21,21 @@ public class MinioAdapter implements FileUploadAdapter {
         createBucket(payload.folderPath().path());
         saveImage(payload);
         return payload.fileName();
+    }
+
+    @Override
+    @SneakyThrows
+    public boolean existsByFilename(String filename, FileFolderProperties<? extends FileSubfolder> fileFolderProperties) {
+        String filePath = fileFolderProperties.getSubfolder().getSubfolderPath() + "/" + filename;
+
+        try {
+            minioClient.statObject(StatObjectArgs.builder()
+                    .bucket(fileFolderProperties.getFolder().getName())
+                    .object(filePath).build());
+            return true;
+        } catch (MinioException e) {
+            return false;
+        }
     }
 
     @SneakyThrows

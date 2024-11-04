@@ -38,6 +38,13 @@ databaseChangeLog:
                   defaultValueBoolean: false
                   constraints:
                     nullable: false
+        - createIndex:
+            indexName: idx_account_auth_email
+            schemaName: security_management
+            tableName: account_auth
+            columns:
+              - column:
+                  name: email
 
   - changeSet:
       id: create_account_auth_roles_table

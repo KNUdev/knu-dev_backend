@@ -1,5 +1,6 @@
 package ua.knu.knudev.teammanager.service;
 
+import lombok.SneakyThrows;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -10,7 +11,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.web.multipart.MultipartFile;
-import ua.knu.knudev.fileserviceapi.api.FileServiceApi;
+import ua.knu.knudev.fileserviceapi.api.ImageServiceApi;
+import ua.knu.knudev.fileserviceapi.subfolder.ImageSubfolder;
 import ua.knu.knudev.knudevcommon.utils.AcademicUnitsIds;
 import ua.knu.knudev.knudevcommon.utils.FullName;
 import ua.knu.knudev.knudevsecurityapi.api.AccountAuthServiceApi;
@@ -43,6 +45,7 @@ class AccountProfileServiceTest {
 
     private static final AuthAccountCreationResponse AUTH_RESPONSE = AuthAccountCreationResponse.builder()
             .email(TEST_EMAIL)
+            .roles(TEST_ROLES)
             .build();
 
     private static final Department testDepartment = getTestDepartment();
@@ -60,7 +63,7 @@ class AccountProfileServiceTest {
     private AccountProfileMapper accountProfileMapper;
 
     @Mock
-    private FileServiceApi fileServiceApi;
+    private ImageServiceApi imageServiceApi;
 
     @Mock
     private DepartmentService departmentService;
@@ -83,7 +86,7 @@ class AccountProfileServiceTest {
                 .password(TEST_PASSWORD)
                 .academicUnitsIds(AcademicUnitsIds.builder()
                         .departmentId(TEST_DEPARTMENT_ID)
-                        .specialtyId(TEST_SPECIALTY_ID)
+                        .specialtyCodename(TEST_SPECIALTY_ID)
                         .build())
                 .avatarFile(mockAvatarFile)
                 .fullName(FullName.builder()
@@ -96,15 +99,16 @@ class AccountProfileServiceTest {
 
     @Test
     @DisplayName("Should register successfully when all inputs are valid")
+    @SneakyThrows
     void should_RegisterSuccessfully_When_AllInputsAreValid() {
         // Arrange
         when(accountProfileRepository.existsByEmail(TEST_EMAIL)).thenReturn(false);
         doNothing().when(departmentService).validateAcademicUnitByIds(any(AcademicUnitsIds.class));
         when(accountAuthServiceApi.createAccount(any(AccountCreationRequest.class))).thenReturn(AUTH_RESPONSE);
-        when(fileServiceApi.uploadAccountPicture(eq(mockAvatarFile))).thenReturn(TEST_FILE_NAME);
+        when(uploadAvatar()).thenReturn(TEST_FILE_NAME);
         when(departmentService.getById(TEST_DEPARTMENT_ID)).thenReturn(testDepartment);
         when(accountProfileRepository.save(any(AccountProfile.class))).thenReturn(testProfile);
-        when(accountProfileMapper.toDto(any(AccountProfile.class))).thenReturn(testProfileDto);
+        when(mockAvatarFile.getBytes()).thenReturn(new byte[]{1, 2, 3, 4, 5});
 
         // Act
         AccountRegistrationResponse response = accountProfileService.register(request);
@@ -113,22 +117,22 @@ class AccountProfileServiceTest {
         assertNotNull(response);
         assertEquals(testProfileDto, response.accountProfile());
 
-        verify(accountProfileRepository, times(1)).existsByEmail(TEST_EMAIL);
-        verify(departmentService, times(1)).validateAcademicUnitByIds(any(AcademicUnitsIds.class));
-        verify(accountAuthServiceApi, times(1)).createAccount(eq(request));
-        verify(fileServiceApi, times(1)).uploadAccountPicture(eq(mockAvatarFile));
-        verify(departmentService, times(1)).getById(TEST_DEPARTMENT_ID);
         verify(accountProfileRepository, times(1)).save(accountProfileCaptor.capture());
-        verify(accountProfileMapper, times(1)).toDto(eq(testProfile));
-
         AccountProfile capturedProfile = accountProfileCaptor.getValue();
+
         assertEquals(TEST_EMAIL, capturedProfile.getEmail());
         assertEquals(PROFILE_FIRST_NAME, capturedProfile.getFirstName());
         assertEquals(PROFILE_LAST_NAME, capturedProfile.getLastName());
         assertEquals(PROFILE_MIDDLE_NAME, capturedProfile.getMiddleName());
-        assertEquals(TEST_FILE_NAME, capturedProfile.getAvatar());
+        assertEquals(TEST_FILE_NAME, capturedProfile.getAvatarFilename());
         assertEquals(testDepartment, capturedProfile.getDepartment());
         assertEquals(testSpecialty.getCodeName(), capturedProfile.getSpecialty().getCodeName());
+
+        verify(accountProfileRepository, times(1)).existsByEmail(TEST_EMAIL);
+        verify(departmentService, times(1)).validateAcademicUnitByIds(any(AcademicUnitsIds.class));
+        verify(departmentService, times(1)).getById(TEST_DEPARTMENT_ID);
+        verify(accountAuthServiceApi, times(1)).createAccount(eq(request));
+        verifyUploadAvatar();
     }
 
     @Test
@@ -140,7 +144,7 @@ class AccountProfileServiceTest {
 
         verify(accountProfileRepository, times(1)).existsByEmail(TEST_EMAIL);
         verify(departmentService, never()).validateAcademicUnitByIds(any(AcademicUnitsIds.class));
-        verifyNoMoreInteractions(accountAuthServiceApi, fileServiceApi, departmentService, accountProfileRepository, accountProfileMapper);
+        verifyNoMoreInteractions(accountAuthServiceApi, imageServiceApi, departmentService, accountProfileRepository, accountProfileMapper);
     }
 
     @Test
@@ -154,7 +158,7 @@ class AccountProfileServiceTest {
 
         verify(accountProfileRepository, times(1)).existsByEmail(TEST_EMAIL);
         verify(departmentService, times(1)).validateAcademicUnitByIds(any(AcademicUnitsIds.class));
-        verifyNoMoreInteractions(accountAuthServiceApi, fileServiceApi, departmentService, accountProfileRepository, accountProfileMapper);
+        verifyNoMoreInteractions(imageServiceApi, departmentService, accountProfileRepository, accountProfileMapper);
     }
 
     @Test
@@ -170,34 +174,37 @@ class AccountProfileServiceTest {
         verify(accountProfileRepository, times(1)).existsByEmail(TEST_EMAIL);
         verify(departmentService, times(1)).validateAcademicUnitByIds(any(AcademicUnitsIds.class));
         verify(accountAuthServiceApi, times(1)).createAccount(eq(request));
-        verifyNoMoreInteractions(fileServiceApi, departmentService, accountProfileRepository, accountProfileMapper);
+        verifyNoMoreInteractions(imageServiceApi, departmentService, accountProfileRepository, accountProfileMapper);
     }
 
     @Test
     @DisplayName("Should throw AccountException when file upload fails")
+    @SneakyThrows
     void should_ThrowAccountExceptionWhen_AvatarUploadFails() {
         when(accountProfileRepository.existsByEmail(TEST_EMAIL)).thenReturn(false);
         doNothing().when(departmentService).validateAcademicUnitByIds(any(AcademicUnitsIds.class));
         when(accountAuthServiceApi.createAccount(any(AccountCreationRequest.class))).thenReturn(AUTH_RESPONSE);
-        when(fileServiceApi.uploadAccountPicture(mockAvatarFile))
-                .thenThrow(new AccountException("File upload failed"));
+        when(uploadAvatar()).thenThrow(new AccountException("File upload failed"));
+        when(mockAvatarFile.getBytes()).thenReturn(new byte[]{1, 2, 3, 4, 5});
 
         assertThrows(AccountException.class, () -> accountProfileService.register(request));
 
         verify(accountProfileRepository, times(1)).existsByEmail(TEST_EMAIL);
         verify(departmentService, times(1)).validateAcademicUnitByIds(any(AcademicUnitsIds.class));
         verify(accountAuthServiceApi, times(1)).createAccount(eq(request));
-        verify(fileServiceApi, times(1)).uploadAccountPicture(eq(mockAvatarFile));
-        verifyNoMoreInteractions(departmentService, accountAuthServiceApi, fileServiceApi, accountProfileRepository, accountProfileMapper);
+        verifyNoMoreInteractions(departmentService, imageServiceApi, accountProfileRepository, accountProfileMapper);
+        verifyUploadAvatar();
     }
 
     @Test
     @DisplayName("Should throw RuntimeException when saving account profile fails")
+    @SneakyThrows
     void should_ThrowRuntimeException_When_SavingProfileFails() {
         when(accountProfileRepository.existsByEmail(TEST_EMAIL)).thenReturn(false);
         doNothing().when(departmentService).validateAcademicUnitByIds(any(AcademicUnitsIds.class));
         when(accountAuthServiceApi.createAccount(any(AccountCreationRequest.class))).thenReturn(AUTH_RESPONSE);
         when(departmentService.getById(TEST_DEPARTMENT_ID)).thenReturn(testDepartment);
+        when(mockAvatarFile.getBytes()).thenReturn(new byte[]{1, 2, 3, 4, 5});
         when(accountProfileRepository.save(any(AccountProfile.class)))
                 .thenThrow(new RuntimeException("Database save failed"));
 
@@ -206,10 +213,10 @@ class AccountProfileServiceTest {
         verify(accountProfileRepository, times(1)).existsByEmail(TEST_EMAIL);
         verify(departmentService, times(1)).validateAcademicUnitByIds(any(AcademicUnitsIds.class));
         verify(accountAuthServiceApi, times(1)).createAccount(eq(request));
-        verify(fileServiceApi, times(1)).uploadAccountPicture(eq(mockAvatarFile));
         verify(departmentService, times(1)).getById(TEST_DEPARTMENT_ID);
         verify(accountProfileRepository, times(1)).save(any(AccountProfile.class));
         verifyNoMoreInteractions(accountProfileMapper);
+        verifyUploadAvatar();
     }
 
     @Test
@@ -220,7 +227,6 @@ class AccountProfileServiceTest {
         when(accountAuthServiceApi.createAccount(any(AccountCreationRequest.class))).thenReturn(AUTH_RESPONSE);
         when(departmentService.getById(TEST_DEPARTMENT_ID)).thenReturn(testDepartment);
         when(accountProfileRepository.save(any(AccountProfile.class))).thenReturn(testProfile);
-        when(accountProfileMapper.toDto(any(AccountProfile.class))).thenReturn(testProfileDto);
 
         AccountRegistrationResponse response = accountProfileService.register(request);
 
@@ -247,5 +253,30 @@ class AccountProfileServiceTest {
         assertEquals(errorMessage, accountException.getMessage());
     }
 
+    @Test
+    @DisplayName("Should throw AccountException when account auth exists (Unexpected error)")
+    void should_ThrowAccountException_When_AccountAuthExists() {
+        when(accountProfileRepository.existsByEmail(TEST_EMAIL)).thenReturn(false);
+        when(accountAuthServiceApi.existsByEmail(TEST_EMAIL)).thenReturn(true);
+
+        AccountException accountException = assertThrows(
+                AccountException.class,
+                () -> accountProfileService.register(request)
+        );
+
+        String errorMessage = "Registration error happened. Please contact support.";
+        assertEquals(errorMessage, accountException.getMessage());
+
+        verifyNoMoreInteractions(departmentService, imageServiceApi, accountProfileRepository, accountProfileMapper);
+    }
+
+    private Object uploadAvatar() {
+        return imageServiceApi.uploadFile(mockAvatarFile, ImageSubfolder.ACCOUNT_PICTURES);
+    }
+
+    private void verifyUploadAvatar() {
+        verify(imageServiceApi, times(1))
+                .uploadFile(mockAvatarFile, ImageSubfolder.ACCOUNT_PICTURES);
+    }
 
 }

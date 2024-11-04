@@ -20,21 +20,20 @@ public class AccountTestUtils {
                 .firstName(PROFILE_FIRST_NAME)
                 .lastName(PROFILE_LAST_NAME)
                 .middleName(PROFILE_MIDDLE_NAME)
-                .avatar(TEST_FILE_NAME)
+                .avatarFilename(TEST_FILE_NAME)
                 .department(getTestDepartment())
                 .specialty(getTestSpecialty("Computer science"))
                 .build();
-
     }
 
     public static AccountProfileDto getTestAccountProfileDto() {
         return AccountProfileDto.builder()
                 .email(TEST_EMAIL)
-                .role(TEST_ROLE)
+                .roles(TEST_ROLES)
                 .fullName(new FullName(PROFILE_FIRST_NAME, PROFILE_LAST_NAME, PROFILE_MIDDLE_NAME))
                 .academicUnitsIds(AcademicUnitsIds.builder()
                         .departmentId(TEST_DEPARTMENT_ID)
-                        .specialtyId(TEST_SPECIALTY_ID)
+                        .specialtyCodename(TEST_SPECIALTY_ID)
                         .build())
                 .avatarFilename(TEST_FILE_NAME)
                 .build();

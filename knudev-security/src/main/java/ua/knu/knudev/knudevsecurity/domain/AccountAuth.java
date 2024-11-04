@@ -41,7 +41,7 @@ public class AccountAuth implements Serializable, UserDetails {
             joinColumns = @JoinColumn(name = "account_auth_id")
     )
     @Enumerated(EnumType.STRING)
-    @Column(name = "roles", nullable = false)
+    @Column(name = "role", nullable = false)
     private Set<AccountRole> roles;
 
     @Column(name = "is_enabled", nullable = false)

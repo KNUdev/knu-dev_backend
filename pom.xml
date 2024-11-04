@@ -32,6 +32,7 @@
         <module>knudev-common</module>
         <module>team-manager</module>
         <module>team-manager-api</module>
+        <module>team-manager-intergration-tests</module>
         <module>task-manager</module>
         <module>task-manager-api</module>
         <module>knudev-security</module>

@@ -25,4 +25,8 @@ public class Specialty {
     @ManyToMany(mappedBy = "specialties", fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
     private Set<Department> departments = new HashSet<>();
 
+    public Specialty(Double codeName, String name) {
+        this.codeName = codeName;
+        this.name = name;
+    }
 }

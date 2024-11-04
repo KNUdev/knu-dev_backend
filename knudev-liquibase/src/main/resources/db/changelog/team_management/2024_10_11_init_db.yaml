@@ -149,7 +149,7 @@ databaseChangeLog:
                     unique: true
                     nullable: false
               - column:
-                  name: avatar
+                  name: avatar_filename
                   type: varchar(75)
                   constraints:
                     nullable: false

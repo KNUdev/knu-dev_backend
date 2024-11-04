@@ -2,7 +2,6 @@ package ua.knu.knudev.teammanager.domain;
 
 import jakarta.persistence.*;
 import lombok.*;
-import org.springframework.data.annotation.CreatedDate;
 
 import java.time.LocalDateTime;
 
@@ -32,10 +31,9 @@ public class AccountProfile {
     private String email;
 
     @Column
-    private String avatar;
+    private String avatarFilename;
 
     @Column(nullable = false, updatable = false)
-    @CreatedDate
     private LocalDateTime registrationDate;
 
     @Column

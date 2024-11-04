@@ -13,3 +13,16 @@ spring:
     change-log: classpath:db/master.yaml
   jpa:
     show-sql: true
+    hibernate:
+      ddl-auto: create-drop
+
+application:
+  minio:
+    access-key: minioadmin
+    secret-key: minioadmin
+    url: http://localhost:9000
+  jwt:
+    issuer: KNUdev
+    expiration: 600000 #10 minutes
+    refresh-token:
+      expiration: 1440000 #24 hours
