@@ -112,12 +112,12 @@ databaseChangeLog:
                   name: specialty_code_name
 
   - changeSet:
-      id: create_team_management_account_profile_table
+      id: create_team_management_profile_account_table
       author: Vladyslav Shtaiier
       changes:
         - createTable:
             schemaName: team_management
-            tableName: account_profile
+            tableName: profile_account
             columns:
               - column:
                   name: id
@@ -125,7 +125,7 @@ databaseChangeLog:
                   autoIncrement: true
                   constraints:
                     primaryKey: true
-                    primaryKeyName: pk_account_profile
+                    primaryKeyName: pk_profile_account
                     nullable: false
               - column:
                   name: first_name
@@ -152,6 +152,11 @@ databaseChangeLog:
                   name: avatar_filename
                   type: varchar(75)
                   constraints:
+                    nullable: true
+              - column:
+                  name: expertise
+                  type: varchar(30)
+                  constraints:
                     nullable: false
               - column:
                   name: registration_date
@@ -173,35 +178,66 @@ databaseChangeLog:
         - addForeignKeyConstraint:
             referencedTableSchemaName: team_management
             baseTableSchemaName: team_management
-            baseTableName: account_profile
+            baseTableName: profile_account
             baseColumnNames: department_id
             referencedTableName: department
             referencedColumnNames: id
-            constraintName: fk_account_profile_department_id
+            constraintName: fk_profile_account_department_id
         - addForeignKeyConstraint:
             referencedTableSchemaName: team_management
             baseTableSchemaName: team_management
-            baseTableName: account_profile
+            baseTableName: profile_account
             baseColumnNames: specialty_code_name
             referencedTableName: specialty
             referencedColumnNames: code_name
-            constraintName: fk_account_profile_specialty_code_name
+            constraintName: fk_profile_account_specialty_code_name
         - createIndex:
-            tableName: account_profile
+            tableName: profile_account
             schemaName: team_management
-            indexName: idx_account_profile_department_id
+            indexName: idx_profile_account_department_id
             columns:
               - column:
                   name: department_id
         - createIndex:
-            tableName: account_profile
+            tableName: profile_account
             schemaName: team_management
-            indexName: idx_account_profile_specialty_code_name
+            indexName: idx_profile_account_specialty_code_name
             columns:
               - column:
                   name: specialty_code_name
 
-
+  - changeSet:
+      id: create_profile_account_roles_table
+      author: Vladyslav Shtaiier
+      changes:
+        - createTable:
+            schemaName: team_management
+            tableName: profile_account_role
+            columns:
+              - column:
+                  name: profile_account_id
+                  type: integer
+                  constraints:
+                    nullable: false
+              - column:
+                  name: role
+                  type: varchar(50)
+                  constraints:
+                    nullable: false
+        - addPrimaryKey:
+            tableName: profile_account_role
+            schemaName: team_management
+            columnNames: profile_account_id, role
+            constraintName: pk_profile_account_roles
+        - addForeignKeyConstraint:
+            referencedTableSchemaName: team_management
+            baseTableSchemaName: team_management
+            baseTableName: profile_account_role
+            baseColumnNames: profile_account_id
+            referencedTableName: profile_account
+            referencedColumnNames: id
+            constraintName: fk_profile_account_id
+            onDelete: cascade
 
 
 

@@ -16,6 +16,7 @@ import ua.knu.knudev.fileserviceapi.subfolder.ImageSubfolder;
 import ua.knu.knudev.intergrationtests.config.IntegrationTestsConfig;
 import ua.knu.knudev.intergrationtests.repository.SpecialtyRepository;
 import ua.knu.knudev.knudevcommon.utils.AcademicUnitsIds;
+import ua.knu.knudev.knudevcommon.utils.FullName;
 import ua.knu.knudev.knudevsecurity.domain.AccountAuth;
 import ua.knu.knudev.knudevsecurity.repository.AccountAuthRepository;
 import ua.knu.knudev.knudevsecurityapi.request.AccountCreationRequest;
@@ -284,7 +285,7 @@ public class AccountProfileServiceIntegrationTest {
     @DisplayName("Should throw ConstraintViolationException when required fields are missing")
     public void should_ThrowConstraintViolationException_When_RequiredFieldsAreMissingDuringRegistration() {
         AccountCreationRequest request = AccountCreationRequest.builder()
-                .email("test@knu.ua")
+                .email(TEST_EMAIL)
                 .build();
 
         assertThrows(ConstraintViolationException.class, () -> accountProfileService.register(request));
@@ -295,6 +296,21 @@ public class AccountProfileServiceIntegrationTest {
     public void should_ThrowConstraintViolationException_When_GivenInvalidEmailDomain() {
         AccountCreationRequest request = getValidAccountCreationReq().toBuilder()
                 .email("testValidEmail@gmail.com")
+                .build();
+
+        assertThrows(ConstraintViolationException.class, () -> accountProfileService.register(request));
+    }
+
+    @Test
+    @DisplayName("Should throw ConstraintViolationException when given invalid email domain")
+    public void a() {
+        AccountCreationRequest request = getValidAccountCreationReq().toBuilder()
+                .fullName(FullName.builder()
+                        .firstName("Vladyslav")
+                        .lastName("Petro")
+                        .middleName("Ighorevich")
+                        .build())
+                .email(TEST_EMAIL)
                 .build();
 
         assertThrows(ConstraintViolationException.class, () -> accountProfileService.register(request));

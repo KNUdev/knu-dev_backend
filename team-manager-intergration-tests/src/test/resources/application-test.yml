@@ -12,7 +12,6 @@ spring:
   liquibase:
     change-log: classpath:db/master.yaml
   jpa:
-    show-sql: true
     hibernate:
       ddl-auto: create-drop
 

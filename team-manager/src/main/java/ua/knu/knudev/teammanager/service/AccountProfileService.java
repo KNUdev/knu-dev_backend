@@ -28,6 +28,7 @@ import ua.knu.knudev.teammanagerapi.response.AccountRegistrationResponse;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.util.HashSet;
 
 @Service
 @RequiredArgsConstructor
@@ -108,6 +109,8 @@ public class AccountProfileService implements AccountProfileApi {
                 .department(department)
                 .specialty(specialty)
                 .registrationDate(LocalDateTime.now())
+                .expertise(request.expertise())
+                .roles(new HashSet<>(authAccount.roles()))
                 .build();
     }
 

@@ -34,7 +34,7 @@ public class DepartmentService {
                 .anyMatch(specialty -> specialty.getCodeName().equals(specialtyId));
         if (!containsSpecialty) {
             throw new DepartmentException(
-                    String.format("Department with id %s does not contain specialty with id %s",
+                    String.format("Department with id %s does not contain specialty with code name: %s",
                             department.getId(),
                             specialtyId)
             );

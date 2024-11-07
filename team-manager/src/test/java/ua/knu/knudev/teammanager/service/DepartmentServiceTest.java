@@ -78,7 +78,7 @@ class DepartmentServiceTest {
                 departmentService.validateAcademicUnitByIds(academicUnitsIds)
         );
         assertEquals(
-                "Department with id " + TEST_DEPARTMENT_ID + " does not contain specialty with id 999.99",
+                "Department with id " + TEST_DEPARTMENT_ID + " does not contain specialty with code name: 999.99",
                 exception.getMessage()
         );
 
@@ -105,7 +105,7 @@ class DepartmentServiceTest {
                 departmentService.validateAcademicUnitByIds(academicUnitsIds)
         );
         assertEquals(
-                "Department with id " + TEST_DEPARTMENT_ID + " does not contain specialty with id " + TEST_SPECIALTY_ID,
+                "Department with id " + TEST_DEPARTMENT_ID + " does not contain specialty with code name: " + TEST_SPECIALTY_ID,
                 exception.getMessage()
         );
         verify(departmentRepository, times(1)).findById(TEST_DEPARTMENT_ID);
