@@ -5,32 +5,25 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
+import ua.knu.knudev.fileserviceapi.api.ImageServiceApi;
+import ua.knu.knudev.fileserviceapi.api.PDFServiceApi;
 import ua.knu.knudev.fileserviceapi.subfolder.ImageSubfolder;
-import ua.knu.knudev.fileserviceapi.folder.PdfFolder;
 import ua.knu.knudev.fileserviceapi.subfolder.PdfSubfolder;
-import ua.knu.knudev.fileserviceapi.api.FileServiceApi;
-import ua.knu.knudev.fileserviceapi.folder.FileFolderProperties;
-import ua.knu.knudev.fileserviceapi.folder.ImageFolder;
 
 @RestController
 @RequiredArgsConstructor
 public class AccController {
 
-    private final FileServiceApi fileServiceApi;
+    private final ImageServiceApi imageServiceApi;
+    private final PDFServiceApi pdfServiceApi;
 
     @PostMapping("/images")
     public String test1(@RequestBody MultipartFile file) {
-        FileFolderProperties<ImageSubfolder> imagesProps = FileFolderProperties.builder(ImageFolder.INSTANCE)
-                .subfolder(ImageSubfolder.TASK_PICTURES)
-                .build();
-        return fileServiceApi.uploadFile(file, imagesProps);
+        return imageServiceApi.uploadFile(file, ImageSubfolder.TASK_PICTURES);
     }
 
     @PostMapping("/pdfs")
     public String test2(@RequestBody MultipartFile file) {
-        FileFolderProperties<PdfSubfolder> imagesProps = FileFolderProperties.builder(PdfFolder.INSTANCE)
-                .subfolder(PdfSubfolder.REQUIREMENTS)
-                .build();
-        return fileServiceApi.uploadFile(file, imagesProps);
+        return pdfServiceApi.uploadFile(file, PdfSubfolder.REQUIREMENTS);
     }
 }
