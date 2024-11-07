@@ -28,6 +28,8 @@ import ua.knu.knudev.teammanagerapi.exception.AccountException;
 import ua.knu.knudev.teammanagerapi.exception.DepartmentException;
 import ua.knu.knudev.teammanagerapi.response.AccountRegistrationResponse;
 
+import java.io.IOException;
+
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -99,7 +101,6 @@ class AccountProfileServiceTest {
 
     @Test
     @DisplayName("Should register successfully when all inputs are valid")
-    @SneakyThrows
     void should_RegisterSuccessfully_When_AllInputsAreValid() {
         // Arrange
         when(accountProfileRepository.existsByEmail(TEST_EMAIL)).thenReturn(false);
@@ -108,7 +109,11 @@ class AccountProfileServiceTest {
         when(uploadAvatar()).thenReturn(TEST_FILE_NAME);
         when(departmentService.getById(TEST_DEPARTMENT_ID)).thenReturn(testDepartment);
         when(accountProfileRepository.save(any(AccountProfile.class))).thenReturn(testProfile);
-        when(mockAvatarFile.getBytes()).thenReturn(new byte[]{1, 2, 3, 4, 5});
+        try {
+            when(mockAvatarFile.getBytes()).thenReturn(new byte[]{1, 2, 3, 4, 5});
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
 
         // Act
         AccountRegistrationResponse response = accountProfileService.register(request);

@@ -10,9 +10,9 @@ public class AccountTestsConstants {
     public static final String TEST_FILE_NAME = "testFilename";
     public static final AccountRole TEST_ROLE = AccountRole.INTERN;
 
-    public static final String PROFILE_FIRST_NAME = "Джон";
-    public static final String PROFILE_LAST_NAME = "Снов";
-    public static final String PROFILE_MIDDLE_NAME = "Бастард";
+    public static final String PROFILE_FIRST_NAME = "John";
+    public static final String PROFILE_LAST_NAME = "Snow";
+    public static final String PROFILE_MIDDLE_NAME = "Bastard";
 
     public static final FullName TEST_FULLNAME = new FullName(
             PROFILE_FIRST_NAME, PROFILE_LAST_NAME, PROFILE_MIDDLE_NAME

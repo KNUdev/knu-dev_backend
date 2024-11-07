@@ -23,15 +23,14 @@ public record AccountCreationRequest(
 
         @NotBlank(message = "Password cannot be blank")
         @Size(
-                min = 5,
+                min = 8,
                 max = 64,
-                message = "Password must be between 5 and 64 characters"
+                message = "Password must be between 8 and 64 characters"
         )
         @Pattern(
                 regexp = "^(?=.*[a-zA-Z])(?=.*\\d).*$",
                 message = "Password must contain at least one letter and one digit"
         )
-
         String password,
 
         @Valid

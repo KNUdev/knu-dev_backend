@@ -302,13 +302,13 @@ public class AccountProfileServiceIntegrationTest {
     }
 
     @Test
-    @DisplayName("Should throw ConstraintViolationException when given invalid email domain")
-    public void a() {
+    @DisplayName("Should throw ConstraintViolationException when names are not in English")
+    public void should_ThrowConstraintViolationException_When_NamesAreNotInEnglish() {
         AccountCreationRequest request = getValidAccountCreationReq().toBuilder()
                 .fullName(FullName.builder()
-                        .firstName("Vladyslav")
-                        .lastName("Petro")
-                        .middleName("Ighorevich")
+                        .firstName("Владислав")
+                        .lastName("Петренко")
+                        .middleName("Григорович")
                         .build())
                 .email(TEST_EMAIL)
                 .build();
