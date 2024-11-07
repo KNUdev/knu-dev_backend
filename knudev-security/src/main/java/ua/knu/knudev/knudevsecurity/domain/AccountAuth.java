@@ -6,7 +6,7 @@ import org.hibernate.annotations.UuidGenerator;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
-import ua.knu.knudev.knudevsecurityapi.constant.AccountRole;
+import ua.knu.knudev.knudevcommon.constant.AccountRole;
 
 import java.io.Serializable;
 import java.util.Collection;

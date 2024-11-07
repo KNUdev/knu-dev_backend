@@ -9,7 +9,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 import ua.knu.knudev.knudevsecurity.domain.AccountAuth;
 import ua.knu.knudev.knudevsecurity.utils.JWTSigningKeyProvider;
-import ua.knu.knudev.knudevsecurityapi.constant.AccountRole;
+import ua.knu.knudev.knudevcommon.constant.AccountRole;
 import ua.knu.knudev.knudevsecurityapi.dto.Tokens;
 
 import java.util.*;

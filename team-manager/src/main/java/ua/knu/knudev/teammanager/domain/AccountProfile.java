@@ -2,8 +2,8 @@ package ua.knu.knudev.teammanager.domain;
 
 import jakarta.persistence.*;
 import lombok.*;
-import ua.knu.knudev.knudevsecurityapi.constant.AccountRole;
-import ua.knu.knudev.knudevsecurityapi.constant.Expertise;
+import ua.knu.knudev.knudevcommon.constant.AccountRole;
+import ua.knu.knudev.knudevcommon.constant.Expertise;
 
 import java.time.LocalDateTime;
 import java.util.Set;

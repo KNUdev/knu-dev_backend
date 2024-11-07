@@ -1,7 +1,7 @@
 package ua.knu.knudev.knudevsecurityapi.response;
 
 import lombok.Builder;
-import ua.knu.knudev.knudevsecurityapi.constant.AccountRole;
+import ua.knu.knudev.knudevcommon.constant.AccountRole;
 
 import java.util.Set;
 

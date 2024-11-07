@@ -13,6 +13,7 @@ import ua.knu.knudev.fileserviceapi.subfolder.FileSubfolder;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Set;
 import java.util.UUID;
 
 @Service
@@ -66,6 +67,19 @@ public class FileService {
 
         int fileExtensionIndex = originalFilename.lastIndexOf(FILE_EXTENSION_SEPARATOR) + 1;
         return originalFilename.substring(fileExtensionIndex);
+    }
+
+    protected void checkFileExtensionAllowance(MultipartFile file, Set<String> ALLOWED_FILE_EXTENSIONS) {
+        String fileExtension = getExtension(file);
+        String allowedExtensionsList = String.join(", ", ALLOWED_FILE_EXTENSIONS);
+
+        boolean hasForbiddenFileExtension = ALLOWED_FILE_EXTENSIONS.stream()
+                .noneMatch(ext -> StringUtils.equals(ext, fileExtension));
+        if (hasForbiddenFileExtension) {
+            throw new FileException(String.format(
+                    "File extension %s is not allowed. Allowed extensions are: %s", fileExtension, allowedExtensionsList
+            ));
+        }
     }
 
     private void validateFileExtension(String extension) {

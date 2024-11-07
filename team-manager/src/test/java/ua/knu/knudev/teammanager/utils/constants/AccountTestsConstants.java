@@ -1,6 +1,6 @@
 package ua.knu.knudev.teammanager.utils.constants;
 
-import ua.knu.knudev.knudevsecurityapi.constant.AccountRole;
+import ua.knu.knudev.knudevcommon.constant.AccountRole;
 
 import java.util.Set;
 

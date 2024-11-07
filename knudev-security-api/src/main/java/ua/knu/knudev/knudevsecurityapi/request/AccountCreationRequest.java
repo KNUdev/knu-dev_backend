@@ -9,7 +9,7 @@ import lombok.Builder;
 import org.springframework.web.multipart.MultipartFile;
 import ua.knu.knudev.knudevcommon.utils.AcademicUnitsIds;
 import ua.knu.knudev.knudevcommon.utils.FullName;
-import ua.knu.knudev.knudevsecurityapi.constant.Expertise;
+import ua.knu.knudev.knudevcommon.constant.Expertise;
 
 @Builder(toBuilder = true)
 public record AccountCreationRequest(

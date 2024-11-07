@@ -1,4 +1,4 @@
-package ua.knu.knudev.knudevsecurityapi.constant;
+package ua.knu.knudev.knudevcommon.constant;
 
 import org.apache.commons.lang3.StringUtils;
 

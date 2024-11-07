@@ -25,7 +25,7 @@ public class ImageService extends FileService implements ImageServiceApi {
 
     @Override
     public String uploadFile(MultipartFile file, ImageSubfolder subfolder) {
-        checkFileExtensionAllowance(file);
+        checkFileExtensionAllowance(file, ALLOWED_IMAGE_EXTENSIONS);
         checkFileSize(file);
 
         return uploadFile(file, getProperties(subfolder));
@@ -42,18 +42,6 @@ public class ImageService extends FileService implements ImageServiceApi {
                 .build();
     }
 
-    private void checkFileExtensionAllowance(MultipartFile file) {
-        String fileExtension = getExtension(file);
-        String allowedExtensions = String.join(", ", ALLOWED_IMAGE_EXTENSIONS);
-
-        boolean hasForbiddenFileExtension = ALLOWED_IMAGE_EXTENSIONS.stream()
-                .noneMatch(ext -> StringUtils.equals(ext, fileExtension));
-        if (hasForbiddenFileExtension) {
-            throw new FileException(String.format(
-                    "File extension %s is not allowed. Allowed extensions are: %s", fileExtension, allowedExtensions
-            ));
-        }
-    }
 
     private void checkFileSize(MultipartFile file) {
         try {
@@ -61,11 +49,9 @@ public class ImageService extends FileService implements ImageServiceApi {
             if(fileSizeInMegabytes > MAXIMUM_ALLOWED_IMAGE_SIZE_IN_MEGABYTES) {
                 throw new FileException("File size is too big. Maximum allowed size is 2 megabytes");
             }
-
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-
     }
 
 }

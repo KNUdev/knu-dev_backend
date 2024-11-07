@@ -8,7 +8,7 @@ import ua.knu.knudev.knudevsecurity.dto.AccountAuthDto;
 import ua.knu.knudev.knudevsecurity.mapper.AccountAuthMapper;
 import ua.knu.knudev.knudevsecurity.repository.AccountAuthRepository;
 import ua.knu.knudev.knudevsecurityapi.api.AccountAuthServiceApi;
-import ua.knu.knudev.knudevsecurityapi.constant.AccountRole;
+import ua.knu.knudev.knudevcommon.constant.AccountRole;
 import ua.knu.knudev.knudevsecurityapi.exception.AccountAuthException;
 import ua.knu.knudev.knudevsecurityapi.request.AccountCreationRequest;
 import ua.knu.knudev.knudevsecurityapi.response.AuthAccountCreationResponse;

@@ -12,4 +12,12 @@
 
     <artifactId>task-manager-api</artifactId>
 
+
+    <dependencies>
+        <dependency>
+            <groupId>ua.knu</groupId>
+            <artifactId>knudev-common</artifactId>
+        </dependency>
+    </dependencies>
+
 </project>
