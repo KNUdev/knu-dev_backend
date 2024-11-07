@@ -14,7 +14,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-@Table(schema = "security_management", name = "account_auth")
+@Table(schema = "security_management", name = "auth_account")
 @Entity
 @Getter
 @Setter
@@ -37,11 +37,11 @@ public class AccountAuth implements Serializable, UserDetails {
     @ElementCollection(fetch = FetchType.LAZY)
     @CollectionTable(
             schema = "security_management",
-            name = "account_auth_role",
-            joinColumns = @JoinColumn(name = "account_auth_id")
+            name = "auth_account_role",
+            joinColumns = @JoinColumn(name = "auth_account_id")
     )
     @Enumerated(EnumType.STRING)
-    @Column(name = "roles", nullable = false)
+    @Column(name = "role", nullable = false)
     private Set<AccountRole> roles;
 
     @Column(name = "is_enabled", nullable = false)

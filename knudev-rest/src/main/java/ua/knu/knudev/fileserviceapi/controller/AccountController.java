@@ -6,18 +6,20 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import ua.knu.knudev.knudevsecurityapi.api.AccountAuthServiceApi;
 import ua.knu.knudev.knudevsecurityapi.request.AccountCreationRequest;
+import ua.knu.knudev.teammanagerapi.api.AccountProfileApi;
+import ua.knu.knudev.teammanagerapi.response.AccountRegistrationResponse;
 
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/account")
 public class AccountController {
 
-    private final AccountAuthServiceApi accountAuthServiceApi;
+    private final AccountProfileApi accountAuthServiceApi;
 
     @PostMapping("/register")
-    public void registerAccount(@Valid @RequestBody AccountCreationRequest registrationRequest) {
-        accountAuthServiceApi.createAccount(registrationRequest);
+    public AccountRegistrationResponse registerAccount(@Valid @RequestBody AccountCreationRequest registrationRequest) {
+        return accountAuthServiceApi.register(registrationRequest);
     }
+
 }

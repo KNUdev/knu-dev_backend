@@ -2,9 +2,11 @@ package ua.knu.knudev.teammanager.domain;
 
 import jakarta.persistence.*;
 import lombok.*;
-import org.springframework.data.annotation.CreatedDate;
+import ua.knu.knudev.knudevsecurityapi.constant.AccountRole;
+import ua.knu.knudev.knudevsecurityapi.constant.Expertise;
 
 import java.time.LocalDateTime;
+import java.util.Set;
 
 @Getter
 @Setter
@@ -12,7 +14,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @Builder
 @Entity
-@Table(schema = "team_management", name = "account_profile")
+@Table(schema = "team_management", name = "profile_account")
 public class AccountProfile {
 
     @Id
@@ -31,21 +33,32 @@ public class AccountProfile {
     @Column(nullable = false, updatable = false, unique = true)
     private String email;
 
-    @Column
-    private String avatar;
+    private String avatarFilename;
+
+    @ElementCollection(fetch = FetchType.LAZY)
+    @CollectionTable(
+            schema = "team_management",
+            name = "profile_account_role",
+            joinColumns = @JoinColumn(name = "profile_account_id")
+    )
+    @Enumerated(EnumType.STRING)
+    @Column(name = "role", nullable = false)
+    private Set<AccountRole> roles;
+
+    @Enumerated(EnumType.STRING)
+    private Expertise expertise;
 
     @Column(nullable = false, updatable = false)
-    @CreatedDate
     private LocalDateTime registrationDate;
 
     @Column
     private LocalDateTime lastRoleUpdateDate;
 
-    @ManyToOne(cascade = CascadeType.PERSIST)
+    @ManyToOne
     @JoinColumn(name = "department_id", referencedColumnName = "id", nullable = false)
     private Department department;
 
-    @ManyToOne(cascade = CascadeType.PERSIST)
+    @ManyToOne
     @JoinColumn(name = "specialty_code_name", referencedColumnName = "code_name", nullable = false)
     private Specialty specialty;
 }
