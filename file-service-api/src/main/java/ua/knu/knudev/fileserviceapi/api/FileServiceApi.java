@@ -20,7 +20,7 @@ public interface FileServiceApi {
 
     default String uploadPdf(MultipartFile file) {
         FileFolderProperties<PdfSubfolder> properties = FileFolderProperties.builder(PdfFolder.INSTANCE)
-                .subfolder(PdfSubfolder.TASK_BODIES)
+//                .subfolder(PdfSubfolder.TASK_BODIES)
                 .build();
         return uploadFile(file, properties);
     }

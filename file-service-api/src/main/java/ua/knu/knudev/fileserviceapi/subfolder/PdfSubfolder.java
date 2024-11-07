@@ -7,7 +7,8 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public enum PdfSubfolder implements FileSubfolder {
     REQUIREMENTS("/requirements"),
-    TASK_BODIES("/tasks/bodies");
+    DEVELOPER_ROLE_TASKS("/tasks/campus/developer-role-tasks"),
+    TECHLEAD_ROLE_TASKS("/tasks/campus/techlead-role-tasks"),;
 
     private final String subfolderPath;
 
