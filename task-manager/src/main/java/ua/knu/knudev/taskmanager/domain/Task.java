@@ -5,7 +5,10 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.UuidGenerator;
+import ua.knu.knudev.knudevcommon.constant.AccountRole;
 
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Getter
@@ -15,12 +18,12 @@ import java.util.UUID;
 @Entity
 @Table(schema = "task_management", name = "task")
 public class Task {
-
     @Id
+    @UuidGenerator
     private UUID id;
     private String filename;
-
-    @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "verification_code_id", referencedColumnName = "id")
-    private TaskVerificationCode taskVerificationCode;
+    private LocalDateTime additionDate;
+    private LocalDateTime lastUpdateDate;
+    @Enumerated(EnumType.STRING)
+    private AccountRole targetRole;
 }
