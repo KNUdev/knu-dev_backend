@@ -32,7 +32,6 @@
         <module>knudev-common</module>
         <module>team-manager</module>
         <module>team-manager-api</module>
-        <module>team-manager-intergration-tests</module>
         <module>task-manager</module>
         <module>task-manager-api</module>
         <module>knudev-security</module>
@@ -42,6 +41,7 @@
         <module>knudev-app</module>
         <module>file-service</module>
         <module>file-service-api</module>
+        <module>knudev-integration-tests</module>
     </modules>
     <properties>
         <java.version>17</java.version>

@@ -7,7 +7,7 @@ import org.springframework.web.multipart.MultipartFile;
 import ua.knu.knudev.fileservice.adapter.FileUploadAdapter;
 import ua.knu.knudev.fileserviceapi.dto.FileUploadPayload;
 import ua.knu.knudev.fileserviceapi.dto.FolderPath;
-import ua.knu.knudev.fileserviceapi.exception.FileException;
+import ua.knu.knudev.knudevcommon.exception.FileException;
 import ua.knu.knudev.fileserviceapi.folder.FileFolderProperties;
 import ua.knu.knudev.fileserviceapi.subfolder.FileSubfolder;
 
@@ -25,13 +25,17 @@ public class FileService {
 
     private final FileUploadAdapter fileUploadAdapter;
 
-    public String uploadFile(MultipartFile file, FileFolderProperties<? extends FileSubfolder> fileFolderProperties) {
+    public String uploadFile(MultipartFile file,
+                             String filename,
+                             FileFolderProperties<? extends FileSubfolder> fileFolderProperties) {
+        validateFileExtension(getExtension(file));
+
         String folderName = fileFolderProperties.getFolder().getName();
         String subfolderPath = fileFolderProperties.getSubfolder().getSubfolderPath();
 
         FileUploadPayload fileUploadPayload = FileUploadPayload.builder()
                 .inputStream(getInputStream(file))
-                .fileName(generateFileName(file))
+                .fileName(filename)
                 .folderPath(FolderPath.builder()
                         .subfolderPath(subfolderPath)
                         .path(folderName)
@@ -51,12 +55,6 @@ public class FileService {
         } catch (IOException e) {
             throw new FileException("Could not get input stream, because file is corrupted");
         }
-    }
-
-    private String generateFileName(MultipartFile file) {
-        String extension = getExtension(file);
-        validateFileExtension(extension);
-        return UUID.randomUUID() + "." + extension;
     }
 
     protected String getExtension(MultipartFile file) {
@@ -80,6 +78,12 @@ public class FileService {
                     "File extension %s is not allowed. Allowed extensions are: %s", fileExtension, allowedExtensionsList
             ));
         }
+    }
+
+    protected String generateRandomUUIDFilename(MultipartFile file) {
+        String extension = getExtension(file);
+        validateFileExtension(extension);
+        return UUID.randomUUID() + "." + extension;
     }
 
     private void validateFileExtension(String extension) {

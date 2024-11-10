@@ -5,9 +5,11 @@ import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import ua.knu.knudev.knudevcommon.exception.FileException;
 import ua.knu.knudev.teammanagerapi.exception.AccountException;
 import ua.knu.knudev.teammanagerapi.exception.DepartmentException;
 
+import javax.annotation.processing.FilerException;
 import java.util.stream.Collectors;
 
 @RestControllerAdvice
@@ -20,6 +22,11 @@ public class RestGlobalExceptionHandler {
 
     @ExceptionHandler
     public String handleDepartmentException(DepartmentException exception) {
+        return exception.getMessage();
+    }
+
+    @ExceptionHandler(FileException.class)
+    public String handleFileException(FileException exception) {
         return exception.getMessage();
     }
 

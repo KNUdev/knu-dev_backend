@@ -25,3 +25,9 @@ application:
     expiration: 600000 #10 minutes
     refresh-token:
       expiration: 1440000 #24 hours
+  files:
+    images:
+      maximum-size-in-kilobytes: 2048
+    pdfs:
+      tasks:
+        maximum-size-in-kilobytes: 2048

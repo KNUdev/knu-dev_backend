@@ -1,8 +1,6 @@
 package ua.knu.knudev.taskmanager.domain;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -20,6 +18,9 @@ public class Task {
 
     @Id
     private UUID id;
-    private String name;
-    private String body;
+    private String filename;
+
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "verification_code_id", referencedColumnName = "id")
+    private TaskVerificationCode taskVerificationCode;
 }

@@ -10,7 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.multipart.MultipartFile;
 import ua.knu.knudev.fileserviceapi.api.ImageServiceApi;
-import ua.knu.knudev.fileserviceapi.exception.FileException;
+import ua.knu.knudev.knudevcommon.exception.FileException;
 import ua.knu.knudev.fileserviceapi.subfolder.ImageSubfolder;
 import ua.knu.knudev.knudevcommon.utils.AcademicUnitsIds;
 import ua.knu.knudev.knudevcommon.utils.FullName;

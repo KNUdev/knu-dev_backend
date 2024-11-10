@@ -1,6 +1,6 @@
 package ua.knu.knudev.filservice;
 
-import org.junit.jupiter.api.BeforeEach;
+import lombok.SneakyThrows;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -12,7 +12,7 @@ import org.springframework.web.multipart.MultipartFile;
 import ua.knu.knudev.fileservice.adapter.FileUploadAdapter;
 import ua.knu.knudev.fileservice.service.FileService;
 import ua.knu.knudev.fileserviceapi.dto.FileUploadPayload;
-import ua.knu.knudev.fileserviceapi.exception.FileException;
+import ua.knu.knudev.knudevcommon.exception.FileException;
 import ua.knu.knudev.fileserviceapi.folder.FileFolder;
 import ua.knu.knudev.fileserviceapi.folder.FileFolderProperties;
 import ua.knu.knudev.fileserviceapi.subfolder.FileSubfolder;
@@ -32,7 +32,7 @@ public class FileServiceTest {
     private static final String TEST_FOLDER_NAME = "test-folder";
     private static final String TEST_SUBFOLDER_PATH = "test-subfolder";
     private static final String TEST_FILE_EXTENSION = ".pdf";
-    private static final String TEST_FILE_NAME = "test" + TEST_FILE_EXTENSION;
+    private static final String TEST_FILE_NAME = "test-" + UUID.randomUUID() + TEST_FILE_EXTENSION;
     private static final String DUMMY_FILE_CONTENT = "dummy content";
 
     @Mock
@@ -52,17 +52,6 @@ public class FileServiceTest {
 
     @InjectMocks
     private FileService fileService;
-
-    @BeforeEach
-    void setUp() throws IOException {
-        when(fileFolderProperties.getFolder()).thenReturn(fileFolder);
-        when(fileFolderProperties.getSubfolder()).thenReturn(fileSubfolder);
-
-        when(fileFolder.getName()).thenReturn(TEST_FOLDER_NAME);
-        when(fileSubfolder.getSubfolderPath()).thenReturn(TEST_SUBFOLDER_PATH);
-
-        when(multipartFile.getInputStream()).thenReturn(new ByteArrayInputStream(DUMMY_FILE_CONTENT.getBytes()));
-    }
 
     @Test
     @DisplayName("Should return generated file name when file is uploaded")
@@ -129,6 +118,7 @@ public class FileServiceTest {
     @Test
     @DisplayName("Should throw exception when file is corrupted")
     void should_ThrowFileException_When_FileIsCorrupted() throws IOException {
+        mockMultipartFile();
         when(multipartFile.getInputStream()).thenThrow(new IOException("Test file corrupted exception"));
 
         FileException exception = assertThrows(FileException.class, this::uploadFile,
@@ -140,9 +130,13 @@ public class FileServiceTest {
     @Test
     @DisplayName("Should throw exception when file extension contains invalid characters")
     void should_ThrowFileException_When_FileExtensionContainsInvalidCharacters() {
-        when(multipartFile.getOriginalFilename()).thenReturn("test.inva|id");
+        String invalidFilename = "test.inva|id";
+        when(multipartFile.getOriginalFilename()).thenReturn(invalidFilename);
 
-        FileException exception = assertThrows(FileException.class, this::uploadFile);
+        FileException exception = assertThrows(
+                FileException.class,
+                () -> fileService.uploadFile(multipartFile, invalidFilename, fileFolderProperties)
+        );
         assertEquals("Invalid file extension.", exception.getMessage());
     }
 
@@ -155,11 +149,19 @@ public class FileServiceTest {
         assertEquals("Invalid file name: no extension found.", exception.getMessage());
     }
 
+    @SneakyThrows
     private void mockMultipartFile() {
+        when(fileFolderProperties.getFolder()).thenReturn(fileFolder);
+        when(fileFolderProperties.getSubfolder()).thenReturn(fileSubfolder);
+
+        when(fileFolder.getName()).thenReturn(TEST_FOLDER_NAME);
+        when(fileSubfolder.getSubfolderPath()).thenReturn(TEST_SUBFOLDER_PATH);
+
+        when(multipartFile.getInputStream()).thenReturn(new ByteArrayInputStream(DUMMY_FILE_CONTENT.getBytes()));
         when(multipartFile.getOriginalFilename()).thenReturn(TEST_FILE_NAME);
     }
 
     private String uploadFile() {
-        return fileService.uploadFile(multipartFile, fileFolderProperties);
+        return fileService.uploadFile(multipartFile, TEST_FILE_NAME, fileFolderProperties);
     }
 }

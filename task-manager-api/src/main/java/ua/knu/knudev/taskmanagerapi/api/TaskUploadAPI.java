@@ -5,5 +5,5 @@ import ua.knu.knudev.knudevcommon.constant.AccountRole;
 import ua.knu.knudev.knudevcommon.constant.Expertise;
 
 public interface TaskUploadAPI {
-    void uploadTaskForRole(AccountRole accountRole, MultipartFile file);
+    String uploadTaskForRole(AccountRole accountRole, MultipartFile file);
 }
