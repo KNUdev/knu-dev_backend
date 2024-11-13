@@ -11,6 +11,7 @@ import ua.knu.knudev.knudevcommon.utils.AcademicUnitsIds;
 import ua.knu.knudev.teammanager.domain.Department;
 import ua.knu.knudev.teammanager.domain.Specialty;
 import ua.knu.knudev.teammanager.repository.DepartmentRepository;
+import ua.knu.knudev.teammanager.repository.SpecialtyRepository;
 import ua.knu.knudev.teammanager.utils.constants.DepartmentTestsConstants;
 import ua.knu.knudev.teammanagerapi.dto.SpecialtyCreationDto;
 import ua.knu.knudev.teammanagerapi.exception.DepartmentException;
@@ -32,6 +33,9 @@ class DepartmentServiceTest {
 
     @Mock
     private DepartmentRepository departmentRepository;
+
+    @Mock
+    private SpecialtyRepository specialtyRepository;
 
     @InjectMocks
     private DepartmentService departmentService;
@@ -155,6 +159,7 @@ class DepartmentServiceTest {
         verify(departmentRepository, times(1)).findById(TEST_DEPARTMENT_ID);
     }
 
+//    TODO improve
     @Test
     @DisplayName("Should create department when given valid data")
     public void Should_createDepartment_When_givenValidData() {
@@ -162,13 +167,15 @@ class DepartmentServiceTest {
         SpecialtyCreationDto specialtyCreationDto1 = buildSpecialtyCreationDto("Computer Engineering");
         SpecialtyCreationDto specialtyCreationDto2 = buildSpecialtyCreationDto("Radio technics");
         SpecialtyCreationDto specialtyCreationDto3 = buildSpecialtyCreationDto("History");
+        Set<SpecialtyCreationDto> specialtyCreationDtos = Set.of(specialtyCreationDto1, specialtyCreationDto2, specialtyCreationDto3);
+        List<Specialty> specialties = buildSpecialties(specialtyCreationDtos);
 
         List<String> specialtiesNames = List.of("Computer Engineering", "Radio technics", "History");
 
-        DepartmentCreationRequest departmentCreationRequest = buildDepartmentCreationRequest(
-                Set.of(specialtyCreationDto1, specialtyCreationDto2, specialtyCreationDto3),
+        DepartmentCreationRequest departmentCreationRequest = buildDepartmentCreationRequest(specialtyCreationDtos,
                 TEST_DEPARTMENT_NAME
         );
+        when(specialtyRepository.findAll()).thenReturn(specialties);
         // Act
         departmentService.createDepartment(departmentCreationRequest);
 
@@ -214,6 +221,16 @@ class DepartmentServiceTest {
                 .name(departmentName)
                 .specialties(specialties)
                 .build();
+    }
+
+    private List<Specialty> buildSpecialties(Set<SpecialtyCreationDto> specialtyCreationDtos) {
+        return specialtyCreationDtos.stream().map(specialtyCreationDto -> {
+            Specialty specialty = new Specialty();
+            specialty.setCodeName(specialtyCreationDto.codeName());
+            specialty.setName(specialtyCreationDto.name());
+            return specialty;
+        }).toList();
+
     }
 
     private SpecialtyCreationDto buildSpecialtyCreationDto(String name) {
