@@ -7,6 +7,7 @@ import ua.knu.knudev.knudevcommon.constant.Expertise;
 
 import java.time.LocalDateTime;
 import java.util.Set;
+import java.util.UUID;
 
 @Getter
 @Setter
@@ -18,8 +19,7 @@ import java.util.Set;
 public class AccountProfile {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+    private UUID id;
 
     @Column(nullable = false)
     private String firstName;
@@ -32,7 +32,6 @@ public class AccountProfile {
 
     @Column(nullable = false, updatable = false, unique = true)
     private String email;
-
     private String avatarFilename;
 
     @ElementCollection(fetch = FetchType.LAZY)
@@ -46,12 +45,11 @@ public class AccountProfile {
     private Set<AccountRole> roles;
 
     @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
     private Expertise expertise;
 
     @Column(nullable = false, updatable = false)
     private LocalDateTime registrationDate;
-
-    @Column
     private LocalDateTime lastRoleUpdateDate;
 
     @ManyToOne

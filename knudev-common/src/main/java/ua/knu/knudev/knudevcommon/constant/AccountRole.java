@@ -13,10 +13,17 @@ public enum AccountRole {
     SITE_MANAGER,
     HEAD_MANAGER;
 
-    public static Set<AccountRole> buildFromSet(Set<String> stringRoles) {
+    public static Set<AccountRole> buildFromStringsSet(Set<String> stringRoles) {
         return stringRoles.stream()
                 .flatMap(stringRole -> Arrays.stream(AccountRole.values())
                         .filter(role -> StringUtils.equalsIgnoreCase(role.name(), stringRole)))
                 .collect(Collectors.toSet());
+    }
+
+    public static AccountRole buildFromString(String accountRole) {
+        return Arrays.stream(AccountRole.values()).
+                filter(role -> StringUtils.equalsIgnoreCase(role.name(), accountRole))
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("Invalid AccountRole: " + accountRole));
     }
 }

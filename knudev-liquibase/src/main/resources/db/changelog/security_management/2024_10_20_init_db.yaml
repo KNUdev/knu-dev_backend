@@ -12,6 +12,7 @@ databaseChangeLog:
                   type: uuid
                   autoIncrement: false
                   constraints:
+                    primaryKeyName: pk_auth_account
                     primaryKey: true
                     nullable: false
               - column:

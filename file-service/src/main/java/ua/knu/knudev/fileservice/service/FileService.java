@@ -25,6 +25,7 @@ public class FileService {
 
     private final FileUploadAdapter fileUploadAdapter;
 
+    //todo what if file is null
     public String uploadFile(MultipartFile file,
                              String filename,
                              FileFolderProperties<? extends FileSubfolder> fileFolderProperties) {

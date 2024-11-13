@@ -15,8 +15,9 @@ import java.util.Set;
 
 @Service
 public class ImageService extends FileService implements ImageServiceApi {
+    //todo to config
     private static final Set<String> ALLOWED_IMAGE_EXTENSIONS = Set.of("jpg", "jpeg", "png", "webp");
-    @Value("${application.files.images.maximum-size-in-kilobytes}")
+    @Value("${application.files.images.profile-avatars.maximum-size-in-kilobytes}")
     private int MAX_IMAGE_SIZE_IN_KILOBYTES;
 
     public ImageService(FileUploadAdapter fileUploadAdapter) {

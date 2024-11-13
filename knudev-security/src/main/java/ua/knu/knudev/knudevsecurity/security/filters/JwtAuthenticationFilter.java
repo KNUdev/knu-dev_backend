@@ -58,7 +58,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             //todo maybe this wont work
             AccountAuth userDetails = AccountAuth.builder()
                     .email(accountUsername)
-                    .roles(AccountRole.buildFromSet(jwtService.extractAccountRole(jwt)))
+                    .roles(AccountRole.buildFromStringsSet(jwtService.extractAccountRole(jwt)))
                     .build();
 
             if (jwtService.isTokenValid(jwt, userDetails)) {

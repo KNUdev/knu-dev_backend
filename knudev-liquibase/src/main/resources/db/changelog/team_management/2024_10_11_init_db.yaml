@@ -121,12 +121,12 @@ databaseChangeLog:
             columns:
               - column:
                   name: id
-                  type: integer
-                  autoIncrement: true
+                  type: uuid
                   constraints:
+                    nullable: false
+                    unique: true
                     primaryKey: true
                     primaryKeyName: pk_profile_account
-                    nullable: false
               - column:
                   name: first_name
                   type: varchar(75)
@@ -216,7 +216,7 @@ databaseChangeLog:
             columns:
               - column:
                   name: profile_account_id
-                  type: integer
+                  type: uuid
                   constraints:
                     nullable: false
               - column:

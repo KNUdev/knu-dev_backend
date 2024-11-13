@@ -12,15 +12,25 @@ databaseChangeLog:
                   type: uuid
                   constraints:
                     primaryKey: true
-                    primaryKeyName: task_pk
+                    primaryKeyName: pk_task
                     nullable: false
               - column:
-                  name: name
-                  type: varchar(100)
+                  name: filename
+                  type: varchar(75)
+                  constraints:
+                    unique: true
+                    nullable: false
+              - column:
+                  name: addition_date
+                  type: date
                   constraints:
                     nullable: false
               - column:
-                  name: body
-                  type: varchar(255)
+                  name: last_update_date
+                  type: date
+              - column:
+                  name: target_role
+                  type: varchar(20)
                   constraints:
                     nullable: false
+

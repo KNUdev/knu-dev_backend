@@ -101,6 +101,7 @@ public class AccountProfileService implements AccountProfileApi {
                 ));
 
         return AccountProfile.builder()
+                .id(authAccount.id())
                 .email(authAccount.email())
                 .firstName(reqFullName.firstName())
                 .lastName(reqFullName.lastName())
