@@ -11,13 +11,13 @@ import ua.knu.knudev.teammanagerapi.request.DepartmentCreationRequest;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/department")
+@RequestMapping("/admin/department")
 public class DepartmentController {
 
     private final DepartmentApi departmentApi;
 
     @PostMapping("/create")
-    public void createDepartment(@RequestBody @Valid DepartmentCreationRequest departmentCreationRequest) {
+    public void createDepartment(@Valid @RequestBody DepartmentCreationRequest departmentCreationRequest) {
         departmentApi.createDepartment(departmentCreationRequest);
     }
 }

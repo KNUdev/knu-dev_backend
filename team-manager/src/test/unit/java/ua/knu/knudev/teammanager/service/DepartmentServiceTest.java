@@ -45,7 +45,7 @@ class DepartmentServiceTest {
                 .specialtyId(TEST_SPECIALTY_ID)
                 .build();
 
-        assertDoesNotThrow(() -> departmentService.validateAcademicUnitByIds(academicUnitsIds));
+        assertDoesNotThrow(() -> departmentService.validateAcademicUnitExistence(academicUnitsIds));
 
         verify(departmentRepository, times(1)).findById(TEST_DEPARTMENT_ID);
     }
@@ -61,7 +61,7 @@ class DepartmentServiceTest {
 
         DepartmentException exception = assertThrows(
                 DepartmentException.class,
-                () -> departmentService.validateAcademicUnitByIds(academicUnitsIds)
+                () -> departmentService.validateAcademicUnitExistence(academicUnitsIds)
         );
         assertEquals("Department with id " + TEST_DEPARTMENT_ID + " not found", exception.getMessage());
 
@@ -78,7 +78,7 @@ class DepartmentServiceTest {
                 .build();
 
         DepartmentException exception = assertThrows(DepartmentException.class, () ->
-                departmentService.validateAcademicUnitByIds(academicUnitsIds)
+                departmentService.validateAcademicUnitExistence(academicUnitsIds)
         );
         assertEquals(
                 "Department with id " + TEST_DEPARTMENT_ID + " does not contain specialty with id 999.99",
@@ -105,7 +105,7 @@ class DepartmentServiceTest {
 
         // Act & Assert
         DepartmentException exception = assertThrows(DepartmentException.class, () ->
-                departmentService.validateAcademicUnitByIds(academicUnitsIds)
+                departmentService.validateAcademicUnitExistence(academicUnitsIds)
         );
         assertEquals(
                 "Department with id " + TEST_DEPARTMENT_ID + " does not contain specialty with id " + TEST_SPECIALTY_ID,
@@ -123,7 +123,7 @@ class DepartmentServiceTest {
                 .specialtyId(TEST_SPECIALTY_ID)
                 .build();
 
-        assertDoesNotThrow(() -> departmentService.validateAcademicUnitByIds(academicUnitsIds));
+        assertDoesNotThrow(() -> departmentService.validateAcademicUnitExistence(academicUnitsIds));
 
         verify(departmentRepository, times(1)).findById(TEST_DEPARTMENT_ID);
     }

@@ -33,7 +33,7 @@ public class AccountProfileService implements AccountProfileApi {
     @Transactional
     public AccountRegistrationResponse register(AccountCreationRequest request) {
         validateEmailNotExists(request.email());
-        departmentService.validateAcademicUnitByIds(request.academicUnitsIds());
+        departmentService.validateAcademicUnitExistence(request.academicUnitsIds());
 
         AuthAccountCreationResponse createdAuthAccount = accountAuthServiceApi.createAccount(request);
         String uploadFilename = fileServiceApi.uploadAccountPicture(request.avatarFile());
