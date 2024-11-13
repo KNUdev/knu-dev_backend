@@ -8,7 +8,7 @@ import org.hibernate.annotations.UuidGenerator;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-@Table(schema = "security_management", name = "task_assignment")
+@Table(schema = "task_management", name = "task_assignment")
 @Entity
 @Getter
 @Setter
@@ -20,14 +20,14 @@ public class TaskAssignment {
     @UuidGenerator
     private UUID id;
 
-    @Column(name = "account_id", nullable = false)
-    private UUID accountId;
+    @Column(name = "assigned_account_id", nullable = false, unique = true)
+    private UUID assignedAccountId;
 
     @OneToOne(optional = false)
     @JoinColumn(name = "task_id", unique = true)
     private Task task;
 
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false, unique = true, updatable = false)
     private String verificationCode;
 
     @Column(nullable = false)

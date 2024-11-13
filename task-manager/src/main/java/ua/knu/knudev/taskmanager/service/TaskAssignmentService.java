@@ -30,7 +30,7 @@ public class TaskAssignmentService {
         LocalDateTime currentDate = LocalDateTime.now();
 
         TaskAssignment assignment = new TaskAssignment();
-        assignment.setAccountId(accountId);
+        assignment.setAssignedAccountId(accountId);
         assignment.setTask(availableTask);
 
         assignment.setVerificationCode(generateUniqueCode());
