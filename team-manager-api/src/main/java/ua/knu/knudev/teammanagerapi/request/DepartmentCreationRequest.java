@@ -1,24 +1,20 @@
 package ua.knu.knudev.teammanagerapi.request;
 
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotEmpty;
-import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.*;
 import lombok.Builder;
-import org.springframework.validation.annotation.Validated;
 import ua.knu.knudev.teammanagerapi.dto.SpecialtyCreationDto;
 
 import java.util.Set;
-import java.util.UUID;
 
 @Builder
-@Validated
 public record DepartmentCreationRequest(
-        UUID id,
-        @NotNull(message = "Department name cannot be blank or empty")
-        @NotBlank(message = "Department name cannot be blank or empty")
+        @NotEmpty(message = "Department name cannot be blank or empty.")
+        @Size(min = 3, max = 150, message = "Too long or short department name.")
+        @Pattern(regexp = "^[A-Za-zА-Яа-яЇїІіЄєҐґ\s-]+$", message = "Department name contains invalid characters.")
         String name,
-        @NotEmpty(message = "Specialties collection cannot be empty")
+        @NotEmpty(message = "Department must contain specialties")
+        @Size(min = 1, max = 75, message = "Department must contain from 1 to 75 specialties")
         Set<@Valid SpecialtyCreationDto> specialties
 ) {
 }

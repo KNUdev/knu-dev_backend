@@ -3,6 +3,7 @@ package ua.knu.knudev.teammanager.domain;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.UuidGenerator;
+import ua.knu.knudev.teammanagerapi.exception.DepartmentException;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -39,7 +40,7 @@ public class Department {
             this.specialties.add(specialty);
             specialty.getDepartments().add(this);
         } else {
-            throw new IllegalArgumentException("Specialty cannot be null");
+            throw new DepartmentException("Specialty cannot be null");
         }
     }
 

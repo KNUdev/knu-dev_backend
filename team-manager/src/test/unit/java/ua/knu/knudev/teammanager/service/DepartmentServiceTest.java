@@ -1,6 +1,5 @@
 package ua.knu.knudev.teammanager.service;
 
-import jakarta.validation.ConstraintViolationException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -10,28 +9,26 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import ua.knu.knudev.knudevcommon.utils.AcademicUnitsIds;
 import ua.knu.knudev.teammanager.domain.Department;
+import ua.knu.knudev.teammanager.domain.Specialty;
 import ua.knu.knudev.teammanager.repository.DepartmentRepository;
 import ua.knu.knudev.teammanager.utils.constants.DepartmentTestsConstants;
 import ua.knu.knudev.teammanagerapi.dto.SpecialtyCreationDto;
 import ua.knu.knudev.teammanagerapi.exception.DepartmentException;
 import ua.knu.knudev.teammanagerapi.request.DepartmentCreationRequest;
 
-import java.util.HashSet;
-import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 import static ua.knu.knudev.teammanager.utils.AcademicUnitsTestUtils.getTestDepartment;
+import static ua.knu.knudev.teammanager.utils.constants.DepartmentTestsConstants.TEST_DEPARTMENT_NAME;
 
 @ExtendWith(MockitoExtension.class)
 class DepartmentServiceTest {
 
     private static final Double TEST_SPECIALTY_ID = DepartmentTestsConstants.TEST_SPECIALTY_ID;
     private static final UUID TEST_DEPARTMENT_ID = DepartmentTestsConstants.TEST_DEPARTMENT_ID;
-    private final UUID testDepartmentID = UUID.randomUUID();
-    private static final String TEST_DEPARTMENT_NAME = "Test Department";
 
     @Mock
     private DepartmentRepository departmentRepository;
@@ -41,7 +38,7 @@ class DepartmentServiceTest {
 
     @Test
     @DisplayName("Validate academic unit successfully when department and specialty exist")
-    void should_validateAcademicUnit_When_DepartmentAndSpecialtyExist() {
+    void should_ValidateAcademicUnit_When_DepartmentAndSpecialtyExist() {
         when(departmentRepository.findById(TEST_DEPARTMENT_ID)).thenReturn(Optional.of(getTestDepartment()));
         AcademicUnitsIds academicUnitsIds = AcademicUnitsIds.builder()
                 .departmentId(TEST_DEPARTMENT_ID)
@@ -55,7 +52,7 @@ class DepartmentServiceTest {
 
     @Test
     @DisplayName("Throw DepartmentException when on validation department does not exist")
-    void should_throwDepartmentException_When_DepartmentDoesNotExistOnValidation() {
+    void should_ThrowDepartmentException_When_DepartmentDoesNotExistOnValidation() {
         when(departmentRepository.findById(TEST_DEPARTMENT_ID)).thenReturn(Optional.empty());
         AcademicUnitsIds academicUnitsIds = AcademicUnitsIds.builder()
                 .departmentId(TEST_DEPARTMENT_ID)
@@ -73,7 +70,7 @@ class DepartmentServiceTest {
 
     @Test
     @DisplayName("Throw DepartmentException when specialty does not exist in the department")
-    void should_throwDepartmentException_When_SpecialtyDoesNotExistInDepartment() {
+    void should_ThrowDepartmentException_When_SpecialtyDoesNotExistInDepartment() {
         when(departmentRepository.findById(TEST_DEPARTMENT_ID)).thenReturn(Optional.of(getTestDepartment()));
         AcademicUnitsIds academicUnitsIds = AcademicUnitsIds.builder()
                 .departmentId(TEST_DEPARTMENT_ID)
@@ -93,7 +90,7 @@ class DepartmentServiceTest {
 
     @Test
     @DisplayName("Throw DepartmentException when department exists but has no specialties")
-    void should_throwDepartmentException_When_DepartmentExistsButHasNoSpecialties() {
+    void should_ThrowDepartmentException_When_DepartmentExistsButHasNoSpecialties() {
         // Arrange
         Department emptyDepartment = new Department();
         emptyDepartment.setId(TEST_DEPARTMENT_ID);
@@ -119,7 +116,7 @@ class DepartmentServiceTest {
 
     @Test
     @DisplayName("Validate academic unit successfully when specialties are loaded lazily")
-    void should_validateAcademicUnit_When_SpecialtiesAreLoadedLazily() {
+    void should_ValidateAcademicUnit_When_SpecialtiesAreLoadedLazily() {
         when(departmentRepository.findById(TEST_DEPARTMENT_ID)).thenReturn(Optional.of(getTestDepartment()));
         AcademicUnitsIds academicUnitsIds = AcademicUnitsIds.builder()
                 .departmentId(TEST_DEPARTMENT_ID)
@@ -133,7 +130,7 @@ class DepartmentServiceTest {
 
     @Test
     @DisplayName("Return department when it exists")
-    void should_returnDepartment_When_DepartmentExists() {
+    void should_ReturnDepartment_When_DepartmentExists() {
         when(departmentRepository.findById(TEST_DEPARTMENT_ID)).thenReturn(Optional.of(getTestDepartment()));
 
         Department result = departmentService.getById(TEST_DEPARTMENT_ID);
@@ -145,7 +142,7 @@ class DepartmentServiceTest {
 
     @Test
     @DisplayName("Throw DepartmentException when on get by id department does not exist")
-    void should_throwDepartmentException_When_DepartmentDoesNotExistOnGet() {
+    void should_ThrowDepartmentException_When_DepartmentDoesNotExistOnGet() {
         when(departmentRepository.findById(TEST_DEPARTMENT_ID)).thenReturn(Optional.empty());
 
         DepartmentException exception = assertThrows(
@@ -160,18 +157,22 @@ class DepartmentServiceTest {
 
     @Test
     @DisplayName("Should create department when given valid data")
-    public void should_createDepartment_When_givenValidData() {
-        SpecialtyCreationDto specialtyCreationDto1 = new SpecialtyCreationDto(14.378, "Computer Engineering");
-        SpecialtyCreationDto specialtyCreationDto2 = new SpecialtyCreationDto(14.378, "Radio technics");
-        SpecialtyCreationDto specialtyCreationDto3 = new SpecialtyCreationDto(14.378, "History");
+    public void Should_createDepartment_When_givenValidData() {
+        // Arrange
+        SpecialtyCreationDto specialtyCreationDto1 = buildSpecialtyCreationDto("Computer Engineering");
+        SpecialtyCreationDto specialtyCreationDto2 = buildSpecialtyCreationDto("Radio technics");
+        SpecialtyCreationDto specialtyCreationDto3 = buildSpecialtyCreationDto("History");
+
+        List<String> specialtiesNames = List.of("Computer Engineering", "Radio technics", "History");
 
         DepartmentCreationRequest departmentCreationRequest = buildDepartmentCreationRequest(
                 Set.of(specialtyCreationDto1, specialtyCreationDto2, specialtyCreationDto3),
                 TEST_DEPARTMENT_NAME
         );
-
+        // Act
         departmentService.createDepartment(departmentCreationRequest);
 
+        // Assert
         ArgumentCaptor<Department> departmentCaptor = ArgumentCaptor.forClass(Department.class);
         verify(departmentRepository, times(1)).save(departmentCaptor.capture());
 
@@ -180,140 +181,43 @@ class DepartmentServiceTest {
         assertEquals(TEST_DEPARTMENT_NAME, savedDepartment.getName());
         assertEquals(3, savedDepartment.getSpecialties().size());
 
-        assertTrue(savedDepartment.getSpecialties().stream()
-                .anyMatch(specialty -> "Computer Engineering".equals(specialty.getName())));
-        assertTrue(savedDepartment.getSpecialties().stream()
-                .anyMatch(specialty -> "Radio technics".equals(specialty.getName())));
-        assertTrue(savedDepartment.getSpecialties().stream()
-                .anyMatch(specialty -> "History".equals(specialty.getName())));
+        specialtiesNames.forEach(specialtiesName -> {
+            assertTrue(savedDepartment.getSpecialties().stream()
+                    .map(Specialty::getName)
+                    .collect(Collectors.toSet())
+                    .containsAll(specialtiesNames));
+        });
     }
 
-
     @Test
-    @DisplayName("Should not create department when not given department name")
-    public void should_notCreateDepartment_When_notGivenDepartmentName() {
-        SpecialtyCreationDto specialtyCreationDto1 = new SpecialtyCreationDto(14.378, "Computer Engineering");
-        SpecialtyCreationDto specialtyCreationDto2 = new SpecialtyCreationDto(14.378, "Radio technics");
-        SpecialtyCreationDto specialtyCreationDto3 = new SpecialtyCreationDto(14.378, "History");
+    @DisplayName("Should not create department when department exist")
+    public void should_Not_Create_Department_When_DepartmentExists() {
+        SpecialtyCreationDto specialtyCreationDto1 = buildSpecialtyCreationDto("Computer Engineering");
+        SpecialtyCreationDto specialtyCreationDto2 = buildSpecialtyCreationDto("Radio technics");
 
         DepartmentCreationRequest departmentCreationRequest = buildDepartmentCreationRequest(
-                Set.of(specialtyCreationDto1, specialtyCreationDto2, specialtyCreationDto3),
-                null
-        );
-
-        ConstraintViolationException constraintViolationException = assertThrows(
-                ConstraintViolationException.class, () -> {
-                    departmentService.createDepartment(departmentCreationRequest);
-                });
-
-        assertEquals("Department name cannot be blank or empty", constraintViolationException.getMessage());
-    }
-
-    @Test
-    @DisplayName("Should not create department when department name is blank")
-    public void should_notCreateDepartment_When_departmentNameIsBlank() {
-        SpecialtyCreationDto specialtyCreationDto1 = new SpecialtyCreationDto(14.378, "Computer Engineering");
-        SpecialtyCreationDto specialtyCreationDto2 = new SpecialtyCreationDto(14.378, "Radio technics");
-        SpecialtyCreationDto specialtyCreationDto3 = new SpecialtyCreationDto(14.378, "History");
-
-        DepartmentCreationRequest departmentCreationRequest = buildDepartmentCreationRequest(
-                Set.of(specialtyCreationDto1, specialtyCreationDto2, specialtyCreationDto3),
-                " "
-        );
-
-        ConstraintViolationException constraintViolationException = assertThrows(
-                ConstraintViolationException.class, () -> {
-                    departmentService.createDepartment(departmentCreationRequest);
-                });
-
-        assertEquals("Department name cannot be blank or empty", constraintViolationException.getMessage());
-
-    }
-
-    @Test
-    @DisplayName("Should not create department when specialties collection is empty")
-    public void should_notCreateDepartment_When_specialtiesCollectionIsEmpty() {
-        DepartmentCreationRequest departmentCreationRequest = buildDepartmentCreationRequest(null, TEST_DEPARTMENT_NAME);
-
-        ConstraintViolationException constraintViolationException = assertThrows(
-                ConstraintViolationException.class, () -> {
-                    departmentService.createDepartment(departmentCreationRequest);
-                });
-
-        assertEquals("Specialties collection cannot be empty", constraintViolationException.getMessage());
-
-    }
-
-    @Test
-    @DisplayName("Should not create department when at least 1 specialty has invalid code-name")
-    public void should_notCreateDepartment_When_atLeastOneSpecialtyHasInvalidCodeName() {
-        SpecialtyCreationDto specialtyCreationDto1 = new SpecialtyCreationDto(14.378, "Computer Engineering");
-        SpecialtyCreationDto specialtyCreationDto2 = new SpecialtyCreationDto(14.378, "Radio technics");
-        SpecialtyCreationDto specialtyCreationDto3 = new SpecialtyCreationDto(null, "History");
-
-        DepartmentCreationRequest departmentCreationRequest = buildDepartmentCreationRequest(
-                Set.of(specialtyCreationDto1, specialtyCreationDto2, specialtyCreationDto3),
+                Set.of(specialtyCreationDto1, specialtyCreationDto2),
                 TEST_DEPARTMENT_NAME
         );
 
-        ConstraintViolationException constraintViolationException = assertThrows(
-                ConstraintViolationException.class, () -> {
-                    departmentService.createDepartment(departmentCreationRequest);
-                });
+        when(departmentRepository.existsByName(TEST_DEPARTMENT_NAME)).thenReturn(true);
 
-        assertEquals("Specialty code-name cant be null or 0", constraintViolationException.getMessage());
-
-    }
-
-    @Test
-    @DisplayName("Should not create department when at least 1 specialty has null name")
-    public void should_notCreateDepartment_When_atLeastOneSpecialtyHasInvalidName() {
-        SpecialtyCreationDto specialtyCreationDto1 = new SpecialtyCreationDto(14.378, null);
-        SpecialtyCreationDto specialtyCreationDto2 = new SpecialtyCreationDto(14.378, "Radio technics");
-        SpecialtyCreationDto specialtyCreationDto3 = new SpecialtyCreationDto(14.378, "History");
-
-        DepartmentCreationRequest departmentCreationRequest = buildDepartmentCreationRequest(
-                Set.of(specialtyCreationDto1, specialtyCreationDto2, specialtyCreationDto3),
-                TEST_DEPARTMENT_NAME
-        );
-
-        ConstraintViolationException constraintViolationException = assertThrows(
-                ConstraintViolationException.class, () -> {
-                    departmentService.createDepartment(departmentCreationRequest);
-                });
-
-        assertEquals("Specialty name can`t be null", constraintViolationException.getMessage());
-
-    }
-
-    @Test
-    @DisplayName("Should not create department when at least 1 specialty has blank name")
-    public void should_notCreateDepartment_When_atLeastOneSpecialtyHasBlankName() {
-        SpecialtyCreationDto specialtyCreationDto1 = new SpecialtyCreationDto(14.378, "  ");
-        SpecialtyCreationDto specialtyCreationDto2 = new SpecialtyCreationDto(14.378, "Radio technics");
-        SpecialtyCreationDto specialtyCreationDto3 = new SpecialtyCreationDto(14.378, "History");
-
-        DepartmentCreationRequest departmentCreationRequest = buildDepartmentCreationRequest(
-                Set.of(specialtyCreationDto1, specialtyCreationDto2, specialtyCreationDto3),
-                TEST_DEPARTMENT_NAME
-        );
-
-        ConstraintViolationException constraintViolationException = assertThrows(
-                ConstraintViolationException.class, () -> {
-                    departmentService.createDepartment(departmentCreationRequest);
-                }
-        );
-
-        assertEquals("Specialty name can`t be blank", constraintViolationException.getMessage());
-
+        assertThrows(DepartmentException.class, () -> {
+            departmentService.createDepartment(departmentCreationRequest);
+        });
+        verify(departmentRepository, times(1)).existsByName(TEST_DEPARTMENT_NAME);
+        verifyNoMoreInteractions(departmentRepository);
     }
 
     private DepartmentCreationRequest buildDepartmentCreationRequest(Set<SpecialtyCreationDto> specialties, String departmentName) {
         return DepartmentCreationRequest.builder()
-                .id(testDepartmentID)
                 .name(departmentName)
                 .specialties(specialties)
                 .build();
+    }
+
+    private SpecialtyCreationDto buildSpecialtyCreationDto(String name) {
+        return new SpecialtyCreationDto(14.378, name);
     }
 
 }

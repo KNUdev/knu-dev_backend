@@ -1,15 +1,16 @@
 package ua.knu.knudev.teammanagerapi.dto;
 
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.*;
 import lombok.Builder;
 
 @Builder
 public record SpecialtyCreationDto(
-        @NotNull(message = "Specialty code-name cant be null or 0")
+        @NotNull(message = "Specialty code-name cannot be null.")
+        @Positive(message = "Specialty code must be greater than 0.")
         Double codeName,
-        @NotBlank(message = "Specialty name can`t be blank")
-        @NotNull(message = "Specialty name can`t be null")
+        @NotNull(message = "Specialty name cannot be blank.")
+        @Size(min = 2, max = 200, message = "Specialty name must be between 2 and 200 characters.")
+        @Pattern(regexp = "^[A-Za-zА-Яа-яЇїІіЄєҐґ\s-]+$", message = "Specialty name contains invalid characters.")
         String name
 ) {
 }

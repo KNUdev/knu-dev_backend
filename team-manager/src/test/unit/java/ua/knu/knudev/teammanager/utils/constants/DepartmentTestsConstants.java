@@ -6,5 +6,6 @@ public class DepartmentTestsConstants {
 
     public static final Double TEST_SPECIALTY_ID = 14.378;
     public static final UUID TEST_DEPARTMENT_ID = UUID.randomUUID();
+    public static final String TEST_DEPARTMENT_NAME = "Test Department";
 
 }

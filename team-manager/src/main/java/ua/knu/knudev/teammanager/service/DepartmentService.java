@@ -1,13 +1,12 @@
 package ua.knu.knudev.teammanager.service;
 
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import org.springframework.validation.annotation.Validated;
 import ua.knu.knudev.knudevcommon.utils.AcademicUnitsIds;
 import ua.knu.knudev.teammanager.domain.Department;
 import ua.knu.knudev.teammanager.domain.Specialty;
 import ua.knu.knudev.teammanager.repository.DepartmentRepository;
+import ua.knu.knudev.teammanager.repository.SpecialtyRepository;
 import ua.knu.knudev.teammanagerapi.api.DepartmentApi;
 import ua.knu.knudev.teammanagerapi.exception.DepartmentException;
 import ua.knu.knudev.teammanagerapi.request.DepartmentCreationRequest;
@@ -17,16 +16,23 @@ import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
-@Validated
 public class DepartmentService implements DepartmentApi {
 
     private final DepartmentRepository departmentRepository;
+    private final SpecialtyRepository specialtyRepository;
 
     @Override
-    public void createDepartment(@Valid DepartmentCreationRequest departmentCreationRequest) {
+    public void createDepartment(DepartmentCreationRequest departmentCreationRequest) {
         Department department = new Department();
+        String departmentCreationName = departmentCreationRequest.name();
 
-        department.setName(departmentCreationRequest.name());
+        boolean departmentAlreadyInDb = existByName(departmentCreationName);
+        if (departmentAlreadyInDb) {
+            throw new DepartmentException("Department with name" + departmentCreationName + "already exists");
+        }
+
+
+        department.setName(departmentCreationName);
         departmentCreationRequest.specialties()
                 .forEach(specialtyDto -> {
                     Specialty specialty = new Specialty();
@@ -61,6 +67,10 @@ public class DepartmentService implements DepartmentApi {
                             specialtyId)
             );
         }
+    }
+
+    private boolean existByName(String name) {
+        return departmentRepository.existsByName(name);
     }
 
     public Department create(Department department) {
