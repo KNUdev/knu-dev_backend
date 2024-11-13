@@ -51,9 +51,7 @@ public class SecurityConfig {
 //                            .requestMatchers("/test/user").hasAnyAuthority(user)
 //                            .requestMatchers("/test/admin").hasAuthority(admin)
 //                            .requestMatchers("/test/owner").hasAuthority(owner)
-                            .anyRequest()
-                            .permitAll()
-//                            .authenticated()
+                            .anyRequest().permitAll()
                     ;
                 })
                 .authenticationProvider(authenticationProvider)

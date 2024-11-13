@@ -39,6 +39,11 @@ public class AccountAuthService implements AccountAuthServiceApi {
                 .build();
     }
 
+    @Override
+    public boolean existsByEmail(String email) {
+        return accountAuthRepository.existsByEmail(email);
+    }
+
     public AccountAuthDto getByEmail(String email) {
         String errorMessage = String.format("Account with email %s does not exist", email);
         AccountAuth account = Optional.ofNullable(accountAuthRepository.findAccountAuthByEmail(email))

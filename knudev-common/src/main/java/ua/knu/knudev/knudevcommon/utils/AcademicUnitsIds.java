@@ -7,6 +7,6 @@ import java.util.UUID;
 @Builder
 public record AcademicUnitsIds(
         UUID departmentId,
-        Double specialtyId
+        Double specialtyCodename
 ) {
 }

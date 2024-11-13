@@ -1,0 +1,27 @@
+spring:
+  datasource:
+    url: '
+      jdbc:h2:mem:testdb;MODE=PostgreSQL;DB_CLOSE_DELAY=-1;INIT=
+      CREATE SCHEMA IF NOT EXISTS TEAM_MANAGEMENT\; 
+      CREATE SCHEMA IF NOT EXISTS TASK_MANAGEMENT\; 
+      CREATE SCHEMA IF NOT EXISTS SECURITY_MANAGEMENT
+    '
+    driver-class-name: org.h2.Driver
+    username: sa
+    password: pa
+  liquibase:
+    change-log: classpath:db/master.yaml
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+
+application:
+  minio:
+    access-key: minioadmin
+    secret-key: minioadmin
+    url: http://localhost:9000
+  jwt:
+    issuer: KNUdev
+    expiration: 600000 #10 minutes
+    refresh-token:
+      expiration: 1440000 #24 hours

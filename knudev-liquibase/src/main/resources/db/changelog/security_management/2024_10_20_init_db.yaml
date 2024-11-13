@@ -1,12 +1,11 @@
 databaseChangeLog:
   - changeSet:
-      id: create_account_auth_table
+      id: create_auth_account_table
       author: Vladyslav Shtaiier
-      comment: "Create security_account table"
       changes:
         - createTable:
             schemaName: security_management
-            tableName: account_auth
+            tableName: auth_account
             columns:
               - column:
                   name: id
@@ -38,18 +37,24 @@ databaseChangeLog:
                   defaultValueBoolean: false
                   constraints:
                     nullable: false
+        - createIndex:
+            indexName: idx_auth_account_email
+            schemaName: security_management
+            tableName: auth_account
+            columns:
+              - column:
+                  name: email
 
   - changeSet:
-      id: create_account_auth_roles_table
+      id: create_auth_account_roles_table
       author: Vladyslav Shtaiier
-      comment: "Create security_account_roles table"
       changes:
         - createTable:
             schemaName: security_management
-            tableName: account_auth_role
+            tableName: auth_account_role
             columns:
               - column:
-                  name: account_auth_id
+                  name: auth_account_id
                   type: uuid
                   constraints:
                     nullable: false
@@ -59,16 +64,16 @@ databaseChangeLog:
                   constraints:
                     nullable: false
         - addPrimaryKey:
-            tableName: account_auth_role
+            tableName: auth_account_role
             schemaName: security_management
-            columnNames: account_auth_id, role
-            constraintName: pk_account_auth_roles
+            columnNames: auth_account_id, role
+            constraintName: pk_auth_account_roles
         - addForeignKeyConstraint:
             referencedTableSchemaName: security_management
             baseTableSchemaName: security_management
-            baseTableName: account_auth_role
-            baseColumnNames: account_auth_id
-            referencedTableName: account_auth
+            baseTableName: auth_account_role
+            baseColumnNames: auth_account_id
+            referencedTableName: auth_account
             referencedColumnNames: id
-            constraintName: fk_account_auth_roles_account_auth
+            constraintName: fk_auth_account_auth_account_id
             onDelete: cascade
