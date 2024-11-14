@@ -20,8 +20,8 @@ public class TaskAssignment {
     @UuidGenerator
     private UUID id;
 
-    @Column(name = "assigned_account_id", nullable = false, unique = true)
-    private UUID assignedAccountId;
+    @Column(name = "assigned_account_email", nullable = false, unique = true)
+    private String assignedAccountEmail;
 
     @OneToOne(optional = false)
     @JoinColumn(name = "task_id", unique = true)
@@ -35,8 +35,6 @@ public class TaskAssignment {
 
     @Column(nullable = false)
     private LocalDateTime activationExpiryDate;
-
-    @Column(nullable = false)
     private LocalDateTime dispatchExpiryDate;
 
     @Enumerated(EnumType.STRING)

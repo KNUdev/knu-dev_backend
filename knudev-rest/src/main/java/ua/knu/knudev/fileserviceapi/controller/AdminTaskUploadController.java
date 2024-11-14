@@ -7,7 +7,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import ua.knu.knudev.knudevcommon.constant.AccountRole;
 import ua.knu.knudev.taskmanagerapi.api.TaskUploadAPI;
 
 @RestController
@@ -25,4 +24,5 @@ public class AdminTaskUploadController {
                                     @RequestParam("taskFile") @Valid @NotNull MultipartFile taskFile) {
         return taskUploadAPI.uploadTaskForRole(accountRole, taskFile);
     }
+
 }

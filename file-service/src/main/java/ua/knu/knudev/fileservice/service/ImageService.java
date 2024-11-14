@@ -56,8 +56,8 @@ public class ImageService extends FileService implements ImageServiceApi {
 
     private void checkFileSize(MultipartFile file) {
         try {
-            int fileSizeInMegabytes = file.getBytes().length / 1024 / 1024;
-            if (fileSizeInMegabytes > MAX_IMAGE_SIZE_IN_KILOBYTES) {
+            int fileSizeInKilobytes = file.getBytes().length / 1024;
+            if (fileSizeInKilobytes > MAX_IMAGE_SIZE_IN_KILOBYTES) {
                 throw new FileException("File size is too big. Maximum allowed size is 2 megabytes");
             }
         } catch (IOException e) {

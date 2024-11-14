@@ -1,9 +1,8 @@
 package ua.knu.knudev.knudevsecurity.dto;
 
 import lombok.Builder;
-import ua.knu.knudev.knudevcommon.constant.AccountRole;
+import ua.knu.knudev.knudevcommon.constant.AccountTechnicalRole;
 
-import java.util.Set;
 import java.util.UUID;
 
 @Builder
@@ -11,7 +10,7 @@ public record AccountAuthDto(
         UUID id,
         String email,
         String password,
-        Set<AccountRole> roles,
+        AccountTechnicalRole technicalRole,
         boolean enabled,
         boolean nonLocked
 ) {

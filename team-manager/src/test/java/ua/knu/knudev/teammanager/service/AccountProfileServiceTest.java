@@ -47,7 +47,7 @@ class AccountProfileServiceTest {
 
     private static final AuthAccountCreationResponse AUTH_RESPONSE = AuthAccountCreationResponse.builder()
             .email(TEST_EMAIL)
-            .roles(TEST_ROLES)
+            .technicalRole(TEST_TECHNICAL_ROLE)
             .build();
 
     private static final Department testDepartment = getTestDepartment();

@@ -6,7 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.UuidGenerator;
-import ua.knu.knudev.knudevcommon.constant.AccountRole;
+import ua.knu.knudev.knudevcommon.constant.AccountTechnicalRole;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -25,5 +25,5 @@ public class Task {
     private LocalDateTime additionDate;
     private LocalDateTime lastUpdateDate;
     @Enumerated(EnumType.STRING)
-    private AccountRole targetRole;
+    private AccountTechnicalRole targetTechnicalRole;
 }

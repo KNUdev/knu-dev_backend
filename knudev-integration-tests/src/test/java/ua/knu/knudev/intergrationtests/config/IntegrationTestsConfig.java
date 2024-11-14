@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
         "ua.knu.knudev.teammanager",
         "ua.knu.knudev.knudevsecurity",
         "ua.knu.knudev.fileservice",
+        "ua.knu.knudev.taskmanager",
         "ua.knu.knudev.intergrationtests"
 })
 @EnableJpaRepositories(basePackages = {

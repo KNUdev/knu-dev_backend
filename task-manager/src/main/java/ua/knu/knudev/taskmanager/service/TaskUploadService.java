@@ -7,7 +7,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import ua.knu.knudev.fileserviceapi.api.PDFServiceApi;
 import ua.knu.knudev.fileserviceapi.subfolder.PdfSubfolder;
-import ua.knu.knudev.knudevcommon.constant.AccountRole;
+import ua.knu.knudev.knudevcommon.constant.AccountTechnicalRole;
 import ua.knu.knudev.knudevcommon.exception.FileException;
 import ua.knu.knudev.taskmanager.config.TaskFileConfigProperties;
 import ua.knu.knudev.taskmanagerapi.api.TaskUploadAPI;
@@ -25,23 +25,23 @@ public class TaskUploadService implements TaskUploadAPI {
     private final TaskFileConfigProperties taskFileConfigProperties;
 
     @Override
-    public String uploadTaskForRole(String stringAccountRole, MultipartFile file) {
+    public String uploadTaskForRole(String stringAccountTechnicalRole, MultipartFile file) {
         checkFileValidity(file);
 
-        AccountRole accountRole = AccountRole.buildFromString(stringAccountRole);
-        PdfSubfolder subfolder = getSubfolderByRole(accountRole);
+        AccountTechnicalRole accountRole = AccountTechnicalRole.valueOf(stringAccountTechnicalRole);
+        PdfSubfolder subfolder = getSubfolderByTechnicalRole(accountRole);
 
         String savedTaskFilename = taskService.create(file.getOriginalFilename(), accountRole);
         return pdfServiceApi.uploadFile(file, savedTaskFilename, subfolder);
     }
 
-    private PdfSubfolder getSubfolderByRole(AccountRole accountRole) {
-        return switch (accountRole) {
+    private PdfSubfolder getSubfolderByTechnicalRole(AccountTechnicalRole role) {
+        return switch (role) {
             case DEVELOPER -> PdfSubfolder.DEVELOPER_ROLE_TASKS;
-            case TEACHLEAD -> PdfSubfolder.TECHLEAD_ROLE_TASKS;
+            case TECHLEAD -> PdfSubfolder.TECHLEAD_ROLE_TASKS;
             default -> throw new IllegalArgumentException(
                     String.format("No tasks present for accountRole %s or accountRole %s does not exist",
-                            accountRole, accountRole)
+                            role, role)
             );
         };
     }

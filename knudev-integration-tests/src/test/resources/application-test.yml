@@ -1,3 +1,4 @@
+
 spring:
   datasource:
     url: '
@@ -14,7 +15,7 @@ spring:
   jpa:
     hibernate:
       ddl-auto: create-drop
-
+    show-sql: true
 application:
   minio:
     access-key: minioadmin
@@ -27,7 +28,17 @@ application:
       expiration: 1440000 #24 hours
   files:
     images:
-      maximum-size-in-kilobytes: 2048
+      profile-avatars:
+        allowed-extensions:
+          - jpg
+          - jpeg
+          - png
+          - webp
+        maximum-size-in-kilobytes: 2048
     pdfs:
       tasks:
+        allowed-extensions:
+          - pdf
         maximum-size-in-kilobytes: 2048
+  assignments:
+    activation-expiry-in-days: 7

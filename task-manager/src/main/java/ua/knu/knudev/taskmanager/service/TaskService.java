@@ -3,7 +3,7 @@ package ua.knu.knudev.taskmanager.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import ua.knu.knudev.knudevcommon.constant.AccountRole;
+import ua.knu.knudev.knudevcommon.constant.AccountTechnicalRole;
 import ua.knu.knudev.taskmanager.domain.Task;
 import ua.knu.knudev.taskmanager.repository.TaskRepository;
 import ua.knu.knudev.taskmanagerapi.api.TaskAPI;
@@ -17,7 +17,7 @@ import java.time.LocalDateTime;
 public class TaskService implements TaskAPI {
     private final TaskRepository taskRepository;
 
-    public String create(String filename, AccountRole targetRole) {
+    public String create(String filename, AccountTechnicalRole targetTechnicalRole) {
 //        if(ObjectUtils.isEmpty(targetRole)) {
 //            throw new
 //        }
@@ -27,7 +27,7 @@ public class TaskService implements TaskAPI {
 
         Task task = new Task();
         task.setFilename(filename);
-        task.setTargetRole(targetRole);
+        task.setTargetTechnicalRole(targetTechnicalRole);
         task.setAdditionDate(LocalDateTime.now());
 
         Task savedTask = taskRepository.save(task);

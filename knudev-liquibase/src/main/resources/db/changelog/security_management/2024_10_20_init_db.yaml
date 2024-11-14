@@ -27,6 +27,14 @@ databaseChangeLog:
                   constraints:
                     nullable: false
               - column:
+                  name: technical_role
+                  type: varchar(20)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: administrative_role
+                  type: varchar(30)
+              - column:
                   name: is_enabled
                   type: boolean
                   defaultValueBoolean: true
@@ -45,36 +53,3 @@ databaseChangeLog:
             columns:
               - column:
                   name: email
-
-  - changeSet:
-      id: create_auth_account_roles_table
-      author: Vladyslav Shtaiier
-      changes:
-        - createTable:
-            schemaName: security_management
-            tableName: auth_account_role
-            columns:
-              - column:
-                  name: auth_account_id
-                  type: uuid
-                  constraints:
-                    nullable: false
-              - column:
-                  name: role
-                  type: varchar(50)
-                  constraints:
-                    nullable: false
-        - addPrimaryKey:
-            tableName: auth_account_role
-            schemaName: security_management
-            columnNames: auth_account_id, role
-            constraintName: pk_auth_account_roles
-        - addForeignKeyConstraint:
-            referencedTableSchemaName: security_management
-            baseTableSchemaName: security_management
-            baseTableName: auth_account_role
-            baseColumnNames: auth_account_id
-            referencedTableName: auth_account
-            referencedColumnNames: id
-            constraintName: fk_auth_account_auth_account_id
-            onDelete: cascade

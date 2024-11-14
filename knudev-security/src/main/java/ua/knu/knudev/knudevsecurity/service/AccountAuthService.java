@@ -3,18 +3,17 @@ package ua.knu.knudev.knudevsecurity.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import ua.knu.knudev.knudevcommon.constant.AccountTechnicalRole;
 import ua.knu.knudev.knudevsecurity.domain.AccountAuth;
 import ua.knu.knudev.knudevsecurity.dto.AccountAuthDto;
 import ua.knu.knudev.knudevsecurity.mapper.AccountAuthMapper;
 import ua.knu.knudev.knudevsecurity.repository.AccountAuthRepository;
 import ua.knu.knudev.knudevsecurityapi.api.AccountAuthServiceApi;
-import ua.knu.knudev.knudevcommon.constant.AccountRole;
 import ua.knu.knudev.knudevsecurityapi.exception.AccountAuthException;
 import ua.knu.knudev.knudevsecurityapi.request.AccountCreationRequest;
 import ua.knu.knudev.knudevsecurityapi.response.AuthAccountCreationResponse;
 
 import java.util.Optional;
-import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -34,8 +33,9 @@ public class AccountAuthService implements AccountAuthServiceApi {
 
         AccountAuth savedAccount = accountAuthRepository.save(accountAuth);
         return AuthAccountCreationResponse.builder()
+                .id(savedAccount.getId())
                 .email(savedAccount.getEmail())
-                .roles(savedAccount.getRoles())
+                .technicalRole(savedAccount.getTechnicalRole())
                 .build();
     }
 
@@ -52,7 +52,7 @@ public class AccountAuthService implements AccountAuthServiceApi {
     }
 
     private void setAccountAuthDefaults(AccountAuth accountAuth) {
-        accountAuth.setRoles(Set.of(AccountRole.INTERN));
+        accountAuth.setTechnicalRole(AccountTechnicalRole.INTERN);
         accountAuth.setNonLocked(true);
         accountAuth.setEnabled(true);
     }

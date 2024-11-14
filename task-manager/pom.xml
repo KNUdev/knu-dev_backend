@@ -23,6 +23,10 @@
         </dependency>
         <dependency>
             <groupId>ua.knu</groupId>
+            <artifactId>team-manager-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>ua.knu</groupId>
             <artifactId>knudev-common</artifactId>
         </dependency>
     </dependencies>

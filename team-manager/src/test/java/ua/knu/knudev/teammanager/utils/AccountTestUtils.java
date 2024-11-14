@@ -5,6 +5,8 @@ import ua.knu.knudev.knudevcommon.utils.AcademicUnitsIds;
 import ua.knu.knudev.teammanagerapi.dto.AccountProfileDto;
 import ua.knu.knudev.knudevcommon.utils.FullName;
 
+import java.util.UUID;
+
 import static ua.knu.knudev.teammanager.utils.AcademicUnitsTestUtils.getTestDepartment;
 import static ua.knu.knudev.teammanager.utils.AcademicUnitsTestUtils.getTestSpecialty;
 import static ua.knu.knudev.teammanager.utils.constants.AccountTestsConstants.*;
@@ -15,7 +17,7 @@ public class AccountTestUtils {
 
     public static AccountProfile  getTestAccountProfile() {
         return AccountProfile.builder()
-                .id(1)
+                .id(UUID.randomUUID())
                 .email(TEST_EMAIL)
                 .firstName(PROFILE_FIRST_NAME)
                 .lastName(PROFILE_LAST_NAME)
@@ -29,7 +31,7 @@ public class AccountTestUtils {
     public static AccountProfileDto getTestAccountProfileDto() {
         return AccountProfileDto.builder()
                 .email(TEST_EMAIL)
-                .roles(TEST_ROLES)
+                .technicalRole(TEST_TECHNICAL_ROLE)
                 .fullName(new FullName(PROFILE_FIRST_NAME, PROFILE_LAST_NAME, PROFILE_MIDDLE_NAME))
                 .academicUnitsIds(AcademicUnitsIds.builder()
                         .departmentId(TEST_DEPARTMENT_ID)

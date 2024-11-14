@@ -30,7 +30,7 @@ databaseChangeLog:
                   name: last_update_date
                   type: date
               - column:
-                  name: target_role
+                  name: target_technical_role
                   type: varchar(20)
                   constraints:
                     nullable: false
@@ -52,8 +52,8 @@ databaseChangeLog:
                     nullable: false
                     unique: true
               - column:
-                  name: assigned_account_id
-                  type: uuid
+                  name: assigned_account_email
+                  type: varchar(75)
                   constraints:
                     nullable: false
                     unique: true
@@ -98,11 +98,9 @@ databaseChangeLog:
             referencedTableSchemaName: task_management
             onDelete: CASCADE
         - createIndex:
-            indexName: idx_task_assignment_assigned_account_id
+            indexName: idx_task_assignment_assigned_account_email
             tableName: task_assignment
             schemaName: task_management
             columns:
               - column:
-                  name: assigned_account_id
-
-
+                  name: assigned_account_email

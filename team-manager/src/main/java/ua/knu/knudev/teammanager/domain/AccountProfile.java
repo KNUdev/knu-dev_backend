@@ -2,11 +2,10 @@ package ua.knu.knudev.teammanager.domain;
 
 import jakarta.persistence.*;
 import lombok.*;
-import ua.knu.knudev.knudevcommon.constant.AccountRole;
+import ua.knu.knudev.knudevcommon.constant.AccountTechnicalRole;
 import ua.knu.knudev.knudevcommon.constant.Expertise;
 
 import java.time.LocalDateTime;
-import java.util.Set;
 import java.util.UUID;
 
 @Getter
@@ -34,15 +33,9 @@ public class AccountProfile {
     private String email;
     private String avatarFilename;
 
-    @ElementCollection(fetch = FetchType.LAZY)
-    @CollectionTable(
-            schema = "team_management",
-            name = "profile_account_role",
-            joinColumns = @JoinColumn(name = "profile_account_id")
-    )
     @Enumerated(EnumType.STRING)
-    @Column(name = "role", nullable = false)
-    private Set<AccountRole> roles;
+    @Column(name = "technical_role", nullable = false)
+    private AccountTechnicalRole technicalRole;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
