@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import ua.knu.knudev.knudevcommon.exception.FileException;
+import ua.knu.knudev.taskmanagerapi.exception.TaskAssignmentException;
 import ua.knu.knudev.taskmanagerapi.exception.TaskException;
 import ua.knu.knudev.teammanagerapi.exception.AccountException;
 import ua.knu.knudev.teammanagerapi.exception.DepartmentException;
@@ -30,6 +31,11 @@ public class RestGlobalExceptionHandler {
 
     @ExceptionHandler
     public ResponseEntity<String> handleTaskException(TaskException ex) {
+        return new ResponseEntity<>(ex.getMessage(), ex.getStatusCode());
+    }
+
+    @ExceptionHandler
+    public ResponseEntity<String> handleTaskAssignmentException(TaskAssignmentException ex) {
         return new ResponseEntity<>(ex.getMessage(), ex.getStatusCode());
     }
 

@@ -30,19 +30,16 @@ public class TaskUploadService implements TaskUploadAPI {
 
         AccountTechnicalRole accountRole = AccountTechnicalRole.valueOf(stringAccountTechnicalRole);
         PdfSubfolder subfolder = getSubfolderByTechnicalRole(accountRole);
-
         String savedTaskFilename = taskService.create(file.getOriginalFilename(), accountRole);
+
         return pdfServiceApi.uploadFile(file, savedTaskFilename, subfolder);
     }
 
     private PdfSubfolder getSubfolderByTechnicalRole(AccountTechnicalRole role) {
         return switch (role) {
+            case INTERN -> PdfSubfolder.INTERN_ROLE_TASKS;
             case DEVELOPER -> PdfSubfolder.DEVELOPER_ROLE_TASKS;
             case TECHLEAD -> PdfSubfolder.TECHLEAD_ROLE_TASKS;
-            default -> throw new IllegalArgumentException(
-                    String.format("No tasks present for accountRole %s or accountRole %s does not exist",
-                            role, role)
-            );
         };
     }
 
@@ -77,7 +74,6 @@ public class TaskUploadService implements TaskUploadAPI {
         int dotIndex = filename.indexOf(".");
         return filename.substring(0, dotIndex);
     }
-
 
     private void checkMaxTaskSize(MultipartFile file) {
         long fileSizeInBytes = file.getSize() / (1024 ^ 3);

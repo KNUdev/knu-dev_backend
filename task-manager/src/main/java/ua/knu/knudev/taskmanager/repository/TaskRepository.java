@@ -19,7 +19,6 @@ public interface TaskRepository extends JpaRepository<Task, UUID> {
             "ORDER BY function('random')")
     Optional<Task> findRandomNotAssignedTaskByTechnicalRole(@Param("role") AccountTechnicalRole role);
 
-
     boolean existsByFilename(String filename);
 
 }
