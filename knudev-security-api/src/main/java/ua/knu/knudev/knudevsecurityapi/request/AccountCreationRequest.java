@@ -1,10 +1,7 @@
 package ua.knu.knudev.knudevsecurityapi.request;
 
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Pattern;
-import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.*;
 import lombok.Builder;
 import org.springframework.web.multipart.MultipartFile;
 import ua.knu.knudev.knudevcommon.utils.AcademicUnitsIds;
@@ -35,9 +32,10 @@ public record AccountCreationRequest(
 
         @Valid
         FullName fullName,
-
+        @Valid @NotNull(message = "Department id and specialty code name must be present")
         AcademicUnitsIds academicUnitsIds,
         MultipartFile avatarFile,
+        @NotNull(message = "Expertise must not be null")
         Expertise expertise
 ) {
 }

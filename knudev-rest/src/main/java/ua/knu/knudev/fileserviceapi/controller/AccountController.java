@@ -16,12 +16,11 @@ public class AccountController {
 
     private final AccountProfileApi accountAuthServiceApi;
 
-    @PostMapping(value = "/register",
-            consumes = MediaType.MULTIPART_FORM_DATA_VALUE
-    )
+    @PostMapping(value = "/register", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @ResponseStatus(HttpStatus.CREATED)
-    public AccountRegistrationResponse registerAccount(@Valid @RequestBody AccountCreationRequest registrationRequest) {
+    public AccountRegistrationResponse registerAccount(@Valid @ModelAttribute AccountCreationRequest registrationRequest) {
         return accountAuthServiceApi.register(registrationRequest);
     }
+
 
 }

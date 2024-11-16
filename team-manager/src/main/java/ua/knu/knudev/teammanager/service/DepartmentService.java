@@ -1,6 +1,8 @@
 package ua.knu.knudev.teammanager.service;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.stereotype.Service;
 import ua.knu.knudev.teammanager.domain.Department;
 import ua.knu.knudev.teammanager.repository.DepartmentRepository;
@@ -10,6 +12,7 @@ import ua.knu.knudev.teammanagerapi.exception.DepartmentException;
 import java.util.Optional;
 import java.util.UUID;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class DepartmentService {
@@ -17,6 +20,11 @@ public class DepartmentService {
     private final DepartmentRepository departmentRepository;
 
     public Department getById(UUID id) {
+        if(ObjectUtils.isEmpty(id)) {
+            log.error("Cannot get department by null id");
+            throw new DepartmentException("Department id is null");
+        }
+
         Optional<Department> optionalDepartment = departmentRepository.findById(id);
         return optionalDepartment.orElseThrow(() -> new DepartmentException(
                 String.format("Department with id %s not found", id)
@@ -29,14 +37,17 @@ public class DepartmentService {
     }
 
     private void validateSpecialtyInDepartment(Department department, Double specialtyId) {
+        if(ObjectUtils.isEmpty(specialtyId)) {
+            throw new DepartmentException("Specialty id cannot be empty");
+        }
+
         boolean containsSpecialty = department.getSpecialties()
                 .stream()
                 .anyMatch(specialty -> specialty.getCodeName().equals(specialtyId));
         if (!containsSpecialty) {
             throw new DepartmentException(
                     String.format("Department with id %s does not contain specialty with code name: %s",
-                            department.getId(),
-                            specialtyId)
+                            department.getId(), specialtyId)
             );
         }
     }
