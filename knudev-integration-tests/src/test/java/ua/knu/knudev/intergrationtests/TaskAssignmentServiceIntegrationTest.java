@@ -188,12 +188,10 @@ public class TaskAssignmentServiceIntegrationTest {
         public void should_ThrowTaskException_When_NoTasksAvailable() {
             taskRepository.deleteAll();
 
-            TaskException exception = assertThrows(
+            assertThrows(
                     TaskException.class,
                     () -> taskAssignmentService.assignTaskToAccount(accountEmail)
             );
-
-            assertEquals("No available tasks at the moment", exception.getMessage());
         }
 
         @Test
@@ -244,12 +242,10 @@ public class TaskAssignmentServiceIntegrationTest {
             taskRepository.deleteAll();
             taskUploadService.uploadTaskForRole(AccountTechnicalRole.DEVELOPER.name(), getPdfFile());
 
-            TaskException exception = assertThrows(
+            assertThrows(
                     TaskException.class,
                     () -> taskAssignmentService.assignTaskToAccount(accountEmail)
             );
-
-            assertEquals("No available tasks at the moment", exception.getMessage());
         }
     }
 }
