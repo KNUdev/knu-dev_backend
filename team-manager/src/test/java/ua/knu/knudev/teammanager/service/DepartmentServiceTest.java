@@ -233,7 +233,8 @@ class DepartmentServiceTest {
         verifyNoMoreInteractions(departmentRepository);
     }
 
-    private DepartmentCreationRequest buildDepartmentCreationRequest(Set<SpecialtyCreationDto> specialties, String nameInEnglish,
+    private DepartmentCreationRequest buildDepartmentCreationRequest(Set<SpecialtyCreationDto> specialties,
+                                                                     String nameInEnglish,
                                                                      String nameInUkrainian) {
         return DepartmentCreationRequest.builder()
                 .nameInEnglish(nameInEnglish)

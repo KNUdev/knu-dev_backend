@@ -29,7 +29,7 @@ public class Department {
     @Column(nullable = false, unique = true, updatable = false)
     private String nameInUkrainian;
 
-    @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
+    @ManyToMany(fetch = FetchType.LAZY, cascade = {CascadeType.MERGE, CascadeType.PERSIST})
     @JoinTable(
             name = "departments_specialties",
             schema = "team_management",
