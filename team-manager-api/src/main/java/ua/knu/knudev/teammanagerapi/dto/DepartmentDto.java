@@ -8,7 +8,8 @@ import java.util.UUID;
 @Builder
 public record DepartmentDto(
         UUID id,
-        String name,
+        String nameInEnglish,
+        String nameInUkrainian,
         Set<SpecialtyCreationDto> specialties
 ) {
 }

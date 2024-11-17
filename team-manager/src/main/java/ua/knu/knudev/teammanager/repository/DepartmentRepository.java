@@ -7,5 +7,6 @@ import java.util.UUID;
 
 public interface DepartmentRepository extends JpaRepository<Department, UUID> {
 
-    boolean existsByName(String name);
+    boolean existsByNameInEnglish(String nameInEnglish);
+    boolean existsByNameInUkrainian(String nameInUkrainian);
 }

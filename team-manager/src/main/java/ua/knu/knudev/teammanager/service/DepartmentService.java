@@ -1,6 +1,5 @@
 package ua.knu.knudev.teammanager.service;
 
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
@@ -27,25 +26,30 @@ public class DepartmentService implements DepartmentApi {
     @Override
     public void createDepartment(DepartmentCreationRequest departmentCreationRequest) {
         Department department = new Department();
-        String departmentCreationName = departmentCreationRequest.name();
-        Set<@Valid SpecialtyCreationDto> specialties = departmentCreationRequest.specialties();
+        Set<SpecialtyCreationDto> specialties = departmentCreationRequest.specialties();
+        String departmentCreationEnglishName = departmentCreationRequest.nameInEnglish();
+        String departmentCreationUkrainianName = departmentCreationRequest.nameInUkrainian();
 
-        boolean departmentAlreadyInDb = existByName(departmentCreationName);
-        if (departmentAlreadyInDb) {
-            throw new DepartmentException("Department with name" + departmentCreationName + "already exists");
-        }
+        Set<SpecialtyCreationDto> specialtyCreationDtos = checkIfDepartmentHasValidSpecialties(specialties);
+        assertDepartmentDoesNotExist(departmentCreationEnglishName, departmentCreationUkrainianName);
 
-        List<Specialty> allSpecialtiesInDb = specialtyRepository.findAll();
-        Set<SpecialtyCreationDto> specialtyCreationDtos = rejectSpecialtiesWithSameParameter(specialties);
-        Set<SpecialtyCreationDto> notExistInDbSpecialtyCreationDtos = chooseNotExistInDbSpecialties(allSpecialtiesInDb,
+        List<Double> specialtiesCodeNames = specialtyCreationDtos.stream()
+                .map(SpecialtyCreationDto::codeName)
+                .toList();
+
+        List<Specialty> allSpecialtiesByExistingCodeNames = specialtyRepository.findSpecialtiesByCodeNameIn(specialtiesCodeNames);
+        Set<SpecialtyCreationDto> notExistInDbSpecialtyCreationDtos = chooseNotExistInDbSpecialties(allSpecialtiesByExistingCodeNames,
                 specialtyCreationDtos);
 
-        department.setName(departmentCreationName);
+        department.setNameInEnglish(departmentCreationEnglishName);
+        department.setNameInUkrainian(departmentCreationUkrainianName);
+
         if (CollectionUtils.isNotEmpty(notExistInDbSpecialtyCreationDtos)) {
             notExistInDbSpecialtyCreationDtos.forEach(specialtyDto -> {
                 Specialty specialty = new Specialty();
                 specialty.setCodeName(specialtyDto.codeName());
-                specialty.setName(specialtyDto.name());
+                specialty.setNameInEnglish(specialtyDto.nameInEnglish());
+                specialty.setNameInUkrainian(specialtyDto.nameInUkrainian());
                 department.addSpecialty(specialty);
             });
         }
@@ -78,8 +82,12 @@ public class DepartmentService implements DepartmentApi {
         }
     }
 
-    private boolean existByName(String name) {
-        return departmentRepository.existsByName(name);
+    private boolean existByNameInEnglish(String name) {
+        return departmentRepository.existsByNameInEnglish(name);
+    }
+
+    private boolean existByNameInUkrainian(String name) {
+        return departmentRepository.existsByNameInUkrainian(name);
     }
 
     private static Set<SpecialtyCreationDto> chooseNotExistInDbSpecialties(List<Specialty> specialties, Set<SpecialtyCreationDto> specialtyCreationDtos) {
@@ -99,26 +107,42 @@ public class DepartmentService implements DepartmentApi {
                 .collect(Collectors.toSet());
     }
 
-    private static Set<SpecialtyCreationDto> rejectSpecialtiesWithSameParameter(Set<SpecialtyCreationDto> specialtyCreationDtos) {
+    private static Set<SpecialtyCreationDto> checkIfDepartmentHasValidSpecialties(Set<SpecialtyCreationDto> specialtyCreationDtos) {
         if (CollectionUtils.isEmpty(specialtyCreationDtos)) {
             return Collections.emptySet();
         }
 
-        Set<String> uniqueNames = new HashSet<>();
-        Set<Double> uniqueCodeNames = new HashSet<>();
-        Set<SpecialtyCreationDto> uniqueSpecialties = new HashSet<>();
+        List<String> specialtiesEnglishNames = new ArrayList<>();
+        List<String> specialtiesUkrainianNames = new ArrayList<>();
+        List<Double> specialtiesCodeNames = new ArrayList<>();
 
         specialtyCreationDtos.forEach(specialty -> {
-            boolean isUniqueName = uniqueNames.add(specialty.name());
-            boolean isUniqueCodeName = uniqueCodeNames.add(specialty.codeName());
+            String nameInEnglish = specialty.nameInEnglish();
+            String nameInUkrainian = specialty.nameInUkrainian();
+            Double codeName = specialty.codeName();
 
-            if (isUniqueName && isUniqueCodeName) {
-                uniqueSpecialties.add(specialty);
+            if (specialtiesEnglishNames.contains(nameInEnglish) || specialtiesUkrainianNames.contains(nameInUkrainian)
+                    || specialtiesCodeNames.contains(codeName)) {
+                throw new DepartmentException("Specialty with name in english " + nameInEnglish + " and with name in ukrainian: "
+                        + nameInUkrainian + " and with code name " + codeName + " are not unique!");
             }
+            specialtiesEnglishNames.add(nameInEnglish);
+            specialtiesUkrainianNames.add(nameInUkrainian);
+            specialtiesCodeNames.add(codeName);
         });
-        return uniqueSpecialties;
+
+        return specialtyCreationDtos;
     }
 
+    private void assertDepartmentDoesNotExist(String departmentNameInEnglish, String departmentNameInUkrainian) {
+        boolean existByNameInEnglish = existByNameInEnglish(departmentNameInEnglish);
+        boolean existByNameInUkrainian = existByNameInUkrainian(departmentNameInUkrainian);
+
+        if (existByNameInUkrainian && existByNameInEnglish) {
+            throw new DepartmentException("Department with name in ukrainian: " + departmentNameInUkrainian + " and with name in english: "
+                    + departmentNameInEnglish + "already exists!");
+        }
+    }
 
     public Department create(Department department) {
         return departmentRepository.save(department);

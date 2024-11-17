@@ -7,6 +7,7 @@ import java.util.Set;
 @Builder
 public record SpecialtyDto(
         Double codeName,
-        String name,
+        String nameInEnglish,
+        String nameInUkrainian,
         Set<DepartmentDto> departments) {
 }

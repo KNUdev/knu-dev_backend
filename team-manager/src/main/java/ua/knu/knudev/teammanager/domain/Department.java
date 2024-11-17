@@ -24,7 +24,10 @@ public class Department {
     private UUID id;
 
     @Column(nullable = false, unique = true, updatable = false)
-    private String name;
+    private String nameInEnglish;
+
+    @Column(nullable = false, unique = true, updatable = false)
+    private String nameInUkrainian;
 
     @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
     @JoinTable(

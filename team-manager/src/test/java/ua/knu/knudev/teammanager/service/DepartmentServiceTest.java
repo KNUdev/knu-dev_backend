@@ -23,7 +23,8 @@ import java.util.stream.Collectors;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 import static ua.knu.knudev.teammanager.utils.AcademicUnitsTestUtils.getTestDepartment;
-import static ua.knu.knudev.teammanager.utils.constants.DepartmentTestsConstants.TEST_DEPARTMENT_NAME;
+import static ua.knu.knudev.teammanager.utils.constants.DepartmentTestsConstants.TEST_DEPARTMENT_NAME_IN_ENGLISH;
+import static ua.knu.knudev.teammanager.utils.constants.DepartmentTestsConstants.TEST_DEPARTMENT_NAME_IN_UKRAINIAN;
 
 @ExtendWith(MockitoExtension.class)
 class DepartmentServiceTest {
@@ -98,7 +99,8 @@ class DepartmentServiceTest {
         // Arrange
         Department emptyDepartment = new Department();
         emptyDepartment.setId(TEST_DEPARTMENT_ID);
-        emptyDepartment.setName("Engineering");
+        emptyDepartment.setNameInEnglish("Engineering");
+        emptyDepartment.setNameInUkrainian("Інженерія");
         emptyDepartment.setSpecialties(new HashSet<>());
 
         when(departmentRepository.findById(TEST_DEPARTMENT_ID)).thenReturn(Optional.of(emptyDepartment));
@@ -159,23 +161,26 @@ class DepartmentServiceTest {
         verify(departmentRepository, times(1)).findById(TEST_DEPARTMENT_ID);
     }
 
-//    TODO improve
     @Test
     @DisplayName("Should create department when given valid data")
     public void Should_createDepartment_When_givenValidData() {
         // Arrange
-        SpecialtyCreationDto specialtyCreationDto1 = buildSpecialtyCreationDto("Computer Engineering");
-        SpecialtyCreationDto specialtyCreationDto2 = buildSpecialtyCreationDto("Radio technics");
-        SpecialtyCreationDto specialtyCreationDto3 = buildSpecialtyCreationDto("History");
+        SpecialtyCreationDto specialtyCreationDto1 = buildSpecialtyCreationDto("Computer Engineering",
+                "Комп'ютерна інженерія", 14.377);
+        SpecialtyCreationDto specialtyCreationDto2 = buildSpecialtyCreationDto("Radio technics",
+                "Радіо техніка", 14.378);
+        SpecialtyCreationDto specialtyCreationDto3 = buildSpecialtyCreationDto("History",
+                "Історія", 14.379);
         Set<SpecialtyCreationDto> specialtyCreationDtos = Set.of(specialtyCreationDto1, specialtyCreationDto2, specialtyCreationDto3);
         List<Specialty> specialties = buildSpecialties(specialtyCreationDtos);
 
-        List<String> specialtiesNames = List.of("Computer Engineering", "Radio technics", "History");
+        List<String> specialtiesNamesInEnglish = List.of("Computer Engineering", "Radio technics", "History");
+        List<String> specialtiesNamesInUkrainian = List.of("Комп'ютерна інженерія", "Радіо техніка", "Історія");
 
         DepartmentCreationRequest departmentCreationRequest = buildDepartmentCreationRequest(specialtyCreationDtos,
-                TEST_DEPARTMENT_NAME
+                TEST_DEPARTMENT_NAME_IN_ENGLISH,
+                TEST_DEPARTMENT_NAME_IN_UKRAINIAN
         );
-        when(specialtyRepository.findAll()).thenReturn(specialties);
         // Act
         departmentService.createDepartment(departmentCreationRequest);
 
@@ -185,56 +190,72 @@ class DepartmentServiceTest {
 
         Department savedDepartment = departmentCaptor.getValue();
 
-        assertEquals(TEST_DEPARTMENT_NAME, savedDepartment.getName());
+        assertEquals(TEST_DEPARTMENT_NAME_IN_ENGLISH, savedDepartment.getNameInEnglish());
         assertEquals(3, savedDepartment.getSpecialties().size());
 
-        specialtiesNames.forEach(specialtiesName -> {
+        specialtiesNamesInEnglish.forEach(specialtiesName -> {
             assertTrue(savedDepartment.getSpecialties().stream()
-                    .map(Specialty::getName)
+                    .map(Specialty::getNameInEnglish)
                     .collect(Collectors.toSet())
-                    .containsAll(specialtiesNames));
+                    .containsAll(specialtiesNamesInEnglish));
+        });
+
+        specialtiesNamesInUkrainian.forEach(specialtiesName -> {
+            assertTrue(savedDepartment.getSpecialties().stream()
+                    .map(Specialty::getNameInUkrainian)
+                    .collect(Collectors.toSet())
+                    .containsAll(specialtiesNamesInUkrainian));
         });
     }
 
     @Test
     @DisplayName("Should not create department when department exist")
     public void should_Not_Create_Department_When_DepartmentExists() {
-        SpecialtyCreationDto specialtyCreationDto1 = buildSpecialtyCreationDto("Computer Engineering");
-        SpecialtyCreationDto specialtyCreationDto2 = buildSpecialtyCreationDto("Radio technics");
+        SpecialtyCreationDto specialtyCreationDto1 = buildSpecialtyCreationDto("Computer Engineering",
+                "Комп'ютерна інженерія", 14.378);
+        SpecialtyCreationDto specialtyCreationDto2 = buildSpecialtyCreationDto("Radio technics",
+                "Радіо техніка", 14.379);
 
         DepartmentCreationRequest departmentCreationRequest = buildDepartmentCreationRequest(
                 Set.of(specialtyCreationDto1, specialtyCreationDto2),
-                TEST_DEPARTMENT_NAME
+                TEST_DEPARTMENT_NAME_IN_ENGLISH,
+                TEST_DEPARTMENT_NAME_IN_UKRAINIAN
         );
 
-        when(departmentRepository.existsByName(TEST_DEPARTMENT_NAME)).thenReturn(true);
+        when(departmentRepository.existsByNameInEnglish(TEST_DEPARTMENT_NAME_IN_ENGLISH)).thenReturn(true);
+        when(departmentRepository.existsByNameInUkrainian(TEST_DEPARTMENT_NAME_IN_UKRAINIAN)).thenReturn(true);
 
         assertThrows(DepartmentException.class, () -> {
             departmentService.createDepartment(departmentCreationRequest);
         });
-        verify(departmentRepository, times(1)).existsByName(TEST_DEPARTMENT_NAME);
+        verify(departmentRepository, times(1)).existsByNameInEnglish(TEST_DEPARTMENT_NAME_IN_ENGLISH);
+        verify(departmentRepository, times(1)).existsByNameInUkrainian(TEST_DEPARTMENT_NAME_IN_UKRAINIAN);
         verifyNoMoreInteractions(departmentRepository);
     }
 
-    private DepartmentCreationRequest buildDepartmentCreationRequest(Set<SpecialtyCreationDto> specialties, String departmentName) {
+    private DepartmentCreationRequest buildDepartmentCreationRequest(Set<SpecialtyCreationDto> specialties, String nameInEnglish,
+                                                                     String nameInUkrainian) {
         return DepartmentCreationRequest.builder()
-                .name(departmentName)
+                .nameInEnglish(nameInEnglish)
+                .nameInUkrainian(nameInUkrainian)
                 .specialties(specialties)
                 .build();
     }
 
     private List<Specialty> buildSpecialties(Set<SpecialtyCreationDto> specialtyCreationDtos) {
-        return specialtyCreationDtos.stream().map(specialtyCreationDto -> {
-            Specialty specialty = new Specialty();
-            specialty.setCodeName(specialtyCreationDto.codeName());
-            specialty.setName(specialtyCreationDto.name());
-            return specialty;
-        }).toList();
+        return specialtyCreationDtos.stream()
+                .map(specialtyCreationDto -> {
+                    Specialty specialty = new Specialty();
+                    specialty.setCodeName(specialtyCreationDto.codeName());
+                    specialty.setNameInEnglish(specialtyCreationDto.nameInEnglish());
+                    specialty.setNameInUkrainian(specialtyCreationDto.nameInUkrainian());
+                    return specialty;
+                }).toList();
 
     }
 
-    private SpecialtyCreationDto buildSpecialtyCreationDto(String name) {
-        return new SpecialtyCreationDto(14.378, name);
+    private SpecialtyCreationDto buildSpecialtyCreationDto(String nameInEnglish, String nameInUkraine, Double codeName) {
+        return new SpecialtyCreationDto(codeName, nameInUkraine, nameInEnglish);
     }
 
 }

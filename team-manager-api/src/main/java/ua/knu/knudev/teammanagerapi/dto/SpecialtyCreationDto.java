@@ -10,7 +10,15 @@ public record SpecialtyCreationDto(
         Double codeName,
         @NotNull(message = "Specialty name cannot be blank.")
         @Size(min = 2, max = 200, message = "Specialty name must be between 2 and 200 characters.")
-        @Pattern(regexp = "^[A-Za-zА-Яа-яЇїІіЄєҐґ\s-]+$", message = "Specialty name contains invalid characters.")
-        String name
+        @Pattern(regexp = "^[А-Яа-яЇїІіЄєҐґ\\s-]+$",
+                message = "Specialty name in ukrainian may contains only ukrainian-alphabet letters"
+        )
+        String nameInUkrainian,
+        @NotNull(message = "Specialty name cannot be blank.")
+        @Size(min = 2, max = 200, message = "Specialty name must be between 2 and 200 characters.")
+        @Pattern(regexp = "^[A-Za-z\\s-]+$",
+                message = "Specialty name in english may contains only english-alphabet letters"
+        )
+        String nameInEnglish
 ) {
 }

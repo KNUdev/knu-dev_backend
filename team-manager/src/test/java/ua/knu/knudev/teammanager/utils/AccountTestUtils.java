@@ -13,7 +13,7 @@ import static ua.knu.knudev.teammanager.utils.constants.DepartmentTestsConstants
 
 public class AccountTestUtils {
 
-    public static AccountProfile  getTestAccountProfile() {
+    public static AccountProfile getTestAccountProfile() {
         return AccountProfile.builder()
                 .id(1)
                 .email(TEST_EMAIL)
@@ -22,7 +22,7 @@ public class AccountTestUtils {
                 .middleName(PROFILE_MIDDLE_NAME)
                 .avatarFilename(TEST_FILE_NAME)
                 .department(getTestDepartment())
-                .specialty(getTestSpecialty("Computer science"))
+                .specialty(getTestSpecialty("Комп'ютерні науки", "Computer science"))
                 .build();
     }
 

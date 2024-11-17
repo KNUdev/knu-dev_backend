@@ -20,13 +20,17 @@ public class Specialty {
     private Double codeName;
 
     @Column(nullable = false, updatable = false, unique = true)
-    private String name;
+    private String nameInEnglish;
+
+    @Column(nullable = false, updatable = false, unique = true)
+    private String nameInUkrainian;
 
     @ManyToMany(mappedBy = "specialties", fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
     private Set<Department> departments = new HashSet<>();
 
-    public Specialty(Double codeName, String name) {
+    public Specialty(Double codeName, String nameInEnglish, String nameInUkrainian) {
         this.codeName = codeName;
-        this.name = name;
+        this.nameInEnglish = nameInEnglish;
+        this.nameInUkrainian = nameInUkrainian;
     }
 }
