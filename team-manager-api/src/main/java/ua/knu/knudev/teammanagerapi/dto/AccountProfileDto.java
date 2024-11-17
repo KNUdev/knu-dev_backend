@@ -8,7 +8,6 @@ import ua.knu.knudev.knudevcommon.utils.FullName;
 @Builder
 public record AccountProfileDto(
         String email,
-//        Set<AccountRole> roles,
         AccountTechnicalRole technicalRole,
         FullName fullName,
         AcademicUnitsIds academicUnitsIds,

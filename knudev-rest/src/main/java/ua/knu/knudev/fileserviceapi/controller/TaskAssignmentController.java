@@ -15,6 +15,7 @@ public class TaskAssignmentController {
 
     private final TaskAssignmentApi taskAssignmentApi;
 
+    //todo somehow download the assignment
     @PostMapping("/to/{email}")
     public TaskAssignmentResponse assignTask(@PathVariable(name = "email") String accountEmail) {
         return taskAssignmentApi.assignTaskToAccount(accountEmail);

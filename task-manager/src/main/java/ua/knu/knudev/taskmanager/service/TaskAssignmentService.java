@@ -2,6 +2,7 @@ package ua.knu.knudev.taskmanager.service;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -20,6 +21,7 @@ import ua.knu.knudev.teammanagerapi.dto.AccountProfileDto;
 import java.security.SecureRandom;
 import java.time.LocalDateTime;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class TaskAssignmentService implements TaskAssignmentApi {
@@ -38,7 +40,13 @@ public class TaskAssignmentService implements TaskAssignmentApi {
         AccountProfileDto account = accountProfileApi.getByEmail(accountEmail);
 
         Task availableTask = taskRepository.findRandomNotAssignedTaskByTechnicalRole(account.technicalRole())
-                .orElseThrow(() -> new TaskException("No available tasks at the moment", HttpStatus.NOT_FOUND));
+                .orElseThrow(() -> {
+                    String errorMessage = String.format("No available tasks at the moment for role %S. " +
+                            "Please contact support.", account.technicalRole());
+                    log.error("No available tasks at the moment for account with email: {}, role: {}",
+                            account.email(), account.technicalRole());
+                    return new TaskException(errorMessage, HttpStatus.NOT_FOUND);
+                });
 
         TaskAssignment assignment = new TaskAssignment();
         String verificationCode = VerificationCodeGenerator.generateUniqueCode(taskAssignmentRepository);

@@ -16,7 +16,7 @@ public interface TaskRepository extends JpaRepository<Task, UUID> {
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("SELECT t FROM Task t WHERE t.targetTechnicalRole = :role AND t.id NOT IN (" +
             "SELECT ta.task.id FROM TaskAssignment ta) " +
-            "ORDER BY function('random')")
+            "ORDER BY function('random') LIMIT 1")
     Optional<Task> findRandomNotAssignedTaskByTechnicalRole(@Param("role") AccountTechnicalRole role);
 
     boolean existsByFilename(String filename);

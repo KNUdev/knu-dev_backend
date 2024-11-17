@@ -53,7 +53,7 @@ public class TaskUploadService implements TaskUploadAPI {
         String noExtensionFilename = removeExtension(filename);
 
         final String ROLE_PATTERN = "Developer|Techlead";
-        final String CAMEL_CASE_PATTERN = "([A-Z][a-z]+)+";
+        final String CAMEL_CASE_PATTERN = "([A-Z][a-z0-9]+)+";
         final String FILENAME_PATTERN = "^Task_(" + ROLE_PATTERN + ")_(" + CAMEL_CASE_PATTERN + ")$";
 
         Pattern pattern = Pattern.compile(FILENAME_PATTERN);
@@ -65,6 +65,7 @@ public class TaskUploadService implements TaskUploadAPI {
             );
         }
     }
+
 
     private String removeExtension(String filename) {
         if (StringUtils.isEmpty(filename)) {
