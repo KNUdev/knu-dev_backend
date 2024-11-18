@@ -51,7 +51,7 @@ class AccountProfileServiceTest {
             .build();
 
     private static final Department testDepartment = getTestDepartment();
-    private static final Specialty testSpecialty = getTestSpecialty("Test Specialty");
+    private static final Specialty testSpecialty = getTestSpecialty("Тестова спеціальність", "Test Specialty");
     private static final AccountProfile testProfile = getTestAccountProfile();
     private static final AccountProfileDto testProfileDto = getTestAccountProfileDto();
 
@@ -104,7 +104,7 @@ class AccountProfileServiceTest {
     void should_RegisterSuccessfully_When_AllInputsAreValid() {
         // Arrange
         when(accountProfileRepository.existsByEmail(TEST_EMAIL)).thenReturn(false);
-        doNothing().when(departmentService).validateAcademicUnitByIds(any(AcademicUnitsIds.class));
+        doNothing().when(departmentService).validateAcademicUnitExistence(any(AcademicUnitsIds.class));
         when(accountAuthServiceApi.createAccount(any(AccountCreationRequest.class))).thenReturn(AUTH_RESPONSE);
         when(uploadAvatar()).thenReturn(TEST_FILE_NAME);
         when(departmentService.getById(TEST_DEPARTMENT_ID)).thenReturn(testDepartment);
@@ -134,7 +134,7 @@ class AccountProfileServiceTest {
         assertEquals(testSpecialty.getCodeName(), capturedProfile.getSpecialty().getCodeName());
 
         verify(accountProfileRepository, times(1)).existsByEmail(TEST_EMAIL);
-        verify(departmentService, times(1)).validateAcademicUnitByIds(any(AcademicUnitsIds.class));
+        verify(departmentService, times(1)).validateAcademicUnitExistence(any(AcademicUnitsIds.class));
         verify(departmentService, times(1)).getById(TEST_DEPARTMENT_ID);
         verify(accountAuthServiceApi, times(1)).createAccount(eq(request));
         verifyUploadAvatar();
@@ -148,7 +148,7 @@ class AccountProfileServiceTest {
         assertThrows(AccountException.class, () -> accountProfileService.register(request));
 
         verify(accountProfileRepository, times(1)).existsByEmail(TEST_EMAIL);
-        verify(departmentService, never()).validateAcademicUnitByIds(any(AcademicUnitsIds.class));
+        verify(departmentService, never()).validateAcademicUnitExistence(any(AcademicUnitsIds.class));
         verifyNoMoreInteractions(accountAuthServiceApi, imageServiceApi, departmentService, accountProfileRepository, accountProfileMapper);
     }
 
@@ -157,12 +157,12 @@ class AccountProfileServiceTest {
     void should_ThrowDepartmentException_When_ValidationFails() {
         when(accountProfileRepository.existsByEmail(TEST_EMAIL)).thenReturn(false);
         doThrow(new DepartmentException("Invalid department or specialty"))
-                .when(departmentService).validateAcademicUnitByIds(any(AcademicUnitsIds.class));
+                .when(departmentService).validateAcademicUnitExistence(any(AcademicUnitsIds.class));
 
         assertThrows(DepartmentException.class, () -> accountProfileService.register(request));
 
         verify(accountProfileRepository, times(1)).existsByEmail(TEST_EMAIL);
-        verify(departmentService, times(1)).validateAcademicUnitByIds(any(AcademicUnitsIds.class));
+        verify(departmentService, times(1)).validateAcademicUnitExistence(any(AcademicUnitsIds.class));
         verifyNoMoreInteractions(imageServiceApi, departmentService, accountProfileRepository, accountProfileMapper);
     }
 
@@ -170,14 +170,14 @@ class AccountProfileServiceTest {
     @DisplayName("Should throw AccountException when account auth creation fails")
     void should_ThrowAccountException_When_AccountAuthCreationFails() {
         when(accountProfileRepository.existsByEmail(TEST_EMAIL)).thenReturn(false);
-        doNothing().when(departmentService).validateAcademicUnitByIds(any(AcademicUnitsIds.class));
+        doNothing().when(departmentService).validateAcademicUnitExistence(any(AcademicUnitsIds.class));
         when(accountAuthServiceApi.createAccount(any(AccountCreationRequest.class)))
                 .thenThrow(new AccountException("Auth service failure"));
 
         assertThrows(AccountException.class, () -> accountProfileService.register(request));
 
         verify(accountProfileRepository, times(1)).existsByEmail(TEST_EMAIL);
-        verify(departmentService, times(1)).validateAcademicUnitByIds(any(AcademicUnitsIds.class));
+        verify(departmentService, times(1)).validateAcademicUnitExistence(any(AcademicUnitsIds.class));
         verify(accountAuthServiceApi, times(1)).createAccount(eq(request));
         verifyNoMoreInteractions(imageServiceApi, departmentService, accountProfileRepository, accountProfileMapper);
     }
@@ -187,7 +187,7 @@ class AccountProfileServiceTest {
     @SneakyThrows
     void should_ThrowAccountExceptionWhen_AvatarUploadFails() {
         when(accountProfileRepository.existsByEmail(TEST_EMAIL)).thenReturn(false);
-        doNothing().when(departmentService).validateAcademicUnitByIds(any(AcademicUnitsIds.class));
+        doNothing().when(departmentService).validateAcademicUnitExistence(any(AcademicUnitsIds.class));
         when(accountAuthServiceApi.createAccount(any(AccountCreationRequest.class))).thenReturn(AUTH_RESPONSE);
         when(uploadAvatar()).thenThrow(new AccountException("File upload failed"));
         when(mockAvatarFile.getBytes()).thenReturn(new byte[]{1, 2, 3, 4, 5});
@@ -195,7 +195,7 @@ class AccountProfileServiceTest {
         assertThrows(AccountException.class, () -> accountProfileService.register(request));
 
         verify(accountProfileRepository, times(1)).existsByEmail(TEST_EMAIL);
-        verify(departmentService, times(1)).validateAcademicUnitByIds(any(AcademicUnitsIds.class));
+        verify(departmentService, times(1)).validateAcademicUnitExistence(any(AcademicUnitsIds.class));
         verify(accountAuthServiceApi, times(1)).createAccount(eq(request));
         verifyNoMoreInteractions(departmentService, imageServiceApi, accountProfileRepository, accountProfileMapper);
         verifyUploadAvatar();
@@ -206,7 +206,7 @@ class AccountProfileServiceTest {
     @SneakyThrows
     void should_ThrowRuntimeException_When_SavingProfileFails() {
         when(accountProfileRepository.existsByEmail(TEST_EMAIL)).thenReturn(false);
-        doNothing().when(departmentService).validateAcademicUnitByIds(any(AcademicUnitsIds.class));
+        doNothing().when(departmentService).validateAcademicUnitExistence(any(AcademicUnitsIds.class));
         when(accountAuthServiceApi.createAccount(any(AccountCreationRequest.class))).thenReturn(AUTH_RESPONSE);
         when(departmentService.getById(TEST_DEPARTMENT_ID)).thenReturn(testDepartment);
         when(mockAvatarFile.getBytes()).thenReturn(new byte[]{1, 2, 3, 4, 5});
@@ -216,7 +216,7 @@ class AccountProfileServiceTest {
         assertThrows(RuntimeException.class, () -> accountProfileService.register(request));
 
         verify(accountProfileRepository, times(1)).existsByEmail(TEST_EMAIL);
-        verify(departmentService, times(1)).validateAcademicUnitByIds(any(AcademicUnitsIds.class));
+        verify(departmentService, times(1)).validateAcademicUnitExistence(any(AcademicUnitsIds.class));
         verify(accountAuthServiceApi, times(1)).createAccount(eq(request));
         verify(departmentService, times(1)).getById(TEST_DEPARTMENT_ID);
         verify(accountProfileRepository, times(1)).save(any(AccountProfile.class));
@@ -228,7 +228,7 @@ class AccountProfileServiceTest {
     @DisplayName("Should correctly build registration response")
     void should_BuildRegistrationResponseCorrectly_When_InputDataIsValid() {
         when(accountProfileRepository.existsByEmail(TEST_EMAIL)).thenReturn(false);
-        doNothing().when(departmentService).validateAcademicUnitByIds(any(AcademicUnitsIds.class));
+        doNothing().when(departmentService).validateAcademicUnitExistence(any(AcademicUnitsIds.class));
         when(accountAuthServiceApi.createAccount(any(AccountCreationRequest.class))).thenReturn(AUTH_RESPONSE);
         when(departmentService.getById(TEST_DEPARTMENT_ID)).thenReturn(testDepartment);
         when(accountProfileRepository.save(any(AccountProfile.class))).thenReturn(testProfile);

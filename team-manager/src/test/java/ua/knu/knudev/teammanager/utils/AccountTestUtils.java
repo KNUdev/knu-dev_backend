@@ -1,9 +1,9 @@
 package ua.knu.knudev.teammanager.utils;
 
-import ua.knu.knudev.teammanager.domain.AccountProfile;
 import ua.knu.knudev.knudevcommon.utils.AcademicUnitsIds;
-import ua.knu.knudev.teammanagerapi.dto.AccountProfileDto;
 import ua.knu.knudev.knudevcommon.utils.FullName;
+import ua.knu.knudev.teammanager.domain.AccountProfile;
+import ua.knu.knudev.teammanagerapi.dto.AccountProfileDto;
 
 import java.util.UUID;
 
@@ -15,7 +15,7 @@ import static ua.knu.knudev.teammanager.utils.constants.DepartmentTestsConstants
 
 public class AccountTestUtils {
 
-    public static AccountProfile  getTestAccountProfile() {
+    public static AccountProfile getTestAccountProfile() {
         return AccountProfile.builder()
                 .id(UUID.randomUUID())
                 .email(TEST_EMAIL)
@@ -24,7 +24,7 @@ public class AccountTestUtils {
                 .middleName(PROFILE_MIDDLE_NAME)
                 .avatarFilename(TEST_FILE_NAME)
                 .department(getTestDepartment())
-                .specialty(getTestSpecialty("Computer science"))
+                .specialty(getTestSpecialty("Комп'ютерні науки", "Computer science"))
                 .build();
     }
 
