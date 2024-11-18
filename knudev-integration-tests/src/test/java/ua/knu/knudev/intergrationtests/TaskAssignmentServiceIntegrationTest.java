@@ -9,7 +9,6 @@ import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.web.multipart.MultipartFile;
 import ua.knu.knudev.intergrationtests.config.IntegrationTestsConfig;
-import ua.knu.knudev.intergrationtests.repository.SpecialtyRepository;
 import ua.knu.knudev.knudevcommon.constant.AccountTechnicalRole;
 import ua.knu.knudev.knudevcommon.constant.Expertise;
 import ua.knu.knudev.knudevcommon.utils.AcademicUnitsIds;
@@ -29,6 +28,7 @@ import ua.knu.knudev.teammanager.domain.Department;
 import ua.knu.knudev.teammanager.domain.Specialty;
 import ua.knu.knudev.teammanager.repository.AccountProfileRepository;
 import ua.knu.knudev.teammanager.repository.DepartmentRepository;
+import ua.knu.knudev.teammanager.repository.SpecialtyRepository;
 import ua.knu.knudev.teammanager.service.AccountProfileService;
 import ua.knu.knudev.teammanagerapi.exception.AccountException;
 import ua.knu.knudev.teammanagerapi.response.AccountRegistrationResponse;
@@ -99,11 +99,12 @@ public class TaskAssignmentServiceIntegrationTest {
 
     private Department createTestDepartmentWithSpecialties() {
         Department department = new Department();
-        department.setName("Test Department");
+        department.setNameInEnglish("Test Department");
+        department.setNameInUkrainian("Тестовий");
 
-        Specialty s1 = new Specialty(122.0, "Computer Science");
-        Specialty s2 = new Specialty(123.0, "Computer Engineering");
-        Specialty s3 = new Specialty(125.0, "Cybernetics");
+        Specialty s1 = new Specialty(122.0, "Computer Science", "Науки");
+        Specialty s2 = new Specialty(123.0, "Computer Engineering", "Інженерія");
+        Specialty s3 = new Specialty(125.0, "Cybernetics", "Кібернетика");
 
         department.addSpecialty(s1);
         department.addSpecialty(s2);
