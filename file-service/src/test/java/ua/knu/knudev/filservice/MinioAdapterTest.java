@@ -13,8 +13,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import ua.knu.knudev.fileservice.adapter.minio.MinioAdapter;
-import ua.knu.knudev.fileserviceapi.dto.FileUploadPayload;
-import ua.knu.knudev.fileserviceapi.dto.FolderPath;
+import ua.knu.knudev.rest.dto.FileUploadPayload;
+import ua.knu.knudev.rest.dto.FolderPath;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;

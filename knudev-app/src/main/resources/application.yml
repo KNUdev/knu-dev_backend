@@ -48,7 +48,6 @@ application:
       expiration: 1440000 #24 hours
   files:
     images:
-      profile-avatars:
         allowed-extensions:
           - jpg
           - jpeg

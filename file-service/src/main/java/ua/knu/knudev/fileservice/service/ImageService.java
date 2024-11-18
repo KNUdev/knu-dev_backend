@@ -1,27 +1,28 @@
 package ua.knu.knudev.fileservice.service;
 
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import ua.knu.knudev.fileservice.adapter.FileUploadAdapter;
-import ua.knu.knudev.fileserviceapi.api.ImageServiceApi;
-import ua.knu.knudev.fileserviceapi.folder.FileFolderProperties;
-import ua.knu.knudev.fileserviceapi.folder.ImageFolder;
-import ua.knu.knudev.fileserviceapi.subfolder.ImageSubfolder;
+import ua.knu.knudev.fileservice.config.ImageFileConfigProperties;
+import ua.knu.knudev.rest.api.ImageServiceApi;
+import ua.knu.knudev.rest.folder.FileFolderProperties;
+import ua.knu.knudev.rest.folder.ImageFolder;
+import ua.knu.knudev.rest.subfolder.ImageSubfolder;
 import ua.knu.knudev.knudevcommon.exception.FileException;
 
 import java.io.IOException;
-import java.util.Set;
 
 @Service
 public class ImageService extends FileService implements ImageServiceApi {
+    private final ImageFileConfigProperties imageFileConfigProperties;
     //todo to config
-    private static final Set<String> ALLOWED_IMAGE_EXTENSIONS = Set.of("jpg", "jpeg", "png", "webp");
-    @Value("${application.files.images.profile-avatars.maximum-size-in-kilobytes}")
-    private int MAX_IMAGE_SIZE_IN_KILOBYTES;
+//    private static final Set<String> ALLOWED_IMAGE_EXTENSIONS = Set.of("jpg", "jpeg", "png", "webp");
+//    @Value("${application.files.images.profile-avatars.maximum-size-in-kilobytes}")
+//    private int MAX_IMAGE_SIZE_IN_KILOBYTES;
 
-    public ImageService(FileUploadAdapter fileUploadAdapter) {
+    public ImageService(FileUploadAdapter fileUploadAdapter, ImageFileConfigProperties imageFileConfigProperties) {
         super(fileUploadAdapter);
+        this.imageFileConfigProperties = imageFileConfigProperties;
     }
 
     @Override
@@ -44,7 +45,7 @@ public class ImageService extends FileService implements ImageServiceApi {
     }
 
     private void checkFileValidity(MultipartFile file) {
-        checkFileExtensionAllowance(file, ALLOWED_IMAGE_EXTENSIONS);
+        checkFileExtensionAllowance(file, imageFileConfigProperties.allowedExtensions());
         checkFileSize(file);
     }
 
@@ -57,7 +58,9 @@ public class ImageService extends FileService implements ImageServiceApi {
     private void checkFileSize(MultipartFile file) {
         try {
             int fileSizeInKilobytes = file.getBytes().length / 1024;
-            if (fileSizeInKilobytes > MAX_IMAGE_SIZE_IN_KILOBYTES) {
+            final Integer MAX_SIZE_IN_KILOBYTES = imageFileConfigProperties.maximumSizeInKilobytes();
+
+            if (fileSizeInKilobytes > MAX_SIZE_IN_KILOBYTES) {
                 throw new FileException("File size is too big. Maximum allowed size is 2 megabytes");
             }
         } catch (IOException e) {
