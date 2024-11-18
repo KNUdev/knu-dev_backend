@@ -8,6 +8,8 @@ import java.util.Optional;
 
 public interface AccountProfileRepository extends JpaRepository<AccountProfile, Integer> {
     boolean existsByEmail(String email);
+
     Optional<AccountProfile> findByEmail(String email);
+
     List<AccountProfile> findAllByEmail(String email);
 }

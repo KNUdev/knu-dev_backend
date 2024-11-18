@@ -3,6 +3,7 @@ package ua.knu.knudev.teammanager.domain;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.UuidGenerator;
+import ua.knu.knudev.teammanagerapi.exception.DepartmentException;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -23,9 +24,12 @@ public class Department {
     private UUID id;
 
     @Column(nullable = false, unique = true, updatable = false)
-    private String name;
+    private String nameInEnglish;
 
-    @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
+    @Column(nullable = false, unique = true, updatable = false)
+    private String nameInUkrainian;
+
+    @ManyToMany(fetch = FetchType.LAZY, cascade = {CascadeType.MERGE, CascadeType.PERSIST})
     @JoinTable(
             name = "departments_specialties",
             schema = "team_management",
@@ -35,7 +39,12 @@ public class Department {
     private Set<Specialty> specialties = new HashSet<>();
 
     public void addSpecialty(Specialty specialty) {
-        this.specialties.add(specialty);
-        specialty.getDepartments().add(this);
+        if (specialty != null) {
+            this.specialties.add(specialty);
+            specialty.getDepartments().add(this);
+        } else {
+            throw new DepartmentException("Specialty cannot be null");
+        }
     }
+
 }

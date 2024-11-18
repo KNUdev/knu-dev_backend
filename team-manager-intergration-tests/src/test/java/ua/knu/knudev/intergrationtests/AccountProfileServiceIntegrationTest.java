@@ -66,11 +66,12 @@ public class AccountProfileServiceIntegrationTest {
     @BeforeEach
     public void setup() {
         Department d1 = new Department();
-        d1.setName("d1");
+        d1.setNameInEnglish("Physics");
+        d1.setNameInUkrainian("Фізика");
 
-        Specialty s1 = new Specialty(122.0, "Computer Science");
-        Specialty s2 = new Specialty(123.0, "Computer Engineering");
-        Specialty s3 = new Specialty(125.0, "Cybernetics");
+        Specialty s1 = new Specialty(122.0, "Computer Science", "Науки");
+        Specialty s2 = new Specialty(123.0, "Computer Engineering", "Інженерія");
+        Specialty s3 = new Specialty(125.0, "Cybernetics", "Кібернетика");
 
         d1.addSpecialty(s1);
         d1.addSpecialty(s2);

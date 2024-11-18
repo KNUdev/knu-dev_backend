@@ -45,7 +45,7 @@ public class AccountProfileService implements AccountProfileApi {
     @Transactional
     public AccountRegistrationResponse register(@Valid AccountCreationRequest request) {
         validateEmailNotExists(request.email());
-        departmentService.validateAcademicUnitByIds(request.academicUnitsIds());
+        departmentService.validateAcademicUnitExistence(request.academicUnitsIds());
 
         AuthAccountCreationResponse createdAuthAccount = accountAuthServiceApi.createAccount(request);
         String uploadFilename = uploadAvatar(request.avatarFile());
