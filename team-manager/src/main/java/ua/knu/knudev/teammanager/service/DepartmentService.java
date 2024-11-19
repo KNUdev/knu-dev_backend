@@ -2,6 +2,8 @@ package ua.knu.knudev.teammanager.service;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import ua.knu.knudev.knudevcommon.utils.AcademicUnitsIds;
@@ -18,6 +20,8 @@ import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class DepartmentService implements DepartmentApi {
@@ -32,22 +36,23 @@ public class DepartmentService implements DepartmentApi {
 
         String nameEn = request.nameInEnglish();
         String nameUk = request.nameInUkrainian();
-        Set<SpecialtyCreationDto> specialtiesDto = request.specialties();
+        Set<SpecialtyCreationDto> requestSpecialties = request.specialties();
 
         ensureDepartmentDoesNotExist(nameEn, nameUk);
 
-        List<Double> codeNames = specialtiesDto.stream()
+        List<Double> specialtiesCodenames = requestSpecialties.stream()
                 .map(SpecialtyCreationDto::codeName)
                 .collect(Collectors.toList());
-        List<Specialty> existingSpecialtiesByCodeName = specialtyRepository.findSpecialtiesByCodeNameIn(codeNames);
+
+        List<Specialty> existingSpecialtiesByCodeName = specialtyRepository.findSpecialtiesByCodeNameIn(specialtiesCodenames);
         List<Specialty> existingSpecialtiesByName = specialtyRepository.findSpecialtiesByNameInEnglishInOrNameInUkrainianIn(
-                specialtiesDto.stream().map(SpecialtyCreationDto::nameInEnglish).collect(Collectors.toSet()),
-                specialtiesDto.stream().map(SpecialtyCreationDto::nameInUkrainian).collect(Collectors.toSet())
+                requestSpecialties.stream().map(SpecialtyCreationDto::nameInEnglish).collect(Collectors.toSet()),
+                requestSpecialties.stream().map(SpecialtyCreationDto::nameInUkrainian).collect(Collectors.toSet())
         );
 
-        validateSpecialties(existingSpecialtiesByCodeName, existingSpecialtiesByName, specialtiesDto);
+        validateSpecialties(existingSpecialtiesByCodeName, existingSpecialtiesByName, requestSpecialties);
 
-        Set<Specialty> allSpecialties = mergeExistingAndNewSpecialties(existingSpecialtiesByCodeName, specialtiesDto);
+        Set<Specialty> allSpecialties = mergeExistingAndNewSpecialties(existingSpecialtiesByCodeName, requestSpecialties);
         Department department = Department.builder()
                 .nameInEnglish(nameEn)
                 .nameInUkrainian(nameUk)
@@ -58,14 +63,20 @@ public class DepartmentService implements DepartmentApi {
     }
 
     public Department getById(UUID id) {
-        return departmentRepository.findById(id).orElseThrow(() ->
-                new DepartmentException(String.format("Department with id '%s' not found.", id), HttpStatus.BAD_REQUEST)
-        );
+        if (ObjectUtils.isEmpty(id)) {
+            log.error("Cannot get department by null id");
+            throw new DepartmentException("Department id is null");
+        }
+
+        Optional<Department> optionalDepartment = departmentRepository.findById(id);
+        return optionalDepartment.orElseThrow(() -> new DepartmentException(
+                String.format("Department with id %s not found", id)
+        ));
     }
 
     public void validateAcademicUnitExistence(AcademicUnitsIds academicUnitsIds) {
         Department department = getById(academicUnitsIds.departmentId());
-        ensureSpecialtyInDepartment(department, academicUnitsIds.specialtyCodename());
+        ensureDepartmentContainsSpecialty(department, academicUnitsIds.specialtyCodename());
     }
 
     private void ensureDepartmentDoesNotExist(String nameEn, String nameUk) {
@@ -80,11 +91,12 @@ public class DepartmentService implements DepartmentApi {
         }
     }
 
-    private Set<Specialty> mergeExistingAndNewSpecialties(List<Specialty> existingSpecialties, Set<SpecialtyCreationDto> specialtiesDto) {
+    private Set<Specialty> mergeExistingAndNewSpecialties(List<Specialty> existingSpecialties,
+                                                          Set<SpecialtyCreationDto> reqSpecialties) {
         Map<Double, Specialty> existingByCodeName = existingSpecialties.stream()
                 .collect(Collectors.toMap(Specialty::getCodeName, Function.identity()));
 
-        Set<SpecialtyCreationDto> newSpecialtiesDto = specialtiesDto.stream()
+        Set<SpecialtyCreationDto> newSpecialtiesDto = reqSpecialties.stream()
                 .filter(dto -> !existingByCodeName.containsKey(dto.codeName()))
                 .collect(Collectors.toSet());
 
@@ -126,7 +138,8 @@ public class DepartmentService implements DepartmentApi {
         }
     }
 
-    private Set<SpecialtyCreationDto> identifyCodeNameMismatches(List<Specialty> existingByCodeName, Set<SpecialtyCreationDto> requestSpecialties) {
+    private Set<SpecialtyCreationDto> identifyCodeNameMismatches(List<Specialty> existingByCodeName,
+                                                                 Set<SpecialtyCreationDto> requestSpecialties) {
         Map<Double, Specialty> existingMap = existingByCodeName.stream()
                 .collect(Collectors.toMap(Specialty::getCodeName, Function.identity()));
 
@@ -140,7 +153,8 @@ public class DepartmentService implements DepartmentApi {
                 .collect(Collectors.toSet());
     }
 
-    private Set<SpecialtyCreationDto> identifyNameMismatches(List<Specialty> existingByName, Set<SpecialtyCreationDto> requestSpecialties) {
+    private Set<SpecialtyCreationDto> identifyNameMismatches(List<Specialty> existingByName,
+                                                             Set<SpecialtyCreationDto> requestSpecialties) {
         Map<String, Set<Double>> codeNamesByEnglishName = existingByName.stream()
                 .collect(Collectors.groupingBy(
                         Specialty::getNameInEnglish,
@@ -158,25 +172,31 @@ public class DepartmentService implements DepartmentApi {
                 .collect(Collectors.toSet());
     }
 
-    private boolean hasNameMismatch(SpecialtyCreationDto dto, Map<String, Set<Double>> codeNamesEn, Map<String, Set<Double>> codeNamesUk) {
-        boolean mismatchEn = codeNamesEn.containsKey(dto.nameInEnglish()) &&
-                !codeNamesEn.get(dto.nameInEnglish()).contains(dto.codeName());
-        boolean mismatchUk = codeNamesUk.containsKey(dto.nameInUkrainian()) &&
-                !codeNamesUk.get(dto.nameInUkrainian()).contains(dto.codeName());
-        return mismatchEn || mismatchUk;
-    }
+    private void ensureDepartmentContainsSpecialty(Department department, Double specialtyCodeName) {
+        if (ObjectUtils.isEmpty(specialtyCodeName)) {
+            throw new DepartmentException("Specialty code-name cannot be empty");
+        }
 
-    private void ensureSpecialtyInDepartment(Department department, Double specialtyCodeName) {
         boolean containsSpecialty = department.getSpecialties().stream()
                 .anyMatch(specialty -> specialty.getCodeName().equals(specialtyCodeName));
-
         if (!containsSpecialty) {
             throw new DepartmentException(
                     String.format("Department '%s' does not contain specialty with code name '%s'.",
-                            department.getId(), specialtyCodeName),
-                    HttpStatus.BAD_REQUEST
-            );
+                            department.getId(), specialtyCodeName), HttpStatus.BAD_REQUEST);
         }
+    }
+
+    private boolean hasNameMismatch(SpecialtyCreationDto reqSpecialty,
+                                    Map<String, Set<Double>> codeNamesEn,
+                                    Map<String, Set<Double>> codeNamesUk) {
+        boolean mismatchEn = codeNamesEn.containsKey(reqSpecialty.nameInEnglish()) &&
+                !codeNamesEn.get(reqSpecialty.nameInEnglish())
+                        .contains(reqSpecialty.codeName());
+        boolean mismatchUk = codeNamesUk.containsKey(reqSpecialty.nameInUkrainian()) &&
+                !codeNamesUk.get(reqSpecialty.nameInUkrainian())
+                        .contains(reqSpecialty.codeName());
+
+        return mismatchEn || mismatchUk;
     }
 
     private void validateDepartmentCreationRequest(Set<SpecialtyCreationDto> specialtiesDto) {
@@ -199,7 +219,9 @@ public class DepartmentService implements DepartmentApi {
         }
     }
 
-    private boolean areFieldsUnique(Set<SpecialtyCreationDto> specialtiesDto, Function<SpecialtyCreationDto, ?> extractor, long expectedSize) {
+    private boolean areFieldsUnique(Set<SpecialtyCreationDto> specialtiesDto,
+                                    Function<SpecialtyCreationDto, ?> extractor,
+                                    long expectedSize) {
         return specialtiesDto.stream()
                 .map(extractor)
                 .distinct()

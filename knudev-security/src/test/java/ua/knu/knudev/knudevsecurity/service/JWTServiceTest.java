@@ -5,9 +5,10 @@ import io.jsonwebtoken.JwtException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import ua.knu.knudev.knudevcommon.constant.AccountAdministrativeRole;
+import ua.knu.knudev.knudevcommon.constant.AccountTechnicalRole;
 import ua.knu.knudev.knudevsecurity.domain.AccountAuth;
 import ua.knu.knudev.knudevsecurity.utils.JWTSigningKeyProvider;
-import ua.knu.knudev.knudevsecurityapi.constant.AccountRole;
 import ua.knu.knudev.knudevsecurityapi.dto.Tokens;
 
 import java.util.Set;
@@ -16,6 +17,8 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class JWTServiceTest {
 
+    private static final AccountTechnicalRole TEST_TECHNICAL_ROLE = AccountTechnicalRole.DEVELOPER;
+    private static final AccountAdministrativeRole TEST_ADMINISTRATIVE_ROLE = AccountAdministrativeRole.HEAD_MANAGER;
     private static final String TEST_EMAIL = "testEmail@knu.ua";
     private static final Integer accessTokenExpirationInMillis = 600000;
     private static final Integer refreshTokenExpirationInMillis = 1200000;
@@ -33,7 +36,8 @@ public class JWTServiceTest {
 
         account = AccountAuth.builder()
                 .email(TEST_EMAIL)
-                .roles(Set.of(AccountRole.INTERN))
+                .technicalRole(TEST_TECHNICAL_ROLE)
+                .administrativeRole(TEST_ADMINISTRATIVE_ROLE)
                 .build();
     }
 
@@ -64,11 +68,11 @@ public class JWTServiceTest {
 
     @Test
     @DisplayName("Should extract account roles from access JWT token")
-    public void should_ExtractAccountRole_When_GivenValidTokens() {
+    public void should_ExtractAccountRoles_When_GivenValidTokens() {
         Tokens tokens = jwtService.generateTokens(account);
 
-        Set<String> rolesFromAccessToken = jwtService.extractAccountRole(tokens.accessToken());
-        assertTrue(rolesFromAccessToken.contains("INTERN"), "Access token should contain the 'INTERN' roles");
+        Set<String> rolesFromAccessToken = jwtService.extractAccountRoles(tokens.accessToken());
+        assertTrue(rolesFromAccessToken.contains("DEVELOPER"), "Access token should contain the 'INTERN' roles");
     }
 
     @Test
@@ -126,7 +130,8 @@ public class JWTServiceTest {
 
         AccountAuth differentUser = AccountAuth.builder()
                 .email("Another" + TEST_EMAIL)
-                .roles(Set.of(AccountRole.DEVELOPER, AccountRole.HEAD_MANAGER))
+                .technicalRole(AccountTechnicalRole.TECHLEAD)
+                .administrativeRole(AccountAdministrativeRole.SITE_MANAGER)
                 .build();
 
         assertFalse(jwtService.isTokenValid(tokens.accessToken(), differentUser),

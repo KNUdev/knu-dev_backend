@@ -6,13 +6,14 @@ import org.hibernate.annotations.UuidGenerator;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
-import ua.knu.knudev.knudevsecurityapi.constant.AccountRole;
+import ua.knu.knudev.knudevcommon.constant.AccountRole;
+import ua.knu.knudev.knudevcommon.constant.AccountAdministrativeRole;
+import ua.knu.knudev.knudevcommon.constant.AccountTechnicalRole;
 
 import java.io.Serializable;
-import java.util.Collection;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Table(schema = "security_management", name = "auth_account")
 @Entity
@@ -34,15 +35,13 @@ public class AccountAuth implements Serializable, UserDetails {
     @Column(nullable = false)
     private String password;
 
-    @ElementCollection(fetch = FetchType.LAZY)
-    @CollectionTable(
-            schema = "security_management",
-            name = "auth_account_role",
-            joinColumns = @JoinColumn(name = "auth_account_id")
-    )
     @Enumerated(EnumType.STRING)
-    @Column(name = "role", nullable = false)
-    private Set<AccountRole> roles;
+    @Column(name = "technical_role", nullable = false)
+    private AccountTechnicalRole technicalRole;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "administrative_role")
+    private AccountAdministrativeRole administrativeRole;
 
     @Column(name = "is_enabled", nullable = false)
     private boolean enabled;
@@ -52,7 +51,8 @@ public class AccountAuth implements Serializable, UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return roles.stream()
+        return Stream.of(technicalRole, administrativeRole)
+                .filter(Objects::nonNull)
                 .map(role -> new SimpleGrantedAuthority(role.name()))
                 .collect(Collectors.toSet());
     }
@@ -75,5 +75,9 @@ public class AccountAuth implements Serializable, UserDetails {
     @Override
     public boolean isCredentialsNonExpired() {
         return true;
+    }
+
+    public Set<AccountRole> getRoles() {
+        return new HashSet<>(Set.of(technicalRole, administrativeRole));
     }
 }

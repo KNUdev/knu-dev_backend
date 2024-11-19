@@ -22,6 +22,10 @@
             <groupId>ua.knu</groupId>
             <artifactId>file-service-api</artifactId>
         </dependency>
+        <dependency>
+            <groupId>ua.knu</groupId>
+            <artifactId>knudev-common</artifactId>
+        </dependency>
     </dependencies>
 
 </project>

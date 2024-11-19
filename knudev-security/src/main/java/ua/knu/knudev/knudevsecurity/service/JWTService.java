@@ -7,9 +7,9 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
+import ua.knu.knudev.knudevcommon.constant.AccountRole;
 import ua.knu.knudev.knudevsecurity.domain.AccountAuth;
 import ua.knu.knudev.knudevsecurity.utils.JWTSigningKeyProvider;
-import ua.knu.knudev.knudevsecurityapi.constant.AccountRole;
 import ua.knu.knudev.knudevsecurityapi.dto.Tokens;
 
 import java.util.*;
@@ -48,7 +48,7 @@ public class JWTService {
         return claimsResolver.apply(claims);
     }
 
-    public Set<String> extractAccountRole(String token) {
+    public Set<String> extractAccountRoles(String token) {
         List<?> roles = parseClaims(token).get("roles", List.class);
 
         return roles.stream()
@@ -112,7 +112,11 @@ public class JWTService {
     private Map<String, Object> buildExtraClaims(boolean isAccessToken, Set<AccountRole> roles) {
         Map<String, Object> extraClaimsMap = new HashMap<>();
         extraClaimsMap.put("isacct", isAccessToken);
-        extraClaimsMap.put("roles", roles.stream().map(Enum::name).collect(Collectors.toSet()));
+
+        Set<String> accountRoles = roles.stream()
+                .map(AccountRole::name)
+                .collect(Collectors.toSet());
+        extraClaimsMap.put("roles", accountRoles);
         return extraClaimsMap;
     }
 

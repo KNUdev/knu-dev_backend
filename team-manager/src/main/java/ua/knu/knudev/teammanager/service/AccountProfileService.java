@@ -9,9 +9,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.multipart.MultipartFile;
-import ua.knu.knudev.fileserviceapi.api.ImageServiceApi;
-import ua.knu.knudev.fileserviceapi.exception.FileException;
-import ua.knu.knudev.fileserviceapi.subfolder.ImageSubfolder;
+import ua.knu.knudev.rest.api.ImageServiceApi;
+import ua.knu.knudev.knudevcommon.exception.FileException;
+import ua.knu.knudev.rest.subfolder.ImageSubfolder;
 import ua.knu.knudev.knudevcommon.utils.AcademicUnitsIds;
 import ua.knu.knudev.knudevcommon.utils.FullName;
 import ua.knu.knudev.knudevsecurityapi.api.AccountAuthServiceApi;
@@ -20,6 +20,7 @@ import ua.knu.knudev.knudevsecurityapi.response.AuthAccountCreationResponse;
 import ua.knu.knudev.teammanager.domain.AccountProfile;
 import ua.knu.knudev.teammanager.domain.Department;
 import ua.knu.knudev.teammanager.domain.Specialty;
+import ua.knu.knudev.teammanager.mapper.AccountProfileMapper;
 import ua.knu.knudev.teammanager.repository.AccountProfileRepository;
 import ua.knu.knudev.teammanagerapi.api.AccountProfileApi;
 import ua.knu.knudev.teammanagerapi.dto.AccountProfileDto;
@@ -28,7 +29,7 @@ import ua.knu.knudev.teammanagerapi.response.AccountRegistrationResponse;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
-import java.util.HashSet;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -40,6 +41,7 @@ public class AccountProfileService implements AccountProfileApi {
     private final AccountAuthServiceApi accountAuthServiceApi;
     private final ImageServiceApi imageServiceApi;
     private final DepartmentService departmentService;
+    private final AccountProfileMapper accountProfileMapper;
 
     @Override
     @Transactional
@@ -56,6 +58,39 @@ public class AccountProfileService implements AccountProfileApi {
         return buildRegistrationResponse(savedAccount, request.email(), createdAuthAccount);
     }
 
+    @Override
+    public AccountProfileDto getById(UUID id) {
+        AccountProfile account = accountProfileRepository.findById(id)
+                .orElseThrow(() -> new AccountException(
+                        String.format("Account with id %s does not exist", id)
+                ));
+        return accountProfileMapper.toDto(account);
+    }
+
+    @Override
+    public AccountProfileDto getByEmail(String email) {
+        AccountProfile account = accountProfileRepository.findByEmail(email)
+                .orElseThrow(() -> new AccountException(
+                        String.format("Account with email %s does not exist", email)
+                ));
+        return accountProfileMapper.toDto(account);
+    }
+
+    @Override
+    public boolean existsByEmail(String email) {
+        return accountProfileRepository.existsByEmail(email);
+    }
+
+    @Override
+    public void assertEmailExists(String email) throws AccountException {
+        boolean emailExists = existsByEmail(email);
+        if(emailExists) {
+            throw new AccountException(
+                    String.format("Account with email %s already exists", email)
+            );
+        }
+    }
+
     private String uploadAvatar(MultipartFile file) {
         try {
             boolean fileIsPresent = ObjectUtils.isNotEmpty(file) && ArrayUtils.getLength(file.getBytes()) != 0;
@@ -69,12 +104,7 @@ public class AccountProfileService implements AccountProfileApi {
     }
 
     private void validateEmailNotExists(String email) {
-        boolean accountProfileExists = accountProfileRepository.existsByEmail(email);
-        if (accountProfileExists) {
-            throw new AccountException(
-                    String.format("Account with email %s already exists", email)
-            );
-        }
+        assertEmailExists(email);
 
         boolean accountAuthExists = accountAuthServiceApi.existsByEmail(email);
         if (accountAuthExists) {
@@ -101,6 +131,7 @@ public class AccountProfileService implements AccountProfileApi {
                 ));
 
         return AccountProfile.builder()
+                .id(authAccount.id())
                 .email(authAccount.email())
                 .firstName(reqFullName.firstName())
                 .lastName(reqFullName.lastName())
@@ -110,7 +141,7 @@ public class AccountProfileService implements AccountProfileApi {
                 .specialty(specialty)
                 .registrationDate(LocalDateTime.now())
                 .expertise(request.expertise())
-                .roles(new HashSet<>(authAccount.roles()))
+                .technicalRole(authAccount.technicalRole())
                 .build();
     }
 
@@ -126,7 +157,7 @@ public class AccountProfileService implements AccountProfileApi {
 
     private AccountProfileDto buildAccountDto(AccountProfile savedAccount, AuthAccountCreationResponse authAccount) {
         return AccountProfileDto.builder()
-                .roles(authAccount.roles())
+                .technicalRole(authAccount.technicalRole())
                 .fullName(FullName.builder()
                         .firstName(savedAccount.getFirstName())
                         .lastName(savedAccount.getLastName())

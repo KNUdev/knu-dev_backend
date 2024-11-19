@@ -6,17 +6,24 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.lang.NonNull;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
+import ua.knu.knudev.knudevcommon.constant.AccountAdministrativeRole;
+import ua.knu.knudev.knudevcommon.constant.AccountTechnicalRole;
 import ua.knu.knudev.knudevsecurity.domain.AccountAuth;
 import ua.knu.knudev.knudevsecurity.service.JWTService;
-import ua.knu.knudev.knudevsecurityapi.constant.AccountRole;
+import ua.knu.knudev.knudevsecurity.utils.RolesUtils;
+import ua.knu.knudev.knudevsecurityapi.exception.AccountRoleException;
 
 import java.io.IOException;
+import java.util.Objects;
+import java.util.Set;
 
 import static ua.knu.knudev.knudevsecurity.security.config.UrlRegistry.AUTH_EXCLUDED_URLS;
 import static ua.knu.knudev.knudevsecurity.security.config.UrlRegistry.AUTH_URL;
@@ -54,12 +61,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 );
                 return;
             }
-
-            //todo maybe this wont work
-            AccountAuth userDetails = AccountAuth.builder()
-                    .email(accountUsername)
-                    .roles(AccountRole.buildFromSet(jwtService.extractAccountRole(jwt)))
-                    .build();
+            UserDetails userDetails = buildUserDetails(accountUsername, jwt);
 
             if (jwtService.isTokenValid(jwt, userDetails)) {
                 setAuthentication(userDetails, request);
@@ -68,7 +70,32 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         filterChain.doFilter(request, response);
     }
 
-    private void setAuthentication(AccountAuth userDetails, HttpServletRequest request) {
+    private UserDetails buildUserDetails(String accountUsername, String jwt) {
+        Set<String> roles = jwtService.extractAccountRoles(jwt);
+
+        AccountTechnicalRole technicalRole = roles.stream()
+                .map(RolesUtils::getTechnicalRoleFromString)
+                .filter(Objects::nonNull)
+                .findFirst()
+                .orElseThrow(() -> new AccountRoleException(
+                        "No technical role found for user: " + accountUsername,
+                        HttpStatus.BAD_REQUEST
+                ));
+
+        AccountAdministrativeRole administrativeRole = roles.stream()
+                .map(RolesUtils::getAdministrativeRoleFromString)
+                .filter(Objects::nonNull)
+                .findFirst()
+                .orElse(null);
+
+        return AccountAuth.builder()
+                .email(accountUsername)
+                .technicalRole(technicalRole)
+                .administrativeRole(administrativeRole)
+                .build();
+    }
+
+    private void setAuthentication(UserDetails userDetails, HttpServletRequest request) {
         UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
                 userDetails, null, userDetails.getAuthorities()
         );
@@ -78,7 +105,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         SecurityContextHolder.getContext().setAuthentication(authToken);
     }
 
-    private boolean isPublicUrlRequest(HttpServletRequest request)  {
+    private boolean isPublicUrlRequest(HttpServletRequest request) {
         String servletPath = request.getServletPath();
         return servletPath.contains(AUTH_URL) && !AUTH_EXCLUDED_URLS.contains(servletPath);
     }

@@ -137,12 +137,12 @@ databaseChangeLog:
             columns:
               - column:
                   name: id
-                  type: integer
-                  autoIncrement: true
+                  type: uuid
                   constraints:
+                    nullable: false
+                    unique: true
                     primaryKey: true
                     primaryKeyName: pk_profile_account
-                    nullable: false
               - column:
                   name: first_name
                   type: varchar(75)
@@ -172,6 +172,11 @@ databaseChangeLog:
               - column:
                   name: expertise
                   type: varchar(30)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: technical_role
+                  type: varchar(20)
                   constraints:
                     nullable: false
               - column:
@@ -221,39 +226,3 @@ databaseChangeLog:
             columns:
               - column:
                   name: specialty_code_name
-
-  - changeSet:
-      id: create_profile_account_roles_table
-      author: Vladyslav Shtaiier
-      changes:
-        - createTable:
-            schemaName: team_management
-            tableName: profile_account_role
-            columns:
-              - column:
-                  name: profile_account_id
-                  type: integer
-                  constraints:
-                    nullable: false
-              - column:
-                  name: role
-                  type: varchar(50)
-                  constraints:
-                    nullable: false
-        - addPrimaryKey:
-            tableName: profile_account_role
-            schemaName: team_management
-            columnNames: profile_account_id, role
-            constraintName: pk_profile_account_roles
-        - addForeignKeyConstraint:
-            referencedTableSchemaName: team_management
-            baseTableSchemaName: team_management
-            baseTableName: profile_account_role
-            baseColumnNames: profile_account_id
-            referencedTableName: profile_account
-            referencedColumnNames: id
-            constraintName: fk_profile_account_id
-            onDelete: cascade
-
-
-

@@ -114,7 +114,7 @@ public class JwtAuthenticationFilterTest {
 
         when(jwtService.extractUsername(TEST_JWT_TOKEN)).thenReturn(TEST_USERNAME);
         when(jwtService.isAccessToken(TEST_JWT_TOKEN)).thenReturn(true);
-        when(jwtService.extractAccountRole(TEST_JWT_TOKEN)).thenReturn(Set.of("DEVELOPER"));
+        when(jwtService.extractAccountRoles(TEST_JWT_TOKEN)).thenReturn(Set.of("DEVELOPER"));
         when(jwtService.isTokenValid(eq(TEST_JWT_TOKEN), any())).thenReturn(true);
 
         SecurityContext securityContext = mockSecurityContext();
@@ -139,6 +139,7 @@ public class JwtAuthenticationFilterTest {
         when(jwtService.extractUsername(TEST_JWT_TOKEN)).thenReturn(TEST_USERNAME);
         when(jwtService.isAccessToken(TEST_JWT_TOKEN)).thenReturn(true);
         when(jwtService.isTokenValid(eq(TEST_JWT_TOKEN), any())).thenReturn(false);
+        when(jwtService.extractAccountRoles(TEST_JWT_TOKEN)).thenReturn(Set.of("DEVELOPER"));
 
         SecurityContext securityContext = mockSecurityContext();
         when(securityContext.getAuthentication()).thenReturn(null);

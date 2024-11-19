@@ -11,8 +11,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.web.multipart.MultipartFile;
-import ua.knu.knudev.fileserviceapi.api.ImageServiceApi;
-import ua.knu.knudev.fileserviceapi.subfolder.ImageSubfolder;
+import ua.knu.knudev.rest.api.ImageServiceApi;
+import ua.knu.knudev.rest.subfolder.ImageSubfolder;
 import ua.knu.knudev.knudevcommon.utils.AcademicUnitsIds;
 import ua.knu.knudev.knudevcommon.utils.FullName;
 import ua.knu.knudev.knudevsecurityapi.api.AccountAuthServiceApi;
@@ -47,7 +47,7 @@ class AccountProfileServiceTest {
 
     private static final AuthAccountCreationResponse AUTH_RESPONSE = AuthAccountCreationResponse.builder()
             .email(TEST_EMAIL)
-            .roles(TEST_ROLES)
+            .technicalRole(TEST_TECHNICAL_ROLE)
             .build();
 
     private static final Department testDepartment = getTestDepartment();
