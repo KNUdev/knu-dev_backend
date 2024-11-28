@@ -1,6 +1,9 @@
 server:
   port: 5000
 spring:
+  freemarker:
+    template-loader-path: "classpath:/templates"
+    suffix: ".ftl"
   servlet:
     multipart:
       max-file-size: 10MB

@@ -13,7 +13,7 @@ public class TaskController {
 
     private final TaskAPI taskAPI;
 
-    @GetMapping
+    @GetMapping("/gdjghdsjg")
     public TaskDto getTaskById(@RequestParam String taskId) {
         return taskAPI.getById(taskId);
     }
