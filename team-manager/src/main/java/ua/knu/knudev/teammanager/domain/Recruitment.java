@@ -6,6 +6,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import lombok.*;
 import ua.knu.knudev.knudevcommon.constant.RecruitmentStatus;
+import ua.knu.knudev.knudevcommon.constant.RecruitmentType;
 
 import java.time.LocalDateTime;
 
@@ -24,6 +25,9 @@ public class Recruitment {
 
     @Column(nullable = false)
     private String recruitmentName;
+
+    @Column(nullable = false)
+    private RecruitmentType recruitmentType;
 
     @Column(updatable = false, nullable = false)
     private LocalDateTime recruitmentStartDateTime;

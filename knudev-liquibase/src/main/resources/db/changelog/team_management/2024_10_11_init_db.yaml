@@ -248,6 +248,11 @@ databaseChangeLog:
                   constraints:
                     nullable: false
               - column:
+                  name: recruitment_type
+                  type: varchar(15)
+                  constraints:
+                    nullable: false
+              - column:
                   name: recruitment_start_date_time
                   type: datetime
                   constraints:
