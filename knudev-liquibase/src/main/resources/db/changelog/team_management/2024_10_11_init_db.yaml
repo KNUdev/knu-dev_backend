@@ -226,3 +226,43 @@ databaseChangeLog:
             columns:
               - column:
                   name: specialty_code_name
+
+  - changeSet:
+      id: create_recruitment_table
+      author: DenysLeonenko
+      changes:
+        - createTable:
+            schemaName: team_management
+            tableName: recruitment
+            columns:
+              - column:
+                  name: recruitment_number
+                  type: int
+                  autoIncrement: true
+                  constraints:
+                    nullable: false
+                    unique: true
+              - column:
+                  name: recruitment_name
+                  type: varchar(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: recruitment_start_date_time
+                  type: datetime
+                  constraints:
+                    nullable: false
+              - column:
+                  name: recruitment_end_date_time
+                  type: datetime
+                  constraints:
+                    nullable: false
+              - column:
+                  name: recruitment_status
+                  type: varchar(25)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: recruited_people_number
+                  type: int
+                  defaultOnNull: true
