@@ -32,7 +32,7 @@ public class Recruitment {
     @Column(updatable = false, nullable = false)
     private LocalDateTime recruitmentStartDateTime;
 
-    @Column(updatable = false, nullable = false)
+    @Column(updatable = false)
     private LocalDateTime recruitmentEndDateTime;
 
     @Column(nullable = false)

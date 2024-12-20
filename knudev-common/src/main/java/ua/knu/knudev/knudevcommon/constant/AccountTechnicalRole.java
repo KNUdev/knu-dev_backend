@@ -6,6 +6,8 @@ import lombok.RequiredArgsConstructor;
 public enum AccountTechnicalRole implements AccountRole {
     INTERN("Intern"),
     DEVELOPER("Developer"),
+    PREMASTER("Premaster"),
+    MASTER("Master"),
     TECHLEAD("Technical Lead");
 
     private final String displayName;

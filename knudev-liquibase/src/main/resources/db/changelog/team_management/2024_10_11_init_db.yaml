@@ -255,13 +255,13 @@ databaseChangeLog:
               - column:
                   name: recruitment_start_date_time
                   type: datetime
+                  valueComputed: CURRENT_TIMESTAMP
                   constraints:
                     nullable: false
               - column:
                   name: recruitment_end_date_time
                   type: datetime
-                  constraints:
-                    nullable: false
+                  defaultOnNull: true
               - column:
                   name: recruitment_status
                   type: varchar(25)
