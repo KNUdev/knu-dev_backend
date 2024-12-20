@@ -1,8 +1,8 @@
 package ua.knu.knudev.teammanagerapi.dto;
 
 import lombok.Builder;
+import ua.knu.knudev.knudevcommon.constant.Expertise;
 import ua.knu.knudev.knudevcommon.constant.RecruitmentStatus;
-import ua.knu.knudev.knudevcommon.constant.RecruitmentType;
 
 import java.time.LocalDateTime;
 
@@ -10,7 +10,7 @@ import java.time.LocalDateTime;
 public record RecruitmentDto(
         Integer recruitmentNumber,
         String recruitmentName,
-        RecruitmentType recruitmentType,
+        Expertise expertise,
         LocalDateTime recruitmentStartDateTime,
         LocalDateTime recruitmentEndDateTime,
         RecruitmentStatus recruitmentStatus,

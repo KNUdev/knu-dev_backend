@@ -3,13 +3,13 @@ package ua.knu.knudev.teammanager.service;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
+import ua.knu.knudev.knudevcommon.constant.Expertise;
 import ua.knu.knudev.knudevcommon.constant.RecruitmentStatus;
-import ua.knu.knudev.knudevcommon.constant.RecruitmentType;
 import ua.knu.knudev.teammanager.domain.Recruitment;
 import ua.knu.knudev.teammanager.repository.RecruitmentRepository;
 import ua.knu.knudev.teammanagerapi.api.QualificationImprovementApi;
 import ua.knu.knudev.teammanagerapi.dto.RecruitmentCloseRequestDto;
-import ua.knu.knudev.teammanagerapi.dto.RecruitmentCreationRequestDto;
+import ua.knu.knudev.teammanagerapi.dto.RecruitmentOpenRequestDto;
 
 import java.time.LocalDateTime;
 
@@ -20,15 +20,15 @@ public class QualificationImprovementService implements QualificationImprovement
     private final RecruitmentRepository recruitmentRepository;
 
     @Override
-    public void initializeRecruitment(RecruitmentCreationRequestDto recruitmentCreationRequestDto) {
-        String recruitmentName = recruitmentCreationRequestDto.getRecruitmentName();
-        RecruitmentType recruitmentType = recruitmentCreationRequestDto.getRecruitmentType();
+    public void initializeRecruitment(RecruitmentOpenRequestDto recruitmentOpenRequestDto) {
+        String recruitmentName = recruitmentOpenRequestDto.getRecruitmentName();
+        Expertise expertise = recruitmentOpenRequestDto.getExpertise();
 
-        validateRecruitmentData(recruitmentName, recruitmentType);
+        validateRecruitmentData(recruitmentName, expertise);
 
         Recruitment recruitment = Recruitment.builder()
                 .recruitmentName(recruitmentName)
-                .recruitmentType(recruitmentType)
+                .expertise(expertise)
                 .recruitmentStatus(RecruitmentStatus.ACTIVE_RECRUITMENT)
                 .build();
 
@@ -53,11 +53,11 @@ public class QualificationImprovementService implements QualificationImprovement
         recruitmentRepository.save(recruitment);
     }
 
-    private void validateRecruitmentData(String recruitmentName, RecruitmentType recruitmentType) {
+    private void validateRecruitmentData(String recruitmentName, Expertise expertise) {
         if (StringUtils.isBlank(recruitmentName)) {
             throw new IllegalArgumentException("Recruitment name cannot be empty or null!");
         }
-        if (recruitmentType == null) {
+        if (expertise == null) {
             throw new IllegalArgumentException("Recruitment type cannot be null!");
         }
     }

@@ -39,6 +39,8 @@ public class TaskUploadService implements TaskUploadAPI {
         return switch (role) {
             case INTERN -> PdfSubfolder.INTERN_ROLE_TASKS;
             case DEVELOPER -> PdfSubfolder.DEVELOPER_ROLE_TASKS;
+            case PREMASTER -> PdfSubfolder.PREMASTER_ROLE_TASKS;
+            case MASTER -> PdfSubfolder.MASTER_ROLE_TASKS;
             case TECHLEAD -> PdfSubfolder.TECHLEAD_ROLE_TASKS;
         };
     }

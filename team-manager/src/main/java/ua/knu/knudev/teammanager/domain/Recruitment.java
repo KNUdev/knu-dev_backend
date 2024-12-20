@@ -5,8 +5,8 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import lombok.*;
+import ua.knu.knudev.knudevcommon.constant.Expertise;
 import ua.knu.knudev.knudevcommon.constant.RecruitmentStatus;
-import ua.knu.knudev.knudevcommon.constant.RecruitmentType;
 
 import java.time.LocalDateTime;
 
@@ -27,7 +27,7 @@ public class Recruitment {
     private String recruitmentName;
 
     @Column(nullable = false)
-    private RecruitmentType recruitmentType;
+    private Expertise expertise;
 
     @Column(updatable = false, nullable = false)
     private LocalDateTime recruitmentStartDateTime;
