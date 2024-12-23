@@ -5,11 +5,11 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import ua.knu.knudev.fileservice.adapter.FileUploadAdapter;
-import ua.knu.knudev.rest.dto.FileUploadPayload;
-import ua.knu.knudev.rest.dto.FolderPath;
+import ua.knu.knudev.fileserviceapi.dto.FileUploadPayload;
+import ua.knu.knudev.fileserviceapi.dto.FolderPath;
 import ua.knu.knudev.knudevcommon.exception.FileException;
-import ua.knu.knudev.rest.folder.FileFolderProperties;
-import ua.knu.knudev.rest.subfolder.FileSubfolder;
+import ua.knu.knudev.fileserviceapi.folder.FileFolderProperties;
+import ua.knu.knudev.fileserviceapi.subfolder.FileSubfolder;
 
 import java.io.IOException;
 import java.io.InputStream;
