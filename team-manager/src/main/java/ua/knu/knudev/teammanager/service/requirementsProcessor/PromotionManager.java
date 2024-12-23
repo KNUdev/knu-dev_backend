@@ -14,6 +14,7 @@ public class PromotionManager implements PromotionManagerApi {
     private final PromotionStrategy promotionStrategy;
 
     @Override
+//    TODO also we need to create service where we will compute requirements for different developers
     public boolean isReadyToPromotion(AccountProfileDto accountProfileDto) {
         AccountTechnicalRole accountTechnicalRole = accountProfileDto.technicalRole();
         PromotionRequirements requirements = createPromotionRequirements(accountTechnicalRole);
