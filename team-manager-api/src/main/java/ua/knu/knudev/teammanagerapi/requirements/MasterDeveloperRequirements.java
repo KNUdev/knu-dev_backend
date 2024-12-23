@@ -5,7 +5,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class MasterDeveloperRequirements {
+public class MasterDeveloperRequirements implements PromotionRequirements{
 
     private Integer preMasterProjectsCount;
     private Double techLeadScore;

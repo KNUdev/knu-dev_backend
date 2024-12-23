@@ -52,4 +52,8 @@ public class AccountProfile {
     @ManyToOne
     @JoinColumn(name = "specialty_code_name", referencedColumnName = "code_name", nullable = false)
     private Specialty specialty;
+
+    @ManyToOne
+    @JoinColumn(name = "joined_users", nullable = false)
+    private RecruitmentAnalytics recruitmentAnalytics;
 }
