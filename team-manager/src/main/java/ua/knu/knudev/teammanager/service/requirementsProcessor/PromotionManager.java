@@ -14,7 +14,8 @@ public class PromotionManager implements PromotionManagerApi {
     private final PromotionStrategy promotionStrategy;
 
     @Override
-//    TODO also we need to create service where we will compute requirements for different developers
+//    TODO also we need to create service where we will compute requirements for different developers,
+//     BECAUSE NOW WE ONLY HAVE LOGIC WITHOUT NEEDABLE DATA IN REQUIREMENTS
     public boolean isReadyToPromotion(AccountProfileDto accountProfileDto) {
         AccountTechnicalRole accountTechnicalRole = accountProfileDto.technicalRole();
         PromotionRequirements requirements = createPromotionRequirements(accountTechnicalRole);
@@ -22,6 +23,7 @@ public class PromotionManager implements PromotionManagerApi {
         return specification.isSatisfiedBy(requirements);
     }
 
+//    TODO IF WE HAVE POSSIBILITY TO TAKE ALL DATA FROM ACCOUNT WE CAN PUT THAT DATA HERE AS CONSTRUCTOR PARAMS
     private PromotionRequirements createPromotionRequirements(AccountTechnicalRole technicalRole) {
         return switch (technicalRole) {
             case INTERN -> new DeveloperRequirements();
