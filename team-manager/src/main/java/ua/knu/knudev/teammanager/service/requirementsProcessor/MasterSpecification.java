@@ -1,6 +1,6 @@
 package ua.knu.knudev.teammanager.service.requirementsProcessor;
 
-import ua.knu.knudev.teammanager.requirements.MasterDeveloperRequirements;
+import ua.knu.knudev.teammanagerapi.requirements.MasterDeveloperRequirements;
 
 public class MasterSpecification implements Specification<MasterDeveloperRequirements> {
 

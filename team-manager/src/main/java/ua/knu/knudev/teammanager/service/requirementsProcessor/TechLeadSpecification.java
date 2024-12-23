@@ -1,6 +1,6 @@
 package ua.knu.knudev.teammanager.service.requirementsProcessor;
 
-import ua.knu.knudev.teammanager.requirements.TechLeadRequirements;
+import ua.knu.knudev.teammanagerapi.requirements.TechLeadRequirements;
 
 public class TechLeadSpecification implements Specification<TechLeadRequirements> {
 

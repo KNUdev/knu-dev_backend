@@ -1,4 +1,4 @@
-package ua.knu.knudev.teammanager.requirements;
+package ua.knu.knudev.teammanagerapi.requirements;
 
 import lombok.Getter;
 import lombok.Setter;

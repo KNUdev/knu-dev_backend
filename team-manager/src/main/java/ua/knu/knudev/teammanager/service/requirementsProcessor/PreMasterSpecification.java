@@ -1,6 +1,6 @@
 package ua.knu.knudev.teammanager.service.requirementsProcessor;
 
-import ua.knu.knudev.teammanager.requirements.PreMasterDeveloperRequirements;
+import ua.knu.knudev.teammanagerapi.requirements.PreMasterDeveloperRequirements;
 
 public class PreMasterSpecification implements Specification<PreMasterDeveloperRequirements>{
 
