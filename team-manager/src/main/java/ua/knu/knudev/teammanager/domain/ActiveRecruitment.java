@@ -28,4 +28,6 @@ public class ActiveRecruitment {
     @Embedded
     private RecruitmentAutoCloseConditions recruitmentAutoCloseConditions;
 
+    private Integer currentRecruitedCount;
+
 }

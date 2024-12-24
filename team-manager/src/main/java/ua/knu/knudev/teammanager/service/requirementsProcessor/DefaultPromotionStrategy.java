@@ -1,12 +1,12 @@
 package ua.knu.knudev.teammanager.service.requirementsProcessor;
 
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 import ua.knu.knudev.knudevcommon.constant.AccountTechnicalRole;
 import ua.knu.knudev.teammanagerapi.requirements.PromotionRequirements;
 
 import java.util.Map;
 
-@Service
+@Component
 public class DefaultPromotionStrategy implements PromotionStrategy {
 
     private final Map<AccountTechnicalRole, Specification<? extends PromotionRequirements>> promotionMap;

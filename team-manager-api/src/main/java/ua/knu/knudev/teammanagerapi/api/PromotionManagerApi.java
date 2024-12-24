@@ -4,5 +4,5 @@ import ua.knu.knudev.teammanagerapi.dto.AccountProfileDto;
 
 public interface PromotionManagerApi {
 
-    boolean isReadyToPromotion(AccountProfileDto accountProfileDto);
+    boolean isReadyForPromotion(AccountProfileDto accountProfileDto);
 }

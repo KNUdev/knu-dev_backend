@@ -18,7 +18,7 @@ public class RecruitmentAnalytics {
     @Column(nullable = false)
     private Integer id;
 
-    @OneToOne
+    @OneToOne(mappedBy = "recruitmentAnalytics", cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "id")
     @MapsId
     private ClosedRecruitment closedRecruitment;

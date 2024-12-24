@@ -7,5 +7,5 @@ public interface RecruitmentApi {
 
     void openRecruitment(RecruitmentOpenRequest creationRequestDto);
 
-    void closeRecruitment(Expertise expertise);
+    void manuallyCloseRecruitment(Expertise expertise);
 }

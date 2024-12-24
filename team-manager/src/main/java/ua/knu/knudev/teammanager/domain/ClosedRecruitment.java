@@ -35,4 +35,7 @@ public class ClosedRecruitment {
     @Embedded
     private RecruitmentAutoCloseConditions recruitmentAutoCloseConditions;
 
+    @OneToOne
+    @JoinColumn(name = "id")
+    private RecruitmentAnalytics recruitmentAnalytics;
 }

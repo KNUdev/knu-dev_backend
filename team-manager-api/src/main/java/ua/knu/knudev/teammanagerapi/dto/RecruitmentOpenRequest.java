@@ -1,14 +1,15 @@
 package ua.knu.knudev.teammanagerapi.dto;
 
-import lombok.Builder;
-import lombok.Data;
+import jakarta.persistence.Embedded;
+import jakarta.validation.constraints.NotNull;
 import ua.knu.knudev.knudevcommon.constant.Expertise;
 
-@Data
-@Builder
-public class RecruitmentOpenRequest {
-
-    private String recruitmentName;
-    private Expertise expertise;
-    private RecruitmentAutoCloseConditionsDto autoCloseConditions;
-}
+public record RecruitmentOpenRequest (
+    @NotNull
+    String recruitmentName,
+    @NotNull
+    Expertise expertise,
+    @Embedded
+    RecruitmentAutoCloseConditionsDto autoCloseConditions
+    )
+{}

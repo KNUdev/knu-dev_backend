@@ -16,7 +16,7 @@ public class PromotionManager implements PromotionManagerApi {
     @Override
 //    TODO also we need to create service where we will compute requirements for different developers,
 //     BECAUSE NOW WE ONLY HAVE LOGIC WITHOUT NEEDABLE DATA IN REQUIREMENTS
-    public boolean isReadyToPromotion(AccountProfileDto accountProfileDto) {
+    public boolean isReadyForPromotion(AccountProfileDto accountProfileDto) {
         AccountTechnicalRole accountTechnicalRole = accountProfileDto.technicalRole();
         PromotionRequirements requirements = createPromotionRequirements(accountTechnicalRole);
         Specification<PromotionRequirements> specification = promotionStrategy.getSpecification(accountTechnicalRole);

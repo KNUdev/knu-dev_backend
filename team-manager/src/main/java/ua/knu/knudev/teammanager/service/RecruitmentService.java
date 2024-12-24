@@ -3,8 +3,6 @@ package ua.knu.knudev.teammanager.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ObjectUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ua.knu.knudev.knudevcommon.constant.Expertise;
@@ -16,6 +14,7 @@ import ua.knu.knudev.teammanager.repository.ActiveRecruitmentRepository;
 import ua.knu.knudev.teammanager.repository.ClosedRecruitmentRepository;
 import ua.knu.knudev.teammanagerapi.api.RecruitmentApi;
 import ua.knu.knudev.teammanagerapi.dto.RecruitmentOpenRequest;
+import ua.knu.knudev.teammanagerapi.exception.RecruitmentException;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -36,32 +35,35 @@ public class RecruitmentService implements RecruitmentApi {
         openRequestValidator(creationRequestDto);
 
         RecruitmentAutoCloseConditions autoCloseConditions = recruitmentAutoCloseConditionsMapper
-                .toDomain(creationRequestDto.getAutoCloseConditions());
+                .toDomain(creationRequestDto.autoCloseConditions());
 
         ActiveRecruitment activeRecruitment = ActiveRecruitment.builder()
-                .name(creationRequestDto.getRecruitmentName())
-                .expertise(creationRequestDto.getExpertise())
+                .name(creationRequestDto.recruitmentName())
+                .expertise(creationRequestDto.expertise())
                 .recruitmentAutoCloseConditions(autoCloseConditions)
+                .currentRecruitedCount(0)
                 .build();
         activeRecruitmentRepository.save(activeRecruitment);
-        log.info("Recruitment {} opened", creationRequestDto.getRecruitmentName());
+        log.info("Recruitment: {} with expertise: {} was opened at: {}, auto-close date: {}", activeRecruitment.getName(),
+                activeRecruitment.getExpertise(), LocalDateTime.now(), activeRecruitment.getRecruitmentAutoCloseConditions().deadlineDate());
     }
 
     @Override
     @Transactional
-    public void closeRecruitment(Expertise expertise) {
-        closeRequestValidator(expertise);
-        ActiveRecruitment activeRecruitment = activeRecruitmentRepository.findById(expertise.name()).orElseThrow();
-        ClosedRecruitment closedRecruitment = closedRecruitmentBuilder(activeRecruitment);
+    public void manuallyCloseRecruitment(Expertise expertise) {
+        ActiveRecruitment activeRecruitment = activeRecruitmentRepository.findById(expertise.name()).orElseThrow(
+                () -> new RecruitmentException("There is no active recruitment with "+ expertise + " expertise"));
+        ClosedRecruitment closedRecruitment = buildClosedRecruitment(activeRecruitment);
         activeRecruitmentRepository.delete(activeRecruitment);
         closedRecruitmentRepository.save(closedRecruitment);
-        log.info("Closed recruitment {}", closedRecruitment);
+        log.info("Recruitment {} with expertise {}, with total people of {}, was manually closed at {}", activeRecruitment.getName(),
+                activeRecruitment.getExpertise(), activeRecruitment.getRecruitmentAutoCloseConditions().maxCandidates(),
+                LocalDateTime.now());
     }
 
-    @Scheduled(fixedRate = 600000)
+//    TODO WE NEED TO REDO THIS METHOD LITTLE
     @Transactional
     protected void autoCloseRecruitment() {
-        // TODO: треба додати це поле в ActiveRecruitment або звідкись його брати, щоб я міг його дістати бо воно також треба і для статистики
         int numberOfRecruitedPeople = 0;
 
         List<ActiveRecruitment> activeRecruitmentsToClose = new ArrayList<>();
@@ -69,7 +71,7 @@ public class RecruitmentService implements RecruitmentApi {
                 .filter(activeRecruitment -> autoCloseRecruitmentFilter(activeRecruitment, numberOfRecruitedPeople))
                 .map(activeRecruitment -> {
                     activeRecruitmentsToClose.add(activeRecruitment);
-                    return closedRecruitmentBuilder(activeRecruitment);
+                    return buildClosedRecruitment(activeRecruitment);
                 })
                 .collect(Collectors.toList());
 
@@ -80,14 +82,15 @@ public class RecruitmentService implements RecruitmentApi {
         }
     }
 
+//    TODO REDO THAT ALSO
     private static boolean autoCloseRecruitmentFilter(ActiveRecruitment activeRecruitment, Integer numberOfRecruitedPeople) {
         RecruitmentAutoCloseConditions autoCloseConditions = activeRecruitment.getRecruitmentAutoCloseConditions();
-        return autoCloseConditions.getMaxCandidates() <= numberOfRecruitedPeople
-                || autoCloseConditions.getDeadlineDate().isBefore(LocalDateTime.now());
+        return autoCloseConditions.maxCandidates() <= numberOfRecruitedPeople
+                || autoCloseConditions.deadlineDate().isBefore(LocalDateTime.now());
 
     }
 
-    private static ClosedRecruitment closedRecruitmentBuilder(ActiveRecruitment activeRecruitment) {
+    private ClosedRecruitment buildClosedRecruitment(ActiveRecruitment activeRecruitment) {
         return ClosedRecruitment.builder()
                 .name(activeRecruitment.getName())
                 .expertise(activeRecruitment.getExpertise())
@@ -99,19 +102,12 @@ public class RecruitmentService implements RecruitmentApi {
 
     private void openRequestValidator(RecruitmentOpenRequest recruitmentOpenRequest) {
         validateOpenRequestData(recruitmentOpenRequest);
-        checkForActiveRecruitments(recruitmentOpenRequest.getExpertise());
+        checkForActiveRecruitments(recruitmentOpenRequest.expertise());
     }
 
-    private void closeRequestValidator(Expertise expertise) {
-        if (ObjectUtils.isEmpty(expertise)) {
-            throw new IllegalArgumentException("Expertise cannot be empty");
-        }
-    }
 
     private void validateOpenRequestData(RecruitmentOpenRequest recruitmentOpenRequest) {
-        if (ObjectUtils.isEmpty(recruitmentOpenRequest.getAutoCloseConditions())
-                || StringUtils.isEmpty(recruitmentOpenRequest.getRecruitmentName())
-                || ObjectUtils.isEmpty(recruitmentOpenRequest.getExpertise())) {
+        if (ObjectUtils.isEmpty(recruitmentOpenRequest.autoCloseConditions())) {
             throw new IllegalArgumentException("Recruitment open request is not valid, please check all data");
         }
     }
