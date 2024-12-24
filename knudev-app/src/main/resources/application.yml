@@ -1,9 +1,15 @@
 server:
   port: 5000
+#WHEN ACTUATOR DEPENDENCY WILL BE ADDED
+#management:
+#  endpoints:
+#    web:
+#      exposure:
+#        include: health, info, mappings
+#  endpoint:
+#    health:
+#      show-details: always
 spring:
-  freemarker:
-    template-loader-path: "classpath:/templates"
-    suffix: ".ftl"
   servlet:
     multipart:
       max-file-size: 10MB
