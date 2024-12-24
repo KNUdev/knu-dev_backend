@@ -6,9 +6,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import org.springframework.stereotype.Service;
 import ua.knu.knudev.fileservice.adapter.FileUploadAdapter;
-import ua.knu.knudev.rest.dto.FileUploadPayload;
-import ua.knu.knudev.rest.folder.FileFolderProperties;
-import ua.knu.knudev.rest.subfolder.FileSubfolder;
+import ua.knu.knudev.fileserviceapi.dto.FileUploadPayload;
+import ua.knu.knudev.fileserviceapi.folder.FileFolderProperties;
+import ua.knu.knudev.fileserviceapi.subfolder.FileSubfolder;
 
 @Service
 @RequiredArgsConstructor

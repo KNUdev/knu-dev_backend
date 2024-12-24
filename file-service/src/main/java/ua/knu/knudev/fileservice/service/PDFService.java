@@ -3,10 +3,10 @@ package ua.knu.knudev.fileservice.service;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import ua.knu.knudev.fileservice.adapter.FileUploadAdapter;
-import ua.knu.knudev.rest.api.PDFServiceApi;
-import ua.knu.knudev.rest.folder.FileFolderProperties;
-import ua.knu.knudev.rest.folder.PdfFolder;
-import ua.knu.knudev.rest.subfolder.PdfSubfolder;
+import ua.knu.knudev.fileserviceapi.api.PDFServiceApi;
+import ua.knu.knudev.fileserviceapi.folder.FileFolderProperties;
+import ua.knu.knudev.fileserviceapi.folder.PdfFolder;
+import ua.knu.knudev.fileserviceapi.subfolder.PdfSubfolder;
 
 import java.util.Set;
 

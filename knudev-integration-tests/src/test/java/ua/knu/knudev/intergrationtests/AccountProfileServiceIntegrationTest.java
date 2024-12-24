@@ -8,7 +8,7 @@ import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.web.multipart.MultipartFile;
 import ua.knu.knudev.fileservice.service.ImageService;
-import ua.knu.knudev.rest.subfolder.ImageSubfolder;
+import ua.knu.knudev.fileserviceapi.subfolder.ImageSubfolder;
 import ua.knu.knudev.intergrationtests.config.IntegrationTestsConfig;
 import ua.knu.knudev.knudevcommon.constant.AccountTechnicalRole;
 import ua.knu.knudev.knudevcommon.constant.Expertise;
