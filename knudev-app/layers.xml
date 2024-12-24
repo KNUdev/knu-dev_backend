@@ -1,7 +1,7 @@
 <layers xmlns="http://www.springframework.org/schema/boot/layers"
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:schemaLocation="http://www.springframework.org/schema/boot/layers
-                      https://www.springframework.org/schema/boot/layers/layers-{spring-boot-xsd-version}.xsd">
+                            https://www.springframework.org/schema/boot/layers/layers-1.0.xsd">
     <application>
         <into layer="spring-boot-loader">
             <include>org/springframework/boot/loader/**</include>
@@ -13,16 +13,16 @@
             <include>*:*:*SNAPSHOT</include>
         </into>
         <into layer="security-dependencies">
-            <include>ua.knu.knudev.knudevsecurity:*:*</include>
+            <include>ua.knu.knudev:knudev-security:*</include>
         </into>
         <into layer="team-manager-dependencies">
-            <include>ua.knu.knudev.teammanager:*:*</include>
+            <include>ua.knu.knudev:team-manager:*</include>
         </into>
         <into layer="task-manager-dependencies">
-            <include>ua.knu.knudev.taskmanager:*:*</include>
+            <include>ua.knu.knudev:task-manager:*</include>
         </into>
         <into layer="file-service-dependencies">
-            <include>ua.knu.knudev.fileservice:*:*</include>
+            <include>ua.knu.knudev:file-service:*</include>
         </into>
         <into layer="dependencies"/>
     </dependencies>

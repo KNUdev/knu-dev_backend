@@ -25,5 +25,4 @@ COPY --from=builder application/task-manager-dependencies/ ./
 COPY --from=builder application/file-service-dependencies/ ./
 COPY --from=builder application/application/ ./
 
-CMD ["java", "org.springframework.boot.loader.JarLauncher"]
-
+CMD ["java", "org.springframework.boot.loader.launch.JarLauncher"]
