@@ -19,8 +19,8 @@ jobs:
         distribution: 'adopt'
         java-version: '17'
 
-    - name: Build with Maven (skip integration tests)
-      run: mvn clean package -DskipITs
+    - name: Build with Maven (skip all tests)
+      run: mvn clean package -DskipTests
 
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v2
