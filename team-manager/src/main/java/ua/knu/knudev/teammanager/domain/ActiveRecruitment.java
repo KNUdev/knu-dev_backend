@@ -55,8 +55,8 @@ public class ActiveRecruitment {
     @JoinTable(
             name = "active_recruitment_accounts",
             schema = "team_management",
-            joinColumns = @JoinColumn(name = "active_recruitment_id"),
-            inverseJoinColumns = @JoinColumn(name = "account_profile_id", unique = true)
+            joinColumns = @JoinColumn(name = "active_recruitment_id", referencedColumnName = "id"),
+            inverseJoinColumns = @JoinColumn(name = "account_profile_id", referencedColumnName = "id", unique = true)
     )
     private Set<AccountProfile> currentRecruited;
 

@@ -74,81 +74,6 @@ databaseChangeLog:
                   name: name_in_ukrainian
 
   - changeSet:
-      id: create_closed_recruitment_table
-      author: DenysLeonenko
-      changes:
-        - createTable:
-            schemaName: team_management
-            tableName: closed_recruitment
-            columns:
-              - column:
-                  name: id
-                  type: int
-                  constraints:
-                    nullable: false
-                    primaryKey: true
-              - column:
-                  name: expertise
-                  type: varchar(75)
-                  constraints:
-                    nullable: false
-              - column:
-                  name: name
-                  type: varchar(255)
-                  constraints:
-                    nullable: false
-              - column:
-                  name: started_at
-                  type: datetime
-                  constraints:
-                    nullable: false
-              - column:
-                  name: closed_at
-                  type: datetime
-                  constraints:
-                    nullable: false
-              - column:
-                  name: deadline_date
-                  type: datetime
-                  constraints:
-                    nullable: false
-              - column:
-                  name: max_candidates
-                  type: int
-                  constraints:
-                    nullable: false
-
-  - changeSet:
-      id: create_recruitment_analytics_table
-      author: DenysLeonenko
-      changes:
-        - createTable:
-            schemaName: team_management
-            tableName: recruitment_analytics
-            columns:
-              - column:
-                  name: id
-                  type: int
-                  constraints:
-                    primaryKey: true
-                    nullable: false
-              - column:
-                  name: closed_recruitment_id
-                  type: int
-                  constraints:
-                    nullable: false
-        - addForeignKeyConstraint:
-            baseTableName: recruitment_analytics
-            baseColumnNames: closed_recruitment_id
-            referencedTableName: closed_recruitment
-            referencedColumnNames: id
-            baseTableSchemaName: team_management
-            referencedTableSchemaName: team_management
-            constraintName: fk_recruitment_closed
-
-
-
-  - changeSet:
       id: create_departments_specialties_table
       author: DenysLeonenko, Vladyslav Shtaiier
       changes:
@@ -271,11 +196,6 @@ databaseChangeLog:
                   type: double
                   constraints:
                     nullable: false
-              - column:
-                  name: joined_users
-                  type: int
-                  constraints:
-                    nullable: false
         - addForeignKeyConstraint:
             referencedTableSchemaName: team_management
             baseTableSchemaName: team_management
@@ -292,14 +212,6 @@ databaseChangeLog:
             referencedTableName: specialty
             referencedColumnNames: code_name
             constraintName: fk_profile_account_specialty_code_name
-        - addForeignKeyConstraint:
-            referencedTableSchemaName: team_management
-            baseTableSchemaName: team_management
-            baseTableName: profile_account
-            baseColumnNames: joined_users
-            referencedTableName: recruitment_analytics
-            referencedColumnNames: id
-            constraintName: fk_profile_recruitment
         - createIndex:
             tableName: profile_account
             schemaName: team_management
@@ -314,13 +226,110 @@ databaseChangeLog:
             columns:
               - column:
                   name: specialty_code_name
-        - createIndex:
+
+  - changeSet:
+      id: create_closed_recruitment_table
+      author: your_name
+      changes:
+        - createTable:
             schemaName: team_management
-            indexName: idx_joined_users
-            tableName: profile_account
+            tableName: closed_recruitment
             columns:
               - column:
-                  name: joined_users
+                  name: id
+                  type: UUID
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: expertise
+                  type: varchar(50)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: type
+                  type: varchar(15)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: name
+                  type: varchar(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: started_at
+                  type: datetime
+                  constraints:
+                    nullable: false
+              - column:
+                  name: closed_at
+                  type: datetime
+                  constraints:
+                    nullable: false
+              - column:
+                  name: deadline_date
+                  type: datetime
+              - column:
+                  name: max_candidates
+                  type: datetime
+
+  - changeSet:
+      id: create_recruitment_analytics_table
+      author: your_name
+      changes:
+        - createTable:
+            schemaName: team_management
+            tableName: recruitment_analytics
+            columns:
+              - column:
+                  name: id
+                  type: UUID
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+        - addForeignKeyConstraint:
+            baseTableSchemaName: team_management
+            baseTableName: recruitment_analytics
+            baseColumnNames: id
+            referencedTableSchemaName: team_management
+            referencedTableName: closed_recruitment
+            referencedColumnNames: id
+            constraintName: fk_recruitment_analytics_closed_recruitment
+
+  - changeSet:
+      id: create_recruitment_analytics_joined_users_table
+      author: your_name
+      changes:
+        - createTable:
+            schemaName: team_management
+            tableName: recruitment_analytics_joined_users
+            columns:
+              - column:
+                  name: recruitment_analytics_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+              - column:
+                  name: account_profile_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+        - addForeignKeyConstraint:
+            baseTableSchemaName: team_management
+            baseTableName: recruitment_analytics_joined_users
+            baseColumnNames: recruitment_analytics_id
+            referencedTableSchemaName: team_management
+            referencedTableName: recruitment_analytics
+            referencedColumnNames: id
+            constraintName: fk_recruitment_analytics_id
+        - addForeignKeyConstraint:
+            baseTableSchemaName: team_management
+            baseTableName: recruitment_analytics_joined_users
+            baseColumnNames: account_profile_id
+            referencedTableSchemaName: team_management
+            referencedTableName: profile_account
+            referencedColumnNames: id
+            constraintName: fk_account_profile_id
 
   - changeSet:
       id: create_active_recruitment_table
@@ -331,8 +340,19 @@ databaseChangeLog:
             tableName: active_recruitment
             columns:
               - column:
+                  name: id
+                  type: uuid
+                  constraints:
+                    nullable: false
+                    unique: true
+              - column:
                   name: expertise
                   type: varchar(75)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: unit
+                  type: varchar(15)
                   constraints:
                     nullable: false
               - column:
@@ -356,6 +376,59 @@ databaseChangeLog:
                   type: int
                   constraints:
                     nullable: false
+        - createIndex:
+            schemaName: team_management
+            tableName: active_recruitment
+            indexName: idx_expertise
+            columns:
               - column:
-                  name: current_recruited_count
-                  type: int
+                  name: expertise
+        - createIndex:
+            schemaName: team_management
+            tableName: active_recruitment
+            indexName: idx_unit
+            columns:
+              - column:
+                  name: unit
+
+  - changeSet:
+      id: create_active_recruitment_accounts_table
+      author: DenysLeonenko
+      changes:
+        - createTable:
+            schemaName: team_management
+            tableName: active_recruitment_accounts
+            columns:
+              - column:
+                  name: active_recruitment_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+              - column:
+                  name: account_profile_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+        - addForeignKeyConstraint:
+            baseTableSchemaName: team_management
+            baseTableName: active_recruitment_accounts
+            baseColumnNames: active_recruitment_id
+            referencedTableSchemaName: team_management
+            referencedTableName: active_recruitment
+            referencedColumnNames: id
+            constraintName: fk_active_recruitment_id
+        - addForeignKeyConstraint:
+            baseTableSchemaName: team_management
+            baseTableName: active_recruitment_accounts
+            baseColumnNames: account_profile_id
+            referencedTableSchemaName: team_management
+            referencedTableName: profile_account
+            referencedColumnNames: id
+            constraintName: fk_account_profile_id
+        - addUniqueConstraint:
+            schemaName: team_management
+            tableName: active_recruitment_accounts
+            columnNames: account_profile_id
+            constraintName: uq_account_profile_id
+
+

@@ -27,8 +27,8 @@ public class RecruitmentAnalytics {
     @JoinTable(
             name = "recruitment_analytics_joined_users",
             schema = "team_management",
-            joinColumns = @JoinColumn(name = "recruitment_analytics_id"),
-            inverseJoinColumns = @JoinColumn(name = "account_profile_id")
+            joinColumns = @JoinColumn(name = "recruitment_analytics_id", referencedColumnName = "id"),
+            inverseJoinColumns = @JoinColumn(name = "account_profile_id", referencedColumnName = "id")
     )
     private List<AccountProfile> joinedUsers;
 
