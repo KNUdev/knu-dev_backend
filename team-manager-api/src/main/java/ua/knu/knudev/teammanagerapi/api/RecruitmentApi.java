@@ -1,11 +1,12 @@
 package ua.knu.knudev.teammanagerapi.api;
 
-import ua.knu.knudev.knudevcommon.constant.Expertise;
-import ua.knu.knudev.teammanagerapi.dto.RecruitmentOpenRequest;
+import ua.knu.knudev.teammanagerapi.request.RecruitmentOpenRequest;
+
+import java.util.UUID;
 
 public interface RecruitmentApi {
 
-    void openRecruitment(RecruitmentOpenRequest creationRequestDto);
+    void openRecruitment(RecruitmentOpenRequest openRequest);
 
-    void manuallyCloseRecruitment(Expertise expertise);
+    void closeRecruitment(UUID activeRecruitmentId);
 }

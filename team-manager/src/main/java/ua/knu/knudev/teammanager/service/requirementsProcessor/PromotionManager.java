@@ -20,6 +20,13 @@ public class PromotionManager implements PromotionManagerApi {
         AccountTechnicalRole accountTechnicalRole = accountProfileDto.technicalRole();
         PromotionRequirements requirements = createPromotionRequirements(accountTechnicalRole);
         Specification<PromotionRequirements> specification = promotionStrategy.getSpecification(accountTechnicalRole);
+        /*
+            ProjectService -> Account has .....
+            
+
+         */
+
+
         return specification.isSatisfiedBy(requirements);
     }
 

@@ -2,8 +2,8 @@ package ua.knu.knudev.teammanager.domain;
 
 import jakarta.persistence.*;
 import lombok.*;
-
 import java.util.List;
+import java.util.UUID;
 
 @Getter
 @Setter
@@ -16,14 +16,21 @@ public class RecruitmentAnalytics {
 
     @Id
     @Column(nullable = false)
-    private Integer id;
+    private UUID id;
 
-    @OneToOne(mappedBy = "recruitmentAnalytics", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JoinColumn(name = "id")
+    @OneToOne
     @MapsId
+    @JoinColumn(name = "id")
     private ClosedRecruitment closedRecruitment;
 
-    @OneToMany(mappedBy = "recruitment_analytics", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany
+    @JoinTable(
+            name = "recruitment_analytics_joined_users",
+            schema = "team_management",
+            joinColumns = @JoinColumn(name = "recruitment_analytics_id"),
+            inverseJoinColumns = @JoinColumn(name = "account_profile_id")
+    )
     private List<AccountProfile> joinedUsers;
 
+    // TODO: Add more analytics fields
 }

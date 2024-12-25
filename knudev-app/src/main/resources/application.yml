@@ -1,6 +1,6 @@
 server:
   port: 5000
-#WHEN ACTUATOR DEPENDENCY WILL BE ADDED
+#TODO WHEN ACTUATOR DEPENDENCY WILL BE ADDED
 #management:
 #  endpoints:
 #    web:

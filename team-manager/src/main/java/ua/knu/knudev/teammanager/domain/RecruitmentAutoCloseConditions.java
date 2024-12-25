@@ -10,5 +10,4 @@ public record RecruitmentAutoCloseConditions(
         Integer maxCandidates
 ) {
 
-
 }

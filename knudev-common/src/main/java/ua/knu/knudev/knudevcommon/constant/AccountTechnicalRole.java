@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
 public enum AccountTechnicalRole implements AccountRole {
+    //Todo add role, which represent that account can do nothing (not in campus\precampus)
     INTERN("Intern"),
     DEVELOPER("Developer"),
     PREMASTER("Premaster"),

@@ -4,7 +4,6 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.util.HashSet;
-import java.util.Objects;
 import java.util.Set;
 
 @Getter
@@ -35,15 +34,4 @@ public class Specialty {
         this.nameInUkrainian = nameInUkrainian;
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof Specialty that)) return false;
-        return Objects.equals(codeName, that.codeName);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(codeName);
-    }
 }

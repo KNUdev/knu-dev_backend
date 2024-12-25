@@ -2,9 +2,12 @@ package ua.knu.knudev.teammanager.domain;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.UuidGenerator;
 import ua.knu.knudev.knudevcommon.constant.Expertise;
+import ua.knu.knudev.knudevcommon.constant.KNUdevUnit;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Getter
 @Setter
@@ -16,12 +19,17 @@ import java.time.LocalDateTime;
 public class ClosedRecruitment {
 
     @Id
-    @Column(nullable = false)
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+    @UuidGenerator
+    @Column(updatable = false, nullable = false)
+    private UUID id;
 
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private Expertise expertise;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private KNUdevUnit type;
 
     @Column(nullable = false)
     private String name;
@@ -35,7 +43,17 @@ public class ClosedRecruitment {
     @Embedded
     private RecruitmentAutoCloseConditions recruitmentAutoCloseConditions;
 
-    @OneToOne
-    @JoinColumn(name = "id")
+    @OneToOne(mappedBy = "closedRecruitment", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private RecruitmentAnalytics recruitmentAnalytics;
+
+    public void setRecruitmentAnalytics(RecruitmentAnalytics recruitmentAnalytics) {
+        if (recruitmentAnalytics == null) {
+            if (this.recruitmentAnalytics != null) {
+                this.recruitmentAnalytics.setClosedRecruitment(null);
+            }
+        } else {
+            recruitmentAnalytics.setClosedRecruitment(this);
+        }
+        this.recruitmentAnalytics = recruitmentAnalytics;
+    }
 }
