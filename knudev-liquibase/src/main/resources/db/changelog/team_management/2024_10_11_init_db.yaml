@@ -74,6 +74,81 @@ databaseChangeLog:
                   name: name_in_ukrainian
 
   - changeSet:
+      id: create_closed_recruitment_table
+      author: DenysLeonenko
+      changes:
+        - createTable:
+            schemaName: team_management
+            tableName: closed_recruitment
+            columns:
+              - column:
+                  name: id
+                  type: int
+                  constraints:
+                    nullable: false
+                    primaryKey: true
+              - column:
+                  name: expertise
+                  type: varchar(75)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: name
+                  type: varchar(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: started_at
+                  type: datetime
+                  constraints:
+                    nullable: false
+              - column:
+                  name: closed_at
+                  type: datetime
+                  constraints:
+                    nullable: false
+              - column:
+                  name: deadline_date
+                  type: datetime
+                  constraints:
+                    nullable: false
+              - column:
+                  name: max_candidates
+                  type: int
+                  constraints:
+                    nullable: false
+
+  - changeSet:
+      id: create_recruitment_analytics_table
+      author: DenysLeonenko
+      changes:
+        - createTable:
+            schemaName: team_management
+            tableName: recruitment_analytics
+            columns:
+              - column:
+                  name: id
+                  type: int
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: closed_recruitment_id
+                  type: int
+                  constraints:
+                    nullable: false
+        - addForeignKeyConstraint:
+            baseTableName: recruitment_analytics
+            baseColumnNames: closed_recruitment_id
+            referencedTableName: closed_recruitment
+            referencedColumnNames: id
+            baseTableSchemaName: team_management
+            referencedTableSchemaName: team_management
+            constraintName: fk_recruitment_closed
+
+
+
+  - changeSet:
       id: create_departments_specialties_table
       author: DenysLeonenko, Vladyslav Shtaiier
       changes:
@@ -129,7 +204,7 @@ databaseChangeLog:
 
   - changeSet:
       id: create_team_management_profile_account_table
-      author: Vladyslav Shtaiier
+      author: Vladyslav Shtaiier, DenysLeonenko
       changes:
         - createTable:
             schemaName: team_management
@@ -196,6 +271,11 @@ databaseChangeLog:
                   type: double
                   constraints:
                     nullable: false
+              - column:
+                  name: joined_users
+                  type: int
+                  constraints:
+                    nullable: false
         - addForeignKeyConstraint:
             referencedTableSchemaName: team_management
             baseTableSchemaName: team_management
@@ -212,6 +292,14 @@ databaseChangeLog:
             referencedTableName: specialty
             referencedColumnNames: code_name
             constraintName: fk_profile_account_specialty_code_name
+        - addForeignKeyConstraint:
+            referencedTableSchemaName: team_management
+            baseTableSchemaName: team_management
+            baseTableName: profile_account
+            baseColumnNames: joined_users
+            referencedTableName: recruitment_analytics
+            referencedColumnNames: id
+            constraintName: fk_profile_recruitment
         - createIndex:
             tableName: profile_account
             schemaName: team_management
@@ -226,48 +314,48 @@ databaseChangeLog:
             columns:
               - column:
                   name: specialty_code_name
+        - createIndex:
+            schemaName: team_management
+            indexName: idx_joined_users
+            tableName: profile_account
+            columns:
+              - column:
+                  name: joined_users
 
   - changeSet:
-      id: create_recruitment_table
+      id: create_active_recruitment_table
       author: DenysLeonenko
       changes:
         - createTable:
             schemaName: team_management
-            tableName: recruitment
+            tableName: active_recruitment
             columns:
               - column:
-                  name: recruitment_number
-                  type: int
-                  autoIncrement: true
+                  name: expertise
+                  type: varchar(75)
                   constraints:
                     nullable: false
-                    unique: true
               - column:
-                  name: recruitment_name
+                  name: started_at
+                  type: datetime
+                  constraints:
+                    nullable: false
+                  defaultValueComputed: "CURRENT_TIMESTAMP"
+              - column:
+                  name: name
                   type: varchar(255)
                   constraints:
                     nullable: false
               - column:
-                  name: recruitment_type
-                  type: varchar(15)
-                  constraints:
-                    nullable: false
-              - column:
-                  name: recruitment_start_date_time
+                  name: deadline_date
                   type: datetime
-                  valueComputed: CURRENT_TIMESTAMP
                   constraints:
                     nullable: false
               - column:
-                  name: recruitment_end_date_time
-                  type: datetime
-                  defaultOnNull: true
-              - column:
-                  name: recruitment_status
-                  type: varchar(25)
-                  constraints:
-                    nullable: false
-              - column:
-                  name: recruited_people_number
+                  name: max_candidates
                   type: int
-                  defaultOnNull: true
+                  constraints:
+                    nullable: false
+              - column:
+                  name: current_recruited_count
+                  type: int

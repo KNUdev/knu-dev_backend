@@ -54,6 +54,6 @@ public class AccountProfile {
     private Specialty specialty;
 
     @ManyToOne
-    @JoinColumn(name = "joined_users", nullable = false)
+    @JoinColumn(name = "joined_users", referencedColumnName = "id", nullable = false)
     private RecruitmentAnalytics recruitmentAnalytics;
 }

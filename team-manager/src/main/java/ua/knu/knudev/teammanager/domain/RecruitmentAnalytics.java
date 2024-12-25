@@ -23,7 +23,7 @@ public class RecruitmentAnalytics {
     @MapsId
     private ClosedRecruitment closedRecruitment;
 
-    @OneToMany(mappedBy = "recruitment_analytics", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "recruitmentAnalytics", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<AccountProfile> joinedUsers;
 
 }
