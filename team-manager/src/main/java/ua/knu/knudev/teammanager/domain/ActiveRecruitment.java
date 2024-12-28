@@ -19,11 +19,11 @@ import java.util.UUID;
         schema = "team_management",
         name = "active_recruitment",
         uniqueConstraints = {
-                @UniqueConstraint(columnNames = {"expertise", "type"})
+                @UniqueConstraint(columnNames = {"expertise", "unit"})
         },
         indexes = {
                 @Index(name = "idx_expertise", columnList = "expertise"),
-                @Index(name = "idx_type", columnList = "type")
+                @Index(name = "idx_unit", columnList = "unit")
         }
 )
 @Builder
@@ -53,7 +53,7 @@ public class ActiveRecruitment {
 
     @OneToMany
     @JoinTable(
-            name = "active_recruitment_accounts",
+            name = "active_recruitment_current_recruited",
             schema = "team_management",
             joinColumns = @JoinColumn(name = "active_recruitment_id", referencedColumnName = "id"),
             inverseJoinColumns = @JoinColumn(name = "account_profile_id", referencedColumnName = "id", unique = true)

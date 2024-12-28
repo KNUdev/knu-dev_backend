@@ -229,7 +229,7 @@ databaseChangeLog:
 
   - changeSet:
       id: create_closed_recruitment_table
-      author: your_name
+      author: DenysLeonenko
       changes:
         - createTable:
             schemaName: team_management
@@ -255,6 +255,7 @@ databaseChangeLog:
                   name: name
                   type: varchar(255)
                   constraints:
+                    unique: true
                     nullable: false
               - column:
                   name: started_at
@@ -271,11 +272,11 @@ databaseChangeLog:
                   type: datetime
               - column:
                   name: max_candidates
-                  type: datetime
+                  type: int
 
   - changeSet:
       id: create_recruitment_analytics_table
-      author: your_name
+      author: DenysLeonenko
       changes:
         - createTable:
             schemaName: team_management
@@ -297,12 +298,12 @@ databaseChangeLog:
             constraintName: fk_recruitment_analytics_closed_recruitment
 
   - changeSet:
-      id: create_recruitment_analytics_joined_users_table
-      author: your_name
+      id: create_recruitment_joined_users_table
+      author: DenysLeonenko
       changes:
         - createTable:
             schemaName: team_management
-            tableName: recruitment_analytics_joined_users
+            tableName: recruitment_joined_users
             columns:
               - column:
                   name: recruitment_analytics_id
@@ -316,7 +317,7 @@ databaseChangeLog:
                     nullable: false
         - addForeignKeyConstraint:
             baseTableSchemaName: team_management
-            baseTableName: recruitment_analytics_joined_users
+            baseTableName: recruitment_joined_users
             baseColumnNames: recruitment_analytics_id
             referencedTableSchemaName: team_management
             referencedTableName: recruitment_analytics
@@ -324,7 +325,7 @@ databaseChangeLog:
             constraintName: fk_recruitment_analytics_id
         - addForeignKeyConstraint:
             baseTableSchemaName: team_management
-            baseTableName: recruitment_analytics_joined_users
+            baseTableName: recruitment_joined_users
             baseColumnNames: account_profile_id
             referencedTableSchemaName: team_management
             referencedTableName: profile_account
@@ -347,7 +348,7 @@ databaseChangeLog:
                     unique: true
               - column:
                   name: expertise
-                  type: varchar(75)
+                  type: varchar(30)
                   constraints:
                     nullable: false
               - column:
@@ -358,13 +359,14 @@ databaseChangeLog:
               - column:
                   name: started_at
                   type: datetime
+                  defaultValueComputed: "CURRENT_TIMESTAMP"
                   constraints:
                     nullable: false
-                  defaultValueComputed: "CURRENT_TIMESTAMP"
               - column:
                   name: name
                   type: varchar(255)
                   constraints:
+                    unique: true
                     nullable: false
               - column:
                   name: deadline_date
@@ -392,12 +394,12 @@ databaseChangeLog:
                   name: unit
 
   - changeSet:
-      id: create_active_recruitment_accounts_table
+      id: create_active_recruitment_current_recruited_table
       author: DenysLeonenko
       changes:
         - createTable:
             schemaName: team_management
-            tableName: active_recruitment_accounts
+            tableName: active_recruitment_current_recruited
             columns:
               - column:
                   name: active_recruitment_id
@@ -411,7 +413,7 @@ databaseChangeLog:
                     nullable: false
         - addForeignKeyConstraint:
             baseTableSchemaName: team_management
-            baseTableName: active_recruitment_accounts
+            baseTableName: active_recruitment_current_recruited
             baseColumnNames: active_recruitment_id
             referencedTableSchemaName: team_management
             referencedTableName: active_recruitment
@@ -419,7 +421,7 @@ databaseChangeLog:
             constraintName: fk_active_recruitment_id
         - addForeignKeyConstraint:
             baseTableSchemaName: team_management
-            baseTableName: active_recruitment_accounts
+            baseTableName: active_recruitment_current_recruited
             baseColumnNames: account_profile_id
             referencedTableSchemaName: team_management
             referencedTableName: profile_account
@@ -427,8 +429,6 @@ databaseChangeLog:
             constraintName: fk_account_profile_id
         - addUniqueConstraint:
             schemaName: team_management
-            tableName: active_recruitment_accounts
+            tableName: active_recruitment_current_recruited
             columnNames: account_profile_id
             constraintName: uq_account_profile_id
-
-

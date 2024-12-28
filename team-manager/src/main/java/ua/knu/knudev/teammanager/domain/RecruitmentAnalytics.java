@@ -2,7 +2,8 @@ package ua.knu.knudev.teammanager.domain;
 
 import jakarta.persistence.*;
 import lombok.*;
-import java.util.List;
+
+import java.util.Set;
 import java.util.UUID;
 
 @Getter
@@ -25,12 +26,12 @@ public class RecruitmentAnalytics {
 
     @OneToMany
     @JoinTable(
-            name = "recruitment_analytics_joined_users",
+            name = "recruitment_joined_users",
             schema = "team_management",
             joinColumns = @JoinColumn(name = "recruitment_analytics_id", referencedColumnName = "id"),
             inverseJoinColumns = @JoinColumn(name = "account_profile_id", referencedColumnName = "id")
     )
-    private List<AccountProfile> joinedUsers;
+    private Set<AccountProfile> joinedUsers;
 
     // TODO: Add more analytics fields
 }

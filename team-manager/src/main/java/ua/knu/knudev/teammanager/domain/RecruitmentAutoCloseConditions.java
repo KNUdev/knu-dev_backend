@@ -7,7 +7,7 @@ import java.time.LocalDateTime;
 @Embeddable
 public record RecruitmentAutoCloseConditions(
         LocalDateTime deadlineDate,
-        Integer maxCandidates
+        int maxCandidates
 ) {
 
 }
