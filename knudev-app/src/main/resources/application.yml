@@ -1,5 +1,5 @@
 server:
-  port: 5000
+  port: ${APPLICATION_PORT:5000}
 #TODO WHEN ACTUATOR DEPENDENCY WILL BE ADDED
 #management:
 #  endpoints:
