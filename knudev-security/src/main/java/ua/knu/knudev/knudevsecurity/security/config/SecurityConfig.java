@@ -14,11 +14,11 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.context.SecurityContextHolderFilter;
 import ua.knu.knudev.knudevsecurity.security.Auth403EntryPoint;
+import ua.knu.knudev.knudevsecurity.security.filters.CorsFilter;
 import ua.knu.knudev.knudevsecurity.security.filters.JWTValidityFilter;
 import ua.knu.knudev.knudevsecurity.security.filters.JwtAuthenticationFilter;
 
 import static ua.knu.knudev.knudevsecurity.security.config.UrlRegistry.WHITE_LIST_URLS;
-
 
 @Configuration
 @RequiredArgsConstructor
@@ -27,6 +27,7 @@ public class SecurityConfig {
     private final AuthenticationProvider authenticationProvider;
     private final JWTValidityFilter jwtValidityFilter;
     private final Auth403EntryPoint auth403EntryPoint;
+    private final CorsFilter corsFilter;
 
     //todo test all cases
     @Bean
@@ -34,6 +35,7 @@ public class SecurityConfig {
         http
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .csrf(AbstractHttpConfigurer::disable)
+                .cors(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> {
 //                    String user = AccountRole.USER.name();
 //                    String admin = AccountRole.ADMIN.name();
@@ -57,6 +59,7 @@ public class SecurityConfig {
                 .authenticationProvider(authenticationProvider)
                 .addFilterBefore(jwtValidityFilter, SecurityContextHolderFilter.class)
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(corsFilter, JWTValidityFilter.class)
                 .formLogin(Customizer.withDefaults())
                 .exceptionHandling(exceptionHandling -> exceptionHandling
                         .authenticationEntryPoint(auth403EntryPoint)
