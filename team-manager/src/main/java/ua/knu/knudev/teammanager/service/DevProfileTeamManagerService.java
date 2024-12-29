@@ -15,11 +15,11 @@ import java.util.Set;
 public class DevProfileTeamManagerService implements DevProfileTeamManagerApi {
     private final DepartmentService departmentService;
 
-    public void create3TestDepartments() {
+    @Override
+    public void createTestDepartments() {
         SpecialtyCreationDto s1 = new SpecialtyCreationDto(123.0, "Computer Engineering", "Комп'ютерна інженерія");
         SpecialtyCreationDto s2 = new SpecialtyCreationDto(172.0, "Radiotechnics", "Радіотехніка");
         SpecialtyCreationDto s3 = new SpecialtyCreationDto(105.0, "Applied Physics", "Прикладна фізика");
-
         DepartmentCreationRequest dcr = new DepartmentCreationRequest(
                 "Faculty of Radiophysics, Electronics and Computer Systems",
                 "Факультет Радіофізики, Електроніки та Комп'юторних систем",
@@ -30,7 +30,6 @@ public class DevProfileTeamManagerService implements DevProfileTeamManagerApi {
         SpecialtyCreationDto s22 = new SpecialtyCreationDto(125.0, "Cybersecurity", "Кібербезпека");
         SpecialtyCreationDto s33 = new SpecialtyCreationDto(122.0, "Computer Science", "Комп'ютерні науки");
 
-        // 7 new specialties
         SpecialtyCreationDto s44 = new SpecialtyCreationDto(127.0, "Data Analytics", "Аналіз даних");
         SpecialtyCreationDto s55 = new SpecialtyCreationDto(128.0, "Artificial Intelligence", "Штучний інтелект");
         SpecialtyCreationDto s66 = new SpecialtyCreationDto(129.0, "Bioinformatics", "Біоінформатика");

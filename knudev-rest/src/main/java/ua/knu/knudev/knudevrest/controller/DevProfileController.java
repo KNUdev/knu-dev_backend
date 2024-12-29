@@ -16,7 +16,7 @@ public class DevProfileController {
 
     @PostMapping("/departments/create")
     public void createTestDepartments() {
-        devProfileTeamManagerApi.create3TestDepartments();
+        devProfileTeamManagerApi.createTestDepartments();
     }
 
 }
