@@ -1,4 +1,4 @@
-package ua.knu.knudev.teammanager.domain;
+package ua.knu.knudev.teammanager.domain.embeddable;
 
 import jakarta.persistence.Embeddable;
 
@@ -9,5 +9,4 @@ public record RecruitmentAutoCloseConditions(
         LocalDateTime deadlineDate,
         int maxCandidates
 ) {
-
 }

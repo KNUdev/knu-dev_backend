@@ -8,7 +8,7 @@ import ua.knu.knudev.knudevcommon.constant.Expertise;
 import ua.knu.knudev.knudevcommon.constant.KNUdevUnit;
 import ua.knu.knudev.teammanager.domain.ActiveRecruitment;
 import ua.knu.knudev.teammanager.domain.ClosedRecruitment;
-import ua.knu.knudev.teammanager.domain.RecruitmentAutoCloseConditions;
+import ua.knu.knudev.teammanager.domain.embeddable.RecruitmentAutoCloseConditions;
 import ua.knu.knudev.teammanager.mapper.RecruitmentAutoCloseConditionsMapper;
 import ua.knu.knudev.teammanager.repository.ActiveRecruitmentRepository;
 import ua.knu.knudev.teammanager.repository.ClosedRecruitmentRepository;

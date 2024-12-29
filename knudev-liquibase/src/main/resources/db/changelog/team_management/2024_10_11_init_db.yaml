@@ -15,13 +15,13 @@ databaseChangeLog:
                     unique: true
                     primaryKey: true
               - column:
-                  name: name_in_english
+                  name: en_name
                   type: varchar(255)
                   constraints:
                     nullable: false
                     unique: true
               - column:
-                  name: name_in_ukrainian
+                  name: uk_name
                   type: varchar(255)
                   constraints:
                     nullable: false
@@ -32,9 +32,9 @@ databaseChangeLog:
             indexName: idx_department_name
             columns:
               - column:
-                  name: name_in_english
+                  name: en_name
               - column:
-                  name: name_in_ukrainian
+                  name: uk_name
 
   - changeSet:
       id: create_specialty_table
@@ -52,13 +52,13 @@ databaseChangeLog:
                     unique: true
                     primaryKey: true
               - column:
-                  name: name_in_english
+                  name: en_name
                   type: varchar(255)
                   constraints:
                     unique: true
                     nullable: false
               - column:
-                  name: name_in_ukrainian
+                  name: uk_name
                   type: varchar(255)
                   constraints:
                     unique: true
@@ -69,9 +69,9 @@ databaseChangeLog:
             indexName: idx_specialty_name
             columns:
               - column:
-                  name: name_in_english
+                  name: uk_name
               - column:
-                  name: name_in_ukrainian
+                  name: en_name
 
   - changeSet:
       id: create_departments_specialties_table

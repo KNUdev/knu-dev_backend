@@ -19,5 +19,4 @@ public class DevProfileController {
         devProfileTeamManagerApi.create3TestDepartments();
     }
 
-
 }
