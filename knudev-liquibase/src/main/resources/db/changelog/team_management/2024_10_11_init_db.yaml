@@ -247,7 +247,7 @@ databaseChangeLog:
                   constraints:
                     nullable: false
               - column:
-                  name: type
+                  name: unit
                   type: varchar(15)
                   constraints:
                     nullable: false
