@@ -7,8 +7,8 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import ua.knu.knudev.knudevcommon.utils.AcademicUnitsIds;
 import ua.knu.knudev.teammanager.domain.Department;
+import ua.knu.knudev.teammanager.domain.Specialty;
 import ua.knu.knudev.teammanager.domain.embeddable.MultiLanguageName;
 import ua.knu.knudev.teammanager.repository.DepartmentRepository;
 import ua.knu.knudev.teammanager.repository.SpecialtyRepository;
@@ -23,6 +23,7 @@ import java.util.stream.Collectors;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 import static ua.knu.knudev.teammanager.utils.AcademicUnitsTestUtils.getTestDepartment;
+import static ua.knu.knudev.teammanager.utils.AcademicUnitsTestUtils.getTestSpecialty;
 import static ua.knu.knudev.teammanager.utils.constants.DepartmentTestsConstants.TEST_DEPARTMENT_NAME_IN_ENGLISH;
 import static ua.knu.knudev.teammanager.utils.constants.DepartmentTestsConstants.TEST_DEPARTMENT_NAME_IN_UKRAINIAN;
 
@@ -45,12 +46,8 @@ class DepartmentServiceTest {
     @DisplayName("Validate academic unit successfully when department and specialty exist")
     void should_ValidateAcademicUnit_When_DepartmentAndSpecialtyExist() {
         when(departmentRepository.findById(TEST_DEPARTMENT_ID)).thenReturn(Optional.of(getTestDepartment()));
-        AcademicUnitsIds academicUnitsIds = AcademicUnitsIds.builder()
-                .departmentId(TEST_DEPARTMENT_ID)
-                .specialtyCodename(TEST_SPECIALTY_ID)
-                .build();
 
-        assertDoesNotThrow(() -> departmentService.validateAcademicUnitExistence(academicUnitsIds));
+        assertDoesNotThrow(() -> departmentService.validateAcademicUnitExistence(TEST_DEPARTMENT_ID, TEST_SPECIALTY_ID));
 
         verify(departmentRepository, times(1)).findById(TEST_DEPARTMENT_ID);
     }
@@ -59,14 +56,10 @@ class DepartmentServiceTest {
     @DisplayName("Throw DepartmentException when on validation department does not exist")
     void should_ThrowDepartmentException_When_DepartmentDoesNotExistOnValidation() {
         when(departmentRepository.findById(TEST_DEPARTMENT_ID)).thenReturn(Optional.empty());
-        AcademicUnitsIds academicUnitsIds = AcademicUnitsIds.builder()
-                .departmentId(TEST_DEPARTMENT_ID)
-                .specialtyCodename(TEST_SPECIALTY_ID)
-                .build();
 
         DepartmentException exception = assertThrows(
                 DepartmentException.class,
-                () -> departmentService.validateAcademicUnitExistence(academicUnitsIds)
+                () -> departmentService.validateAcademicUnitExistence(TEST_DEPARTMENT_ID, TEST_SPECIALTY_ID)
         );
         assertEquals("Department with id " + TEST_DEPARTMENT_ID + " not found", exception.getMessage());
 
@@ -76,14 +69,16 @@ class DepartmentServiceTest {
     @Test
     @DisplayName("Throw DepartmentException when specialty does not exist in the department")
     void should_ThrowDepartmentException_When_SpecialtyDoesNotExistInDepartment() {
-        when(departmentRepository.findById(TEST_DEPARTMENT_ID)).thenReturn(Optional.of(getTestDepartment()));
-        AcademicUnitsIds academicUnitsIds = AcademicUnitsIds.builder()
-                .departmentId(TEST_DEPARTMENT_ID)
-                .specialtyCodename(999.99)
-                .build();
+        Specialty testSpecialty = getTestSpecialty("Тестова спеціальність", "Test specialty");
+        testSpecialty.setCodeName(999.123);
+        Department testDepartment = getTestDepartment();
+        testDepartment.setSpecialties(Set.of(testSpecialty));
 
-       assertThrows(DepartmentException.class, () ->
-                departmentService.validateAcademicUnitExistence(academicUnitsIds)
+        when(departmentRepository.findById(TEST_DEPARTMENT_ID)).thenReturn(Optional.of(testDepartment));
+
+        assertThrows(
+                DepartmentException.class,
+                () -> departmentService.validateAcademicUnitExistence(TEST_DEPARTMENT_ID, TEST_SPECIALTY_ID)
         );
         verify(departmentRepository, times(1)).findById(TEST_DEPARTMENT_ID);
     }
@@ -98,14 +93,10 @@ class DepartmentServiceTest {
         emptyDepartment.setSpecialties(new HashSet<>());
 
         when(departmentRepository.findById(TEST_DEPARTMENT_ID)).thenReturn(Optional.of(emptyDepartment));
-        AcademicUnitsIds academicUnitsIds = AcademicUnitsIds.builder()
-                .departmentId(TEST_DEPARTMENT_ID)
-                .specialtyCodename(TEST_SPECIALTY_ID)
-                .build();
 
         // Act & Assert
         assertThrows(DepartmentException.class, () ->
-                departmentService.validateAcademicUnitExistence(academicUnitsIds)
+                departmentService.validateAcademicUnitExistence(TEST_DEPARTMENT_ID, TEST_SPECIALTY_ID)
         );
         verify(departmentRepository, times(1)).findById(TEST_DEPARTMENT_ID);
     }
@@ -114,12 +105,8 @@ class DepartmentServiceTest {
     @DisplayName("Validate academic unit successfully when specialties are loaded lazily")
     void should_ValidateAcademicUnit_When_SpecialtiesAreLoadedLazily() {
         when(departmentRepository.findById(TEST_DEPARTMENT_ID)).thenReturn(Optional.of(getTestDepartment()));
-        AcademicUnitsIds academicUnitsIds = AcademicUnitsIds.builder()
-                .departmentId(TEST_DEPARTMENT_ID)
-                .specialtyCodename(TEST_SPECIALTY_ID)
-                .build();
 
-        assertDoesNotThrow(() -> departmentService.validateAcademicUnitExistence(academicUnitsIds));
+        assertDoesNotThrow(() -> departmentService.validateAcademicUnitExistence(TEST_DEPARTMENT_ID, TEST_SPECIALTY_ID));
 
         verify(departmentRepository, times(1)).findById(TEST_DEPARTMENT_ID);
     }

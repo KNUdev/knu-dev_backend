@@ -7,7 +7,6 @@ import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import ua.knu.knudev.knudevcommon.dto.MultiLanguageNameDto;
-import ua.knu.knudev.knudevcommon.utils.AcademicUnitsIds;
 import ua.knu.knudev.teammanager.domain.Department;
 import ua.knu.knudev.teammanager.domain.Specialty;
 import ua.knu.knudev.teammanager.domain.embeddable.MultiLanguageName;
@@ -96,9 +95,9 @@ public class DepartmentService implements DepartmentApi {
         ));
     }
 
-    public void validateAcademicUnitExistence(AcademicUnitsIds academicUnitsIds) {
-        Department department = getById(academicUnitsIds.departmentId());
-        ensureDepartmentContainsSpecialty(department, academicUnitsIds.specialtyCodename());
+    public void validateAcademicUnitExistence(UUID departmentId, Double specialtyCodeName) {
+        Department department = getById(departmentId);
+        ensureDepartmentContainsSpecialty(department, specialtyCodeName);
     }
 
     private void ensureDepartmentDoesNotExist(String nameEn, String nameUk) {

@@ -11,8 +11,6 @@ import org.springframework.web.multipart.MultipartFile;
 import ua.knu.knudev.intergrationtests.config.IntegrationTestsConfig;
 import ua.knu.knudev.knudevcommon.constant.AccountTechnicalRole;
 import ua.knu.knudev.knudevcommon.constant.Expertise;
-import ua.knu.knudev.knudevcommon.utils.AcademicUnitsIds;
-import ua.knu.knudev.knudevcommon.utils.FullName;
 import ua.knu.knudev.knudevsecurity.repository.AccountAuthRepository;
 import ua.knu.knudev.knudevsecurityapi.request.AccountCreationRequest;
 import ua.knu.knudev.taskmanager.domain.TaskAssignment;
@@ -45,11 +43,9 @@ public class TaskAssignmentServiceIntegrationTest {
 
     private static final String TEST_EMAIL = "student@knu.ua";
     private static final String TEST_PASSWORD = "Password123!";
-    private static final FullName TEST_FULLNAME = FullName.builder()
-            .firstName("John")
-            .lastName("Doe")
-            .middleName("Middle")
-            .build();
+    private static final String TEST_FIRST_NAME = "John";
+    private static final String TEST_LAST_NAME = "Doe";
+    private static final String TEST_MIDDLE_NAME = "Middle";
     private static final String TEST_FILE_NAME = "avatar.png";
     private static final String TASK_FILE_NAME = "Task_Developer_MoonlightWalk.pdf";
     @Autowired
@@ -117,9 +113,12 @@ public class TaskAssignmentServiceIntegrationTest {
         return AccountCreationRequest.builder()
                 .email(TEST_EMAIL)
                 .password(TEST_PASSWORD)
-                .fullName(TEST_FULLNAME)
                 .expertise(Expertise.BACKEND)
-                .academicUnitsIds(new AcademicUnitsIds(testDepartment.getId(), testSpecialty.getCodeName()))
+                .firstName(TEST_FIRST_NAME)
+                .lastName(TEST_LAST_NAME)
+                .middleName(TEST_MIDDLE_NAME)
+                .departmentId(testDepartment.getId())
+                .specialtyCodename(testSpecialty.getCodeName())
                 .avatarFile(getMockMultipartFile())
                 .build();
     }
