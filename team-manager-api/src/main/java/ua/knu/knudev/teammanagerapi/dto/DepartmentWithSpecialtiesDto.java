@@ -1,15 +1,15 @@
 package ua.knu.knudev.teammanagerapi.dto;
 
 import lombok.Builder;
+import ua.knu.knudev.knudevcommon.dto.MultiLanguageNameDto;
 
 import java.util.Set;
 import java.util.UUID;
 
 @Builder
-public record DepartmentDto(
+public record DepartmentWithSpecialtiesDto(
         UUID id,
-        String nameInEnglish,
-        String nameInUkrainian,
+        MultiLanguageNameDto name,
         Set<SpecialtyCreationDto> specialties
 ) {
 }
