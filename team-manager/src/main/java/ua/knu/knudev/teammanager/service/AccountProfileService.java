@@ -31,7 +31,6 @@ import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-//todo fix tests
 @Service
 @RequiredArgsConstructor
 @Validated
