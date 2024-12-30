@@ -1,14 +1,15 @@
 package ua.knu.knudev.knudevrest.exception;
 
-import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import ua.knu.knudev.knudevcommon.constant.Expertise;
 import ua.knu.knudev.knudevcommon.exception.FileException;
 import ua.knu.knudev.taskmanagerapi.exception.TaskAssignmentException;
 import ua.knu.knudev.taskmanagerapi.exception.TaskException;
@@ -16,7 +17,11 @@ import ua.knu.knudev.teammanagerapi.exception.AccountException;
 import ua.knu.knudev.teammanagerapi.exception.DepartmentException;
 
 import java.nio.charset.StandardCharsets;
-import java.util.stream.Collectors;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Stream;
 
 @RestControllerAdvice
 public class RestGlobalExceptionHandler {
@@ -52,12 +57,20 @@ public class RestGlobalExceptionHandler {
         return exception.getMessage();
     }
 
-    @ExceptionHandler
+    @ExceptionHandler(MethodArgumentNotValidException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public String handleMethodArgumentNotValidException(MethodArgumentNotValidException exception) {
-        return exception.getFieldErrors().stream()
-                .map(DefaultMessageSourceResolvable::getDefaultMessage)
-                .collect(Collectors.joining(", "));
+    public Map<String, List<String>> handleValidationExceptions(MethodArgumentNotValidException ex) {
+        Map<String, List<String>> errors = new HashMap<>();
+
+        ex.getBindingResult().getFieldErrors().forEach(fieldError -> {
+            String fieldKey = fieldError.getField() + "Errors";
+            String errorMessage = buildErrorMessage(fieldError);
+
+            List<String> fieldErrorList = errors.computeIfAbsent(fieldKey, k -> new ArrayList<>());
+            fieldErrorList.add(errorMessage);
+        });
+
+        return errors;
     }
 
     @ExceptionHandler
@@ -69,6 +82,15 @@ public class RestGlobalExceptionHandler {
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public String handleIllegalArgumentException(IllegalArgumentException exception) {
         return exception.getMessage();
+    }
+
+    private String buildErrorMessage(FieldError fieldError) {
+        if ("expertise".equals(fieldError.getField())
+                && "typeMismatch".equals(fieldError.getCode())) {
+            return "Invalid Expertise value. Possible values are: " + Stream.of(Expertise.values());
+        }
+
+        return fieldError.getDefaultMessage();
     }
 
 }

@@ -47,7 +47,7 @@ public class AccountProfileService implements AccountProfileApi {
     @Transactional
     public AccountRegistrationResponse register(@Valid AccountCreationRequest request) {
         validateEmailNotExists(request.email());
-        departmentService.validateAcademicUnitExistence(request.academicUnitsIds());
+        departmentService.validateAcademicUnitExistence(request.departmentId(), request.specialtyCodename());
 
         AuthAccountCreationResponse createdAuthAccount = accountAuthServiceApi.createAccount(request);
         String uploadFilename = uploadAvatar(request.avatarFile());
@@ -116,26 +116,25 @@ public class AccountProfileService implements AccountProfileApi {
     private AccountProfile buildAccountProfile(AccountCreationRequest request,
                                                String uploadFilename,
                                                AuthAccountCreationResponse authAccount) {
-        FullName reqFullName = request.fullName();
-        AcademicUnitsIds reqAcademicUnitsIds = request.academicUnitsIds();
+        UUID departmentId = request.departmentId();
+        Double specialtyCodename = request.specialtyCodename();
 
-        Department department = departmentService.getById(reqAcademicUnitsIds.departmentId());
+        Department department = departmentService.getById(departmentId);
         Specialty specialty = department.getSpecialties().stream()
-                .filter(s -> s.getCodeName().equals(reqAcademicUnitsIds.specialtyCodename()))
+                .filter(s -> s.getCodeName().equals(specialtyCodename))
                 .findAny()
                 .orElseThrow(() -> new AccountException(
                         String.format("Specialty with id %s not found in department %s",
-                                reqAcademicUnitsIds.specialtyCodename(),
-                                reqAcademicUnitsIds.departmentId()
+                                specialtyCodename, departmentId
                         )
                 ));
 
         return AccountProfile.builder()
                 .id(authAccount.id())
                 .email(authAccount.email())
-                .firstName(reqFullName.firstName())
-                .lastName(reqFullName.lastName())
-                .middleName(reqFullName.middleName())
+                .firstName(request.firstName())
+                .lastName(request.lastName())
+                .middleName(request.middleName())
                 .avatarFilename(uploadFilename)
                 .department(department)
                 .specialty(specialty)
