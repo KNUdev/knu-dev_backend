@@ -13,6 +13,7 @@ import ua.knu.knudev.knudevcommon.constant.KNUdevUnit;
 import ua.knu.knudev.teammanager.domain.*;
 import ua.knu.knudev.teammanager.repository.*;
 import ua.knu.knudev.teammanager.service.RecruitmentService;
+import ua.knu.knudev.teammanagerapi.constant.RecruitmentCloseCause;
 import ua.knu.knudev.teammanagerapi.exception.AccountException;
 import ua.knu.knudev.teammanagerapi.exception.RecruitmentException;
 import ua.knu.knudev.teammanagerapi.request.RecruitmentJoinRequest;
@@ -300,7 +301,9 @@ class RecruitmentServiceTest {
         AccountProfile user = createAndSaveAccount("closeVsJoin@example.com");
 
         // Act
-        Thread closer = new Thread(() -> recruitmentService.closeRecruitment(recruitment.getId()));
+        Thread closer = new Thread(() -> recruitmentService.closeRecruitment(
+                recruitment.getId(), RecruitmentCloseCause.MANUAL_CLOSE
+        ));
         Thread joiner = new Thread(() -> recruitmentService.joinActiveRecruitment(
                 new RecruitmentJoinRequest(user.getId(), recruitment.getId())
         ));

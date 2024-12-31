@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 import ua.knu.knudev.knudevcommon.constant.Expertise;
 import ua.knu.knudev.knudevcommon.constant.KNUdevUnit;
+import ua.knu.knudev.teammanagerapi.constant.RecruitmentCloseCause;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -28,6 +29,10 @@ public class ClosedRecruitment {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, updatable = false)
     private KNUdevUnit unit;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, updatable = false)
+    private RecruitmentCloseCause closeCause;
 
     @Column(nullable = false, unique = true)
     private String name;

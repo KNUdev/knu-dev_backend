@@ -17,8 +17,10 @@ public class RecruitmentController {
 
     @PostMapping("/join")
     public void joinActiveRecruitment(@RequestBody RecruitmentJoinRequest joinRequest) {
-
-
-
+        recruitmentApi.joinActiveRecruitment(joinRequest);
     }
+
+    //todo close, open recruitment. On close manually to service pass MANUAL_CLOSE
+
+
 }

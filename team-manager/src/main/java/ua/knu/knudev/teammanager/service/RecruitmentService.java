@@ -13,6 +13,7 @@ import ua.knu.knudev.teammanager.mapper.RecruitmentAutoCloseConditionsMapper;
 import ua.knu.knudev.teammanager.repository.ActiveRecruitmentRepository;
 import ua.knu.knudev.teammanager.repository.ClosedRecruitmentRepository;
 import ua.knu.knudev.teammanagerapi.api.RecruitmentApi;
+import ua.knu.knudev.teammanagerapi.constant.RecruitmentCloseCause;
 import ua.knu.knudev.teammanagerapi.exception.RecruitmentException;
 import ua.knu.knudev.teammanagerapi.request.RecruitmentJoinRequest;
 import ua.knu.knudev.teammanagerapi.request.RecruitmentOpenRequest;
@@ -57,11 +58,12 @@ public class RecruitmentService implements RecruitmentApi {
 
     @Override
     @Transactional
-    public void closeRecruitment(UUID activeRecruitmentId) {
+    public void closeRecruitment(UUID activeRecruitmentId, RecruitmentCloseCause closeCause) {
         //todo perhaps app some field why active recruitment was closed (enum with 3 values)
         ActiveRecruitment activeRecruitment = getActiveRecruitmentDomainById(activeRecruitmentId);
 
         ClosedRecruitment closedRecruitment = buildClosedRecruitment(activeRecruitment);
+        closedRecruitment.setCloseCause(closeCause);
         activeRecruitmentRepository.delete(activeRecruitment);
         closedRecruitmentRepository.save(closedRecruitment);
 
@@ -111,7 +113,7 @@ public class RecruitmentService implements RecruitmentApi {
 
         int freshCount = activeRecruitmentRepository.countRecruited(activeRecruitmentId);
         if (freshCount == maxRecruitedLimit) {
-            closeRecruitment(activeRecruitmentId);
+            closeRecruitment(activeRecruitmentId, RecruitmentCloseCause.ON_RECRUITS_EXCEEDING);
         }
     }
 
