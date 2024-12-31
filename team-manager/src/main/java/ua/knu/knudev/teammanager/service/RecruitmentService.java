@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.support.TransactionTemplate;
 import ua.knu.knudev.knudevcommon.constant.Expertise;
 import ua.knu.knudev.knudevcommon.constant.KNUdevUnit;
 import ua.knu.knudev.teammanager.domain.*;
@@ -25,6 +26,7 @@ import java.util.UUID;
 @Slf4j
 public class RecruitmentService implements RecruitmentApi {
 
+    private final TransactionTemplate transactionTemplate;
     private final ActiveRecruitmentRepository activeRecruitmentRepository;
     private final ClosedRecruitmentRepository closedRecruitmentRepository;
     private final RecruitmentAutoCloseConditionsMapper recruitmentAutoCloseConditionsMapper;
@@ -71,10 +73,27 @@ public class RecruitmentService implements RecruitmentApi {
     }
 
     @Override
-    @Transactional
     public void joinActiveRecruitment(RecruitmentJoinRequest joinRequest) {
+        final int maxJoinRetries = 5;
+
+        for (int attempt = 1; attempt <= maxJoinRetries; attempt++) {
+            try {
+                transactionTemplate.executeWithoutResult(status -> doJoinActiveRecruitment(joinRequest));
+                return;
+            } catch (ObjectOptimisticLockingFailureException ex) {
+                log.warn("Optimistic lock failed on attempt {}/{}. Message={}",
+                        attempt, maxJoinRetries, ex.getMessage());
+                if (attempt == maxJoinRetries) {
+                    throw new RecruitmentException("Concurrent conflict, refresh and try again");
+                }
+            }
+        }
+    }
+
+    private void doJoinActiveRecruitment(RecruitmentJoinRequest joinRequest) {
         UUID accountId = joinRequest.accountId();
         UUID activeRecruitmentId = joinRequest.activeRecruitmentId();
+
         if (activeRecruitmentRepository.hasUserJoined(activeRecruitmentId, accountId)) {
             throw new RecruitmentException("User is already in this recruitment");
         }
@@ -84,23 +103,14 @@ public class RecruitmentService implements RecruitmentApi {
 
         int currentRecruitedCount = activeRecruitmentRepository.countRecruited(activeRecruitmentId);
         int maxRecruitedLimit = activeRecruitment.getRecruitmentAutoCloseConditions().maxCandidates();
-        try {
-            if (currentRecruitedCount < maxRecruitedLimit) {
-                activeRecruitment.joinUserToRecruitment(accountProfileDomain);
-            }
-            activeRecruitmentRepository.saveAndFlush(activeRecruitment);
 
-            closeRecruitmentIfMaxCandidatesExceed(currentRecruitedCount, maxRecruitedLimit, activeRecruitmentId);
-        } catch (ObjectOptimisticLockingFailureException ex) {
-            closeRecruitmentIfMaxCandidatesExceed(currentRecruitedCount, maxRecruitedLimit, activeRecruitmentId);
-            throw new RecruitmentException("Something went wrong. Please refresh and try again");
+        if (currentRecruitedCount < maxRecruitedLimit) {
+            activeRecruitment.joinUserToRecruitment(accountProfileDomain);
         }
-    }
+        activeRecruitmentRepository.saveAndFlush(activeRecruitment);
 
-    private void closeRecruitmentIfMaxCandidatesExceed(int currentRecruitedCount,
-                                                       int maxRecruited,
-                                                       UUID activeRecruitmentId) {
-        if (currentRecruitedCount + 1 == maxRecruited) {
+        int freshCount = activeRecruitmentRepository.countRecruited(activeRecruitmentId);
+        if (freshCount == maxRecruitedLimit) {
             closeRecruitment(activeRecruitmentId);
         }
     }
