@@ -21,8 +21,7 @@ public class TaskController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successfully retrieved the task"),
             @ApiResponse(responseCode = "400", description = "Invalid task ID supplied"),
-            @ApiResponse(responseCode = "404", description = "Task not found"),
-            @ApiResponse(responseCode = "500", description = "Internal server error")
+            @ApiResponse(responseCode = "404", description = "Task not found")
     })
     @GetMapping("/gdjghdsjg")
     public TaskDto getTaskById(

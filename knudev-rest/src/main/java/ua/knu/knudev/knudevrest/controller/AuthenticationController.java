@@ -27,8 +27,7 @@ public class AuthenticationController {
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "User successfully authenticated"),
             @ApiResponse(responseCode = "400", description = "Invalid authentication request"),
-            @ApiResponse(responseCode = "401", description = "Unauthorized access - Invalid credentials"),
-            @ApiResponse(responseCode = "500", description = "Internal server error")
+            @ApiResponse(responseCode = "401", description = "Unauthorized access - Invalid credentials")
     })
     @PostMapping("/login")
     public ResponseEntity<AuthenticationResponse> authenticate(

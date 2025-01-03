@@ -32,8 +32,7 @@ public class AdminTaskUploadController {
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Task successfully uploaded."),
             @ApiResponse(responseCode = "400", description = "Invalid input provided."),
-            @ApiResponse(responseCode = "403", description = "You are not have an access this endpoint."),
-            @ApiResponse(responseCode = "500", description = "Internal server error.")
+            @ApiResponse(responseCode = "403", description = "You are not have an access this endpoint.")
     })
     @PostMapping(value = "/campus/{role}",
             consumes = MediaType.MULTIPART_FORM_DATA_VALUE,

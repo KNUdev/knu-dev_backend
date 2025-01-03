@@ -29,8 +29,7 @@ public class AccountController {
     )
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Account successfully registered."),
-            @ApiResponse(responseCode = "400", description = "Invalid input provided."),
-            @ApiResponse(responseCode = "500", description = "Internal server error.")
+            @ApiResponse(responseCode = "400", description = "Invalid input provided.")
     })
     @PostMapping(value = "/register", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @ResponseStatus(HttpStatus.CREATED)

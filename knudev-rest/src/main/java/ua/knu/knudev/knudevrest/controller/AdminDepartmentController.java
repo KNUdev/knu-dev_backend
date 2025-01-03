@@ -28,8 +28,7 @@ public class AdminDepartmentController {
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Task successfully uploaded."),
             @ApiResponse(responseCode = "400", description = "Invalid input provided."),
-            @ApiResponse(responseCode = "403", description = "You are not have an access this endpoint."),
-            @ApiResponse(responseCode = "500", description = "Internal server error.")
+            @ApiResponse(responseCode = "403", description = "You are not have an access this endpoint.")
     })
     @PostMapping("/create")
     @ResponseStatus(HttpStatus.CREATED)

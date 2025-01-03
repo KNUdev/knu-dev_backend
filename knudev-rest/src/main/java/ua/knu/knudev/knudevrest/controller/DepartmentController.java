@@ -26,8 +26,7 @@ public class DepartmentController {
             description = "This endpoint retrieves a list of short department details."
     )
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Successfully retrieved the list of departments."),
-            @ApiResponse(responseCode = "500", description = "Internal server error.")
+            @ApiResponse(responseCode = "200", description = "Successfully retrieved the list of departments.")
     })
     @GetMapping("/departments")
     public Set<ShortDepartmentDto> getShortDepartments() {
@@ -40,8 +39,7 @@ public class DepartmentController {
     )
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Successfully retrieved the specialties for the department."),
-            @ApiResponse(responseCode = "404", description = "Department not found."),
-            @ApiResponse(responseCode = "500", description = "Internal server error.")
+            @ApiResponse(responseCode = "404", description = "Department not found.")
     })
     @GetMapping("/departments/{departmentId}/specialties")
     public Set<ShortSpecialtyDto> getSpecialtiesByDepartment(

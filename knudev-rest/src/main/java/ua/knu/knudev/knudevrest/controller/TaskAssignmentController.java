@@ -26,8 +26,7 @@ public class TaskAssignmentController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Task successfully assigned"),
             @ApiResponse(responseCode = "400", description = "Bad request, invalid email or other parameters"),
-            @ApiResponse(responseCode = "404", description = "Account not found"),
-            @ApiResponse(responseCode = "500", description = "Internal server error")
+            @ApiResponse(responseCode = "404", description = "Account not found")
     })
     @PostMapping("/to/{email}")
     public TaskAssignmentResponse assignTask(
