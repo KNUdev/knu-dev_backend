@@ -9,6 +9,4 @@ public interface RecruitmentApi {
     void openRecruitment(RecruitmentOpenRequest openRequest);
 
     void closeRecruitment(UUID activeRecruitmentId);
-
-    void addUserToRecruitment(UUID activeRecruitmentId, UUID accountProfileId);
 }

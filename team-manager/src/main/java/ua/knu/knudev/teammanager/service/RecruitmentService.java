@@ -76,36 +76,8 @@ public class RecruitmentService implements RecruitmentApi {
         );
     }
 
-    @Override
-    public void addUserToRecruitment(UUID activeRecruitmentId, UUID accountProfileId) {
-        AccountProfile accountProfile = accountProfileRepository.findById(accountProfileId)
-                .orElseThrow(() -> new AccountException("Account profile not found with ID: " + accountProfileId));
-        ActiveRecruitment activeRecruitment = activeRecruitmentRepository.findById(activeRecruitmentId)
-                .orElseThrow(() -> new RecruitmentException("Active recruitment not found with ID: " + activeRecruitmentId));
 
-        Set<AccountProfile> currentRecruited = activeRecruitment.getCurrentRecruited();
-        int maxCandidates = activeRecruitment.getRecruitmentAutoCloseConditions().maxCandidates();
-
-        if (currentRecruited.contains(accountProfile)) {
-            throw new RecruitmentException("Account profile with ID: " + accountProfileId + " is already added to the recruitment.");
-        }
-
-        if (currentRecruited.size() >= maxCandidates) {
-            throw new RecruitmentException("Recruitment with ID: " + activeRecruitmentId + " has reached its maximum capacity.");
-        }
-
-        // Додаємо користувача
-        currentRecruited.add(accountProfile);
-
-        // Зберігаємо змінений об'єкт
-        activeRecruitment.setCurrentRecruited(currentRecruited);
-        activeRecruitmentRepository.save(activeRecruitment);
-    }
-
-
-
-
-    //    TODO WE NEED TO REDO THIS METHOD LITTLE
+//    TODO WE NEED TO REDO THIS METHOD LITTLE
 //    @Transactional
 //    protected void autoCloseRecruitment() {
 //        int numberOfRecruitedPeople = 0;
