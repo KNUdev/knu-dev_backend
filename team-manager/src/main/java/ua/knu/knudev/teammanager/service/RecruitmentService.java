@@ -3,21 +3,26 @@ package ua.knu.knudev.teammanager.service;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.stereotype.Service;
 import ua.knu.knudev.knudevcommon.constant.Expertise;
 import ua.knu.knudev.knudevcommon.constant.KNUdevUnit;
+import ua.knu.knudev.teammanager.domain.AccountProfile;
 import ua.knu.knudev.teammanager.domain.ActiveRecruitment;
 import ua.knu.knudev.teammanager.domain.ClosedRecruitment;
 import ua.knu.knudev.teammanager.domain.embeddable.RecruitmentAutoCloseConditions;
 import ua.knu.knudev.teammanager.mapper.RecruitmentAutoCloseConditionsMapper;
+import ua.knu.knudev.teammanager.repository.AccountProfileRepository;
 import ua.knu.knudev.teammanager.repository.ActiveRecruitmentRepository;
 import ua.knu.knudev.teammanager.repository.ClosedRecruitmentRepository;
 import ua.knu.knudev.teammanagerapi.api.RecruitmentApi;
+import ua.knu.knudev.teammanagerapi.exception.AccountException;
 import ua.knu.knudev.teammanagerapi.exception.RecruitmentException;
 import ua.knu.knudev.teammanagerapi.request.RecruitmentOpenRequest;
 
 import java.time.LocalDateTime;
 import java.util.Collections;
+import java.util.Set;
 import java.util.UUID;
 
 @Service
@@ -26,6 +31,7 @@ import java.util.UUID;
 public class RecruitmentService implements RecruitmentApi {
 
     private final ActiveRecruitmentRepository activeRecruitmentRepository;
+    private final AccountProfileRepository accountProfileRepository;
     private final ClosedRecruitmentRepository closedRecruitmentRepository;
     private final RecruitmentAutoCloseConditionsMapper recruitmentAutoCloseConditionsMapper;
 
@@ -70,7 +76,36 @@ public class RecruitmentService implements RecruitmentApi {
         );
     }
 
-//    TODO WE NEED TO REDO THIS METHOD LITTLE
+    @Override
+    public void addUserToRecruitment(UUID activeRecruitmentId, UUID accountProfileId) {
+        AccountProfile accountProfile = accountProfileRepository.findById(accountProfileId)
+                .orElseThrow(() -> new AccountException("Account profile not found with ID: " + accountProfileId));
+        ActiveRecruitment activeRecruitment = activeRecruitmentRepository.findById(activeRecruitmentId)
+                .orElseThrow(() -> new RecruitmentException("Active recruitment not found with ID: " + activeRecruitmentId));
+
+        Set<AccountProfile> currentRecruited = activeRecruitment.getCurrentRecruited();
+        int maxCandidates = activeRecruitment.getRecruitmentAutoCloseConditions().maxCandidates();
+
+        if (currentRecruited.contains(accountProfile)) {
+            throw new RecruitmentException("Account profile with ID: " + accountProfileId + " is already added to the recruitment.");
+        }
+
+        if (currentRecruited.size() >= maxCandidates) {
+            throw new RecruitmentException("Recruitment with ID: " + activeRecruitmentId + " has reached its maximum capacity.");
+        }
+
+        // Додаємо користувача
+        currentRecruited.add(accountProfile);
+
+        // Зберігаємо змінений об'єкт
+        activeRecruitment.setCurrentRecruited(currentRecruited);
+        activeRecruitmentRepository.save(activeRecruitment);
+    }
+
+
+
+
+    //    TODO WE NEED TO REDO THIS METHOD LITTLE
 //    @Transactional
 //    protected void autoCloseRecruitment() {
 //        int numberOfRecruitedPeople = 0;

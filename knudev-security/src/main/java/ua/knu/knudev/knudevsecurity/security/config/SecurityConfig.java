@@ -41,6 +41,7 @@ public class SecurityConfig {
 //                    String admin = AccountRole.ADMIN.name();
 //                    String owner = AccountRole.OWNER.name();
                     auth
+                            .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
                             .requestMatchers(WHITE_LIST_URLS).permitAll()
                             .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                             .requestMatchers("/components/**").permitAll()
