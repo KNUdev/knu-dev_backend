@@ -19,7 +19,7 @@ spring:
   config:
     import: optional:file:.env[.properties]
   datasource:
-    url: ${DB_URI:jdbc:postgresql://localhost:5432/knudev_db}
+    url: ${DB_URI:jdbc:postgresql://localhost:5433/knudev_db}
     username: ${POSTGRES_USERNAME:postgres}
     password: ${POSTGRES_PASSWORD:knudevpass}
     driver-class-name: org.postgresql.Driver
@@ -41,6 +41,8 @@ logging:
         transaction:
           support:
             TransactionSynchronizationUtils: info
+      springdoc:
+        ui: DEBUG
 
 application:
   base-url: ${BASE_URL:http://localhost:5000}
@@ -57,12 +59,12 @@ application:
       expiration: 1440000 #24 hours
   files:
     images:
-        allowed-extensions:
-          - jpg
-          - jpeg
-          - png
-          - webp
-        maximum-size-in-kilobytes: 2048
+      allowed-extensions:
+        - jpg
+        - jpeg
+        - png
+        - webp
+      maximum-size-in-kilobytes: 2048
     pdfs:
       tasks:
         allowed-extensions:
