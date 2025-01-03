@@ -5,7 +5,6 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Import;
 import ua.knu.knudev.fileservice.config.FileServiceConfig;
 import ua.knu.knudev.fileserviceapi.config.FileServiceApiConfig;
-import ua.knu.knudev.knudevrest.config.OpenApiConfiguration;
 import ua.knu.knudev.knudevrest.config.RestConfig;
 import ua.knu.knudev.knudevcommon.config.CommonConfig;
 import ua.knu.knudev.knudevliquibase.config.LiquibaseConfig;
@@ -19,7 +18,7 @@ import ua.knu.knudev.teammanagerapi.config.TeamManagerApiConfig;
 @SpringBootApplication
 @Import({CommonConfig.class, LiquibaseConfig.class, RestConfig.class, SecurityModuleConfig.class, SecurityApiConfig.class,
         TaskManagerConfig.class, TaskManagerApiConfig.class, TeamManagerConfig.class, TeamManagerApiConfig.class,
-        FileServiceConfig.class, FileServiceApiConfig.class, OpenApiConfiguration.class})
+        FileServiceConfig.class, FileServiceApiConfig.class})
 public class KnudevApplication {
 
     public static void main(String[] args) {
