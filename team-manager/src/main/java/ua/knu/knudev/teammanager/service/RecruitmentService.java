@@ -10,7 +10,6 @@ import ua.knu.knudev.teammanager.domain.ActiveRecruitment;
 import ua.knu.knudev.teammanager.domain.ClosedRecruitment;
 import ua.knu.knudev.teammanager.domain.embeddable.RecruitmentAutoCloseConditions;
 import ua.knu.knudev.teammanager.mapper.RecruitmentAutoCloseConditionsMapper;
-import ua.knu.knudev.teammanager.repository.AccountProfileRepository;
 import ua.knu.knudev.teammanager.repository.ActiveRecruitmentRepository;
 import ua.knu.knudev.teammanager.repository.ClosedRecruitmentRepository;
 import ua.knu.knudev.teammanagerapi.api.RecruitmentApi;
@@ -93,7 +92,7 @@ public class RecruitmentService implements RecruitmentApi {
 //    }
 //
 
-    /// /    TODO REDO THAT ALSO
+////    TODO REDO THAT ALSO
 //    private static boolean autoCloseRecruitmentFilter(ActiveRecruitment activeRecruitment, Integer numberOfRecruitedPeople) {
 //        RecruitmentAutoCloseConditions autoCloseConditions = activeRecruitment.getRecruitmentAutoCloseConditions();
 //        return autoCloseConditions.maxCandidates() <= numberOfRecruitedPeople
