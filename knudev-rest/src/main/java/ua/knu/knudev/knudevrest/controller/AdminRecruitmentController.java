@@ -95,7 +95,8 @@ public class AdminRecruitmentController {
                     name = "Active recruitment id",
                     description = "Active recruitment id",
                     in = ParameterIn.HEADER,
-                    required = true
+                    required = true,
+                    example = "550e8400-e29b-41d4-a716-446655440000"
             ) UUID activeRecruitmentId) {
         RecruitmentCloseRequest closeRequest = new RecruitmentCloseRequest(
                 activeRecruitmentId, RecruitmentCloseCause.MANUAL_CLOSE);
