@@ -2,10 +2,12 @@ package ua.knu.knudev.teammanager.domain;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.apache.commons.lang3.ObjectUtils;
 import org.hibernate.annotations.UuidGenerator;
 import ua.knu.knudev.knudevcommon.constant.Expertise;
 import ua.knu.knudev.knudevcommon.constant.KNUdevUnit;
 import ua.knu.knudev.teammanager.domain.embeddable.RecruitmentAutoCloseConditions;
+import ua.knu.knudev.teammanagerapi.exception.RecruitmentException;
 
 import java.time.LocalDateTime;
 import java.util.Set;
@@ -52,7 +54,7 @@ public class ActiveRecruitment {
     @Embedded
     private RecruitmentAutoCloseConditions recruitmentAutoCloseConditions;
 
-    @OneToMany
+    @OneToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinTable(
             name = "active_recruitment_current_recruited",
             schema = "team_management",
@@ -60,5 +62,15 @@ public class ActiveRecruitment {
             inverseJoinColumns = @JoinColumn(name = "account_profile_id", referencedColumnName = "id", unique = true)
     )
     private Set<AccountProfile> currentRecruited;
+
+    @Version
+    private int version;
+
+    public void joinUserToRecruitment(AccountProfile account) {
+        if (ObjectUtils.isEmpty(account)) {
+            throw new RecruitmentException("Cannot join empty user to recruitment with id: " + this.id);
+        }
+        this.currentRecruited.add(account);
+    }
 
 }
