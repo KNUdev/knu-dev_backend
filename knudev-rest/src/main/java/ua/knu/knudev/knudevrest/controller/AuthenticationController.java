@@ -57,7 +57,8 @@ public class AuthenticationController {
                     name = "Authentication request",
                     description = "Authentication request containing the user's credentials",
                     in = ParameterIn.HEADER,
-                    required = true
+                    required = true,
+                    schema = @Schema(implementation = AuthenticationRequest.class)
             ) AuthenticationRequest authenticationRequest
     ) {
         return ResponseEntity.ok(authServiceApi.authenticate(authenticationRequest));

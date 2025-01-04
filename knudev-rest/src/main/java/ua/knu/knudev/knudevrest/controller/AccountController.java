@@ -54,7 +54,8 @@ public class AccountController {
                     name = "Account creation request",
                     description = "Account registration details",
                     in = ParameterIn.HEADER,
-                    required = true
+                    required = true,
+                    schema = @Schema(implementation = AccountCreationRequest.class)
             ) AccountCreationRequest registrationRequest) {
         return accountAuthServiceApi.register(registrationRequest);
     }

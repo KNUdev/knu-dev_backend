@@ -34,24 +34,21 @@ public class AdminDepartmentController {
             @ApiResponse(
                     responseCode = "201",
                     description = "Department successfully created.",
-                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE)
-            ),
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE)),
             @ApiResponse(
                     responseCode = "400",
                     description = "Invalid input provided.",
                     content = @Content(
                             mediaType = MediaType.APPLICATION_JSON_VALUE,
                             schema = @Schema(implementation = ErrorResponse.class)
-                    )
-            ),
+                    )),
             @ApiResponse(
                     responseCode = "403",
                     description = "You do not have access to this endpoint.",
                     content = @Content(
                             mediaType = MediaType.APPLICATION_JSON_VALUE,
                             schema = @Schema(implementation = ErrorResponse.class)
-                    )
-            )
+                    ))
     })
     @PostMapping("/create")
     @ResponseStatus(HttpStatus.CREATED)
@@ -60,7 +57,8 @@ public class AdminDepartmentController {
                     name = "Department creation request",
                     description = "Department creation data",
                     in = ParameterIn.HEADER,
-                    required = true
+                    required = true,
+                    schema = @Schema(implementation = DepartmentCreationRequest.class)
             ) DepartmentCreationRequest departmentCreationRequest) {
         departmentApi.createDepartment(departmentCreationRequest);
     }
