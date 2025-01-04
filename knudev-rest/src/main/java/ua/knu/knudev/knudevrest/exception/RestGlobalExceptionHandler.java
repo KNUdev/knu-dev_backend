@@ -14,6 +14,7 @@ import ua.knu.knudev.taskmanagerapi.exception.TaskAssignmentException;
 import ua.knu.knudev.taskmanagerapi.exception.TaskException;
 import ua.knu.knudev.teammanagerapi.exception.AccountException;
 import ua.knu.knudev.teammanagerapi.exception.DepartmentException;
+import ua.knu.knudev.teammanagerapi.exception.RecruitmentException;
 
 import java.nio.charset.StandardCharsets;
 import java.util.stream.Collectors;
@@ -58,6 +59,11 @@ public class RestGlobalExceptionHandler {
         return exception.getFieldErrors().stream()
                 .map(DefaultMessageSourceResolvable::getDefaultMessage)
                 .collect(Collectors.joining(", "));
+    }
+
+    @ExceptionHandler
+    public String handleRecruitmentException(RecruitmentException recruitmentException) {
+        return recruitmentException.getMessage();
     }
 
     @ExceptionHandler

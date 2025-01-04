@@ -16,6 +16,7 @@ import ua.knu.knudev.teammanager.service.RecruitmentService;
 import ua.knu.knudev.teammanagerapi.constant.RecruitmentCloseCause;
 import ua.knu.knudev.teammanagerapi.exception.AccountException;
 import ua.knu.knudev.teammanagerapi.exception.RecruitmentException;
+import ua.knu.knudev.teammanagerapi.request.RecruitmentCloseRequest;
 import ua.knu.knudev.teammanagerapi.request.RecruitmentJoinRequest;
 
 import java.time.LocalDateTime;
@@ -302,7 +303,7 @@ class RecruitmentServiceTest {
 
         // Act
         Thread closer = new Thread(() -> recruitmentService.closeRecruitment(
-                recruitment.getId(), RecruitmentCloseCause.MANUAL_CLOSE
+                new RecruitmentCloseRequest(recruitment.getId(), RecruitmentCloseCause.MANUAL_CLOSE)
         ));
         Thread joiner = new Thread(() -> recruitmentService.joinActiveRecruitment(
                 new RecruitmentJoinRequest(user.getId(), recruitment.getId())

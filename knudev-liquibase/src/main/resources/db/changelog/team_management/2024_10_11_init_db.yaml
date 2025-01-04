@@ -371,7 +371,6 @@ databaseChangeLog:
                   name: name
                   type: varchar(255)
                   constraints:
-                    unique: true
                     nullable: false
               - column:
                   name: deadline_date
@@ -383,6 +382,9 @@ databaseChangeLog:
                   type: int
                   constraints:
                     nullable: false
+              - column:
+                  name: version
+                  type: int
         - createIndex:
             schemaName: team_management
             tableName: active_recruitment

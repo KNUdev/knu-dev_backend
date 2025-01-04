@@ -15,6 +15,7 @@ import ua.knu.knudev.teammanager.repository.ClosedRecruitmentRepository;
 import ua.knu.knudev.teammanagerapi.api.RecruitmentApi;
 import ua.knu.knudev.teammanagerapi.constant.RecruitmentCloseCause;
 import ua.knu.knudev.teammanagerapi.exception.RecruitmentException;
+import ua.knu.knudev.teammanagerapi.request.RecruitmentCloseRequest;
 import ua.knu.knudev.teammanagerapi.request.RecruitmentJoinRequest;
 import ua.knu.knudev.teammanagerapi.request.RecruitmentOpenRequest;
 
@@ -45,6 +46,8 @@ public class RecruitmentService implements RecruitmentApi {
                 .expertise(openRequest.expertise())
                 .recruitmentAutoCloseConditions(autoCloseConditions)
                 .currentRecruited(Collections.emptySet())
+                .unit(openRequest.unit())
+                .startedAt(LocalDateTime.now())
                 .build();
         activeRecruitmentRepository.save(activeRecruitment);
 
@@ -58,12 +61,11 @@ public class RecruitmentService implements RecruitmentApi {
 
     @Override
     @Transactional
-    public void closeRecruitment(UUID activeRecruitmentId, RecruitmentCloseCause closeCause) {
-        //todo perhaps app some field why active recruitment was closed (enum with 3 values)
-        ActiveRecruitment activeRecruitment = getActiveRecruitmentDomainById(activeRecruitmentId);
+    public void closeRecruitment(RecruitmentCloseRequest closeRequest) {
+        ActiveRecruitment activeRecruitment = getActiveRecruitmentDomainById(closeRequest.activeRecruitmentId());
 
         ClosedRecruitment closedRecruitment = buildClosedRecruitment(activeRecruitment);
-        closedRecruitment.setCloseCause(closeCause);
+        closedRecruitment.setCloseCause(closeRequest.closeCause());
         activeRecruitmentRepository.delete(activeRecruitment);
         closedRecruitmentRepository.save(closedRecruitment);
 
@@ -113,7 +115,9 @@ public class RecruitmentService implements RecruitmentApi {
 
         int freshCount = activeRecruitmentRepository.countRecruited(activeRecruitmentId);
         if (freshCount == maxRecruitedLimit) {
-            closeRecruitment(activeRecruitmentId, RecruitmentCloseCause.ON_RECRUITS_EXCEEDING);
+            RecruitmentCloseRequest closeRequest = new RecruitmentCloseRequest(activeRecruitmentId,
+                    RecruitmentCloseCause.ON_RECRUITS_EXCEEDING);
+            closeRecruitment(closeRequest);
         }
     }
 
