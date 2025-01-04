@@ -1,15 +1,15 @@
 package ua.knu.knudev.knudevsecurityapi.request;
 
-import jakarta.validation.Valid;
 import jakarta.validation.constraints.*;
 import lombok.Builder;
 import org.springframework.web.multipart.MultipartFile;
-import ua.knu.knudev.knudevcommon.utils.AcademicUnitsIds;
-import ua.knu.knudev.knudevcommon.utils.FullName;
 import ua.knu.knudev.knudevcommon.constant.Expertise;
+
+import java.util.UUID;
 
 @Builder(toBuilder = true)
 public record AccountCreationRequest(
+
         @NotBlank(message = "Email cannot be blank")
         @Email(message = "Invalid email format")
         @Pattern(
@@ -30,11 +30,48 @@ public record AccountCreationRequest(
         )
         String password,
 
-        @Valid
-        FullName fullName,
-        @Valid @NotNull(message = "Department id and specialty code name must be present")
-        AcademicUnitsIds academicUnitsIds,
+        @NotBlank(message = "First name cannot be null or blank.")
+        @Pattern(
+                regexp = "^[A-Za-z'-]+$",
+                message = "First name must contain only English letters and valid symbols (- or ')"
+        )
+        @Size(
+                max = 50,
+                message = "First name cannot exceed 50 characters"
+        )
+        String firstName,
+
+        @NotBlank(message = "Last name cannot be null or blank.")
+        @Pattern(
+                regexp = "^[A-Za-z'-]+$",
+                message = "Last name must contain only English letters and valid symbols (- or ')"
+        )
+        @Size(
+                max = 50,
+                message = "Last name cannot exceed 50 characters"
+        )
+        String lastName,
+
+        @NotBlank(message = "Middle name cannot be null or blank.")
+        @Pattern(
+                regexp = "^[A-Za-z'-]+$",
+                message = "Middle name must contain only English letters and valid symbols (- or ')"
+        )
+        @Size(
+                max = 50,
+                message = "Middle name cannot exceed 50 characters"
+        )
+        String middleName,
+
+        @NotNull(message = "Department ID must be present")
+        UUID departmentId,
+
+        @NotNull(message = "Specialty code name must be present")
+        @DecimalMin(value = "1.0", message = "Specialty code name must be at least 1.0")
+        Double specialtyCodename,
+
         MultipartFile avatarFile,
+
         @NotNull(message = "Expertise must not be null")
         Expertise expertise
 ) {

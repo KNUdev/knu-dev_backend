@@ -2,6 +2,7 @@ package ua.knu.knudev.teammanager.utils;
 
 import ua.knu.knudev.teammanager.domain.Department;
 import ua.knu.knudev.teammanager.domain.Specialty;
+import ua.knu.knudev.teammanager.domain.embeddable.MultiLanguageName;
 
 import static ua.knu.knudev.teammanager.utils.constants.DepartmentTestsConstants.TEST_DEPARTMENT_ID;
 import static ua.knu.knudev.teammanager.utils.constants.DepartmentTestsConstants.TEST_SPECIALTY_ID;
@@ -9,19 +10,13 @@ import static ua.knu.knudev.teammanager.utils.constants.DepartmentTestsConstants
 public class AcademicUnitsTestUtils {
 
     public static Specialty getTestSpecialty(String nameInUkrainian, String nameInEnglish) {
-        Specialty specialty = new Specialty();
-        specialty.setCodeName(TEST_SPECIALTY_ID);
-        specialty.setNameInEnglish(nameInEnglish);
-        specialty.setNameInUkrainian(nameInUkrainian);
-
-        return specialty;
+        return new Specialty(TEST_SPECIALTY_ID, nameInEnglish, nameInUkrainian);
     }
 
     public static Department getTestDepartment() {
         Department department = new Department();
         department.setId(TEST_DEPARTMENT_ID);
-        department.setNameInEnglish("Engineering");
-        department.setNameInUkrainian("Інженерія");
+        department.setName(new MultiLanguageName("Engineering", "Інженерія"));
 
         department.addSpecialty(getTestSpecialty("Кібербезпека", "Cybersecurity"));
         department.addSpecialty(getTestSpecialty("Комп'ютерні науки", "Computer science"));

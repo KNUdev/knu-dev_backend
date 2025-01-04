@@ -14,13 +14,13 @@ public record SpecialtyCreationDto(
         @Pattern(regexp = "^[А-Яа-яЇїІіЄєҐґ\\s-]+$",
                 message = "Specialty name in ukrainian may contains only ukrainian-alphabet letters"
         )
-        String nameInUkrainian,
+        String ukName,
 
         @NotBlank(message = "Specialty English name cannot be blank or empty")
         @Size(min = 2, max = 200, message = "Specialty name must be between 2 and 200 characters")
         @Pattern(regexp = "^[A-Za-z\\s-]+$",
                 message = "Specialty name in english may contains only english-alphabet letters"
         )
-        String nameInEnglish
+        String enName
 ) {
 }

@@ -5,6 +5,7 @@ import lombok.*;
 import ua.knu.knudev.knudevcommon.constant.Expertise;
 import ua.knu.knudev.knudevcommon.constant.KNUdevUnit;
 import ua.knu.knudev.teammanagerapi.constant.RecruitmentCloseCause;
+import ua.knu.knudev.teammanager.domain.embeddable.RecruitmentAutoCloseConditions;
 
 import java.time.LocalDateTime;
 import java.util.UUID;

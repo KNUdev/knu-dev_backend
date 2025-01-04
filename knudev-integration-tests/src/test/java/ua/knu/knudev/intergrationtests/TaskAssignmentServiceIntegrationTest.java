@@ -11,8 +11,6 @@ import org.springframework.web.multipart.MultipartFile;
 import ua.knu.knudev.intergrationtests.config.IntegrationTestsConfig;
 import ua.knu.knudev.knudevcommon.constant.AccountTechnicalRole;
 import ua.knu.knudev.knudevcommon.constant.Expertise;
-import ua.knu.knudev.knudevcommon.utils.AcademicUnitsIds;
-import ua.knu.knudev.knudevcommon.utils.FullName;
 import ua.knu.knudev.knudevsecurity.repository.AccountAuthRepository;
 import ua.knu.knudev.knudevsecurityapi.request.AccountCreationRequest;
 import ua.knu.knudev.taskmanager.domain.TaskAssignment;
@@ -26,6 +24,7 @@ import ua.knu.knudev.taskmanagerapi.exception.TaskException;
 import ua.knu.knudev.taskmanagerapi.response.TaskAssignmentResponse;
 import ua.knu.knudev.teammanager.domain.Department;
 import ua.knu.knudev.teammanager.domain.Specialty;
+import ua.knu.knudev.teammanager.domain.embeddable.MultiLanguageName;
 import ua.knu.knudev.teammanager.repository.AccountProfileRepository;
 import ua.knu.knudev.teammanager.repository.DepartmentRepository;
 import ua.knu.knudev.teammanager.repository.SpecialtyRepository;
@@ -44,11 +43,9 @@ public class TaskAssignmentServiceIntegrationTest {
 
     private static final String TEST_EMAIL = "student@knu.ua";
     private static final String TEST_PASSWORD = "Password123!";
-    private static final FullName TEST_FULLNAME = FullName.builder()
-            .firstName("John")
-            .lastName("Doe")
-            .middleName("Middle")
-            .build();
+    private static final String TEST_FIRST_NAME = "John";
+    private static final String TEST_LAST_NAME = "Doe";
+    private static final String TEST_MIDDLE_NAME = "Middle";
     private static final String TEST_FILE_NAME = "avatar.png";
     private static final String TASK_FILE_NAME = "Task_Developer_MoonlightWalk.pdf";
     @Autowired
@@ -99,8 +96,7 @@ public class TaskAssignmentServiceIntegrationTest {
 
     private Department createTestDepartmentWithSpecialties() {
         Department department = new Department();
-        department.setNameInEnglish("Test Department");
-        department.setNameInUkrainian("Тестовий");
+        department.setName(new MultiLanguageName("Test Department", "Тестовий"));
 
         Specialty s1 = new Specialty(122.0, "Computer Science", "Науки");
         Specialty s2 = new Specialty(123.0, "Computer Engineering", "Інженерія");
@@ -117,9 +113,12 @@ public class TaskAssignmentServiceIntegrationTest {
         return AccountCreationRequest.builder()
                 .email(TEST_EMAIL)
                 .password(TEST_PASSWORD)
-                .fullName(TEST_FULLNAME)
                 .expertise(Expertise.BACKEND)
-                .academicUnitsIds(new AcademicUnitsIds(testDepartment.getId(), testSpecialty.getCodeName()))
+                .firstName(TEST_FIRST_NAME)
+                .lastName(TEST_LAST_NAME)
+                .middleName(TEST_MIDDLE_NAME)
+                .departmentId(testDepartment.getId())
+                .specialtyCodename(testSpecialty.getCodeName())
                 .avatarFile(getMockMultipartFile())
                 .build();
     }

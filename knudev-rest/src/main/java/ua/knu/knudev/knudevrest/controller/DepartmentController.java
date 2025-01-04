@@ -1,22 +1,29 @@
 package ua.knu.knudev.knudevrest.controller;
 
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RestController;
 import ua.knu.knudev.teammanagerapi.api.DepartmentApi;
-import ua.knu.knudev.teammanagerapi.request.DepartmentCreationRequest;
+import ua.knu.knudev.teammanagerapi.dto.ShortDepartmentDto;
+import ua.knu.knudev.teammanagerapi.dto.ShortSpecialtyDto;
+
+import java.util.Set;
+import java.util.UUID;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/admin/department")
 public class DepartmentController {
-
     private final DepartmentApi departmentApi;
 
-    @PostMapping("/create")
-    @ResponseStatus(HttpStatus.CREATED)
-    public void createDepartment(@Valid @RequestBody DepartmentCreationRequest departmentCreationRequest) {
-        departmentApi.createDepartment(departmentCreationRequest);
+    @GetMapping("/departments")
+    public Set<ShortDepartmentDto> getShortDepartments() {
+        return departmentApi.getShortDepartments();
     }
+
+    @GetMapping("/departments/{departmentId}/specialties")
+    public Set<ShortSpecialtyDto> getSpecialtiesByDepartment(@PathVariable UUID departmentId) {
+        return departmentApi.getSpecialtiesByDepartmentId(departmentId);
+    }
+
 }

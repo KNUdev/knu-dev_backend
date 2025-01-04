@@ -6,6 +6,7 @@ import org.apache.commons.lang3.ObjectUtils;
 import org.hibernate.annotations.UuidGenerator;
 import ua.knu.knudev.knudevcommon.constant.Expertise;
 import ua.knu.knudev.knudevcommon.constant.KNUdevUnit;
+import ua.knu.knudev.teammanager.domain.embeddable.RecruitmentAutoCloseConditions;
 import ua.knu.knudev.teammanagerapi.exception.RecruitmentException;
 
 import java.time.LocalDateTime;
