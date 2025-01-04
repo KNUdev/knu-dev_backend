@@ -2,12 +2,17 @@ package ua.knu.knudev.knudevrest.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.enums.ParameterIn;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
+import ua.knu.knudev.knudevsecurityapi.response.ErrorResponse;
 import ua.knu.knudev.teammanagerapi.api.DepartmentApi;
 import ua.knu.knudev.teammanagerapi.request.DepartmentCreationRequest;
 
@@ -26,15 +31,37 @@ public class AdminDepartmentController {
                     """
     )
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Task successfully uploaded."),
-            @ApiResponse(responseCode = "400", description = "Invalid input provided."),
-            @ApiResponse(responseCode = "403", description = "You are not have an access this endpoint.")
+            @ApiResponse(
+                    responseCode = "201",
+                    description = "Department successfully created.",
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE)
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "Invalid input provided.",
+                    content = @Content(
+                            mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = ErrorResponse.class)
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "403",
+                    description = "You do not have access to this endpoint.",
+                    content = @Content(
+                            mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = ErrorResponse.class)
+                    )
+            )
     })
     @PostMapping("/create")
     @ResponseStatus(HttpStatus.CREATED)
-    public void createDepartment(@Valid @RequestBody @Parameter(description = "Department creation data")
-                                 DepartmentCreationRequest departmentCreationRequest) {
+    public void createDepartment(
+            @Valid @RequestBody @Parameter(
+                    name = "Department creation request",
+                    description = "Department creation data",
+                    in = ParameterIn.HEADER,
+                    required = true
+            ) DepartmentCreationRequest departmentCreationRequest) {
         departmentApi.createDepartment(departmentCreationRequest);
     }
-
 }

@@ -1,7 +1,15 @@
 package ua.knu.knudev.knudevsecurityapi.response;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
 
 @Builder
-public record AuthenticationResponse(String accessToken, String refreshToken) {
+@Schema(description = "Authentication response")
+public record AuthenticationResponse(
+        @Schema(description = "Authentication access token", requiredMode = Schema.RequiredMode.REQUIRED)
+        String accessToken,
+
+        @Schema(description = "Refresh token", requiredMode = Schema.RequiredMode.REQUIRED)
+        String refreshToken
+) {
 }

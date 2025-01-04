@@ -14,7 +14,7 @@ public record AcademicUnitsIds(
         UUID departmentId,
 
         @Schema(description = "The specialty code name associated with the user's academic specialization.",
-                examples = {"123.0", "109.1", "74.0"}, requiredMode = Schema.RequiredMode.REQUIRED)
+                example = "123.1", requiredMode = Schema.RequiredMode.REQUIRED)
         Double specialtyCodename
 ) {
 }

@@ -41,8 +41,6 @@ logging:
         transaction:
           support:
             TransactionSynchronizationUtils: info
-      springdoc:
-        ui: DEBUG
 
 application:
   base-url: ${BASE_URL:http://localhost:5000}
@@ -88,3 +86,6 @@ application:
       tech-lead:
         duration-in-months-as-master: 6
         tech-lead-score: 8
+springdoc:
+  swagger-ui:
+    path: /api/documentation

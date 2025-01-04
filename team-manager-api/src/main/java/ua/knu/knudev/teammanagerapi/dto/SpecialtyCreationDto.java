@@ -8,7 +8,7 @@ import lombok.Builder;
 @Builder
 public record SpecialtyCreationDto(
 
-        @Schema(description = "Specialty codename", examples = {"72.0", "123.0", "109.2"},
+        @Schema(description = "Specialty codename", example = "109.2",
                 requiredMode = Schema.RequiredMode.REQUIRED)
         @NotNull(message = "Specialty code-name cannot be null")
         @Positive(message = "Specialty code-name must be greater than 0")

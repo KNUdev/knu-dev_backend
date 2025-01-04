@@ -77,7 +77,7 @@ public record AccountCreationRequest(
         UUID departmentId,
 
         @Schema(description = "The specialty code name associated with the user's academic specialization.",
-                examples = {"123.0", "109.1", "74.0"}, requiredMode = Schema.RequiredMode.REQUIRED)
+                example = "109.1", requiredMode = Schema.RequiredMode.REQUIRED)
         @NotNull(message = "Specialty code name must be present")
         @DecimalMin(value = "1.0", message = "Specialty code name must be at least 1.0")
         Double specialtyCodename,
