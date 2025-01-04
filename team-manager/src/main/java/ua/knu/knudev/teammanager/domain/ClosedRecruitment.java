@@ -2,9 +2,9 @@ package ua.knu.knudev.teammanager.domain;
 
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.UuidGenerator;
 import ua.knu.knudev.knudevcommon.constant.Expertise;
 import ua.knu.knudev.knudevcommon.constant.KNUdevUnit;
+import ua.knu.knudev.teammanagerapi.constant.RecruitmentCloseCause;
 import ua.knu.knudev.teammanager.domain.embeddable.RecruitmentAutoCloseConditions;
 
 import java.time.LocalDateTime;
@@ -20,7 +20,6 @@ import java.util.UUID;
 public class ClosedRecruitment {
 
     @Id
-    @UuidGenerator
     @Column(updatable = false, nullable = false)
     private UUID id;
 
@@ -30,7 +29,11 @@ public class ClosedRecruitment {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, updatable = false)
-    private KNUdevUnit type;
+    private KNUdevUnit unit;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, updatable = false)
+    private RecruitmentCloseCause closeCause;
 
     @Column(nullable = false, unique = true)
     private String name;

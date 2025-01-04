@@ -5,6 +5,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.validation.FieldError;
+import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -15,6 +16,7 @@ import ua.knu.knudev.taskmanagerapi.exception.TaskAssignmentException;
 import ua.knu.knudev.taskmanagerapi.exception.TaskException;
 import ua.knu.knudev.teammanagerapi.exception.AccountException;
 import ua.knu.knudev.teammanagerapi.exception.DepartmentException;
+import ua.knu.knudev.teammanagerapi.exception.RecruitmentException;
 
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -74,7 +76,17 @@ public class RestGlobalExceptionHandler {
     }
 
     @ExceptionHandler
+    public String handleRecruitmentException(RecruitmentException recruitmentException) {
+        return recruitmentException.getMessage();
+    }
+
+    @ExceptionHandler
     public String handleHttpMessageNotReadableException(HttpMessageNotReadableException exception) {
+        return exception.getMessage();
+    }
+
+    @ExceptionHandler
+    public String handleHttpRequestMethodNotSupportedException(HttpRequestMethodNotSupportedException exception) {
         return exception.getMessage();
     }
 

@@ -60,10 +60,7 @@ public class AccountProfileService implements AccountProfileApi {
 
     @Override
     public AccountProfileDto getById(UUID id) {
-        AccountProfile account = accountProfileRepository.findById(id)
-                .orElseThrow(() -> new AccountException(
-                        String.format("Account with id %s does not exist", id)
-                ));
+        AccountProfile account = getDomainById(id);
         return accountProfileMapper.toDto(account);
     }
 
@@ -89,6 +86,13 @@ public class AccountProfileService implements AccountProfileApi {
                     String.format("Account with email %s already exists", email)
             );
         }
+    }
+
+    public AccountProfile getDomainById(UUID id) {
+        return accountProfileRepository.findById(id)
+                .orElseThrow(() -> new AccountException(
+                        String.format("Account with id %s does not exist", id)
+                ));
     }
 
     private String uploadAvatar(MultipartFile file) {
