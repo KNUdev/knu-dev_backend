@@ -77,7 +77,7 @@ public class DepartmentService implements DepartmentApi {
     public Set<ShortSpecialtyDto> getSpecialtiesByDepartmentId(UUID departmentId) {
         return departmentRepository.findSpecialtiesByDepartmentId(departmentId).stream()
                 .map(specialty -> ShortSpecialtyDto.builder()
-                        .name(new MultiLanguageNameDto(specialty.getName().enName(), specialty.getName().ukName()))
+                        .name(new MultiLanguageNameDto(specialty.getName().getEnName(), specialty.getName().getUkName()))
                         .codeName(specialty.getCodeName())
                         .build())
                 .collect(Collectors.toSet());
@@ -168,8 +168,8 @@ public class DepartmentService implements DepartmentApi {
                 .filter(dto -> {
                     Specialty existing = existingMap.get(dto.codeName());
                     MultiLanguageName existingName = existing.getName();
-                    return !existingName.enName().equals(dto.enName()) ||
-                            !existingName.ukName().equals(dto.ukName());
+                    return !existingName.getEnName().equals(dto.enName()) ||
+                            !existingName.getUkName().equals(dto.ukName());
                 })
                 .collect(Collectors.toSet());
     }
@@ -178,13 +178,13 @@ public class DepartmentService implements DepartmentApi {
                                                              Set<SpecialtyCreationDto> requestSpecialties) {
         Map<String, Set<Double>> codeNamesByEnglishName = existingByName.stream()
                 .collect(Collectors.groupingBy(
-                        specialty -> specialty.getName().enName(),
+                        specialty -> specialty.getName().getEnName(),
                         Collectors.mapping(Specialty::getCodeName, Collectors.toSet())
                 ));
 
         Map<String, Set<Double>> codeNamesByUkrainianName = existingByName.stream()
                 .collect(Collectors.groupingBy(
-                        specialty -> specialty.getName().ukName(),
+                        specialty -> specialty.getName().getUkName(),
                         Collectors.mapping(Specialty::getCodeName, Collectors.toSet())
                 ));
 

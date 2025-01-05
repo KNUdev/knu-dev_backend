@@ -1,7 +1,14 @@
 package ua.knu.knudev.knudevcommon.dto;
 
-import lombok.Builder;
+import lombok.*;
 
 @Builder
-public record MultiLanguageNameDto(String enName, String ukName) {
+@ToString
+@Getter
+@EqualsAndHashCode
+@AllArgsConstructor
+@NoArgsConstructor
+public class MultiLanguageNameDto {
+    private String enName;
+    private String ukName;
 }

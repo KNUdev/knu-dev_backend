@@ -166,16 +166,16 @@ class DepartmentServiceTest {
 
         Department savedDepartment = departmentCaptor.getValue();
 
-        assertEquals(TEST_DEPARTMENT_NAME_IN_ENGLISH, savedDepartment.getName().enName());
+        assertEquals(TEST_DEPARTMENT_NAME_IN_ENGLISH, savedDepartment.getName().getEnName());
         assertEquals(3, savedDepartment.getSpecialties().size());
 
         specialtiesNamesInEnglish.forEach(specialtiesName -> assertTrue(savedDepartment.getSpecialties().stream()
-                .map(specialty -> specialty.getName().enName())
+                .map(specialty -> specialty.getName().getEnName())
                 .collect(Collectors.toSet())
                 .containsAll(specialtiesNamesInEnglish)));
 
         specialtiesNamesInUkrainian.forEach(specialtiesName -> assertTrue(savedDepartment.getSpecialties().stream()
-                .map(specialty -> specialty.getName().ukName())
+                .map(specialty -> specialty.getName().getUkName())
                 .collect(Collectors.toSet())
                 .containsAll(specialtiesNamesInUkrainian)));
     }
