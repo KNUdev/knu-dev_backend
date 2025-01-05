@@ -5,11 +5,15 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.ObjectUtils;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.multipart.MultipartFile;
 import ua.knu.knudev.fileserviceapi.api.ImageServiceApi;
+import ua.knu.knudev.knudevcommon.constant.FilterOptions;
 import ua.knu.knudev.knudevcommon.exception.FileException;
 import ua.knu.knudev.fileserviceapi.subfolder.ImageSubfolder;
 import ua.knu.knudev.knudevcommon.utils.AcademicUnitsIds;
@@ -29,6 +33,7 @@ import ua.knu.knudev.teammanagerapi.response.AccountRegistrationResponse;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.util.Map;
 import java.util.UUID;
 
 @Service
@@ -86,6 +91,13 @@ public class AccountProfileService implements AccountProfileApi {
                     String.format("Account with email %s already exists", email)
             );
         }
+    }
+
+    @Override
+    public Page<AccountProfileDto> findAllBySearchQuery(Map<FilterOptions, Object> filters, Integer pageNumber, Integer pageSize) {
+        Pageable paging = PageRequest.of(pageNumber, pageSize);
+        Page<AccountProfile> searchedAccountsPage = accountProfileRepository.findAllAccountsByFilters(filters, paging);
+        return searchedAccountsPage.map(accountProfileMapper::toDto);
     }
 
     public AccountProfile getDomainById(UUID id) {
