@@ -13,9 +13,9 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.multipart.MultipartFile;
 import ua.knu.knudev.fileserviceapi.api.ImageServiceApi;
+import ua.knu.knudev.fileserviceapi.subfolder.ImageSubfolder;
 import ua.knu.knudev.knudevcommon.constant.FilterOptions;
 import ua.knu.knudev.knudevcommon.exception.FileException;
-import ua.knu.knudev.fileserviceapi.subfolder.ImageSubfolder;
 import ua.knu.knudev.knudevcommon.utils.AcademicUnitsIds;
 import ua.knu.knudev.knudevcommon.utils.FullName;
 import ua.knu.knudev.knudevsecurityapi.api.AccountAuthServiceApi;
@@ -27,12 +27,14 @@ import ua.knu.knudev.teammanager.domain.Specialty;
 import ua.knu.knudev.teammanager.mapper.AccountProfileMapper;
 import ua.knu.knudev.teammanager.repository.AccountProfileRepository;
 import ua.knu.knudev.teammanagerapi.api.AccountProfileApi;
+import ua.knu.knudev.teammanagerapi.dto.AccountFilterDataDto;
 import ua.knu.knudev.teammanagerapi.dto.AccountProfileDto;
 import ua.knu.knudev.teammanagerapi.exception.AccountException;
 import ua.knu.knudev.teammanagerapi.response.AccountRegistrationResponse;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.util.EnumMap;
 import java.util.Map;
 import java.util.UUID;
 
@@ -86,7 +88,7 @@ public class AccountProfileService implements AccountProfileApi {
     @Override
     public void assertEmailExists(String email) throws AccountException {
         boolean emailExists = existsByEmail(email);
-        if(emailExists) {
+        if (emailExists) {
             throw new AccountException(
                     String.format("Account with email %s already exists", email)
             );
@@ -94,9 +96,10 @@ public class AccountProfileService implements AccountProfileApi {
     }
 
     @Override
-    public Page<AccountProfileDto> findAllBySearchQuery(Map<FilterOptions, Object> filters, Integer pageNumber, Integer pageSize) {
+    public Page<AccountProfileDto> findAllBySearchQuery(AccountFilterDataDto accountFilterDataDto, Integer pageNumber, Integer pageSize) {
         Pageable paging = PageRequest.of(pageNumber, pageSize);
-        Page<AccountProfile> searchedAccountsPage = accountProfileRepository.findAllAccountsByFilters(filters, paging);
+        Map<FilterOptions, Object> filtersMap = buildAccountsFiltersMap(accountFilterDataDto);
+        Page<AccountProfile> searchedAccountsPage = accountProfileRepository.findAllAccountsByFilters(filtersMap, paging);
         return searchedAccountsPage.map(accountProfileMapper::toDto);
     }
 
@@ -185,5 +188,28 @@ public class AccountProfileService implements AccountProfileApi {
                         .specialtyCodename(savedAccount.getSpecialty().getCodeName())
                         .build())
                 .build();
+    }
+
+    private Map<FilterOptions, Object> buildAccountsFiltersMap(AccountFilterDataDto accountFilterDataDto) {
+
+        Map<FilterOptions, Object> filters = new EnumMap<>(FilterOptions.class);
+        addFilter2Map(filters, FilterOptions.USER_INITIALS_AND_EMAIL, accountFilterDataDto.searchQuery());
+        addFilter2Map(filters, FilterOptions.REGISTRATION_DATE, accountFilterDataDto.registrationDate());
+        addFilter2Map(filters, FilterOptions.REGISTRATION_DATE_END_TIME, accountFilterDataDto.registrationEndDate());
+        addFilter2Map(filters, FilterOptions.KNUDEV_UNIT, accountFilterDataDto.knuDevUnit());
+        addFilter2Map(filters, FilterOptions.EXPERTISE, accountFilterDataDto.expertise());
+        addFilter2Map(filters, FilterOptions.DEPARTMENT, accountFilterDataDto.departmentName());
+        addFilter2Map(filters, FilterOptions.SPECIALTY, accountFilterDataDto.specialtyName());
+        addFilter2Map(filters, FilterOptions.UNIVERSITY_STUDY_YEAR, accountFilterDataDto.universityStudyYear());
+        addFilter2Map(filters, FilterOptions.RECRUITMENT_NUMBER, accountFilterDataDto.recruitmentNumber());
+        addFilter2Map(filters, FilterOptions.TECHNICAL_ROLE, accountFilterDataDto.technicalRole());
+
+        return filters;
+    }
+
+    private void addFilter2Map(Map<FilterOptions, Object> filters, FilterOptions option, Object value) {
+        if (value != null) {
+            filters.put(option, value);
+        }
     }
 }
