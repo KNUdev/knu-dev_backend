@@ -190,7 +190,7 @@ public class AccountProfileService implements AccountProfileApi {
                 .build();
     }
 
-    private Map<FilterOptions, Object> buildAccountsFiltersMap(AccountFilterDataDto accountFilterDataDto) {
+    protected Map<FilterOptions, Object> buildAccountsFiltersMap(AccountFilterDataDto accountFilterDataDto) {
 
         Map<FilterOptions, Object> filters = new EnumMap<>(FilterOptions.class);
         addFilter2Map(filters, FilterOptions.USER_INITIALS_AND_EMAIL, accountFilterDataDto.searchQuery());
