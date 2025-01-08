@@ -51,6 +51,10 @@ public class AccountProfile {
     @Column(nullable = false, updatable = false)
     private Integer yearOfStudyOnRegistration;
 
+//    TODO mb change
+    @Column
+    private KNUdevUnit unit = null;
+
     @ManyToOne
     @JoinColumn(name = "department_id", referencedColumnName = "id", nullable = false)
     private Department department;
@@ -58,6 +62,14 @@ public class AccountProfile {
     @ManyToOne
     @JoinColumn(name = "specialty_code_name", referencedColumnName = "code_name", nullable = false)
     private Specialty specialty;
+
+    @PrePersist
+    @PreUpdate
+    private void updateKNUdevUnit() {
+        this.unit = this.technicalRole == AccountTechnicalRole.INTERN
+                ? KNUdevUnit.PRECAMPUS
+                : KNUdevUnit.CAMPUS;
+    }
 
     //    TODO test this method
     public Integer getCurrentYearOfStudy() {

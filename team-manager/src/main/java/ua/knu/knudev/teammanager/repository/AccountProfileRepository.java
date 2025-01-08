@@ -9,10 +9,10 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.support.PageableExecutionUtils;
 import ua.knu.knudev.knudevcommon.constant.AccountTechnicalRole;
 import ua.knu.knudev.knudevcommon.constant.Expertise;
-import ua.knu.knudev.teammanagerapi.constant.AccountsCriteriaFilterOption;
 import ua.knu.knudev.knudevcommon.constant.KNUdevUnit;
 import ua.knu.knudev.teammanager.domain.AccountProfile;
 import ua.knu.knudev.teammanager.domain.QAccountProfile;
+import ua.knu.knudev.teammanagerapi.constant.AccountsCriteriaFilterOption;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -70,7 +70,8 @@ public interface AccountProfileRepository extends JpaRepository<AccountProfile, 
                 AccountsCriteriaFilterOption.EXPERTISE, (profile, val) -> profile.expertise.eq(Enum.valueOf(Expertise.class, val.toString())),
                 AccountsCriteriaFilterOption.DEPARTMENT, (profile, val) -> profile.department.id.eq(UUID.fromString(val.toString())),
                 AccountsCriteriaFilterOption.SPECIALTY, (profile, val) -> profile.specialty.codeName.eq(Double.valueOf(val.toString())),
-                AccountsCriteriaFilterOption.TECHNICAL_ROLE, (profile, val) -> profile.technicalRole.eq(Enum.valueOf(AccountTechnicalRole.class, val.toString()))
+                AccountsCriteriaFilterOption.TECHNICAL_ROLE, (profile, val) -> profile.technicalRole.eq(Enum.valueOf(AccountTechnicalRole.class, val.toString())),
+                AccountsCriteriaFilterOption.UNIT, (profile, val) -> profile.unit.eq(Enum.valueOf(KNUdevUnit.class, val.toString()))
         );
 
         return Optional.ofNullable(filterMap.get(key)).map(func -> func.apply(accountProfile, value));

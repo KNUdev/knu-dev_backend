@@ -201,6 +201,10 @@ databaseChangeLog:
                   type: int
                   constraints:
                     nullable: false
+              - column:
+                  name: unit
+                  type: varchar(10)
+                  defaultOnNull: true
         - addForeignKeyConstraint:
             referencedTableSchemaName: team_management
             baseTableSchemaName: team_management
