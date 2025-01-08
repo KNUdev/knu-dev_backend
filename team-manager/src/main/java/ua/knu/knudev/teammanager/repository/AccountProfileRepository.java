@@ -9,7 +9,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.support.PageableExecutionUtils;
 import ua.knu.knudev.knudevcommon.constant.AccountTechnicalRole;
 import ua.knu.knudev.knudevcommon.constant.Expertise;
-import ua.knu.knudev.knudevcommon.constant.FilterOptions;
+import ua.knu.knudev.teammanagerapi.constant.AccountsCriteriaFilterOption;
 import ua.knu.knudev.knudevcommon.constant.KNUdevUnit;
 import ua.knu.knudev.teammanager.domain.AccountProfile;
 import ua.knu.knudev.teammanager.domain.QAccountProfile;
@@ -33,7 +33,7 @@ public interface AccountProfileRepository extends JpaRepository<AccountProfile, 
 
     List<AccountProfile> findAllByEmail(String email);
 
-    default Page<AccountProfile> findAllAccountsByFilters(Map<FilterOptions, Object> filters, Pageable pageable) {
+    default Page<AccountProfile> findAllAccountsByFilters(Map<AccountsCriteriaFilterOption, Object> filters, Pageable pageable) {
         BooleanBuilder predicate = new BooleanBuilder();
 
         filters.forEach((key, value) -> {
@@ -52,9 +52,9 @@ public interface AccountProfileRepository extends JpaRepository<AccountProfile, 
         return PageableExecutionUtils.getPage(query.fetch(), pageable, query::fetchCount);
     }
 
-    private static Optional<BooleanExpression> getFilterPredicate(FilterOptions key, Object value) {
-        Map<FilterOptions, BiFunction<QAccountProfile, Object, BooleanExpression>> filterMap = Map.of(
-                FilterOptions.USER_INITIALS_AND_EMAIL, (profile, val) -> {
+    private static Optional<BooleanExpression> getFilterPredicate(AccountsCriteriaFilterOption key, Object value) {
+        Map<AccountsCriteriaFilterOption, BiFunction<QAccountProfile, Object, BooleanExpression>> filterMap = Map.of(
+                AccountsCriteriaFilterOption.USER_INITIALS_OR_EMAIL, (profile, val) -> {
                     String[] parts = val.toString().trim().split("\\s+");
                     BooleanExpression predicate = null;
                     for (String part : parts) {
@@ -66,14 +66,11 @@ public interface AccountProfileRepository extends JpaRepository<AccountProfile, 
                     }
                     return predicate;
                 },
-                FilterOptions.REGISTRATION_DATE, (profile, val) -> profile.registrationDate.eq((LocalDateTime) val),
-                FilterOptions.EXPERTISE, (profile, val) -> profile.expertise.eq(Enum.valueOf(Expertise.class, val.toString())),
-                FilterOptions.DEPARTMENT, (profile, val) -> profile.department.name.enName.eq(val.toString())
-                        .or(profile.department.name.ukName.eq(val.toString())),
-                FilterOptions.SPECIALTY, (profile, val) -> profile.specialty.name.enName.eq(val.toString())
-                        .or(profile.specialty.name.ukName.eq(val.toString())),
-                FilterOptions.TECHNICAL_ROLE, (profile, val) -> profile.technicalRole.eq(Enum.valueOf(AccountTechnicalRole.class, val.toString())),
-                FilterOptions.KNUDEV_UNIT, (profile, val) -> profile.knudevUnit.eq(Enum.valueOf(KNUdevUnit.class, val.toString()))
+                AccountsCriteriaFilterOption.REGISTERED_AT, (profile, val) -> profile.registrationDate.before((LocalDateTime) val),
+                AccountsCriteriaFilterOption.EXPERTISE, (profile, val) -> profile.expertise.eq(Enum.valueOf(Expertise.class, val.toString())),
+                AccountsCriteriaFilterOption.DEPARTMENT, (profile, val) -> profile.department.id.eq(UUID.fromString(val.toString())),
+                AccountsCriteriaFilterOption.SPECIALTY, (profile, val) -> profile.specialty.codeName.eq(Double.valueOf(val.toString())),
+                AccountsCriteriaFilterOption.TECHNICAL_ROLE, (profile, val) -> profile.technicalRole.eq(Enum.valueOf(AccountTechnicalRole.class, val.toString()))
         );
 
         return Optional.ofNullable(filterMap.get(key)).map(func -> func.apply(accountProfile, value));

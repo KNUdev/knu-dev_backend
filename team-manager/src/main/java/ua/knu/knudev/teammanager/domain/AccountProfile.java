@@ -47,13 +47,9 @@ public class AccountProfile {
     @Column(nullable = false, updatable = false)
     private LocalDateTime registrationDate;
     private LocalDateTime lastRoleUpdateDate;
-    private LocalDateTime registrationEndDate;
 
-    @Column(nullable = false)
-    private Integer studyYearsOnRegistration;
-
-    @Column(nullable = false)
-    private KNUdevUnit knudevUnit;
+    @Column(nullable = false, updatable = false)
+    private Integer yearOfStudyOnRegistration;
 
     @ManyToOne
     @JoinColumn(name = "department_id", referencedColumnName = "id", nullable = false)
@@ -63,14 +59,9 @@ public class AccountProfile {
     @JoinColumn(name = "specialty_code_name", referencedColumnName = "code_name", nullable = false)
     private Specialty specialty;
 
-    @PrePersist
-    @PreUpdate
-    private void updateKNUdevUnit() {
-        this.knudevUnit = this.technicalRole == AccountTechnicalRole.INTERN ? KNUdevUnit.PRECAMPUS : KNUdevUnit.CAMPUS;
-    }
-
-    public Integer calculateCurrentStudyYears() {
-        Integer baseStudyYears = this.studyYearsOnRegistration;
+    //    TODO test this method
+    public Integer getCurrentYearOfStudy() {
+        Integer baseStudyYears = this.yearOfStudyOnRegistration;
         LocalDate registrationYearEndDate = determineAcademicYearEndDate(this.registrationDate);
         LocalDate currentYearEndDate = determineAcademicYearEndDate(LocalDateTime.now());
         int additionalStudyYears = (int) ChronoUnit.YEARS.between(registrationYearEndDate, currentYearEndDate);

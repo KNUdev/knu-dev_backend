@@ -14,7 +14,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.multipart.MultipartFile;
 import ua.knu.knudev.fileserviceapi.api.ImageServiceApi;
 import ua.knu.knudev.fileserviceapi.subfolder.ImageSubfolder;
-import ua.knu.knudev.knudevcommon.constant.FilterOptions;
+import ua.knu.knudev.teammanagerapi.constant.AccountsCriteriaFilterOption;
 import ua.knu.knudev.knudevcommon.exception.FileException;
 import ua.knu.knudev.knudevcommon.utils.AcademicUnitsIds;
 import ua.knu.knudev.knudevcommon.utils.FullName;
@@ -27,7 +27,7 @@ import ua.knu.knudev.teammanager.domain.Specialty;
 import ua.knu.knudev.teammanager.mapper.AccountProfileMapper;
 import ua.knu.knudev.teammanager.repository.AccountProfileRepository;
 import ua.knu.knudev.teammanagerapi.api.AccountProfileApi;
-import ua.knu.knudev.teammanagerapi.dto.AccountFilterDataDto;
+import ua.knu.knudev.teammanagerapi.dto.AccountSearchCriteria;
 import ua.knu.knudev.teammanagerapi.dto.AccountProfileDto;
 import ua.knu.knudev.teammanagerapi.exception.AccountException;
 import ua.knu.knudev.teammanagerapi.response.AccountRegistrationResponse;
@@ -96,9 +96,9 @@ public class AccountProfileService implements AccountProfileApi {
     }
 
     @Override
-    public Page<AccountProfileDto> findAllBySearchQuery(AccountFilterDataDto accountFilterDataDto, Integer pageNumber, Integer pageSize) {
+    public Page<AccountProfileDto> findAllBySearchQuery(AccountSearchCriteria accountSearchCriteria, Integer pageNumber, Integer pageSize) {
         Pageable paging = PageRequest.of(pageNumber, pageSize);
-        Map<FilterOptions, Object> filtersMap = buildAccountsFiltersMap(accountFilterDataDto);
+        Map<AccountsCriteriaFilterOption, Object> filtersMap = buildAccountsFiltersMap(accountSearchCriteria);
         Page<AccountProfile> searchedAccountsPage = accountProfileRepository.findAllAccountsByFilters(filtersMap, paging);
         return searchedAccountsPage.map(accountProfileMapper::toDto);
     }
@@ -190,24 +190,24 @@ public class AccountProfileService implements AccountProfileApi {
                 .build();
     }
 
-    protected Map<FilterOptions, Object> buildAccountsFiltersMap(AccountFilterDataDto accountFilterDataDto) {
+    protected Map<AccountsCriteriaFilterOption, Object> buildAccountsFiltersMap(AccountSearchCriteria accountSearchCriteria) {
 
-        Map<FilterOptions, Object> filters = new EnumMap<>(FilterOptions.class);
-        addFilter2Map(filters, FilterOptions.USER_INITIALS_AND_EMAIL, accountFilterDataDto.searchQuery());
-        addFilter2Map(filters, FilterOptions.REGISTRATION_DATE, accountFilterDataDto.registrationDate());
-        addFilter2Map(filters, FilterOptions.REGISTRATION_DATE_END_TIME, accountFilterDataDto.registrationEndDate());
-        addFilter2Map(filters, FilterOptions.KNUDEV_UNIT, accountFilterDataDto.knuDevUnit());
-        addFilter2Map(filters, FilterOptions.EXPERTISE, accountFilterDataDto.expertise());
-        addFilter2Map(filters, FilterOptions.DEPARTMENT, accountFilterDataDto.departmentName());
-        addFilter2Map(filters, FilterOptions.SPECIALTY, accountFilterDataDto.specialtyName());
-        addFilter2Map(filters, FilterOptions.UNIVERSITY_STUDY_YEAR, accountFilterDataDto.universityStudyYear());
-        addFilter2Map(filters, FilterOptions.RECRUITMENT_NUMBER, accountFilterDataDto.recruitmentId());
-        addFilter2Map(filters, FilterOptions.TECHNICAL_ROLE, accountFilterDataDto.technicalRole());
+        Map<AccountsCriteriaFilterOption, Object> filters = new EnumMap<>(AccountsCriteriaFilterOption.class);
+        addFilter2Map(filters, AccountsCriteriaFilterOption.USER_INITIALS_OR_EMAIL, accountSearchCriteria.searchQuery());
+        addFilter2Map(filters, AccountsCriteriaFilterOption.REGISTERED_AT, accountSearchCriteria.registeredAt());
+        addFilter2Map(filters, AccountsCriteriaFilterOption.REGISTERED_BEFORE, accountSearchCriteria.registeredBefore());
+        addFilter2Map(filters, AccountsCriteriaFilterOption.UNIT, accountSearchCriteria.unit());
+        addFilter2Map(filters, AccountsCriteriaFilterOption.EXPERTISE, accountSearchCriteria.expertise());
+        addFilter2Map(filters, AccountsCriteriaFilterOption.DEPARTMENT, accountSearchCriteria.departmentId());
+        addFilter2Map(filters, AccountsCriteriaFilterOption.SPECIALTY, accountSearchCriteria.specialtyId());
+        addFilter2Map(filters, AccountsCriteriaFilterOption.UNIVERSITY_STUDY_YEAR, accountSearchCriteria.universityStudyYear());
+        addFilter2Map(filters, AccountsCriteriaFilterOption.RECRUITMENT_ORIGIN, accountSearchCriteria.recruitmentId());
+        addFilter2Map(filters, AccountsCriteriaFilterOption.TECHNICAL_ROLE, accountSearchCriteria.technicalRole());
 
         return filters;
     }
 
-    private void addFilter2Map(Map<FilterOptions, Object> filters, FilterOptions option, Object value) {
+    private void addFilter2Map(Map<AccountsCriteriaFilterOption, Object> filters, AccountsCriteriaFilterOption option, Object value) {
         if (value != null) {
             filters.put(option, value);
         }

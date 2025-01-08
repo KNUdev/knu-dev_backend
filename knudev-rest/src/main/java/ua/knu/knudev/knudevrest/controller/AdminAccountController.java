@@ -19,7 +19,7 @@ import ua.knu.knudev.knudevcommon.constant.Expertise;
 import ua.knu.knudev.knudevcommon.constant.KNUdevUnit;
 import ua.knu.knudev.knudevsecurityapi.response.ErrorResponse;
 import ua.knu.knudev.teammanagerapi.api.AccountProfileApi;
-import ua.knu.knudev.teammanagerapi.dto.AccountFilterDataDto;
+import ua.knu.knudev.teammanagerapi.dto.AccountSearchCriteria;
 import ua.knu.knudev.teammanagerapi.dto.AccountProfileDto;
 
 import java.time.LocalDateTime;
@@ -57,12 +57,12 @@ public class AdminAccountController {
     })
     @Parameters({
             @Parameter(name = "searchQuery", description = "Search term to filter accounts by name with email.", example = "John Doe"),
-            @Parameter(name = "registrationDate", description = "Start of the registration date range to filter accounts.", example = "2024-01-01T00:00:00", schema = @Schema(type = "string", format = "date-time")),
-            @Parameter(name = "registrationEndDate", description = "End of the registration date range to filter accounts.", example = "2024-12-31T23:59:59", schema = @Schema(type = "string", format = "date-time")),
-            @Parameter(name = "knudevUnit", description = "Filter accounts by their KNUdev unit.", example = "DEVELOPMENT", schema = @Schema(implementation = KNUdevUnit.class)),
+            @Parameter(name = "registeredAt", description = "Start of the registration date range to filter accounts.", example = "2024-01-01T00:00:00", schema = @Schema(type = "string", format = "date-time")),
+            @Parameter(name = "registeredBefore", description = "End of the registration date range to filter accounts.", example = "2024-12-31T23:59:59", schema = @Schema(type = "string", format = "date-time")),
+            @Parameter(name = "unit", description = "Filter accounts by their KNUdev unit.", example = "DEVELOPMENT", schema = @Schema(implementation = KNUdevUnit.class)),
             @Parameter(name = "expertise", description = "Filter accounts by their area of expertise.", example = "SOFTWARE_ENGINEERING", schema = @Schema(implementation = Expertise.class)),
-            @Parameter(name = "departmentName", description = "Filter accounts by department name.", example = "Computer Science"),
-            @Parameter(name = "specialtyName", description = "Filter accounts by specialty name.", example = "Artificial Intelligence"),
+            @Parameter(name = "departmentId", description = "Filter accounts by department name.", example = "Computer Science"),
+            @Parameter(name = "specialtyId", description = "Filter accounts by specialty name.", example = "Artificial Intelligence"),
             @Parameter(name = "universityStudyYear", description = "Filter accounts by university study year.", example = "3"),
             @Parameter(name = "recruitmentId", description = "Filter accounts by recruitment batch number.", example = "f47ac10b-58cc-4372-a567-0e02b2c3d479"),
             @Parameter(name = "technicalRole", description = "Filter accounts by their technical role.", example = "SOFTWARE_ENGINEER", schema = @Schema(implementation = AccountTechnicalRole.class)),
@@ -72,32 +72,32 @@ public class AdminAccountController {
     @GetMapping
     public Page<AccountProfileDto> getAccountsByFilter(
             @RequestParam(name = "searchQuery", required = false) String searchQuery,
-            @RequestParam(name = "registrationDate", required = false) LocalDateTime registrationDate,
-            @RequestParam(name = "registrationEndDate", required = false) LocalDateTime registrationEndDate,
-            @RequestParam(name = "knudevUnit", required = false) KNUdevUnit knudevUnit,
+            @RequestParam(name = "registeredAt", required = false) LocalDateTime registeredAt,
+            @RequestParam(name = "registeredBefore", required = false) LocalDateTime registeredBefore,
+            @RequestParam(name = "unit", required = false) KNUdevUnit unit,
             @RequestParam(name = "expertise", required = false) Expertise expertise,
-            @RequestParam(name = "departmentName", required = false) String departmentName,
-            @RequestParam(name = "specialtyName", required = false) String specialtyName,
+            @RequestParam(name = "departmentId", required = false) String departmentId,
+            @RequestParam(name = "specialtyId", required = false) String specialtyId,
             @RequestParam(name = "universityStudyYear", required = false) Integer universityStudyYear,
             @RequestParam(name = "recruitmentId", required = false) UUID recruitmentId,
             @RequestParam(name = "technicalRole", required = false) AccountTechnicalRole technicalRole,
             @RequestParam(name = "page", defaultValue = "0") Integer pageNumber,
             @RequestParam(name = "size", defaultValue = "9") Integer pageSize) {
 
-        AccountFilterDataDto accountFilterDataDto = AccountFilterDataDto.builder()
+        AccountSearchCriteria accountSearchCriteria = AccountSearchCriteria.builder()
                 .searchQuery(searchQuery)
-                .registrationDate(registrationDate)
-                .registrationEndDate(registrationEndDate)
-                .knuDevUnit(knudevUnit)
+                .registeredAt(registeredAt)
+                .registeredBefore(registeredBefore)
+                .unit(unit)
                 .expertise(expertise)
-                .departmentName(departmentName)
-                .specialtyName(specialtyName)
+                .departmentId(departmentId)
+                .specialtyId(specialtyId)
                 .universityStudyYear(universityStudyYear)
                 .recruitmentId(recruitmentId)
                 .technicalRole(technicalRole)
                 .build();
 
-        return accountProfileApi.findAllBySearchQuery(accountFilterDataDto, pageNumber, pageSize);
+        return accountProfileApi.findAllBySearchQuery(accountSearchCriteria, pageNumber, pageSize);
     }
 
 }

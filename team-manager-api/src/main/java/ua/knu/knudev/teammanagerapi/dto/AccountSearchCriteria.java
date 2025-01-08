@@ -9,14 +9,14 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Builder
-public record AccountFilterDataDto(
+public record AccountSearchCriteria(
         String searchQuery,
-        LocalDateTime registrationDate,
-        LocalDateTime registrationEndDate,
-        KNUdevUnit knuDevUnit,
+        LocalDateTime registeredAt,
+        LocalDateTime registeredBefore,
+        KNUdevUnit unit,
         Expertise expertise,
-        String departmentName,
-        String specialtyName,
+        String departmentId,
+        String specialtyId,
         Integer universityStudyYear,
         UUID recruitmentId,
         AccountTechnicalRole technicalRole
