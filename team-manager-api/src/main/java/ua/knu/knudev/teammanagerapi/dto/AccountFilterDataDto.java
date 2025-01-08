@@ -6,6 +6,7 @@ import ua.knu.knudev.knudevcommon.constant.Expertise;
 import ua.knu.knudev.knudevcommon.constant.KNUdevUnit;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Builder
 public record AccountFilterDataDto(
@@ -17,7 +18,7 @@ public record AccountFilterDataDto(
         String departmentName,
         String specialtyName,
         Integer universityStudyYear,
-        Integer recruitmentNumber,
+        UUID recruitmentId,
         AccountTechnicalRole technicalRole
 ) {
 

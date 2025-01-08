@@ -4,8 +4,11 @@ import jakarta.persistence.*;
 import lombok.*;
 import ua.knu.knudev.knudevcommon.constant.AccountTechnicalRole;
 import ua.knu.knudev.knudevcommon.constant.Expertise;
+import ua.knu.knudev.knudevcommon.constant.KNUdevUnit;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.UUID;
 
 @Getter
@@ -44,6 +47,13 @@ public class AccountProfile {
     @Column(nullable = false, updatable = false)
     private LocalDateTime registrationDate;
     private LocalDateTime lastRoleUpdateDate;
+    private LocalDateTime registrationEndDate;
+
+    @Column(nullable = false)
+    private Integer studyYearsOnRegistration;
+
+    @Column(nullable = false)
+    private KNUdevUnit knudevUnit;
 
     @ManyToOne
     @JoinColumn(name = "department_id", referencedColumnName = "id", nullable = false)
@@ -52,5 +62,27 @@ public class AccountProfile {
     @ManyToOne
     @JoinColumn(name = "specialty_code_name", referencedColumnName = "code_name", nullable = false)
     private Specialty specialty;
+
+    @PrePersist
+    @PreUpdate
+    private void updateKNUdevUnit() {
+        this.knudevUnit = this.technicalRole == AccountTechnicalRole.INTERN ? KNUdevUnit.PRECAMPUS : KNUdevUnit.CAMPUS;
+    }
+
+    public Integer calculateCurrentStudyYears() {
+        Integer baseStudyYears = this.studyYearsOnRegistration;
+        LocalDate registrationYearEndDate = determineAcademicYearEndDate(this.registrationDate);
+        LocalDate currentYearEndDate = determineAcademicYearEndDate(LocalDateTime.now());
+        int additionalStudyYears = (int) ChronoUnit.YEARS.between(registrationYearEndDate, currentYearEndDate);
+        return baseStudyYears + additionalStudyYears;
+    }
+
+    private LocalDate determineAcademicYearEndDate(LocalDateTime dateTime) {
+        if (dateTime.getMonthValue() > 6) {
+            return LocalDate.of(dateTime.getYear() + 1, 6, 30);
+        } else {
+            return LocalDate.of(dateTime.getYear(), 6, 30);
+        }
+    }
 
 }

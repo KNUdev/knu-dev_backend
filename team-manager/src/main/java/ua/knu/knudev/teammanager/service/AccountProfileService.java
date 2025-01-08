@@ -201,7 +201,7 @@ public class AccountProfileService implements AccountProfileApi {
         addFilter2Map(filters, FilterOptions.DEPARTMENT, accountFilterDataDto.departmentName());
         addFilter2Map(filters, FilterOptions.SPECIALTY, accountFilterDataDto.specialtyName());
         addFilter2Map(filters, FilterOptions.UNIVERSITY_STUDY_YEAR, accountFilterDataDto.universityStudyYear());
-        addFilter2Map(filters, FilterOptions.RECRUITMENT_NUMBER, accountFilterDataDto.recruitmentNumber());
+        addFilter2Map(filters, FilterOptions.RECRUITMENT_NUMBER, accountFilterDataDto.recruitmentId());
         addFilter2Map(filters, FilterOptions.TECHNICAL_ROLE, accountFilterDataDto.technicalRole());
 
         return filters;

@@ -196,6 +196,19 @@ databaseChangeLog:
                   type: double
                   constraints:
                     nullable: false
+              - column:
+                  name: registration_end_date
+                  type: datetime
+              - column:
+                  name: study_years_on_registration
+                  type: int
+                  constraints:
+                    nullable: false
+              - column:
+                  name: knudev_unit
+                  type: varchar(30)
+                  constraints:
+                    nullable: false
         - addForeignKeyConstraint:
             referencedTableSchemaName: team_management
             baseTableSchemaName: team_management

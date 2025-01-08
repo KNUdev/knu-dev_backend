@@ -23,6 +23,7 @@ import ua.knu.knudev.teammanagerapi.dto.AccountFilterDataDto;
 import ua.knu.knudev.teammanagerapi.dto.AccountProfileDto;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @RestController
 @RequiredArgsConstructor
@@ -63,7 +64,7 @@ public class AdminAccountController {
             @Parameter(name = "departmentName", description = "Filter accounts by department name.", example = "Computer Science"),
             @Parameter(name = "specialtyName", description = "Filter accounts by specialty name.", example = "Artificial Intelligence"),
             @Parameter(name = "universityStudyYear", description = "Filter accounts by university study year.", example = "3"),
-            @Parameter(name = "recruitmentNumber", description = "Filter accounts by recruitment batch number.", example = "f47ac10b-58cc-4372-a567-0e02b2c3d479"),
+            @Parameter(name = "recruitmentId", description = "Filter accounts by recruitment batch number.", example = "f47ac10b-58cc-4372-a567-0e02b2c3d479"),
             @Parameter(name = "technicalRole", description = "Filter accounts by their technical role.", example = "SOFTWARE_ENGINEER", schema = @Schema(implementation = AccountTechnicalRole.class)),
             @Parameter(name = "page", description = "Page number for pagination (0-indexed).", example = "0"),
             @Parameter(name = "size", description = "Number of accounts to retrieve per page.", example = "10")
@@ -78,7 +79,7 @@ public class AdminAccountController {
             @RequestParam(name = "departmentName", required = false) String departmentName,
             @RequestParam(name = "specialtyName", required = false) String specialtyName,
             @RequestParam(name = "universityStudyYear", required = false) Integer universityStudyYear,
-            @RequestParam(name = "recruitmentNumber", required = false) Integer recruitmentNumber,
+            @RequestParam(name = "recruitmentId", required = false) UUID recruitmentId,
             @RequestParam(name = "technicalRole", required = false) AccountTechnicalRole technicalRole,
             @RequestParam(name = "page", defaultValue = "0") Integer pageNumber,
             @RequestParam(name = "size", defaultValue = "9") Integer pageSize) {
@@ -92,7 +93,7 @@ public class AdminAccountController {
                 .departmentName(departmentName)
                 .specialtyName(specialtyName)
                 .universityStudyYear(universityStudyYear)
-                .recruitmentNumber(recruitmentNumber)
+                .recruitmentId(recruitmentId)
                 .technicalRole(technicalRole)
                 .build();
 

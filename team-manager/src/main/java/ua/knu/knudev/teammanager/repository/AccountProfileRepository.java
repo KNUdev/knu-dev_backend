@@ -10,6 +10,7 @@ import org.springframework.data.support.PageableExecutionUtils;
 import ua.knu.knudev.knudevcommon.constant.AccountTechnicalRole;
 import ua.knu.knudev.knudevcommon.constant.Expertise;
 import ua.knu.knudev.knudevcommon.constant.FilterOptions;
+import ua.knu.knudev.knudevcommon.constant.KNUdevUnit;
 import ua.knu.knudev.teammanager.domain.AccountProfile;
 import ua.knu.knudev.teammanager.domain.QAccountProfile;
 
@@ -71,8 +72,8 @@ public interface AccountProfileRepository extends JpaRepository<AccountProfile, 
                         .or(profile.department.name.ukName.eq(val.toString())),
                 FilterOptions.SPECIALTY, (profile, val) -> profile.specialty.name.enName.eq(val.toString())
                         .or(profile.specialty.name.ukName.eq(val.toString())),
-                FilterOptions.TECHNICAL_ROLE, (profile, val) -> profile.technicalRole.eq(Enum.valueOf(AccountTechnicalRole.class, val.toString()))
-//                TODO add more filters
+                FilterOptions.TECHNICAL_ROLE, (profile, val) -> profile.technicalRole.eq(Enum.valueOf(AccountTechnicalRole.class, val.toString())),
+                FilterOptions.KNUDEV_UNIT, (profile, val) -> profile.knudevUnit.eq(Enum.valueOf(KNUdevUnit.class, val.toString()))
         );
 
         return Optional.ofNullable(filterMap.get(key)).map(func -> func.apply(accountProfile, value));
