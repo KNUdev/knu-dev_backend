@@ -6,10 +6,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import ua.knu.knudev.knudevcommon.dto.MultiLanguageNameDto;
+import ua.knu.knudev.knudevcommon.dto.MultiLanguageFieldDto;
 import ua.knu.knudev.teammanager.domain.Department;
 import ua.knu.knudev.teammanager.domain.Specialty;
-import ua.knu.knudev.teammanager.domain.embeddable.MultiLanguageName;
+import ua.knu.knudev.teammanager.domain.embeddable.MultiLanguageField;
 import ua.knu.knudev.teammanager.mapper.DepartmentWithSpecialtiesMapper;
 import ua.knu.knudev.teammanager.mapper.ShortDepartmentMapper;
 import ua.knu.knudev.teammanager.repository.DepartmentRepository;
@@ -51,7 +51,7 @@ public class DepartmentService implements DepartmentApi {
                 .collect(Collectors.toList());
 
         List<Specialty> existingSpecialtiesByCodeName = specialtyRepository.findSpecialtiesByCodeNameIn(specialtiesCodenames);
-        List<Specialty> existingSpecialtiesByName = specialtyRepository.findSpecialtiesByName_UkNameInOrName_EnNameIn(
+        List<Specialty> existingSpecialtiesByName = specialtyRepository.findByNameUkInOrNameEnIn(
                 requestSpecialties.stream().map(SpecialtyCreationDto::enName).collect(Collectors.toSet()),
                 requestSpecialties.stream().map(SpecialtyCreationDto::ukName).collect(Collectors.toSet())
         );
@@ -60,7 +60,7 @@ public class DepartmentService implements DepartmentApi {
 
         Set<Specialty> allSpecialties = mergeExistingAndNewSpecialties(existingSpecialtiesByCodeName, requestSpecialties);
         Department department = Department.builder()
-                .name(new MultiLanguageName(nameEn, nameUk))
+                .name(new MultiLanguageField(nameEn, nameUk))
                 .specialties(allSpecialties)
                 .build();
 
@@ -77,7 +77,7 @@ public class DepartmentService implements DepartmentApi {
     public Set<ShortSpecialtyDto> getSpecialtiesByDepartmentId(UUID departmentId) {
         return departmentRepository.findSpecialtiesByDepartmentId(departmentId).stream()
                 .map(specialty -> ShortSpecialtyDto.builder()
-                        .name(new MultiLanguageNameDto(specialty.getName().getEnName(), specialty.getName().getUkName()))
+                        .name(new MultiLanguageFieldDto(specialty.getName().getEn(), specialty.getName().getUk()))
                         .codeName(specialty.getCodeName())
                         .build())
                 .collect(Collectors.toSet());
@@ -101,8 +101,8 @@ public class DepartmentService implements DepartmentApi {
     }
 
     private void ensureDepartmentDoesNotExist(String nameEn, String nameUk) {
-        boolean existsEn = departmentRepository.existsByNameEnName(nameEn);
-        boolean existsUk = departmentRepository.existsByNameUkName(nameUk);
+        boolean existsEn = departmentRepository.existsByName_En(nameEn);
+        boolean existsUk = departmentRepository.existsByName_Uk(nameUk);
 
         if (existsEn || existsUk) {
             throw new DepartmentException(
@@ -134,7 +134,7 @@ public class DepartmentService implements DepartmentApi {
     private Specialty convertToSpecialty(SpecialtyCreationDto dto) {
         return Specialty.builder()
                 .codeName(dto.codeName())
-                .name(new MultiLanguageName(dto.enName(), dto.ukName()))
+                .name(new MultiLanguageField(dto.enName(), dto.ukName()))
                 .build();
     }
 
@@ -167,9 +167,9 @@ public class DepartmentService implements DepartmentApi {
                 .filter(dto -> existingMap.containsKey(dto.codeName()))
                 .filter(dto -> {
                     Specialty existing = existingMap.get(dto.codeName());
-                    MultiLanguageName existingName = existing.getName();
-                    return !existingName.getEnName().equals(dto.enName()) ||
-                            !existingName.getUkName().equals(dto.ukName());
+                    MultiLanguageField existingName = existing.getName();
+                    return !existingName.getEn().equals(dto.enName()) ||
+                            !existingName.getUk().equals(dto.ukName());
                 })
                 .collect(Collectors.toSet());
     }
@@ -178,13 +178,13 @@ public class DepartmentService implements DepartmentApi {
                                                              Set<SpecialtyCreationDto> requestSpecialties) {
         Map<String, Set<Double>> codeNamesByEnglishName = existingByName.stream()
                 .collect(Collectors.groupingBy(
-                        specialty -> specialty.getName().getEnName(),
+                        specialty -> specialty.getName().getEn(),
                         Collectors.mapping(Specialty::getCodeName, Collectors.toSet())
                 ));
 
         Map<String, Set<Double>> codeNamesByUkrainianName = existingByName.stream()
                 .collect(Collectors.groupingBy(
-                        specialty -> specialty.getName().getUkName(),
+                        specialty -> specialty.getName().getUk(),
                         Collectors.mapping(Specialty::getCodeName, Collectors.toSet())
                 ));
 

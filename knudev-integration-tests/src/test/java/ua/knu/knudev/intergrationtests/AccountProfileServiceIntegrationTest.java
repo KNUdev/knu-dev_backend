@@ -19,7 +19,7 @@ import ua.knu.knudev.knudevsecurityapi.request.AccountCreationRequest;
 import ua.knu.knudev.teammanager.domain.AccountProfile;
 import ua.knu.knudev.teammanager.domain.Department;
 import ua.knu.knudev.teammanager.domain.Specialty;
-import ua.knu.knudev.teammanager.domain.embeddable.MultiLanguageName;
+import ua.knu.knudev.teammanager.domain.embeddable.MultiLanguageField;
 import ua.knu.knudev.teammanager.repository.AccountProfileRepository;
 import ua.knu.knudev.teammanager.repository.DepartmentRepository;
 import ua.knu.knudev.teammanager.repository.SpecialtyRepository;
@@ -77,7 +77,7 @@ public class AccountProfileServiceIntegrationTest {
 
     private Department createTestDepartmentWithSpecialties() {
         Department department = new Department();
-        department.setName(new MultiLanguageName("Test Department", "Тестовий"));
+        department.setName(new MultiLanguageField("Test Department", "Тестовий"));
 
 
         Specialty s1 = new Specialty(122.0, "Computer Science", "Науки");

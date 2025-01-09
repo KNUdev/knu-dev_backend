@@ -3,7 +3,7 @@ package ua.knu.knudev.teammanager.domain;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.UuidGenerator;
-import ua.knu.knudev.teammanager.domain.embeddable.MultiLanguageName;
+import ua.knu.knudev.teammanager.domain.embeddable.MultiLanguageField;
 import ua.knu.knudev.teammanagerapi.exception.DepartmentException;
 
 import java.util.HashSet;
@@ -25,7 +25,7 @@ public class Department {
     private UUID id;
 
     @Embedded
-    private MultiLanguageName name;
+    private MultiLanguageField name;
 
     @ManyToMany(fetch = FetchType.LAZY, cascade = {CascadeType.MERGE, CascadeType.PERSIST})
     @JoinTable(
