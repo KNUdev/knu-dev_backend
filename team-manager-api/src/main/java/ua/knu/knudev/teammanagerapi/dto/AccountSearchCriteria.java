@@ -16,7 +16,7 @@ public record AccountSearchCriteria(
         KNUdevUnit unit,
         Expertise expertise,
         String departmentId,
-        String specialtyId,
+        String specialtyCodeName,
         Integer universityStudyYear,
         UUID recruitmentId,
         AccountTechnicalRole technicalRole

@@ -66,14 +66,23 @@ public interface AccountProfileRepository extends JpaRepository<AccountProfile, 
                     }
                     return predicate;
                 },
-                AccountsCriteriaFilterOption.REGISTERED_AT, (profile, val) -> profile.registrationDate.before((LocalDateTime) val),
-                AccountsCriteriaFilterOption.EXPERTISE, (profile, val) -> profile.expertise.eq(Enum.valueOf(Expertise.class, val.toString())),
-                AccountsCriteriaFilterOption.DEPARTMENT, (profile, val) -> profile.department.id.eq(UUID.fromString(val.toString())),
-                AccountsCriteriaFilterOption.SPECIALTY, (profile, val) -> profile.specialty.codeName.eq(Double.valueOf(val.toString())),
-                AccountsCriteriaFilterOption.TECHNICAL_ROLE, (profile, val) -> profile.technicalRole.eq(Enum.valueOf(AccountTechnicalRole.class, val.toString())),
-                AccountsCriteriaFilterOption.UNIT, (profile, val) -> profile.unit.eq(Enum.valueOf(KNUdevUnit.class, val.toString()))
+                AccountsCriteriaFilterOption.REGISTERED_BEFORE,
+                (profile, val) -> profile.registrationDate.before((LocalDateTime) val),
+                AccountsCriteriaFilterOption.REGISTERED_AT,
+                (profile, val) -> profile.registrationDate.eq((LocalDateTime) val),
+                AccountsCriteriaFilterOption.EXPERTISE,
+                (profile, val) -> profile.expertise.eq(Enum.valueOf(Expertise.class, val.toString())),
+                AccountsCriteriaFilterOption.DEPARTMENT,
+                (profile, val) -> profile.department.id.eq(UUID.fromString(val.toString())),
+                AccountsCriteriaFilterOption.SPECIALTY,
+                (profile, val) -> profile.specialty.codeName.eq(Double.valueOf(val.toString())),
+                AccountsCriteriaFilterOption.TECHNICAL_ROLE,
+                (profile, val) -> profile.technicalRole.eq(Enum.valueOf(AccountTechnicalRole.class, val.toString())),
+                AccountsCriteriaFilterOption.UNIT,
+                (profile, val) -> profile.unit.eq(Enum.valueOf(KNUdevUnit.class, val.toString()))
         );
 
-        return Optional.ofNullable(filterMap.get(key)).map(func -> func.apply(accountProfile, value));
+        return Optional.ofNullable(filterMap.get(key))
+                .map(func -> func.apply(accountProfile, value));
     }
 }

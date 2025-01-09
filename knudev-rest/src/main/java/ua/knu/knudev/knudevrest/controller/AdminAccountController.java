@@ -56,18 +56,18 @@ public class AdminAccountController {
                     )),
     })
     @Parameters({
-            @Parameter(name = "searchQuery", description = "Search term to filter accounts by name with email.", example = "John Doe"),
-            @Parameter(name = "registeredAt", description = "Start of the registration date range to filter accounts.", example = "2024-01-01T00:00:00", schema = @Schema(type = "string", format = "date-time")),
+            @Parameter(name = "searchQuery", description = "Search term to filter accounts by name or email.", example = "John Doe"),
+            @Parameter(name = "registeredAt", description = "Exact date of registration.", example = "2024-01-01T00:00:00", schema = @Schema(type = "string", format = "date-time")),
             @Parameter(name = "registeredBefore", description = "End of the registration date range to filter accounts.", example = "2024-12-31T23:59:59", schema = @Schema(type = "string", format = "date-time")),
-            @Parameter(name = "unit", description = "Filter accounts by their KNUdev unit.", example = "DEVELOPMENT", schema = @Schema(implementation = KNUdevUnit.class)),
-            @Parameter(name = "expertise", description = "Filter accounts by their area of expertise.", example = "SOFTWARE_ENGINEERING", schema = @Schema(implementation = Expertise.class)),
-            @Parameter(name = "departmentId", description = "Filter accounts by department name.", example = "Computer Science"),
-            @Parameter(name = "specialtyId", description = "Filter accounts by specialty name.", example = "Artificial Intelligence"),
+            @Parameter(name = "unit", description = "Filter accounts by their unit.", example = "CAMPUS", schema = @Schema(implementation = KNUdevUnit.class)),
+            @Parameter(name = "expertise", description = "Filter accounts by their area of expertise.", example = "FULLSTACK", schema = @Schema(implementation = Expertise.class)),
+            @Parameter(name = "departmentId", description = "Filter accounts by department id.", example = "f47ac10b-58cc-4372-a567-0e02b2c3d479"),
+            @Parameter(name = "specialtyCodeName", description = "Filter accounts by specialty code name.", example = "123.0"),
             @Parameter(name = "universityStudyYear", description = "Filter accounts by university study year.", example = "3"),
-            @Parameter(name = "recruitmentId", description = "Filter accounts by recruitment batch number.", example = "f47ac10b-58cc-4372-a567-0e02b2c3d479"),
-            @Parameter(name = "technicalRole", description = "Filter accounts by their technical role.", example = "SOFTWARE_ENGINEER", schema = @Schema(implementation = AccountTechnicalRole.class)),
-            @Parameter(name = "page", description = "Page number for pagination (0-indexed).", example = "0"),
-            @Parameter(name = "size", description = "Number of accounts to retrieve per page.", example = "10")
+            @Parameter(name = "recruitmentId", description = "Filter accounts by recruitment id.", example = "f47ac10b-58cc-4372-a567-0e02b2c3d479"),
+            @Parameter(name = "technicalRole", description = "Filter accounts by their technical role.", example = "BACKEND", schema = @Schema(implementation = AccountTechnicalRole.class)),
+            @Parameter(name = "pageNumber", description = "Page number for pagination (0-indexed).", example = "0"),
+            @Parameter(name = "pageSize", description = "Number of accounts to retrieve per page.", example = "10")
     })
     @GetMapping
     public Page<AccountProfileDto> getAccountsByFilter(
@@ -77,12 +77,12 @@ public class AdminAccountController {
             @RequestParam(name = "unit", required = false) KNUdevUnit unit,
             @RequestParam(name = "expertise", required = false) Expertise expertise,
             @RequestParam(name = "departmentId", required = false) String departmentId,
-            @RequestParam(name = "specialtyId", required = false) String specialtyId,
+            @RequestParam(name = "specialtyCodeName", required = false) String specialtyCodeName,
             @RequestParam(name = "universityStudyYear", required = false) Integer universityStudyYear,
             @RequestParam(name = "recruitmentId", required = false) UUID recruitmentId,
             @RequestParam(name = "technicalRole", required = false) AccountTechnicalRole technicalRole,
-            @RequestParam(name = "page", defaultValue = "0") Integer pageNumber,
-            @RequestParam(name = "size", defaultValue = "9") Integer pageSize) {
+            @RequestParam(name = "pageNumber", defaultValue = "0") Integer pageNumber,
+            @RequestParam(name = "pageSize", defaultValue = "9") Integer pageSize) {
 
         AccountSearchCriteria accountSearchCriteria = AccountSearchCriteria.builder()
                 .searchQuery(searchQuery)
@@ -91,7 +91,7 @@ public class AdminAccountController {
                 .unit(unit)
                 .expertise(expertise)
                 .departmentId(departmentId)
-                .specialtyId(specialtyId)
+                .specialtyCodeName(specialtyCodeName)
                 .universityStudyYear(universityStudyYear)
                 .recruitmentId(recruitmentId)
                 .technicalRole(technicalRole)
