@@ -4,8 +4,11 @@ import jakarta.persistence.*;
 import lombok.*;
 import ua.knu.knudev.knudevcommon.constant.AccountTechnicalRole;
 import ua.knu.knudev.knudevcommon.constant.Expertise;
+import ua.knu.knudev.knudevcommon.constant.KNUdevUnit;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.UUID;
 
 @Getter
@@ -45,6 +48,12 @@ public class AccountProfile {
     private LocalDateTime registrationDate;
     private LocalDateTime lastRoleUpdateDate;
 
+    @Column(nullable = false, updatable = false)
+    private Integer yearOfStudyOnRegistration;
+
+    @Column
+    private KNUdevUnit unit;
+
     @ManyToOne
     @JoinColumn(name = "department_id", referencedColumnName = "id", nullable = false)
     private Department department;
@@ -52,5 +61,22 @@ public class AccountProfile {
     @ManyToOne
     @JoinColumn(name = "specialty_code_name", referencedColumnName = "code_name", nullable = false)
     private Specialty specialty;
+
+    //    TODO test this method
+    public Integer getCurrentYearOfStudy() {
+        Integer baseStudyYears = this.yearOfStudyOnRegistration;
+        LocalDate registrationYearEndDate = determineAcademicYearEndDate(this.registrationDate);
+        LocalDate currentYearEndDate = determineAcademicYearEndDate(LocalDateTime.now());
+        int additionalStudyYears = (int) ChronoUnit.YEARS.between(registrationYearEndDate, currentYearEndDate);
+        return baseStudyYears + additionalStudyYears;
+    }
+
+    private LocalDate determineAcademicYearEndDate(LocalDateTime dateTime) {
+        if (dateTime.getMonthValue() > 6) {
+            return LocalDate.of(dateTime.getYear() + 1, 6, 30);
+        } else {
+            return LocalDate.of(dateTime.getYear(), 6, 30);
+        }
+    }
 
 }

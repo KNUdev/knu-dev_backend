@@ -29,5 +29,4 @@ public enum AccountTechnicalRole implements AccountRole {
         return displayName;
     }
 
-
 }

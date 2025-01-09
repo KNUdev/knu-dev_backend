@@ -58,7 +58,7 @@ public class RecruitmentService implements RecruitmentApi {
                 activeRecruitment.getName(),
                 activeRecruitment.getExpertise(),
                 LocalDateTime.now(),
-                activeRecruitment.getRecruitmentAutoCloseConditions().deadlineDate()
+                activeRecruitment.getRecruitmentAutoCloseConditions().getDeadlineDate()
         );
     }
 
@@ -109,7 +109,7 @@ public class RecruitmentService implements RecruitmentApi {
         ActiveRecruitment activeRecruitment = getActiveRecruitmentDomainById(activeRecruitmentId);
 
         int currentRecruitedCount = activeRecruitmentRepository.countRecruited(activeRecruitmentId);
-        int maxRecruitedLimit = activeRecruitment.getRecruitmentAutoCloseConditions().maxCandidates();
+        int maxRecruitedLimit = activeRecruitment.getRecruitmentAutoCloseConditions().getMaxCandidates();
 
         if (currentRecruitedCount < maxRecruitedLimit) {
             activeRecruitment.joinUserToRecruitment(accountProfileDomain);
