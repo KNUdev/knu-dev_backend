@@ -60,7 +60,7 @@ public class Project {
 
     @ElementCollection
     @CollectionTable(schema = "team_management", name = "github_repo_links", joinColumns = @JoinColumn(name = "project_id"))
-    @Column(name = "repo_link", nullable = false)
+    @Column(name = "github_repo_link", nullable = false)
     private Set<String> githubRepoLinks = new HashSet<>();
 
     @OneToOne
