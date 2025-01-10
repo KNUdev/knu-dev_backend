@@ -1,11 +1,11 @@
 package ua.knu.knudev.teammanagerapi.request;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
-import ua.knu.knudev.knudevcommon.constant.ProjectStatus;
+import org.springframework.web.multipart.MultipartFile;
 import ua.knu.knudev.knudevcommon.constant.ProjectTag;
 import ua.knu.knudev.knudevcommon.dto.MultiLanguageFieldDto;
 
@@ -20,6 +20,7 @@ public record ProjectCreationRequest(
                 example = "{ 'en': 'KNUdev main site', 'uk': 'КНУдев головний сайт' }",
                 implementation = MultiLanguageFieldDto.class
         )
+        @Valid @NotNull
         MultiLanguageFieldDto name,
 
         @Schema(
@@ -27,11 +28,11 @@ public record ProjectCreationRequest(
                 example = "{ 'en': 'Main KNUdev organization site', 'uk': 'Головний сайт організації КНУдев' }",
                 implementation = MultiLanguageFieldDto.class
         )
+        @Valid @NotNull
         MultiLanguageFieldDto description,
 
-        @Schema(description = "Path or filename for the project's avatar.", example = "avatar.png")
-        @NotBlank(message = "Avatar file path must not be blank.")
-        String avatarFile,
+        @Schema(description = "File for the project's avatar.", example = "avatar.png")
+        MultipartFile avatarFile,
 
         @Schema(
                 description = "Links to the project's GitHub repositories.",
@@ -43,10 +44,6 @@ public record ProjectCreationRequest(
         @Schema(description = "Tags associated with the project.", example = "[ 'WEB', 'MOBILE' ]",
                 implementation = ProjectTag.class)
         @NotEmpty(message = "At least one project tag must be specified.")
-        Set<ProjectTag> tags,
-
-        @Schema(description = "Status of the project.", example = "UNDER_DEVELOPMENT", implementation = ProjectStatus.class)
-        @NotNull(message = "Project status must not be null.")
-        ProjectStatus status
+        Set<ProjectTag> tags
 ) {
 }

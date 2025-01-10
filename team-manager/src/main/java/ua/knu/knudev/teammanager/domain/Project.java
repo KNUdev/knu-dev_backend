@@ -6,7 +6,6 @@ import org.hibernate.annotations.UuidGenerator;
 import ua.knu.knudev.knudevcommon.constant.ProjectStatus;
 import ua.knu.knudev.knudevcommon.constant.ProjectTag;
 import ua.knu.knudev.teammanager.domain.embeddable.MultiLanguageField;
-import ua.knu.knudev.teammanager.domain.embeddable.ProjectReleaseInfo;
 
 import java.time.LocalDate;
 import java.util.HashSet;
@@ -55,7 +54,7 @@ public class Project {
     @ElementCollection(targetClass = ProjectTag.class)
     @CollectionTable(schema = "team_management", name = "project_tags", joinColumns = @JoinColumn(name = "project_id"))
     @Enumerated(EnumType.STRING)
-    @Column(name = "tag", nullable = false)
+    @Column(name = "tags", nullable = false)
     private Set<ProjectTag> tags = new HashSet<>();
 
     @ElementCollection
@@ -63,8 +62,10 @@ public class Project {
     @Column(name = "github_repo_link", nullable = false)
     private Set<String> githubRepoLinks = new HashSet<>();
 
-    @OneToOne
-    @MapsId
-    @JoinColumn(name = "id")
-    private ProjectReleaseInfo projectReleaseInfo;
+    @OneToOne(mappedBy = "project", cascade = CascadeType.ALL, orphanRemoval = true)
+    private ProjectReleaseInfo releaseInfo;
+
+    @OneToMany(mappedBy = "project", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<ProjectAccount> projectAccounts = new HashSet<>();
+
 }

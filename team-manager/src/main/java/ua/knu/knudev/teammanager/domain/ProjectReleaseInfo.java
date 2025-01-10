@@ -1,9 +1,7 @@
-package ua.knu.knudev.teammanager.domain.embeddable;
+package ua.knu.knudev.teammanager.domain;
 
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.UuidGenerator;
-import ua.knu.knudev.teammanager.domain.Project;
 
 import java.time.LocalDate;
 import java.util.UUID;
@@ -14,7 +12,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@Table(schema = "team_manager", name = "project_release_info")
+@Table(schema = "team_management", name = "project_release_info")
 public class ProjectReleaseInfo {
 
     @Id
@@ -27,7 +25,9 @@ public class ProjectReleaseInfo {
     @Column
     private String projectDomain;
 
-    @OneToOne(mappedBy = "projectReleaseInfo", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToOne
+    @MapsId
+    @JoinColumn(name = "id")
     private Project project;
 
 }

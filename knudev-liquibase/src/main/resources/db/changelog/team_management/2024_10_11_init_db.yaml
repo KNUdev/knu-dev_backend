@@ -509,7 +509,7 @@ databaseChangeLog:
                   constraints:
                     nullable: false
               - column:
-                  name: tag
+                  name: tags
                   type: varchar(50)
                   constraints:
                     nullable: false
@@ -528,6 +528,34 @@ databaseChangeLog:
                   type: varchar(255)
                   constraints:
                     nullable: false
+
+  - changeSet:
+      id: create_project_account_table
+      author: user
+      changes:
+        - createTable:
+            tableName: project_account
+            schemaName: team_management
+            columns:
+              - column:
+                  name: project_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+              - column:
+                  name: account_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+              - column:
+                  name: date_joined
+                  type: DATE
+                  constraints:
+                    nullable: false
+        - addPrimaryKey:
+            tableName: project_account
+            schemaName: team_management
+            columnNames: project_id, account_id
 
   - changeSet:
       id: create_project_release_info_table
@@ -577,4 +605,20 @@ databaseChangeLog:
             constraintName: fk_github_repo_links_project
             referencedTableSchemaName: team_management
             referencedTableName: project
+            referencedColumnNames: id
+        - addForeignKeyConstraint:
+            baseTableSchemaName: team_management
+            baseTableName: project_account
+            baseColumnNames: project_id
+            constraintName: fk_project_accounts_project
+            referencedTableSchemaName: team_management
+            referencedTableName: project
+            referencedColumnNames: id
+        - addForeignKeyConstraint:
+            baseTableSchemaName: team_management
+            baseTableName: project_account
+            baseColumnNames: account_id
+            constraintName: fk_project_accounts_profile_account
+            referencedTableSchemaName: team_management
+            referencedTableName: profile_account
             referencedColumnNames: id
