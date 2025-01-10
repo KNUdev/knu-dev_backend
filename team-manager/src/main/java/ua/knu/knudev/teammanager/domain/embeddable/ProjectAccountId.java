@@ -11,6 +11,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode
+@Builder
 @Embeddable
 public class ProjectAccountId implements Serializable {
     private UUID projectId;
