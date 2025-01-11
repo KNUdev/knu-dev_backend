@@ -22,6 +22,7 @@ import ua.knu.knudev.teammanagerapi.api.ProjectApi;
 import ua.knu.knudev.teammanagerapi.dto.AccountProfileDto;
 import ua.knu.knudev.teammanagerapi.dto.ProjectDto;
 import ua.knu.knudev.teammanagerapi.exception.ProjectException;
+import ua.knu.knudev.teammanagerapi.request.AddProjectDeveloperRequest;
 import ua.knu.knudev.teammanagerapi.request.ProjectCreationRequest;
 
 import javax.security.auth.login.AccountNotFoundException;
@@ -43,7 +44,7 @@ public class ProjectService implements ProjectApi {
 
     @Override
     @Transactional
-    public void createProject(ProjectCreationRequest projectCreationRequest) {
+    public void create(ProjectCreationRequest projectCreationRequest) {
         MultiLanguageField name = projectMapper.map(projectCreationRequest.name());
         MultiLanguageField description = projectMapper.map(projectCreationRequest.description());
 
@@ -58,8 +59,9 @@ public class ProjectService implements ProjectApi {
                 .description(description)
                 .avatarFilename(filename)
                 .tags(projectCreationRequest.tags())
-                .startedAt(LocalDate.now())
+                .startedAt(null)
                 .githubRepoLinks(projectCreationRequest.githubRepoUrls())
+                .status(ProjectStatus.PLANNED)
                 .build();
 
         projectRepository.save(project);
@@ -69,11 +71,12 @@ public class ProjectService implements ProjectApi {
     @Override
     @SneakyThrows
     @Transactional
-    public void addDeveloperToProject(UUID accountProfileId, UUID projectId) {
-        validateInputs(accountProfileId, projectId);
-
-        Project project = getById(projectId);
+    public void addDeveloper(AddProjectDeveloperRequest addProjectDeveloperRequest) {
+        UUID projectId = addProjectDeveloperRequest.projectId();
+        UUID accountProfileId = addProjectDeveloperRequest.accountProfileId();
+        Project project = getProjectById(projectId);
         AccountProfile accountProfile = getAccountProfileById(accountProfileId);
+        Set<ProjectAccount> projectAccounts = project.getProjectAccounts();
 
         ProjectAccount projectAccount = createProjectAccount(
                 project,
@@ -82,43 +85,53 @@ public class ProjectService implements ProjectApi {
                 accountProfileId
         );
 
-        project.getProjectAccounts().add(projectAccount);
+        if (projectAccounts.contains(projectAccount)) {
+            throw new ProjectException("Account with ID: " + accountProfile +
+                    " is already assigned to project: " + projectId);
+        }
+        projectAccounts.add(projectAccount);
         projectRepository.save(project);
         log.info("Added developer: {}, to project: {}", projectAccount.getId().getAccountId(), projectId);
     }
 
     @Override
-    public void updateProjectStatus(UUID projectId, ProjectStatus newProjectStatus) {
+    public void updateStatus(UUID projectId, ProjectStatus newProjectStatus) {
         if (newProjectStatus == null) {
             throw new ProjectException("Project status can't be null!");
         }
 
-        Project project = getById(projectId);
+        Project project = getProjectById(projectId);
+
+        if (project.getStatus() == ProjectStatus.PLANNED &&
+                newProjectStatus == ProjectStatus.UNDER_DEVELOPMENT) {
+            project.setStartedAt(LocalDate.now());
+        }
+
         project.setStatus(newProjectStatus);
         projectRepository.save(project);
         log.info("Project status updated: {}, in project: {}", newProjectStatus, projectId);
     }
 
     @Override
-    public ProjectDto getProjectById(UUID projectId) {
-        Project project = getById(projectId);
+    public ProjectDto getById(UUID projectId) {
+        Project project = getProjectById(projectId);
         return projectMapper.toDto(project);
     }
 
     @Override
-    public Set<ProjectDto> getProjects() {
+    public Set<ProjectDto> getAll() {
         Set<Project> allProjects = new HashSet<>(projectRepository.findAll());
         if (allProjects.isEmpty()) {
             throw new ProjectException("No projects found!");
         }
-        log.info("Found {} projects", allProjects.size());
+
         return projectMapper.toDtos(allProjects);
     }
 
     @Override
     @Transactional
-    public void releaseProject(UUID projectId, String projectDomain) {
-        Project project = getById(projectId);
+    public void release(UUID projectId, String projectDomain) {
+        Project project = getProjectById(projectId);
 
         if (project.getReleaseInfo() != null) {
             throw new ProjectException("Project already has a release!");
@@ -135,13 +148,7 @@ public class ProjectService implements ProjectApi {
         log.info("Project released: {}", projectId);
     }
 
-    private void validateInputs(UUID accountProfileId, UUID projectId) {
-        if (accountProfileId == null || projectId == null) {
-            throw new IllegalArgumentException("Account profile or project id cannot be null!");
-        }
-    }
-
-    private Project getById(UUID projectId) {
+    private Project getProjectById(UUID projectId) {
         return projectRepository.findById(projectId).orElseThrow(
                 () -> new ProjectException("Project with id " + projectId + " not found"));
     }

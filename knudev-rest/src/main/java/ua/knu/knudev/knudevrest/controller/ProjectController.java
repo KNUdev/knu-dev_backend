@@ -53,7 +53,7 @@ public class ProjectController {
             required = true,
             example = "f3b1c1b7d287b9f5acdb2f941517c7a9fcbf4bb2d9e8b3d3cfc622b1f67d34e8"
     ) UUID projectId) {
-        return projectApi.getProjectById(projectId);
+        return projectApi.getById(projectId);
     }
 
     @Operation(
@@ -70,6 +70,6 @@ public class ProjectController {
     @GetMapping("/all")
     @ResponseStatus(HttpStatus.OK)
     public Set<ProjectDto> getAllProjects() {
-        return projectApi.getProjects();
+        return projectApi.getAll();
     }
 }

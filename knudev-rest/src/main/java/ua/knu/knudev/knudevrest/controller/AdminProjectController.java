@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 import ua.knu.knudev.knudevcommon.constant.ProjectStatus;
 import ua.knu.knudev.knudevsecurityapi.response.ErrorResponse;
 import ua.knu.knudev.teammanagerapi.api.ProjectApi;
+import ua.knu.knudev.teammanagerapi.request.AddProjectDeveloperRequest;
 import ua.knu.knudev.teammanagerapi.request.ProjectCreationRequest;
 
 import java.util.UUID;
@@ -58,28 +59,13 @@ public class AdminProjectController {
                     required = true,
                     schema = @Schema(description = "Project creation request payload")
             ) ProjectCreationRequest projectCreationRequest) {
-        projectApi.createProject(projectCreationRequest);
+        projectApi.create(projectCreationRequest);
     }
 
     @Operation(
             summary = "Add developer to a project",
-            description = "Adds a developer to the specified project by associating the developer's account profile with the project.",
-            parameters = {
-                    @Parameter(
-                            name = "projectId",
-                            description = "The unique identifier of the project to which the developer will be added.",
-                            required = true,
-                            in = ParameterIn.HEADER,
-                            example = "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
-                    ),
-                    @Parameter(
-                            name = "accountProfileId",
-                            description = "The unique identifier of the developer's account profile to be added to the project.",
-                            required = true,
-                            in = ParameterIn.HEADER,
-                            example = "f3b1c1b7d287b9f5acdb2f941517c7a9fcbf4bb2d9e8b3d3cfc622b1f67d34e8"
-                    )
-            })
+            description = "Adds a developer to the specified project by associating the developer's account profile with the project."
+    )
     @ApiResponses(value = {
             @ApiResponse(
                     responseCode = "200",
@@ -100,10 +86,16 @@ public class AdminProjectController {
                             schema = @Schema(implementation = ErrorResponse.class)
                     ))
     })
-    @PatchMapping("/{projectId}/add/developer")
+    @PatchMapping("/{projectId}/developers/add")
     @ResponseStatus(HttpStatus.OK)
-    public void addDevelopers(@PathVariable UUID projectId, @RequestBody UUID accountProfileId) {
-        projectApi.addDeveloperToProject(accountProfileId, projectId);
+    public void addDevelopers(@Valid @RequestBody @Parameter(
+            name = "Add project developer request",
+            description = "The object of adding a developer to the project",
+            in = ParameterIn.HEADER,
+            required = true,
+            schema = @Schema(implementation = AddProjectDeveloperRequest.class)
+    ) AddProjectDeveloperRequest addProjectDeveloperRequest) {
+        projectApi.addDeveloper(addProjectDeveloperRequest);
     }
 
     @Operation(
@@ -150,7 +142,7 @@ public class AdminProjectController {
     @PatchMapping("/{projectId}/update/status")
     @ResponseStatus(HttpStatus.OK)
     public void updateStatus(@PathVariable UUID projectId, @RequestBody ProjectStatus status) {
-        projectApi.updateProjectStatus(projectId, status);
+        projectApi.updateStatus(projectId, status);
     }
 
     @Operation(
@@ -198,7 +190,7 @@ public class AdminProjectController {
     @PatchMapping("/{projectId}/release")
     @ResponseStatus(HttpStatus.OK)
     public void releaseProject(@PathVariable UUID projectId, @RequestBody String projectDomain) {
-        projectApi.releaseProject(projectId, projectDomain);
+        projectApi.release(projectId, projectDomain);
     }
 
 

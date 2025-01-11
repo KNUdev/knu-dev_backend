@@ -9,8 +9,6 @@ import ua.knu.knudev.knudevcommon.constant.KNUdevUnit;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
-import java.util.HashSet;
-import java.util.Set;
 import java.util.UUID;
 
 @Getter
@@ -64,10 +62,7 @@ public class AccountProfile {
     @JoinColumn(name = "specialty_code_name", referencedColumnName = "code_name", nullable = false)
     private Specialty specialty;
 
-    @OneToMany(mappedBy = "accountProfile", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<ProjectAccount> projectAccounts = new HashSet<>();
-
-//    TODO TEST THIS METHOD
+    //    TODO TEST THIS METHOD
     public Integer getCurrentYearOfStudy() {
         Integer baseStudyYears = this.yearOfStudyOnRegistration;
         LocalDate registrationYearEndDate = determineAcademicYearEndDate(this.registrationDate);

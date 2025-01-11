@@ -2,6 +2,7 @@ package ua.knu.knudev.teammanagerapi.api;
 
 import ua.knu.knudev.knudevcommon.constant.ProjectStatus;
 import ua.knu.knudev.teammanagerapi.dto.ProjectDto;
+import ua.knu.knudev.teammanagerapi.request.AddProjectDeveloperRequest;
 import ua.knu.knudev.teammanagerapi.request.ProjectCreationRequest;
 
 import java.util.Set;
@@ -9,15 +10,15 @@ import java.util.UUID;
 
 public interface ProjectApi {
 
-    void createProject(ProjectCreationRequest projectCreationRequest);
+    void create(ProjectCreationRequest projectCreationRequest);
 
-    void addDeveloperToProject(UUID accountProfileId, UUID projectId);
+    void addDeveloper(AddProjectDeveloperRequest addProjectDeveloperRequest);
 
-    void updateProjectStatus(UUID projectId, ProjectStatus newProjectStatus);
+    void updateStatus(UUID projectId, ProjectStatus newProjectStatus);
 
-    ProjectDto getProjectById(UUID projectId);
+    ProjectDto getById(UUID projectId);
 
-    Set<ProjectDto> getProjects();
+    Set<ProjectDto> getAll();
 
-    void releaseProject(UUID projectId, String projectDomain);
+    void release(UUID projectId, String projectDomain);
 }

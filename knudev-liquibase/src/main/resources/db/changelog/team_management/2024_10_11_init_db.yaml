@@ -491,8 +491,6 @@ databaseChangeLog:
               - column:
                   name: started_at
                   type: date
-                  constraints:
-                    nullable: false
               - column:
                   name: status
                   type: varchar(50)
@@ -500,7 +498,7 @@ databaseChangeLog:
                     nullable: false
 
         - createTable:
-            tableName: project_tags
+            tableName: tag
             schemaName: team_management
             columns:
               - column:
@@ -592,7 +590,7 @@ databaseChangeLog:
             referencedColumnNames: id
         - addForeignKeyConstraint:
             baseTableSchemaName: team_management
-            baseTableName: project_tags
+            baseTableName: tag
             baseColumnNames: project_id
             constraintName: fk_project_tags_project
             referencedTableSchemaName: team_management

@@ -44,7 +44,7 @@ public class Project {
     @Column
     private String avatarFilename;
 
-    @Column(nullable = false, updatable = false)
+    @Column
     private LocalDate startedAt;
 
     @Enumerated(EnumType.STRING)
@@ -52,7 +52,7 @@ public class Project {
     private ProjectStatus status;
 
     @ElementCollection(targetClass = ProjectTag.class)
-    @CollectionTable(schema = "team_management", name = "project_tags", joinColumns = @JoinColumn(name = "project_id"))
+    @CollectionTable(schema = "team_management", name = "tag", joinColumns = @JoinColumn(name = "project_id"))
     @Enumerated(EnumType.STRING)
     @Column(name = "tags", nullable = false)
     private Set<ProjectTag> tags = new HashSet<>();
