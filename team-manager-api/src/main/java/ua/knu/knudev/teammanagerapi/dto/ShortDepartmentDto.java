@@ -1,9 +1,8 @@
 package ua.knu.knudev.teammanagerapi.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import ua.knu.knudev.knudevcommon.dto.MultiLanguageNameDto;
+import ua.knu.knudev.knudevcommon.dto.MultiLanguageFieldDto;
 
-import java.util.Set;
 import java.util.UUID;
 
 @Schema(description = "Object that contains short information about department")
@@ -13,7 +12,7 @@ public record ShortDepartmentDto(
         UUID id,
 
         @Schema(description = "Object with department name in English and in Ukrainian",
-                requiredMode = Schema.RequiredMode.REQUIRED, implementation = MultiLanguageNameDto.class)
-        MultiLanguageNameDto name
+                requiredMode = Schema.RequiredMode.REQUIRED, implementation = MultiLanguageFieldDto.class)
+        MultiLanguageFieldDto name
 ) {
 }

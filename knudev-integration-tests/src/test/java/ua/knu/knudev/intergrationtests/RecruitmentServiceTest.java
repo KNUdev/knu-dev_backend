@@ -11,7 +11,7 @@ import ua.knu.knudev.knudevcommon.constant.AccountTechnicalRole;
 import ua.knu.knudev.knudevcommon.constant.Expertise;
 import ua.knu.knudev.knudevcommon.constant.KNUdevUnit;
 import ua.knu.knudev.teammanager.domain.*;
-import ua.knu.knudev.teammanager.domain.embeddable.MultiLanguageName;
+import ua.knu.knudev.teammanager.domain.embeddable.MultiLanguageField;
 import ua.knu.knudev.teammanager.domain.embeddable.RecruitmentAutoCloseConditions;
 import ua.knu.knudev.teammanager.repository.*;
 import ua.knu.knudev.teammanager.service.RecruitmentService;
@@ -64,7 +64,7 @@ class RecruitmentServiceTest {
 
     private Department createTestDepartmentWithSpecialties() {
         Department department = new Department();
-        department.setName(new MultiLanguageName("Test Department", "Тестовий"));
+        department.setName(new MultiLanguageField("Test Department", "Тестовий"));
 
         Specialty s1 = new Specialty(122.0, "Computer Science", "Науки");
         Specialty s2 = new Specialty(123.0, "Computer Engineering", "Інженерія");

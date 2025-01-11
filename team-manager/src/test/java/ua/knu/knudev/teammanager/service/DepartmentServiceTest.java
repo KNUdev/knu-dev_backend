@@ -9,7 +9,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import ua.knu.knudev.teammanager.domain.Department;
 import ua.knu.knudev.teammanager.domain.Specialty;
-import ua.knu.knudev.teammanager.domain.embeddable.MultiLanguageName;
+import ua.knu.knudev.teammanager.domain.embeddable.MultiLanguageField;
 import ua.knu.knudev.teammanager.repository.DepartmentRepository;
 import ua.knu.knudev.teammanager.repository.SpecialtyRepository;
 import ua.knu.knudev.teammanager.utils.constants.DepartmentTestsConstants;
@@ -89,7 +89,7 @@ class DepartmentServiceTest {
         // Arrange
         Department emptyDepartment = new Department();
         emptyDepartment.setId(TEST_DEPARTMENT_ID);
-        emptyDepartment.setName(new MultiLanguageName("Engineering", "Інженерія"));
+        emptyDepartment.setName(new MultiLanguageField("Engineering", "Інженерія"));
         emptyDepartment.setSpecialties(new HashSet<>());
 
         when(departmentRepository.findById(TEST_DEPARTMENT_ID)).thenReturn(Optional.of(emptyDepartment));
@@ -166,16 +166,16 @@ class DepartmentServiceTest {
 
         Department savedDepartment = departmentCaptor.getValue();
 
-        assertEquals(TEST_DEPARTMENT_NAME_IN_ENGLISH, savedDepartment.getName().getEnName());
+        assertEquals(TEST_DEPARTMENT_NAME_IN_ENGLISH, savedDepartment.getName().getEn());
         assertEquals(3, savedDepartment.getSpecialties().size());
 
         specialtiesNamesInEnglish.forEach(specialtiesName -> assertTrue(savedDepartment.getSpecialties().stream()
-                .map(specialty -> specialty.getName().getEnName())
+                .map(specialty -> specialty.getName().getEn())
                 .collect(Collectors.toSet())
                 .containsAll(specialtiesNamesInEnglish)));
 
         specialtiesNamesInUkrainian.forEach(specialtiesName -> assertTrue(savedDepartment.getSpecialties().stream()
-                .map(specialty -> specialty.getName().getUkName())
+                .map(specialty -> specialty.getName().getUk())
                 .collect(Collectors.toSet())
                 .containsAll(specialtiesNamesInUkrainian)));
     }
@@ -194,12 +194,12 @@ class DepartmentServiceTest {
                 TEST_DEPARTMENT_NAME_IN_UKRAINIAN
         );
 
-        when(departmentRepository.existsByNameEnName(TEST_DEPARTMENT_NAME_IN_ENGLISH)).thenReturn(true);
-        when(departmentRepository.existsByNameUkName(TEST_DEPARTMENT_NAME_IN_UKRAINIAN)).thenReturn(true);
+        when(departmentRepository.existsByName_En(TEST_DEPARTMENT_NAME_IN_ENGLISH)).thenReturn(true);
+        when(departmentRepository.existsByName_Uk(TEST_DEPARTMENT_NAME_IN_UKRAINIAN)).thenReturn(true);
 
         assertThrows(DepartmentException.class, () -> departmentService.createDepartment(departmentCreationRequest));
-        verify(departmentRepository, times(1)).existsByNameEnName(TEST_DEPARTMENT_NAME_IN_ENGLISH);
-        verify(departmentRepository, times(1)).existsByNameUkName(TEST_DEPARTMENT_NAME_IN_UKRAINIAN);
+        verify(departmentRepository, times(1)).existsByName_En(TEST_DEPARTMENT_NAME_IN_ENGLISH);
+        verify(departmentRepository, times(1)).existsByName_Uk(TEST_DEPARTMENT_NAME_IN_UKRAINIAN);
         verifyNoMoreInteractions(departmentRepository);
     }
 

@@ -2,7 +2,7 @@ package ua.knu.knudev.teammanager.domain;
 
 import jakarta.persistence.*;
 import lombok.*;
-import ua.knu.knudev.teammanager.domain.embeddable.MultiLanguageName;
+import ua.knu.knudev.teammanager.domain.embeddable.MultiLanguageField;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -21,14 +21,14 @@ public class Specialty {
     private Double codeName;
 
     @Embedded
-    private MultiLanguageName name;
+    private MultiLanguageField name;
 
     @ManyToMany(mappedBy = "specialties", fetch = FetchType.LAZY, cascade = {CascadeType.MERGE, CascadeType.PERSIST})
     private Set<Department> departments = new HashSet<>();
 
     public Specialty(Double codeName, String nameInEnglish, String nameInUkrainian) {
         this.codeName = codeName;
-        this.name = new MultiLanguageName(nameInEnglish, nameInUkrainian);
+        this.name = new MultiLanguageField(nameInEnglish, nameInUkrainian);
     }
 
 }

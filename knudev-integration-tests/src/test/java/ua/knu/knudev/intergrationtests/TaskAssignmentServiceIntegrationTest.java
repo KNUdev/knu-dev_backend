@@ -24,7 +24,7 @@ import ua.knu.knudev.taskmanagerapi.exception.TaskException;
 import ua.knu.knudev.taskmanagerapi.response.TaskAssignmentResponse;
 import ua.knu.knudev.teammanager.domain.Department;
 import ua.knu.knudev.teammanager.domain.Specialty;
-import ua.knu.knudev.teammanager.domain.embeddable.MultiLanguageName;
+import ua.knu.knudev.teammanager.domain.embeddable.MultiLanguageField;
 import ua.knu.knudev.teammanager.repository.AccountProfileRepository;
 import ua.knu.knudev.teammanager.repository.DepartmentRepository;
 import ua.knu.knudev.teammanager.repository.SpecialtyRepository;
@@ -96,7 +96,7 @@ public class TaskAssignmentServiceIntegrationTest {
 
     private Department createTestDepartmentWithSpecialties() {
         Department department = new Department();
-        department.setName(new MultiLanguageName("Test Department", "Тестовий"));
+        department.setName(new MultiLanguageField("Test Department", "Тестовий"));
 
         Specialty s1 = new Specialty(122.0, "Computer Science", "Науки");
         Specialty s2 = new Specialty(123.0, "Computer Engineering", "Інженерія");

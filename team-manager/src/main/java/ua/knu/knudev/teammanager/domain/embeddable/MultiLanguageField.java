@@ -10,10 +10,10 @@ import lombok.*;
 @NoArgsConstructor
 @EqualsAndHashCode
 @ToString
-public class MultiLanguageName {
+public class MultiLanguageField {
     @Column(nullable = false, unique = true, updatable = false)
-    private String enName;
+    private String en;
 
     @Column(nullable = false, unique = true, updatable = false)
-    private String ukName;
+    private String uk;
 }
