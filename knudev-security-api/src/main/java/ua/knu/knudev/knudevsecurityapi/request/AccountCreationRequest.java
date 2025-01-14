@@ -87,6 +87,11 @@ public record AccountCreationRequest(
 
         @Schema(description = "Defines the expertise areas of an employee", requiredMode = Schema.RequiredMode.REQUIRED)
         @NotNull(message = "Expertise must not be null")
-        Expertise expertise
+        Expertise expertise,
+
+        @Schema(description = "University study year on registration", requiredMode = Schema.RequiredMode.REQUIRED)
+        @Min(1) @Max(11)
+        @NotNull
+        Integer yearOfStudy
 ) {
 }

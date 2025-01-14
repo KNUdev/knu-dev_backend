@@ -87,7 +87,9 @@ class RecruitmentServiceTest {
                 .department(testDepartment)
                 .specialty(testSpecialty)
                 .expertise(Expertise.BACKEND)
+                .unit(KNUdevUnit.CAMPUS)
                 .technicalRole(AccountTechnicalRole.INTERN)
+                .yearOfStudyOnRegistration(2)
                 .registrationDate(LocalDateTime.now())
                 .build();
         return accountProfileRepository.save(account);

@@ -100,6 +100,7 @@ public class AccountProfileServiceIntegrationTest {
                 .middleName(TEST_MIDDLE_NAME)
                 .expertise(Expertise.BACKEND)
                 .departmentId(testDepartment.getId())
+                .yearOfStudy(2)
                 .specialtyCodename(testSpecialty.getCodeName())
                 .avatarFile(getMockMultipartFile())
                 .build();
@@ -173,6 +174,7 @@ public class AccountProfileServiceIntegrationTest {
                 .expertise(Expertise.BACKEND)
                 .technicalRole(AccountTechnicalRole.INTERN)
                 .registrationDate(LocalDateTime.now())
+                .yearOfStudyOnRegistration(2)
                 .build();
 
         accountProfileRepository.save(existingAccount);

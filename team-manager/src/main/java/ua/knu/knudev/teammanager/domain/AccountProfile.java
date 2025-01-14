@@ -52,6 +52,7 @@ public class AccountProfile {
     private Integer yearOfStudyOnRegistration;
 
     @Column
+    @Enumerated(EnumType.STRING)
     private KNUdevUnit unit;
 
     @ManyToOne

@@ -120,6 +120,7 @@ public class TaskAssignmentServiceIntegrationTest {
                 .departmentId(testDepartment.getId())
                 .specialtyCodename(testSpecialty.getCodeName())
                 .avatarFile(getMockMultipartFile())
+                .yearOfStudy(2)
                 .build();
     }
 
