@@ -10,15 +10,15 @@ import java.util.UUID;
 
 public interface ProjectApi {
 
-    void create(ProjectCreationRequest projectCreationRequest);
+    ProjectDto create(ProjectCreationRequest projectCreationRequest);
 
-    void addDeveloper(AddProjectDeveloperRequest addProjectDeveloperRequest);
+    ProjectDto addDeveloper(AddProjectDeveloperRequest addProjectDeveloperRequest);
 
-    void updateStatus(UUID projectId, ProjectStatus newProjectStatus);
+    ProjectDto updateStatus(UUID projectId, ProjectStatus newProjectStatus);
 
     ProjectDto getById(UUID projectId);
 
     Set<ProjectDto> getAll();
 
-    void release(UUID projectId, String projectDomain);
+    ProjectDto release(UUID projectId, String projectDomain);
 }
