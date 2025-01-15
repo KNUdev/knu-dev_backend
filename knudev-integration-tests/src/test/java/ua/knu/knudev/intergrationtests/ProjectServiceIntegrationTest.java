@@ -133,6 +133,7 @@ public class ProjectServiceIntegrationTest {
                 .department(testDepartment)
                 .specialty(testSpecialty)
                 .build();
+
         return accountProfileRepository.save(accountProfile);
     }
 
@@ -233,7 +234,6 @@ public class ProjectServiceIntegrationTest {
                     ProjectException.class,
                     () -> projectService.addDeveloper(getValidAddProjectDeveloperRequest())
             );
-
             assertEquals("Account with ID: " + testAccountProfile.getId() +
                     " is already assigned to project: " + testProject.getId(), exception.getMessage());
         }
@@ -247,7 +247,6 @@ public class ProjectServiceIntegrationTest {
                     () -> projectService.addDeveloper(new AddProjectDeveloperRequest(
                             testAccountProfile.getId(), testAccountProfile.getId()))
             );
-
             assertEquals("Project with id " + testAccountProfile.getId() + " not found", exception.getMessage());
         }
     }
@@ -290,7 +289,6 @@ public class ProjectServiceIntegrationTest {
                     ProjectException.class,
                     () -> projectService.updateStatus(testProject.getId(), null)
             );
-
             assertEquals("Project status can't be null!", exception.getMessage());
         }
 
@@ -302,7 +300,6 @@ public class ProjectServiceIntegrationTest {
                     ProjectException.class,
                     () -> projectService.updateStatus(testAccountProfile.getId(), ProjectStatus.PLANNED)
             );
-
             assertEquals("Project with id " + testAccountProfile.getId() + " not found", exception.getMessage());
         }
     }
@@ -336,7 +333,6 @@ public class ProjectServiceIntegrationTest {
                     ProjectException.class,
                     () -> projectService.getById(testAccountProfile.getId())
             );
-
             assertEquals("Project with id " + testAccountProfile.getId() + " not found", exception.getMessage());
         }
     }
@@ -368,7 +364,6 @@ public class ProjectServiceIntegrationTest {
                     ProjectException.class,
                     () -> projectService.getAll()
             );
-
             assertEquals("No projects found!", exception.getMessage());
         }
     }
