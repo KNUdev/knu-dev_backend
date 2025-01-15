@@ -269,7 +269,6 @@ databaseChangeLog:
                   name: name
                   type: varchar(255)
                   constraints:
-                    unique: true
                     nullable: false
               - column:
                   name: started_at
@@ -498,7 +497,7 @@ databaseChangeLog:
                     nullable: false
 
         - createTable:
-            tableName: tag
+            tableName: project_tag
             schemaName: team_management
             columns:
               - column:
@@ -507,7 +506,7 @@ databaseChangeLog:
                   constraints:
                     nullable: false
               - column:
-                  name: tags
+                  name: tag
                   type: varchar(50)
                   constraints:
                     nullable: false
@@ -529,7 +528,7 @@ databaseChangeLog:
 
   - changeSet:
       id: create_project_account_table
-      author: user
+      author: DenysLeonenko
       changes:
         - createTable:
             tableName: project_account
@@ -537,17 +536,17 @@ databaseChangeLog:
             columns:
               - column:
                   name: project_id
-                  type: UUID
+                  type: uuid
                   constraints:
                     nullable: false
               - column:
                   name: account_id
-                  type: UUID
+                  type: uuid
                   constraints:
                     nullable: false
               - column:
                   name: date_joined
-                  type: DATE
+                  type: date
                   constraints:
                     nullable: false
         - addPrimaryKey:
@@ -590,7 +589,7 @@ databaseChangeLog:
             referencedColumnNames: id
         - addForeignKeyConstraint:
             baseTableSchemaName: team_management
-            baseTableName: tag
+            baseTableName: project_tag
             baseColumnNames: project_id
             constraintName: fk_project_tags_project
             referencedTableSchemaName: team_management

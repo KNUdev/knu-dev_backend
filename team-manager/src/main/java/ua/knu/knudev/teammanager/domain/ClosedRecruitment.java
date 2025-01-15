@@ -35,7 +35,7 @@ public class ClosedRecruitment {
     @Column(nullable = false, updatable = false)
     private RecruitmentCloseCause closeCause;
 
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false, updatable = false)
     private String name;
 
     @Column(nullable = false, updatable = false)

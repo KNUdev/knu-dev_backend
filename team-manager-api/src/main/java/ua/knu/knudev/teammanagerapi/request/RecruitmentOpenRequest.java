@@ -5,11 +5,13 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
+import lombok.Builder;
 import ua.knu.knudev.knudevcommon.constant.Expertise;
 import ua.knu.knudev.knudevcommon.constant.KNUdevUnit;
 import ua.knu.knudev.teammanagerapi.dto.RecruitmentAutoCloseConditionsDto;
 
 @Schema(description = "Object that contains data to open recruitment")
+@Builder
 public record RecruitmentOpenRequest(
         @Schema(description = "Recruitment name", requiredMode = Schema.RequiredMode.REQUIRED, maxLength = 100,
                 example = "New Year recruitment")

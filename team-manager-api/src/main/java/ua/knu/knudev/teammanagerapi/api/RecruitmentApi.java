@@ -1,14 +1,16 @@
 package ua.knu.knudev.teammanagerapi.api;
 
+import ua.knu.knudev.teammanagerapi.dto.ActiveRecruitmentDto;
+import ua.knu.knudev.teammanagerapi.dto.ClosedRecruitmentDto;
 import ua.knu.knudev.teammanagerapi.request.RecruitmentCloseRequest;
 import ua.knu.knudev.teammanagerapi.request.RecruitmentJoinRequest;
 import ua.knu.knudev.teammanagerapi.request.RecruitmentOpenRequest;
 
 public interface RecruitmentApi {
 
-    void openRecruitment(RecruitmentOpenRequest openRequest);
+    ActiveRecruitmentDto openRecruitment(RecruitmentOpenRequest openRequest);
 
-    void closeRecruitment(RecruitmentCloseRequest closeRequest);
+    ClosedRecruitmentDto closeRecruitment(RecruitmentCloseRequest closeRequest);
 
     void joinActiveRecruitment(RecruitmentJoinRequest joinRequest);
 }
