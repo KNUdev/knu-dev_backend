@@ -98,7 +98,8 @@ public class AdminRecruitmentController {
                     description = "Active recruitment id",
                     in = ParameterIn.HEADER,
                     required = true,
-                    example = "550e8400-e29b-41d4-a716-446655440000"
+                    example = "550e8400-e29b-41d4-a716-446655440000",
+                    schema = @Schema(implementation = RecruitmentCloseRequest.class)
             ) UUID activeRecruitmentId) {
         RecruitmentCloseRequest closeRequest = new RecruitmentCloseRequest(
                 activeRecruitmentId, RecruitmentCloseCause.MANUAL_CLOSE);
