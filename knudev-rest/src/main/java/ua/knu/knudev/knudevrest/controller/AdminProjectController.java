@@ -57,7 +57,8 @@ public class AdminProjectController {
                     description = "Project creation data",
                     in = ParameterIn.HEADER,
                     required = true,
-                    schema = @Schema(description = "Project creation request payload")
+                    schema = @Schema(description = "Project creation request payload",
+                            implementation = ProjectCreationRequest.class)
             ) ProjectCreationRequest projectCreationRequest) {
         projectApi.create(projectCreationRequest);
     }
