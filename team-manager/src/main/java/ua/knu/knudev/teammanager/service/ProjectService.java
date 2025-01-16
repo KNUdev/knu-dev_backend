@@ -17,6 +17,7 @@ import ua.knu.knudev.teammanager.domain.ProjectAccount;
 import ua.knu.knudev.teammanager.domain.ProjectReleaseInfo;
 import ua.knu.knudev.teammanager.domain.embeddable.MultiLanguageField;
 import ua.knu.knudev.teammanager.domain.embeddable.ProjectAccountId;
+import ua.knu.knudev.teammanager.mapper.MultiLanguageFieldMapper;
 import ua.knu.knudev.teammanager.mapper.ProjectMapper;
 import ua.knu.knudev.teammanager.repository.ProjectRepository;
 import ua.knu.knudev.teammanagerapi.api.ProjectApi;
@@ -40,12 +41,13 @@ public class ProjectService implements ProjectApi {
     private final ProjectRepository projectRepository;
     private final ImageServiceApi imageServiceApi;
     private final AccountProfileService accountProfileService;
+    private final MultiLanguageFieldMapper multiLanguageFieldMapper;
 
     @Override
     @Transactional
     public FullProjectDto create(ProjectCreationRequest projectCreationRequest) {
-        MultiLanguageField name = projectMapper.map(projectCreationRequest.name());
-        MultiLanguageField description = projectMapper.map(projectCreationRequest.description());
+        MultiLanguageField name = multiLanguageFieldMapper.map(projectCreationRequest.name());
+        MultiLanguageField description = multiLanguageFieldMapper.map(projectCreationRequest.description());
 
         String filename = imageServiceApi.uploadFile(
                 projectCreationRequest.avatarFile(),
@@ -132,13 +134,10 @@ public class ProjectService implements ProjectApi {
     public Page<ShortProjectDto> getAll(Integer pageNumber, Integer pageSize) {
         Pageable pageable = PageRequest.of(pageNumber, pageSize);
         Page<Project> allProjectsPage = projectRepository.findAll(pageable);
-        if (allProjectsPage.isEmpty()) {
-            throw new ProjectException("No projects found!");
-        }
 
         return allProjectsPage.map(project -> new ShortProjectDto(
-                projectMapper.map(project.getName()),
-                projectMapper.map(project.getDescription()),
+                multiLanguageFieldMapper.map(project.getName()),
+                multiLanguageFieldMapper.map(project.getDescription()),
                 project.getStatus(),
                 project.getAvatarFilename(),
                 project.getTags()
@@ -146,6 +145,7 @@ public class ProjectService implements ProjectApi {
     }
 
     @Override
+    @Transactional
     public FullProjectDto release(UUID projectId, String projectDomain) {
         Project project = getProjectById(projectId);
 

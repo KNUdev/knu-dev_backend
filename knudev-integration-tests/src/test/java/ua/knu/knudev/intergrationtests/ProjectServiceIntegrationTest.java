@@ -9,6 +9,7 @@ import org.springframework.web.multipart.MultipartFile;
 import ua.knu.knudev.fileservice.service.ImageService;
 import ua.knu.knudev.fileserviceapi.subfolder.ImageSubfolder;
 import ua.knu.knudev.intergrationtests.config.IntegrationTestsConfig;
+import ua.knu.knudev.intergrationtests.repository.ProjectReleaseInfoRepository;
 import ua.knu.knudev.knudevcommon.constant.*;
 import ua.knu.knudev.knudevcommon.dto.MultiLanguageFieldDto;
 import ua.knu.knudev.teammanager.domain.AccountProfile;
@@ -45,6 +46,7 @@ public class ProjectServiceIntegrationTest {
     private static final String TEST_GITHUB_REPO_LINK_1 = "https://github.com/KNUdev/knu-dev/issues";
     private static final String TEST_GITHUB_REPO_LINK_2 = "https://github.com/KNUdev/knu-dev/pulls";
     private static final String TEST_PROJECT_DOMAIN = "knudev";
+    private static final UUID INVALID_PROJECT_ID = UUID.randomUUID();
 
     @Autowired
     private ProjectService projectService;
@@ -242,7 +244,7 @@ public class ProjectServiceIntegrationTest {
             assertThrows(
                     ProjectException.class,
                     () -> projectService.addDeveloper(new AddProjectDeveloperRequest(
-                            testAccountProfile.getId(), testAccountProfile.getId()))
+                            INVALID_PROJECT_ID, testAccountProfile.getId()))
             );
         }
     }
@@ -287,7 +289,7 @@ public class ProjectServiceIntegrationTest {
         public void should_ThrowProjectException_When_ProjectIdIsNotValid() {
             assertThrows(
                     ProjectException.class,
-                    () -> projectService.updateStatus(testAccountProfile.getId(), ProjectStatus.PLANNED)
+                    () -> projectService.updateStatus(INVALID_PROJECT_ID, ProjectStatus.PLANNED)
             );
         }
     }
@@ -316,7 +318,7 @@ public class ProjectServiceIntegrationTest {
         public void should_ThrowProjectException_When_ProvidedInvalidId() {
             assertThrows(
                     ProjectException.class,
-                    () -> projectService.getById(testAccountProfile.getId())
+                    () -> projectService.getById(INVALID_PROJECT_ID)
             );
         }
     }
@@ -331,16 +333,6 @@ public class ProjectServiceIntegrationTest {
 
             assertNotNull(response, "Response should not be null");
             assertEquals(1, response.size(), "Response should contain 1 project");
-        }
-
-        @Test
-        @DisplayName("Should throw ProjectException when database has noone project")
-        public void should_ThrowProjectException_When_DatabaseHasNoOneProject() {
-            projectRepository.deleteAll();
-            assertThrows(
-                    ProjectException.class,
-                    () -> projectService.getAll(0, 1).getContent()
-            );
         }
     }
 

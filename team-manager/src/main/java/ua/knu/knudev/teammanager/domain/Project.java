@@ -20,6 +20,7 @@ import java.util.UUID;
 @Entity
 @Table(schema = "team_management", name = "project")
 @Builder
+@BatchSize(size = 10)
 public class Project {
 
     @Id
@@ -52,15 +53,15 @@ public class Project {
     @Column(nullable = false)
     private ProjectStatus status;
 
-    @BatchSize(size = 100)
-    @ElementCollection(targetClass = ProjectTag.class, fetch = FetchType.EAGER)
+    @BatchSize(size = 40)
+    @ElementCollection(targetClass = ProjectTag.class)
     @CollectionTable(schema = "team_management", name = "tag", joinColumns = @JoinColumn(name = "project_id"))
     @Enumerated(EnumType.STRING)
     @Column(name = "tags", nullable = false)
     private Set<ProjectTag> tags = new HashSet<>();
 
-    @BatchSize(size = 100)
-    @ElementCollection(fetch = FetchType.EAGER)
+    @BatchSize(size = 20)
+    @ElementCollection
     @CollectionTable(schema = "team_management", name = "github_repo_links", joinColumns = @JoinColumn(name = "project_id"))
     @Column(name = "github_repo_link", nullable = false)
     private Set<String> githubRepoLinks = new HashSet<>();
@@ -68,7 +69,6 @@ public class Project {
     @OneToOne(mappedBy = "project", cascade = CascadeType.ALL, orphanRemoval = true)
     private ProjectReleaseInfo releaseInfo;
 
-    @BatchSize(size = 100)
     @OneToMany(mappedBy = "project", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<ProjectAccount> projectAccounts = new HashSet<>();
 
