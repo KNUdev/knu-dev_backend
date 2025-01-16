@@ -17,6 +17,8 @@ import org.springframework.web.bind.annotation.RestController;
 import ua.knu.knudev.knudevsecurityapi.response.ErrorResponse;
 import ua.knu.knudev.teammanagerapi.api.RecruitmentApi;
 import ua.knu.knudev.teammanagerapi.constant.RecruitmentCloseCause;
+import ua.knu.knudev.teammanagerapi.dto.ActiveRecruitmentDto;
+import ua.knu.knudev.teammanagerapi.dto.ClosedRecruitmentDto;
 import ua.knu.knudev.teammanagerapi.request.RecruitmentCloseRequest;
 import ua.knu.knudev.teammanagerapi.request.RecruitmentOpenRequest;
 
@@ -54,7 +56,7 @@ public class AdminRecruitmentController {
                     ))
     })
     @PostMapping("/open")
-    public void open(
+    public ActiveRecruitmentDto open(
             @RequestBody @Valid @Parameter(
                     name = "Open request",
                     description = "Recruitment open data",
@@ -62,7 +64,7 @@ public class AdminRecruitmentController {
                     required = true,
                     schema = @Schema(implementation = RecruitmentOpenRequest.class)
             ) RecruitmentOpenRequest openRequest) {
-        recruitmentApi.openRecruitment(openRequest);
+        return recruitmentApi.openRecruitment(openRequest);
     }
 
     @Operation(
@@ -90,17 +92,18 @@ public class AdminRecruitmentController {
                     ))
     })
     @PostMapping("/close")
-    public void close(
+    public ClosedRecruitmentDto close(
             @RequestBody @Parameter(
                     name = "Active recruitment id",
                     description = "Active recruitment id",
                     in = ParameterIn.HEADER,
                     required = true,
-                    example = "550e8400-e29b-41d4-a716-446655440000"
+                    example = "550e8400-e29b-41d4-a716-446655440000",
+                    schema = @Schema(implementation = RecruitmentCloseRequest.class)
             ) UUID activeRecruitmentId) {
         RecruitmentCloseRequest closeRequest = new RecruitmentCloseRequest(
                 activeRecruitmentId, RecruitmentCloseCause.MANUAL_CLOSE);
-        recruitmentApi.closeRecruitment(closeRequest);
+        return recruitmentApi.closeRecruitment(closeRequest);
     }
 
 }

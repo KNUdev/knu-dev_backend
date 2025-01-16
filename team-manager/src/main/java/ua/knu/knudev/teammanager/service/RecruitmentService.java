@@ -1,48 +1,58 @@
 package ua.knu.knudev.teammanager.service;
 
-import jakarta.transaction.Transactional;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
+import org.springframework.scheduling.TaskScheduler;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.support.TransactionTemplate;
+import org.springframework.validation.annotation.Validated;
 import ua.knu.knudev.knudevcommon.constant.Expertise;
 import ua.knu.knudev.knudevcommon.constant.KNUdevUnit;
-import ua.knu.knudev.teammanager.domain.*;
+import ua.knu.knudev.teammanager.domain.AccountProfile;
 import ua.knu.knudev.teammanager.domain.ActiveRecruitment;
-import ua.knu.knudev.teammanager.domain.ClosedRecruitment;
 import ua.knu.knudev.teammanager.domain.embeddable.RecruitmentAutoCloseConditions;
-import ua.knu.knudev.teammanager.mapper.RecruitmentAutoCloseConditionsMapper;
+import ua.knu.knudev.teammanager.mapper.RecruitmentMapper;
 import ua.knu.knudev.teammanager.repository.ActiveRecruitmentRepository;
-import ua.knu.knudev.teammanager.repository.ClosedRecruitmentRepository;
 import ua.knu.knudev.teammanagerapi.api.RecruitmentApi;
 import ua.knu.knudev.teammanagerapi.constant.RecruitmentCloseCause;
+import ua.knu.knudev.teammanagerapi.dto.ActiveRecruitmentDto;
+import ua.knu.knudev.teammanagerapi.dto.ClosedRecruitmentDto;
+import ua.knu.knudev.teammanagerapi.dto.RecruitmentAutoCloseConditionsDto;
 import ua.knu.knudev.teammanagerapi.exception.RecruitmentException;
 import ua.knu.knudev.teammanagerapi.request.RecruitmentCloseRequest;
 import ua.knu.knudev.teammanagerapi.request.RecruitmentJoinRequest;
 import ua.knu.knudev.teammanagerapi.request.RecruitmentOpenRequest;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.Collections;
 import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
+@Validated
 public class RecruitmentService implements RecruitmentApi {
 
     private final TransactionTemplate transactionTemplate;
     private final ActiveRecruitmentRepository activeRecruitmentRepository;
-    private final ClosedRecruitmentRepository closedRecruitmentRepository;
-    private final RecruitmentAutoCloseConditionsMapper recruitmentAutoCloseConditionsMapper;
     private final AccountProfileService accountProfileService;
+    private final TaskScheduler taskScheduler;
+    private final RecruitmentCloseService recruitmentCloseService;
+    private final RecruitmentMapper recruitmentMapper;
 
     @Override
-    public void openRecruitment(RecruitmentOpenRequest openRequest) {
+    public ActiveRecruitmentDto openRecruitment(RecruitmentOpenRequest openRequest) {
         assertActiveRecruitmentNotExists(openRequest);
 
-        RecruitmentAutoCloseConditions autoCloseConditions = recruitmentAutoCloseConditionsMapper
-                .toDomain(openRequest.autoCloseConditions());
+        RecruitmentAutoCloseConditionsDto requestConditions = openRequest.autoCloseConditions();
+        RecruitmentAutoCloseConditions autoCloseConditions = new RecruitmentAutoCloseConditions(
+                requestConditions.deadlineDate(),
+                requestConditions.maxCandidates()
+        );
 
         ActiveRecruitment activeRecruitment = ActiveRecruitment.builder()
                 .name(openRequest.recruitmentName())
@@ -52,7 +62,9 @@ public class RecruitmentService implements RecruitmentApi {
                 .unit(openRequest.unit())
                 .startedAt(LocalDateTime.now())
                 .build();
-        activeRecruitmentRepository.save(activeRecruitment);
+        ActiveRecruitment savedRecruitment = activeRecruitmentRepository.save(activeRecruitment);
+
+        scheduleRecruitmentAutoCloseOnDeadlineDate(savedRecruitment.getId(), autoCloseConditions.getDeadlineDate());
 
         log.info("Recruitment {} with expertise: {} was opened at: {}, auto-close date: {}",
                 activeRecruitment.getName(),
@@ -60,23 +72,23 @@ public class RecruitmentService implements RecruitmentApi {
                 LocalDateTime.now(),
                 activeRecruitment.getRecruitmentAutoCloseConditions().getDeadlineDate()
         );
+
+        return recruitmentMapper.toDto(savedRecruitment);
     }
 
     @Override
-    @Transactional
-    public void closeRecruitment(RecruitmentCloseRequest closeRequest) {
+    public ClosedRecruitmentDto closeRecruitment(@Valid RecruitmentCloseRequest closeRequest) {
         ActiveRecruitment activeRecruitment = getActiveRecruitmentDomainById(closeRequest.activeRecruitmentId());
 
-        ClosedRecruitment closedRecruitment = buildClosedRecruitment(activeRecruitment);
-        closedRecruitment.setCloseCause(closeRequest.closeCause());
-        activeRecruitmentRepository.delete(activeRecruitment);
-        closedRecruitmentRepository.save(closedRecruitment);
+        ClosedRecruitmentDto closedRecruitment = recruitmentCloseService.closeRecruitment(closeRequest, activeRecruitment);
 
-        log.info("Recruitment {} with expertise: {} was manually closed at {}",
+        log.info("Recruitment {} with expertise: {} was closed by cause {} at {}",
                 activeRecruitment.getName(),
                 activeRecruitment.getExpertise(),
+                closeRequest.closeCause(),
                 LocalDateTime.now()
         );
+        return closedRecruitment;
     }
 
     @Override
@@ -95,6 +107,11 @@ public class RecruitmentService implements RecruitmentApi {
                 }
             }
         }
+    }
+
+    public ActiveRecruitmentDto getById(UUID id) {
+        ActiveRecruitment activeRecruitment = getActiveRecruitmentDomainById(id);
+        return recruitmentMapper.toDto(activeRecruitment);
     }
 
     private void doJoinActiveRecruitment(RecruitmentJoinRequest joinRequest) {
@@ -118,8 +135,10 @@ public class RecruitmentService implements RecruitmentApi {
 
         int freshCount = activeRecruitmentRepository.countRecruited(activeRecruitmentId);
         if (freshCount == maxRecruitedLimit) {
-            RecruitmentCloseRequest closeRequest = new RecruitmentCloseRequest(activeRecruitmentId,
-                    RecruitmentCloseCause.ON_RECRUITS_EXCEEDING);
+            RecruitmentCloseRequest closeRequest = new RecruitmentCloseRequest(
+                    activeRecruitmentId,
+                    RecruitmentCloseCause.ON_RECRUITS_EXCEEDING
+            );
             closeRecruitment(closeRequest);
         }
     }
@@ -144,23 +163,29 @@ public class RecruitmentService implements RecruitmentApi {
         }
     }
 
-    private ClosedRecruitment buildClosedRecruitment(ActiveRecruitment activeRecruitment) {
-        ClosedRecruitment closedRecruitment = ClosedRecruitment.builder()
-                .id(activeRecruitment.getId())
-                .name(activeRecruitment.getName())
-                .unit(activeRecruitment.getUnit())
-                .expertise(activeRecruitment.getExpertise())
-                .recruitmentAutoCloseConditions(activeRecruitment.getRecruitmentAutoCloseConditions())
-                .closedAt(LocalDateTime.now())
-                .startedAt(activeRecruitment.getStartedAt())
-                .build();
+    private void scheduleRecruitmentAutoCloseOnDeadlineDate(UUID activeRecruitmentId, LocalDateTime deadlineDate) {
+        Runnable recruitmentAutoCloseTask = () -> {
+            RecruitmentCloseRequest closeRequest = new RecruitmentCloseRequest(
+                    activeRecruitmentId,
+                    RecruitmentCloseCause.ON_TIME_LIMIT
+            );
+            closeRecruitment(closeRequest);
+        };
+        Instant instant = deadlineDate
+                .atZone(ZoneId.of("Europe/Kiev"))
+                .toInstant();
 
-        RecruitmentAnalytics recruitmentAnalytics = RecruitmentAnalytics.builder()
-                .joinedUsers(activeRecruitment.getCurrentRecruited())
-                .closedRecruitment(closedRecruitment)
-                .build();
-        closedRecruitment.setRecruitmentAnalytics(recruitmentAnalytics);
-        return closedRecruitment;
+        Runnable safeTask = () -> {
+            try {
+                recruitmentAutoCloseTask.run();
+            } catch (Exception e) {
+                log.error("Error on autoclose recruitment", e);
+            }
+        };
+
+        taskScheduler.schedule(safeTask, instant);
+        log.info("Scheduled auto close task for recruitment with id: {} at deadline: {}",
+                activeRecruitmentId, deadlineDate);
     }
 
 }
