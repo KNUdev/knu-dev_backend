@@ -19,11 +19,7 @@ import ua.knu.knudev.teammanagerapi.exception.DepartmentException;
 import ua.knu.knudev.teammanagerapi.exception.RecruitmentException;
 
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Stream;
+import java.util.*;
 
 @RestControllerAdvice
 public class RestGlobalExceptionHandler {
@@ -99,7 +95,7 @@ public class RestGlobalExceptionHandler {
     private String buildErrorMessage(FieldError fieldError) {
         if ("expertise".equals(fieldError.getField())
                 && "typeMismatch".equals(fieldError.getCode())) {
-            return "Invalid Expertise value. Possible values are: " + Stream.of(Expertise.values());
+            return "Invalid Expertise value. Possible values are: " + Arrays.toString(Expertise.values());
         }
 
         return fieldError.getDefaultMessage();

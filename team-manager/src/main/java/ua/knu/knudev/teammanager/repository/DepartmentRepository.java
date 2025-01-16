@@ -19,8 +19,7 @@ public interface DepartmentRepository extends JpaRepository<Department, UUID> {
     """)
     Set<Specialty> findSpecialtiesByDepartmentId(@Param("id") UUID id);
 
-    boolean existsByName_En(String nameEnName);
+    boolean existsByName_En(String enName);
 
-    boolean existsByName_Uk(String nameUkName);
-
+    boolean existsByName_Uk(String ukName);
 }
