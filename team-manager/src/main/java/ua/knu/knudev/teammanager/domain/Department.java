@@ -25,6 +25,10 @@ public class Department {
     private UUID id;
 
     @Embedded
+    @AttributeOverrides({
+            @AttributeOverride(name = "en", column = @Column(name = "en_name")),
+            @AttributeOverride(name = "uk", column = @Column(name = "uk_name"))
+    })
     private MultiLanguageField name;
 
     @ManyToMany(fetch = FetchType.LAZY, cascade = {CascadeType.MERGE, CascadeType.PERSIST})

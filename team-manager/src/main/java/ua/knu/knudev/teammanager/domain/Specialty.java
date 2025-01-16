@@ -21,9 +21,13 @@ public class Specialty {
     private Double codeName;
 
     @Embedded
+    @AttributeOverrides({
+            @AttributeOverride(name = "en", column = @Column(name = "en_name")),
+            @AttributeOverride(name = "uk", column = @Column(name = "uk_name"))
+    })
     private MultiLanguageField name;
 
-    @ManyToMany(mappedBy = "specialties", fetch = FetchType.LAZY, cascade = {CascadeType.MERGE, CascadeType.PERSIST})
+    @ManyToMany(mappedBy = "specialties", cascade = {CascadeType.MERGE, CascadeType.PERSIST})
     private Set<Department> departments = new HashSet<>();
 
     public Specialty(Double codeName, String nameInEnglish, String nameInUkrainian) {
