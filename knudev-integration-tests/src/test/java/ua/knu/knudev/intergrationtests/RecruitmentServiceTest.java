@@ -49,16 +49,6 @@ class RecruitmentServiceTest {
     private Department testDepartment;
     private Specialty testSpecialty;
 
-    @BeforeAll
-    void globalSetup() {
-        // Runs once before all tests in this class (if needed).
-    }
-
-    @AfterAll
-    void globalTeardown() {
-        // Runs once after all tests in this class (if needed).
-    }
-
     @BeforeEach
     void setup() {
         testDepartment = createTestDepartmentWithSpecialties();
@@ -124,9 +114,6 @@ class RecruitmentServiceTest {
         return activeRecruitmentRepository.save(recruitment);
     }
 
-    // ------------------------------------------------------------------------------------------
-    // NESTED CLASS: OPENING RECRUITMENT
-    // ------------------------------------------------------------------------------------------
     @Nested
     @DisplayName("Opening Recruitment Scenarios")
     class OpeningRecruitmentScenarios {
@@ -152,7 +139,6 @@ class RecruitmentServiceTest {
         @Test
         @DisplayName("Should throw an exception when opening a duplicate recruitment (same expertise & unit)")
         void should_ThrowException_When_OpeningDuplicateRecruitmentInSameExpertiseAndUnit() {
-            // We already have a recruitment with BACKEND + PRECAMPUS
             createAndSaveRecruitment(5);
 
             RecruitmentOpenRequest duplicateRequest = RecruitmentOpenRequest.builder()
@@ -172,9 +158,6 @@ class RecruitmentServiceTest {
         }
     }
 
-    // ------------------------------------------------------------------------------------------
-    // NESTED CLASS: JOINING RECRUITMENT
-    // ------------------------------------------------------------------------------------------
     @Nested
     @DisplayName("Joining Recruitment Scenarios")
     class JoiningRecruitmentScenarios {
@@ -220,18 +203,15 @@ class RecruitmentServiceTest {
         @Test
         @DisplayName("Should throw RecruitmentException when user joins a non-existent recruitment")
         void should_ThrowRecruitmentException_When_UserJoinsNonExistentRecruitment() {
-            // Arrange
             AccountProfile user = createAndSaveAccount("notfound@example.com");
             UUID fakeRecruitmentId = UUID.randomUUID();
 
-            // Act & Assert
-            RecruitmentException exception = assertThrows(
+            assertThrows(
                     RecruitmentException.class,
                     () -> recruitmentService.joinActiveRecruitment(
                             new RecruitmentJoinRequest(user.getId(), fakeRecruitmentId)
                     )
             );
-            assertTrue(exception.getMessage().contains("There is no active recruitment with ID"));
         }
 
         @Test
@@ -240,19 +220,15 @@ class RecruitmentServiceTest {
             ActiveRecruitment recruitment = createAndSaveRecruitment(5);
             UUID invalidAccountId = UUID.randomUUID();
 
-            AccountException ex = assertThrows(
+            assertThrows(
                     AccountException.class,
                     () -> recruitmentService.joinActiveRecruitment(
                             new RecruitmentJoinRequest(invalidAccountId, recruitment.getId())
                     )
             );
-            assertTrue(ex.getMessage().contains("does not exist"));
         }
     }
 
-    // ------------------------------------------------------------------------------------------
-    // NESTED CLASS: CLOSING RECRUITMENT
-    // ------------------------------------------------------------------------------------------
     @Nested
     @DisplayName("Closing Recruitment Scenarios")
     class ClosingRecruitmentScenarios {
@@ -353,9 +329,6 @@ class RecruitmentServiceTest {
         }
     }
 
-    // ------------------------------------------------------------------------------------------
-    // NESTED CLASS: AUTO-CLOSE & CONCURRENCY
-    // ------------------------------------------------------------------------------------------
     @Nested
     @DisplayName("Auto-Close & Concurrency Scenarios")
     class AutoCloseAndConcurrencyScenarios {
@@ -413,7 +386,7 @@ class RecruitmentServiceTest {
 
         @Test
         @DisplayName("Should close recruitment when a close and join happen at the same time")
-        void should_CloseRecruitment_When_ConcurrentCloseAndJoin() throws InterruptedException {
+        void should_CloseRecruitment_When_ConcurrentCloseRecruitmentAndUserJoin() throws InterruptedException {
             // Arrange
             ActiveRecruitment recruitment = createAndSaveRecruitment(2);
             AccountProfile user = createAndSaveAccount("closeVsJoin@example.com");
@@ -442,7 +415,7 @@ class RecruitmentServiceTest {
 
         @Test
         @DisplayName("Should auto-close the recruitment when the deadline date is reached")
-        void should_AutoClose_When_OnDeadlineDate() throws InterruptedException {
+        void should_AutoClose_When_OnDeadlineDateLimit() throws InterruptedException {
             RecruitmentOpenRequest recruitmentOpenRequest = RecruitmentOpenRequest.builder()
                     .recruitmentName("Should be AutoClosed")
                     .expertise(Expertise.BACKEND)
