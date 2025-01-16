@@ -8,13 +8,14 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import lombok.AllArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import ua.knu.knudev.knudevsecurityapi.response.ErrorResponse;
 import ua.knu.knudev.teammanagerapi.api.ProjectApi;
-import ua.knu.knudev.teammanagerapi.dto.ProjectDto;
+import ua.knu.knudev.teammanagerapi.dto.FullProjectDto;
+import ua.knu.knudev.teammanagerapi.dto.ShortProjectDto;
 
-import java.util.Set;
 import java.util.UUID;
 
 @RestController
@@ -34,7 +35,7 @@ public class ProjectController {
                     description = "Project was successfully retrieved.",
                     content = @Content(
                             mediaType = "application/json",
-                            schema = @Schema(implementation = ProjectDto.class)
+                            schema = @Schema(implementation = FullProjectDto.class)
                     )),
             @ApiResponse(
                     responseCode = "404",
@@ -45,11 +46,11 @@ public class ProjectController {
     })
     @GetMapping("/{projectId}")
     @ResponseStatus(HttpStatus.OK)
-    public ProjectDto getProject(@PathVariable @Parameter(
+    public FullProjectDto getProject(@PathVariable @Parameter(
             name = "projectId",
             description = "Id of the project, information about which we want to see",
             in = ParameterIn.HEADER,
-            schema = @Schema(implementation = ProjectDto.class),
+            schema = @Schema(implementation = FullProjectDto.class),
             required = true,
             example = "f3b1c1b7d287b9f5acdb2f941517c7a9fcbf4bb2d9e8b3d3cfc622b1f67d34e8"
     ) UUID projectId) {
@@ -65,11 +66,13 @@ public class ProjectController {
             description = "Projects were successfully retrieved.",
             content = @Content(
                     mediaType = "application/json",
-                    schema = @Schema(implementation = ProjectDto.class)
+                    schema = @Schema(implementation = FullProjectDto.class)
             ))
     @GetMapping("/all")
     @ResponseStatus(HttpStatus.OK)
-    public Set<ProjectDto> getAllProjects() {
-        return projectApi.getAll();
+    public Page<ShortProjectDto> getAllProjects(
+            @RequestParam(name = "pageNumber", defaultValue = "0") Integer pageNumber,
+            @RequestParam(name = "pageSize", defaultValue = "9") Integer pageSize) {
+        return projectApi.getAll(pageNumber, pageSize);
     }
 }

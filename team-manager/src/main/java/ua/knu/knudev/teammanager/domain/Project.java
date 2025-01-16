@@ -2,6 +2,7 @@ package ua.knu.knudev.teammanager.domain;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.BatchSize;
 import org.hibernate.annotations.UuidGenerator;
 import ua.knu.knudev.knudevcommon.constant.ProjectStatus;
 import ua.knu.knudev.knudevcommon.constant.ProjectTag;
@@ -51,13 +52,15 @@ public class Project {
     @Column(nullable = false)
     private ProjectStatus status;
 
-    @ElementCollection(targetClass = ProjectTag.class)
+    @BatchSize(size = 100)
+    @ElementCollection(targetClass = ProjectTag.class, fetch = FetchType.EAGER)
     @CollectionTable(schema = "team_management", name = "tag", joinColumns = @JoinColumn(name = "project_id"))
     @Enumerated(EnumType.STRING)
     @Column(name = "tags", nullable = false)
     private Set<ProjectTag> tags = new HashSet<>();
 
-    @ElementCollection
+    @BatchSize(size = 100)
+    @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(schema = "team_management", name = "github_repo_links", joinColumns = @JoinColumn(name = "project_id"))
     @Column(name = "github_repo_link", nullable = false)
     private Set<String> githubRepoLinks = new HashSet<>();
@@ -65,6 +68,7 @@ public class Project {
     @OneToOne(mappedBy = "project", cascade = CascadeType.ALL, orphanRemoval = true)
     private ProjectReleaseInfo releaseInfo;
 
+    @BatchSize(size = 100)
     @OneToMany(mappedBy = "project", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<ProjectAccount> projectAccounts = new HashSet<>();
 

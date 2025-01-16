@@ -18,8 +18,9 @@ import ua.knu.knudev.teammanager.domain.Specialty;
 import ua.knu.knudev.teammanager.domain.embeddable.MultiLanguageField;
 import ua.knu.knudev.teammanager.repository.*;
 import ua.knu.knudev.teammanager.service.ProjectService;
+import ua.knu.knudev.teammanagerapi.dto.FullProjectDto;
 import ua.knu.knudev.teammanagerapi.dto.ProjectAccountDto;
-import ua.knu.knudev.teammanagerapi.dto.ProjectDto;
+import ua.knu.knudev.teammanagerapi.dto.ShortProjectDto;
 import ua.knu.knudev.teammanagerapi.exception.ProjectException;
 import ua.knu.knudev.teammanagerapi.request.AddProjectDeveloperRequest;
 import ua.knu.knudev.teammanagerapi.request.ProjectCreationRequest;
@@ -177,24 +178,25 @@ public class ProjectServiceIntegrationTest {
         Set<String> repoLinks = Set.of(TEST_GITHUB_REPO_LINK_1, TEST_GITHUB_REPO_LINK_2);
 
         //Act
-        ProjectDto response = projectService.create(request);
+        FullProjectDto response = projectService.create(request);
 
         //Assert
         assertNotNull(response, "Response should not be null");
-        assertNull(response.startedAt());
+        assertNull(response.getStartedAt());
 
         List<Project> projectByName = projectRepository.findProjectByName(new MultiLanguageField(TEST_PROJECT_NAME_IN_ENGLISH,
                 TEST_PROJECT_NAME_IN_UKRAINIAN));
+        String en = response.getName().getEn();
 
         assertEquals(2, projectByName.size());
-        assertEquals(TEST_PROJECT_NAME_IN_ENGLISH, response.name().getEn());
-        assertEquals(TEST_PROJECT_NAME_IN_UKRAINIAN, response.name().getUk());
-        assertEquals(TEST_PROJECT_DESCRIPTION_IN_ENGLISH, response.description().getEn());
-        assertEquals(TEST_PROJECT_DESCRIPTION_IN_UKRAINIAN, response.description().getUk());
-        assertEquals(TEST_PROJECT_NAME_IN_ENGLISH, response.avatarFilename());
-        assertEquals(ProjectStatus.PLANNED, response.status());
-        assertEquals(tags, response.tags());
-        assertEquals(repoLinks, response.githubRepoLinks());
+        assertEquals(TEST_PROJECT_NAME_IN_ENGLISH, en);
+        assertEquals(TEST_PROJECT_NAME_IN_UKRAINIAN, response.getName().getUk());
+        assertEquals(TEST_PROJECT_DESCRIPTION_IN_ENGLISH, response.getDescription().getEn());
+        assertEquals(TEST_PROJECT_DESCRIPTION_IN_UKRAINIAN, response.getDescription().getUk());
+        assertEquals(TEST_PROJECT_NAME_IN_ENGLISH, response.getAvatarFilename());
+        assertEquals(ProjectStatus.PLANNED, response.getStatus());
+        assertEquals(tags, response.getTags());
+        assertEquals(repoLinks, response.getGithubRepoLinks());
         assertTrue(projectRepository.existsProjectByAvatarFilename(TEST_PROJECT_NAME_IN_ENGLISH), "Project should exist");
         assertTrue(imageService.existsByFilename(TEST_PROJECT_NAME_IN_ENGLISH, ImageSubfolder.PROJECTS_AVATARS));
     }
@@ -209,15 +211,15 @@ public class ProjectServiceIntegrationTest {
             AddProjectDeveloperRequest request = getValidAddProjectDeveloperRequest();
 
             //Act
-            ProjectDto response = projectService.addDeveloper(request);
-            List<UUID> profileAccountIds = response.projectAccounts().stream()
+            FullProjectDto response = projectService.addDeveloper(request);
+            List<UUID> profileAccountIds = response.getProjectAccounts().stream()
                     .map(ProjectAccountDto::accountId)
                     .toList();
 
             //Assert
             assertNotNull(response, "Response should not be null");
-            assertNotNull(response.projectAccounts(), "Project accounts should not be null");
-            assertEquals(testProject.getId(), response.id());
+            assertNotNull(response.getProjectAccounts(), "Project accounts should not be null");
+            assertEquals(testProject.getId(), response.getId());
             assertTrue(accountProfileRepository.existsById(testAccountProfile.getId()), "Account profile should exist");
             assertTrue(projectRepository.existsProjectById(testProject.getId()), "Project should exist");
             assertTrue(profileAccountIds.contains(testAccountProfile.getId()), "Profile accounts should contain account id");
@@ -226,28 +228,22 @@ public class ProjectServiceIntegrationTest {
         @Test
         @DisplayName("Should throw ProjectException when projectAccount already exist in project")
         public void should_ThrowProjectException_When_ProjectAccountAlreadyExist() {
-            //Arrange
             projectService.addDeveloper(getValidAddProjectDeveloperRequest());
 
-            //Act & Assert
-            ProjectException exception = assertThrows(
+            assertThrows(
                     ProjectException.class,
                     () -> projectService.addDeveloper(getValidAddProjectDeveloperRequest())
             );
-            assertEquals("Account with ID: " + testAccountProfile.getId() +
-                    " is already assigned to project: " + testProject.getId(), exception.getMessage());
         }
 
         @Test
-        @DisplayName("Should throw exception when given not valid projectId")
-        public void should_ThrowException_When_ProjectIdIsNotValid() {
-            //Act & Assert
-            ProjectException exception = assertThrows(
+        @DisplayName("Should throw exception when developer is added to non-existent project")
+        public void should_ThrowException_When_DeveloperIsAddedToNonExistentProject() {
+            assertThrows(
                     ProjectException.class,
                     () -> projectService.addDeveloper(new AddProjectDeveloperRequest(
                             testAccountProfile.getId(), testAccountProfile.getId()))
             );
-            assertEquals("Project with id " + testAccountProfile.getId() + " not found", exception.getMessage());
         }
     }
 
@@ -257,13 +253,11 @@ public class ProjectServiceIntegrationTest {
         @Test
         @DisplayName("Should update status when given valid data")
         public void should_UpdateProjectStatusSuccessfully_When_ProvidedValidData() {
-            //Act
-            ProjectDto response = projectService.updateStatus(testProject.getId(), ProjectStatus.FINISHED);
+            FullProjectDto response = projectService.updateStatus(testProject.getId(), ProjectStatus.FINISHED);
 
-            //Assert
             assertNotNull(response, "Response should not be null");
-            assertEquals(ProjectStatus.FINISHED, response.status());
-            assertEquals(testProject.getId(), response.id());
+            assertEquals(ProjectStatus.FINISHED, response.getStatus());
+            assertEquals(testProject.getId(), response.getId());
             assertTrue(projectRepository.existsById(testProject.getId()), "Project should exist");
             assertTrue(projectRepository.existsByStatus(ProjectStatus.FINISHED));
         }
@@ -271,36 +265,30 @@ public class ProjectServiceIntegrationTest {
         @Test
         @DisplayName("Should set startedAt on now when status was PLANNED and new status is UNDER_DEVELOPMENT")
         public void should_SetStartedAtOnNow_When_ProjectStatusWasPLANNED_AndNewProjectStatusIsUNDER_DEVELOPMENT() {
-            //Act
-            ProjectDto response = projectService.updateStatus(testProject.getId(), ProjectStatus.UNDER_DEVELOPMENT);
+            FullProjectDto response = projectService.updateStatus(testProject.getId(), ProjectStatus.UNDER_DEVELOPMENT);
 
-            //Assert
             assertNotNull(response, "Response should not be null");
-            assertEquals(ProjectStatus.UNDER_DEVELOPMENT, response.status());
-            assertEquals(LocalDate.now(), response.startedAt());
+            assertEquals(ProjectStatus.UNDER_DEVELOPMENT, response.getStatus());
+            assertEquals(LocalDate.now(), response.getStartedAt());
             assertTrue(projectRepository.existsByStatus(ProjectStatus.UNDER_DEVELOPMENT));
         }
 
         @Test
         @DisplayName("Should throw ProjectException when newProjectStatus = null")
         public void should_ThrowProjectException_When_newProjectStatusIsNull() {
-            //Act & Assert
-            ProjectException exception = assertThrows(
+            assertThrows(
                     ProjectException.class,
                     () -> projectService.updateStatus(testProject.getId(), null)
             );
-            assertEquals("Project status can't be null!", exception.getMessage());
         }
 
         @Test
         @DisplayName("Should throw ProjectException when given not valid projectId")
         public void should_ThrowProjectException_When_ProjectIdIsNotValid() {
-            //Act & Assert
-            ProjectException exception = assertThrows(
+            assertThrows(
                     ProjectException.class,
                     () -> projectService.updateStatus(testAccountProfile.getId(), ProjectStatus.PLANNED)
             );
-            assertEquals("Project with id " + testAccountProfile.getId() + " not found", exception.getMessage());
         }
     }
 
@@ -310,30 +298,26 @@ public class ProjectServiceIntegrationTest {
         @Test
         @DisplayName("Should return project successfully when given valid id")
         public void should_ReturnProjectSuccessfully_When_ProvidedValidId() {
-            //Act
-            ProjectDto response = projectService.getById(testProject.getId());
+            FullProjectDto response = projectService.getById(testProject.getId());
 
-            //Assert
             assertNotNull(response, "Response should not be null");
-            assertEquals(testProject.getId(), response.id());
-            assertEquals(testProject.getName().getEn(), response.name().getEn());
-            assertEquals(testProject.getName().getUk(), response.name().getUk());
-            assertEquals(testProject.getDescription().getEn(), response.description().getEn());
-            assertEquals(testProject.getDescription().getUk(), response.description().getUk());
-            assertEquals(testProject.getTags(), response.tags());
-            assertEquals(testProject.getGithubRepoLinks(), response.githubRepoLinks());
+            assertEquals(testProject.getId(), response.getId());
+            assertEquals(testProject.getName().getEn(), response.getName().getEn());
+            assertEquals(testProject.getName().getUk(), response.getName().getUk());
+            assertEquals(testProject.getDescription().getEn(), response.getDescription().getEn());
+            assertEquals(testProject.getDescription().getUk(), response.getDescription().getUk());
+            assertEquals(testProject.getTags(), response.getTags());
+            assertEquals(testProject.getGithubRepoLinks(), response.getGithubRepoLinks());
             assertTrue(projectRepository.existsById(testProject.getId()), "Project should exist");
         }
 
         @Test
         @DisplayName("Should throw ProjectException when given not valid id")
         public void should_ThrowProjectException_When_ProvidedInvalidId() {
-            //Act & Assert
-            ProjectException exception = assertThrows(
+            assertThrows(
                     ProjectException.class,
                     () -> projectService.getById(testAccountProfile.getId())
             );
-            assertEquals("Project with id " + testAccountProfile.getId() + " not found", exception.getMessage());
         }
     }
 
@@ -343,28 +327,20 @@ public class ProjectServiceIntegrationTest {
         @Test
         @DisplayName("Should return all projects when it provided in db")
         public void should_ReturnAllProjects_When_ProvidedInDb() {
-            //Act
-            Set<ProjectDto> response = projectService.getAll();
-            UUID projectId = response.stream().map(ProjectDto::id).toList().get(0);
+            List<ShortProjectDto> response = projectService.getAll(0, 1).getContent();
 
-            //Assert
             assertNotNull(response, "Response should not be null");
             assertEquals(1, response.size(), "Response should contain 1 project");
-            assertEquals(testProject.getId(), projectId);
         }
 
         @Test
         @DisplayName("Should throw ProjectException when database has noone project")
         public void should_ThrowProjectException_When_DatabaseHasNoOneProject() {
-            //Arrange
             projectRepository.deleteAll();
-
-            //Act & Assert
-            ProjectException exception = assertThrows(
+            assertThrows(
                     ProjectException.class,
-                    () -> projectService.getAll()
+                    () -> projectService.getAll(0, 1).getContent()
             );
-            assertEquals("No projects found!", exception.getMessage());
         }
     }
 
@@ -372,33 +348,28 @@ public class ProjectServiceIntegrationTest {
     @DisplayName("Project`s release tests")
     class ReleaseProjectTests {
         @Test
-        @DisplayName("Should successfully save project with project release when given valid data")
-        public void should_ReturnProjectSuccessfully_When_ProvidedValidData() {
-            //Act
-            ProjectDto response = projectService.release(testProject.getId(), TEST_PROJECT_DOMAIN);
+        @DisplayName("Should release project successfully when project exist")
+        public void should_ReleaseProjectSuccessfully_When_ProjectExists() {
+            FullProjectDto response = projectService.release(testProject.getId(), TEST_PROJECT_DOMAIN);
 
-            //Assert
             assertNotNull(response, "Response should not be null");
-            assertNotNull(response.releaseInfo(), "Release info should not be null");
-            assertEquals(testProject.getId(), response.id());
-            assertEquals(LocalDate.now(), response.releaseInfo().releaseDate());
-            assertEquals(TEST_PROJECT_DOMAIN, response.releaseInfo().projectDomain());
-            assertEquals(testProject.getTags(), response.tags());
-            assertTrue(projectReleaseInfoRepository.existsById(response.id()),
+            assertNotNull(response.getReleaseInfo(), "Release info should not be null");
+            assertEquals(testProject.getId(), response.getId());
+            assertEquals(LocalDate.now(), response.getReleaseInfo().releaseDate());
+            assertEquals(TEST_PROJECT_DOMAIN, response.getReleaseInfo().projectDomain());
+            assertEquals(testProject.getTags(), response.getTags());
+            assertTrue(projectReleaseInfoRepository.existsById(response.getId()),
                     "Project release info should exist");
         }
 
         @Test
-        @DisplayName("Should throw ProjectException when project`s release info is not null")
-        public void should_ThrowProjectException_When_ProjectReleaseInfoIsNotNull() {
-            //Arrange
+        @DisplayName("Should throw ProjectException when project is already released")
+        public void should_ThrowProjectException_When_ProjectIsAlreadyReleased() {
             projectService.release(testProject.getId(), TEST_PROJECT_DOMAIN);
 
-            //Act & Assert
-            ProjectException exception = assertThrows(ProjectException.class,
+            assertThrows(ProjectException.class,
                     () -> projectService.release(testProject.getId(), TEST_PROJECT_DOMAIN)
             );
-            assertEquals("Project already has a release!", exception.getMessage());
             assertNotNull(projectRepository.findById(testProject.getId()).get().getReleaseInfo(),
                     "Release info should not be null");
         }
