@@ -1,9 +1,15 @@
 server:
-  port: 5000
+  port: ${APPLICATION_PORT:5000}
+#TODO WHEN ACTUATOR DEPENDENCY WILL BE ADDED
+#management:
+#  endpoints:
+#    web:
+#      exposure:
+#        include: health, info, mappings
+#  endpoint:
+#    health:
+#      show-details: always
 spring:
-  freemarker:
-    template-loader-path: "classpath:/templates"
-    suffix: ".ftl"
   servlet:
     multipart:
       max-file-size: 10MB
@@ -51,12 +57,12 @@ application:
       expiration: 1440000 #24 hours
   files:
     images:
-        allowed-extensions:
-          - jpg
-          - jpeg
-          - png
-          - webp
-        maximum-size-in-kilobytes: 2048
+      allowed-extensions:
+        - jpg
+        - jpeg
+        - png
+        - webp
+      maximum-size-in-kilobytes: 2048
     pdfs:
       tasks:
         allowed-extensions:
@@ -64,3 +70,22 @@ application:
         maximum-size-in-kilobytes: 2048
   assignments:
     activation-expiry-in-days: 7
+  recruitment:
+    requirements:
+      developer:
+        pre-campus-projects-amount: 1
+        pre-campus-duration: 6
+      pre-master-developer:
+        tech-lead-score: 7
+        developing-time-in-campus: 9
+      master-developer:
+        duration-in-months-as-pre-master: 12
+        managed-students-in-pre-campus-amount: 2
+        pre-master-projects-amount: 1
+        tech-lead-score: 7
+      tech-lead:
+        duration-in-months-as-master: 6
+        tech-lead-score: 8
+springdoc:
+  swagger-ui:
+    path: /api/documentation

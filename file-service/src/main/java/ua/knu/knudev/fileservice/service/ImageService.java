@@ -4,10 +4,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import ua.knu.knudev.fileservice.adapter.FileUploadAdapter;
 import ua.knu.knudev.fileservice.config.ImageFileConfigProperties;
-import ua.knu.knudev.rest.api.ImageServiceApi;
-import ua.knu.knudev.rest.folder.FileFolderProperties;
-import ua.knu.knudev.rest.folder.ImageFolder;
-import ua.knu.knudev.rest.subfolder.ImageSubfolder;
+import ua.knu.knudev.fileserviceapi.api.ImageServiceApi;
+import ua.knu.knudev.fileserviceapi.folder.FileFolderProperties;
+import ua.knu.knudev.fileserviceapi.folder.ImageFolder;
+import ua.knu.knudev.fileserviceapi.subfolder.ImageSubfolder;
 import ua.knu.knudev.knudevcommon.exception.FileException;
 
 import java.io.IOException;

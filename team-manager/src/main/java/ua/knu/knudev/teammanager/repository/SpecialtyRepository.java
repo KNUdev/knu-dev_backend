@@ -12,8 +12,8 @@ public interface SpecialtyRepository extends JpaRepository<Specialty, Double> {
 
     List<Specialty> findSpecialtiesByCodeNameIn(List<Double> codeNames);
 
-    List<Specialty> findSpecialtiesByNameInEnglishInOrNameInUkrainianIn(
-            Collection<String> namesInEnglish, Collection<String> namesInUkrainian
+    List<Specialty> findByNameUkInOrNameEnIn(
+            Collection<String> enNames, Collection<String> ukNames
     );
 
 }

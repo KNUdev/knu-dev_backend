@@ -5,8 +5,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
-import ua.knu.knudev.rest.api.PDFServiceApi;
-import ua.knu.knudev.rest.subfolder.PdfSubfolder;
+import ua.knu.knudev.fileserviceapi.api.PDFServiceApi;
+import ua.knu.knudev.fileserviceapi.subfolder.PdfSubfolder;
 import ua.knu.knudev.knudevcommon.constant.AccountTechnicalRole;
 import ua.knu.knudev.knudevcommon.exception.FileException;
 import ua.knu.knudev.taskmanager.config.TaskFileConfigProperties;
@@ -39,6 +39,8 @@ public class TaskUploadService implements TaskUploadAPI {
         return switch (role) {
             case INTERN -> PdfSubfolder.INTERN_ROLE_TASKS;
             case DEVELOPER -> PdfSubfolder.DEVELOPER_ROLE_TASKS;
+            case PREMASTER -> PdfSubfolder.PREMASTER_ROLE_TASKS;
+            case MASTER -> PdfSubfolder.MASTER_ROLE_TASKS;
             case TECHLEAD -> PdfSubfolder.TECHLEAD_ROLE_TASKS;
         };
     }

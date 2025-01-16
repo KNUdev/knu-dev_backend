@@ -8,19 +8,18 @@ import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.web.multipart.MultipartFile;
 import ua.knu.knudev.fileservice.service.ImageService;
-import ua.knu.knudev.rest.subfolder.ImageSubfolder;
+import ua.knu.knudev.fileserviceapi.subfolder.ImageSubfolder;
 import ua.knu.knudev.intergrationtests.config.IntegrationTestsConfig;
 import ua.knu.knudev.knudevcommon.constant.AccountTechnicalRole;
 import ua.knu.knudev.knudevcommon.constant.Expertise;
 import ua.knu.knudev.knudevcommon.exception.FileException;
-import ua.knu.knudev.knudevcommon.utils.AcademicUnitsIds;
-import ua.knu.knudev.knudevcommon.utils.FullName;
 import ua.knu.knudev.knudevsecurity.domain.AccountAuth;
 import ua.knu.knudev.knudevsecurity.repository.AccountAuthRepository;
 import ua.knu.knudev.knudevsecurityapi.request.AccountCreationRequest;
 import ua.knu.knudev.teammanager.domain.AccountProfile;
 import ua.knu.knudev.teammanager.domain.Department;
 import ua.knu.knudev.teammanager.domain.Specialty;
+import ua.knu.knudev.teammanager.domain.embeddable.MultiLanguageField;
 import ua.knu.knudev.teammanager.repository.AccountProfileRepository;
 import ua.knu.knudev.teammanager.repository.DepartmentRepository;
 import ua.knu.knudev.teammanager.repository.SpecialtyRepository;
@@ -30,7 +29,9 @@ import ua.knu.knudev.teammanagerapi.exception.DepartmentException;
 import ua.knu.knudev.teammanagerapi.response.AccountRegistrationResponse;
 
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 import java.util.function.Consumer;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -39,6 +40,12 @@ import static org.junit.jupiter.api.Assertions.*;
 @ActiveProfiles("test")
 public class AccountProfileServiceIntegrationTest {
 
+    private static final String TEST_EMAIL = "test@knu.ua";
+    private static final String TEST_PASSWORD = "Password123!";
+    private static final String TEST_FILE_NAME = "avatar.png";
+    private static final String TEST_FIRST_NAME = "John";
+    private static final String TEST_LAST_NAME = "Doe";
+    private static final String TEST_MIDDLE_NAME = "Middle";
     @Autowired
     private AccountProfileService accountProfileService;
     @Autowired
@@ -51,18 +58,8 @@ public class AccountProfileServiceIntegrationTest {
     private AccountAuthRepository accountAuthRepository;
     @Autowired
     private AccountProfileRepository accountProfileRepository;
-
     private Department testDepartment;
     private Specialty testSpecialty;
-
-    private static final String TEST_EMAIL = "test@knu.ua";
-    private static final String TEST_PASSWORD = "Password123!";
-    private static final FullName TEST_FULLNAME = FullName.builder()
-            .firstName("John")
-            .lastName("Doe")
-            .middleName("Middle")
-            .build();
-    private static final String TEST_FILE_NAME = "avatar.png";
 
     @BeforeEach
     public void setup() {
@@ -80,8 +77,8 @@ public class AccountProfileServiceIntegrationTest {
 
     private Department createTestDepartmentWithSpecialties() {
         Department department = new Department();
-        department.setNameInEnglish("Test Department");
-        department.setNameInUkrainian("Тестовий");
+        department.setName(new MultiLanguageField("Test Department", "Тестовий"));
+
 
         Specialty s1 = new Specialty(122.0, "Computer Science", "Науки");
         Specialty s2 = new Specialty(123.0, "Computer Engineering", "Інженерія");
@@ -98,9 +95,13 @@ public class AccountProfileServiceIntegrationTest {
         return AccountCreationRequest.builder()
                 .email(TEST_EMAIL)
                 .password(TEST_PASSWORD)
-                .fullName(TEST_FULLNAME)
+                .firstName(TEST_FIRST_NAME)
+                .lastName(TEST_LAST_NAME)
+                .middleName(TEST_MIDDLE_NAME)
                 .expertise(Expertise.BACKEND)
-                .academicUnitsIds(new AcademicUnitsIds(testDepartment.getId(), testSpecialty.getCodeName()))
+                .departmentId(testDepartment.getId())
+                .yearOfStudy(2)
+                .specialtyCodename(testSpecialty.getCodeName())
                 .avatarFile(getMockMultipartFile())
                 .build();
     }
@@ -145,9 +146,9 @@ public class AccountProfileServiceIntegrationTest {
         assertTrue(savedAccountOpt.isPresent(), "Account should be saved in repository");
 
         AccountProfile savedAccount = savedAccountOpt.get();
-        assertEquals(TEST_FULLNAME.firstName(), savedAccount.getFirstName(), "First names should match");
-        assertEquals(TEST_FULLNAME.lastName(), savedAccount.getLastName(), "Last names should match");
-        assertEquals(TEST_FULLNAME.middleName(), savedAccount.getMiddleName(), "Middle names should match");
+        assertEquals(TEST_FIRST_NAME, savedAccount.getFirstName(), "First names should match");
+        assertEquals(TEST_LAST_NAME, savedAccount.getLastName(), "Last names should match");
+        assertEquals(TEST_MIDDLE_NAME, savedAccount.getMiddleName(), "Middle names should match");
         assertEquals(testDepartment.getId(), savedAccount.getDepartment().getId(), "Department IDs should match");
         assertEquals(testSpecialty.getCodeName(), savedAccount.getSpecialty().getCodeName(), "Specialty code names should match");
 
@@ -164,15 +165,16 @@ public class AccountProfileServiceIntegrationTest {
         AccountProfile existingAccount = AccountProfile.builder()
                 .id(UUID.randomUUID())
                 .email(TEST_EMAIL)
-                .firstName(TEST_FULLNAME.firstName())
-                .lastName(TEST_FULLNAME.lastName())
-                .middleName(TEST_FULLNAME.middleName())
+                .firstName(TEST_FIRST_NAME)
+                .lastName(TEST_LAST_NAME)
+                .middleName(TEST_MIDDLE_NAME)
                 .avatarFilename(TEST_FILE_NAME)
                 .department(testDepartment)
                 .specialty(testSpecialty)
                 .expertise(Expertise.BACKEND)
                 .technicalRole(AccountTechnicalRole.INTERN)
                 .registrationDate(LocalDateTime.now())
+                .yearOfStudyOnRegistration(2)
                 .build();
 
         accountProfileRepository.save(existingAccount);
@@ -182,69 +184,13 @@ public class AccountProfileServiceIntegrationTest {
         assertEquals(String.format("Account with email %s already exists", TEST_EMAIL), exception.getMessage());
     }
 
-    @Nested
-    @DisplayName("Invalid Account Creation Tests")
-    class InvalidAccountCreationTests {
-
-        @Test
-        @DisplayName("Should throw ConstraintViolationException when registering with invalid password")
-        void should_ThrowConstraintViolationException_When_GivenInvalidPasswordFormat() {
-            AccountCreationRequest request = createInvalidAccountCreationReq(builder -> builder.password("123"));
-
-            assertThrows(ConstraintViolationException.class, () -> accountProfileService.register(request));
-            assertAccountDoesNotExist();
-        }
-
-        @Test
-        @DisplayName("Should throw ConstraintViolationException when registering with invalid email format")
-        void should_ThrowConstraintViolationException_When_GivenInvalidEmailFormat() {
-            AccountCreationRequest request = createInvalidAccountCreationReq(builder -> builder.email("invalidEmail"));
-
-            assertThrows(ConstraintViolationException.class, () -> accountProfileService.register(request));
-            assertAccountDoesNotExist();
-        }
-
-        @Test
-        @DisplayName("Should throw ConstraintViolationException when required fields are missing")
-        void should_ThrowConstraintViolationException_When_RequiredFieldsAreMissing() {
-            AccountCreationRequest request = AccountCreationRequest.builder().email(TEST_EMAIL).build();
-
-            assertThrows(ConstraintViolationException.class, () -> accountProfileService.register(request));
-            assertAccountDoesNotExist();
-        }
-
-        @Test
-        @DisplayName("Should throw ConstraintViolationException when given invalid email domain")
-        void should_ThrowConstraintViolationException_When_GivenInvalidEmailDomain() {
-            AccountCreationRequest request = createInvalidAccountCreationReq(builder -> builder.email("testValidEmail@gmail.com"));
-
-            assertThrows(ConstraintViolationException.class, () -> accountProfileService.register(request));
-            assertAccountDoesNotExist();
-        }
-
-        @Test
-        @DisplayName("Should throw ConstraintViolationException when names are not in English")
-        void should_ThrowConstraintViolationException_When_InputNameIsNotEnglish() {
-            FullName nonEnglishFullName = FullName.builder()
-                    .firstName("Владислав")
-                    .lastName("Петренко")
-                    .middleName("Григорович")
-                    .build();
-
-            AccountCreationRequest request = createInvalidAccountCreationReq(builder -> builder.fullName(nonEnglishFullName));
-
-            assertThrows(ConstraintViolationException.class, () -> accountProfileService.register(request));
-            assertAccountDoesNotExist();
-        }
-    }
-
     @Test
     @DisplayName("Should throw DepartmentException when registering with invalid department")
     public void should_ThrowDepartmentException_When_GivenInvalidDepartment() {
         UUID invalidDepartmentId = UUID.randomUUID();
-        AcademicUnitsIds academicUnitsIds = new AcademicUnitsIds(invalidDepartmentId, testSpecialty.getCodeName());
-
-        AccountCreationRequest request = createInvalidAccountCreationReq(builder -> builder.academicUnitsIds(academicUnitsIds));
+        AccountCreationRequest request = createInvalidAccountCreationReq(builder -> builder
+                .departmentId(invalidDepartmentId)
+        );
 
         assertThrows(DepartmentException.class, () -> accountProfileService.register(request));
         assertAccountDoesNotExist();
@@ -254,9 +200,9 @@ public class AccountProfileServiceIntegrationTest {
     @DisplayName("Should throw DepartmentException when registering with invalid specialty")
     public void should_ThrowDepartmentException_When_GivenInvalidSpecialty() {
         Double invalidSpecialtyCodeName = 999.0;
-        AcademicUnitsIds academicUnitsIds = new AcademicUnitsIds(testDepartment.getId(), invalidSpecialtyCodeName);
-
-        AccountCreationRequest request = createInvalidAccountCreationReq(builder -> builder.academicUnitsIds(academicUnitsIds));
+        AccountCreationRequest request = createInvalidAccountCreationReq(builder -> builder
+                .specialtyCodename(invalidSpecialtyCodeName)
+        );
 
         assertThrows(DepartmentException.class, () -> accountProfileService.register(request));
         assertAccountDoesNotExist();
@@ -352,5 +298,59 @@ public class AccountProfileServiceIntegrationTest {
 
         List<AccountAuth> authAccounts = accountAuthRepository.findAllByEmail(TEST_EMAIL);
         assertEquals(1, authAccounts.size(), "Only one auth account should be saved");
+    }
+
+    @Nested
+    @DisplayName("Invalid Account Creation Tests")
+    class InvalidAccountCreationTests {
+
+        @Test
+        @DisplayName("Should throw ConstraintViolationException when registering with invalid password")
+        void should_ThrowConstraintViolationException_When_GivenInvalidPasswordFormat() {
+            AccountCreationRequest request = createInvalidAccountCreationReq(builder -> builder.password("123"));
+
+            assertThrows(ConstraintViolationException.class, () -> accountProfileService.register(request));
+            assertAccountDoesNotExist();
+        }
+
+        @Test
+        @DisplayName("Should throw ConstraintViolationException when registering with invalid email format")
+        void should_ThrowConstraintViolationException_When_GivenInvalidEmailFormat() {
+            AccountCreationRequest request = createInvalidAccountCreationReq(builder -> builder.email("invalidEmail"));
+
+            assertThrows(ConstraintViolationException.class, () -> accountProfileService.register(request));
+            assertAccountDoesNotExist();
+        }
+
+        @Test
+        @DisplayName("Should throw ConstraintViolationException when required fields are missing")
+        void should_ThrowConstraintViolationException_When_RequiredFieldsAreMissing() {
+            AccountCreationRequest request = AccountCreationRequest.builder().email(TEST_EMAIL).build();
+
+            assertThrows(ConstraintViolationException.class, () -> accountProfileService.register(request));
+            assertAccountDoesNotExist();
+        }
+
+        @Test
+        @DisplayName("Should throw ConstraintViolationException when given invalid email domain")
+        void should_ThrowConstraintViolationException_When_GivenInvalidEmailDomain() {
+            AccountCreationRequest request = createInvalidAccountCreationReq(builder -> builder.email("testValidEmail@gmail.com"));
+
+            assertThrows(ConstraintViolationException.class, () -> accountProfileService.register(request));
+            assertAccountDoesNotExist();
+        }
+
+        @Test
+        @DisplayName("Should throw ConstraintViolationException when names are not in English")
+        void should_ThrowConstraintViolationException_When_InputNameIsNotEnglish() {
+            AccountCreationRequest request = createInvalidAccountCreationReq(builder -> builder
+                    .firstName("Владислав")
+                    .lastName("Петренко")
+                    .middleName("Григорович")
+            );
+
+            assertThrows(ConstraintViolationException.class, () -> accountProfileService.register(request));
+            assertAccountDoesNotExist();
+        }
     }
 }
