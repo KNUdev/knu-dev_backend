@@ -1,13 +1,11 @@
 package ua.knu.knudev.teammanager.service;
 
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.support.TransactionTemplate;
-import org.springframework.validation.annotation.Validated;
 import ua.knu.knudev.knudevcommon.constant.Expertise;
 import ua.knu.knudev.knudevcommon.constant.KNUdevUnit;
 import ua.knu.knudev.teammanager.domain.AccountProfile;
@@ -34,7 +32,6 @@ import java.util.UUID;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-@Validated
 public class RecruitmentService implements RecruitmentApi {
 
     private final TransactionTemplate transactionTemplate;
@@ -77,7 +74,7 @@ public class RecruitmentService implements RecruitmentApi {
     }
 
     @Override
-    public ClosedRecruitmentDto closeRecruitment(@Valid RecruitmentCloseRequest closeRequest) {
+    public ClosedRecruitmentDto closeRecruitment(RecruitmentCloseRequest closeRequest) {
         ActiveRecruitment activeRecruitment = getActiveRecruitmentDomainById(closeRequest.activeRecruitmentId());
 
         ClosedRecruitmentDto closedRecruitment = recruitmentCloseService.closeRecruitment(closeRequest, activeRecruitment);
@@ -93,7 +90,7 @@ public class RecruitmentService implements RecruitmentApi {
 
     @Override
     public void joinActiveRecruitment(RecruitmentJoinRequest joinRequest) {
-        final int maxJoinRetries = 5;
+        final int maxJoinRetries = 10;
 
         for (int attempt = 1; attempt <= maxJoinRetries; attempt++) {
             try {

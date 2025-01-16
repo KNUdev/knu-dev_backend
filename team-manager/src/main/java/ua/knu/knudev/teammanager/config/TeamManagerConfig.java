@@ -19,7 +19,7 @@ public class TeamManagerConfig {
     public ThreadPoolTaskScheduler threadPoolTaskScheduler() {
         ThreadPoolTaskScheduler scheduler = new ThreadPoolTaskScheduler();
         scheduler.setPoolSize(10);
-        scheduler.setThreadNamePrefix("MyScheduler-");
+        scheduler.setThreadNamePrefix("CloseRecruitmentTask-");
         scheduler.initialize();
         return scheduler;
     }

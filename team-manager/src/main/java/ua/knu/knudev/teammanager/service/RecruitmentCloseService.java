@@ -22,7 +22,7 @@ public class RecruitmentCloseService {
     private final ActiveRecruitmentRepository activeRecruitmentRepository;
     private final ClosedRecruitmentRepository closedRecruitmentRepository;
 
-    @Transactional(value = Transactional.TxType.REQUIRES_NEW)
+    @Transactional
     public ClosedRecruitmentDto closeRecruitment(RecruitmentCloseRequest closeRequest, ActiveRecruitment activeRecruitment) {
         ClosedRecruitment closedRecruitment = buildClosedRecruitment(activeRecruitment);
         closedRecruitment.setCloseCause(closeRequest.closeCause());
