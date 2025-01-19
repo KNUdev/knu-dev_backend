@@ -79,7 +79,6 @@ public class AccountProfileServiceIntegrationTest {
         Department department = new Department();
         department.setName(new MultiLanguageField("Test Department", "Тестовий"));
 
-
         Specialty s1 = new Specialty(122.0, "Computer Science", "Науки");
         Specialty s2 = new Specialty(123.0, "Computer Engineering", "Інженерія");
         Specialty s3 = new Specialty(125.0, "Cybernetics", "Кібернетика");

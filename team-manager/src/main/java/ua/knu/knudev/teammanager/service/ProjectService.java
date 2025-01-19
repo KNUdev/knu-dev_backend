@@ -4,6 +4,9 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import ua.knu.knudev.fileserviceapi.api.ImageServiceApi;
 import ua.knu.knudev.fileserviceapi.subfolder.ImageSubfolder;
@@ -14,20 +17,18 @@ import ua.knu.knudev.teammanager.domain.ProjectAccount;
 import ua.knu.knudev.teammanager.domain.ProjectReleaseInfo;
 import ua.knu.knudev.teammanager.domain.embeddable.MultiLanguageField;
 import ua.knu.knudev.teammanager.domain.embeddable.ProjectAccountId;
-import ua.knu.knudev.teammanager.mapper.AccountProfileMapper;
+import ua.knu.knudev.teammanager.mapper.MultiLanguageFieldMapper;
 import ua.knu.knudev.teammanager.mapper.ProjectMapper;
 import ua.knu.knudev.teammanager.repository.ProjectRepository;
-import ua.knu.knudev.teammanagerapi.api.AccountProfileApi;
 import ua.knu.knudev.teammanagerapi.api.ProjectApi;
-import ua.knu.knudev.teammanagerapi.dto.AccountProfileDto;
-import ua.knu.knudev.teammanagerapi.dto.ProjectDto;
+import ua.knu.knudev.teammanagerapi.dto.FullProjectDto;
+import ua.knu.knudev.teammanagerapi.dto.ShortProjectDto;
 import ua.knu.knudev.teammanagerapi.exception.ProjectException;
 import ua.knu.knudev.teammanagerapi.request.AddProjectDeveloperRequest;
 import ua.knu.knudev.teammanagerapi.request.ProjectCreationRequest;
 
-import javax.security.auth.login.AccountNotFoundException;
 import java.time.LocalDate;
-import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
@@ -39,14 +40,14 @@ public class ProjectService implements ProjectApi {
     private final ProjectMapper projectMapper;
     private final ProjectRepository projectRepository;
     private final ImageServiceApi imageServiceApi;
-    private final AccountProfileApi accountProfileApi;
-    private final AccountProfileMapper accountProfileMapper;
+    private final AccountProfileService accountProfileService;
+    private final MultiLanguageFieldMapper multiLanguageFieldMapper;
 
     @Override
     @Transactional
-    public void create(ProjectCreationRequest projectCreationRequest) {
-        MultiLanguageField name = projectMapper.map(projectCreationRequest.name());
-        MultiLanguageField description = projectMapper.map(projectCreationRequest.description());
+    public FullProjectDto create(ProjectCreationRequest projectCreationRequest) {
+        MultiLanguageField name = multiLanguageFieldMapper.toDomain(projectCreationRequest.name());
+        MultiLanguageField description = multiLanguageFieldMapper.toDomain(projectCreationRequest.description());
 
         String filename = imageServiceApi.uploadFile(
                 projectCreationRequest.avatarFile(),
@@ -64,20 +65,21 @@ public class ProjectService implements ProjectApi {
                 .status(ProjectStatus.PLANNED)
                 .build();
 
-        projectRepository.save(project);
+        Project savedProject = projectRepository.save(project);
         log.info("Project was created: {}", project.getId());
+        return projectMapper.toDto(savedProject);
     }
 
     @Override
     @SneakyThrows
     @Transactional
-    public void addDeveloper(AddProjectDeveloperRequest addProjectDeveloperRequest) {
+    public FullProjectDto addDeveloper(AddProjectDeveloperRequest addProjectDeveloperRequest) {
         UUID projectId = addProjectDeveloperRequest.projectId();
         UUID accountProfileId = addProjectDeveloperRequest.accountProfileId();
         Project project = getProjectById(projectId);
-        AccountProfile accountProfile = getAccountProfileById(accountProfileId);
-        Set<ProjectAccount> projectAccounts = project.getProjectAccounts();
+        AccountProfile accountProfile = accountProfileService.getDomainById(accountProfileId);
 
+        Set<ProjectAccount> projectAccounts = project.getProjectAccounts();
         ProjectAccount projectAccount = createProjectAccount(
                 project,
                 accountProfile,
@@ -85,17 +87,24 @@ public class ProjectService implements ProjectApi {
                 accountProfileId
         );
 
-        if (projectAccounts.contains(projectAccount)) {
-            throw new ProjectException("Account with ID: " + accountProfile +
+        List<UUID> accountProfileIds = projectAccounts.stream()
+                .map(account -> account.getAccountProfile().getId())
+                .toList();
+
+        if (accountProfileIds.stream().anyMatch(id -> accountProfile.getId().equals(id))) {
+            throw new ProjectException("Account with ID: " + accountProfileId +
                     " is already assigned to project: " + projectId);
         }
+
         projectAccounts.add(projectAccount);
-        projectRepository.save(project);
+        Project savedProject = projectRepository.save(project);
         log.info("Added developer: {}, to project: {}", projectAccount.getId().getAccountId(), projectId);
+        return projectMapper.toDto(savedProject);
     }
 
     @Override
-    public void updateStatus(UUID projectId, ProjectStatus newProjectStatus) {
+    @Transactional
+    public FullProjectDto updateStatus(UUID projectId, ProjectStatus newProjectStatus) {
         if (newProjectStatus == null) {
             throw new ProjectException("Project status can't be null!");
         }
@@ -108,29 +117,36 @@ public class ProjectService implements ProjectApi {
         }
 
         project.setStatus(newProjectStatus);
-        projectRepository.save(project);
+        Project savedProject = projectRepository.save(project);
         log.info("Project status updated: {}, in project: {}", newProjectStatus, projectId);
+        return projectMapper.toDto(savedProject);
     }
 
     @Override
-    public ProjectDto getById(UUID projectId) {
+    @Transactional
+    public FullProjectDto getById(UUID projectId) {
         Project project = getProjectById(projectId);
         return projectMapper.toDto(project);
     }
 
     @Override
-    public Set<ProjectDto> getAll() {
-        Set<Project> allProjects = new HashSet<>(projectRepository.findAll());
-        if (allProjects.isEmpty()) {
-            throw new ProjectException("No projects found!");
-        }
+    @Transactional
+    public Page<ShortProjectDto> getAll(Integer pageNumber, Integer pageSize) {
+        Pageable pageable = PageRequest.of(pageNumber, pageSize);
+        Page<Project> allProjectsPage = projectRepository.findAll(pageable);
 
-        return projectMapper.toDtos(allProjects);
+        return allProjectsPage.map(project -> new ShortProjectDto(
+                multiLanguageFieldMapper.toDto(project.getName()),
+                multiLanguageFieldMapper.toDto(project.getDescription()),
+                project.getStatus(),
+                project.getAvatarFilename(),
+                project.getTags()
+        ));
     }
 
     @Override
     @Transactional
-    public void release(UUID projectId, String projectDomain) {
+    public FullProjectDto release(UUID projectId, String projectDomain) {
         Project project = getProjectById(projectId);
 
         if (project.getReleaseInfo() != null) {
@@ -144,21 +160,14 @@ public class ProjectService implements ProjectApi {
 
         project.setReleaseInfo(projectReleaseInfo);
 
-        projectRepository.save(project);
+        Project savedProject = projectRepository.save(project);
         log.info("Project released: {}", projectId);
+        return projectMapper.toDto(savedProject);
     }
 
     private Project getProjectById(UUID projectId) {
         return projectRepository.findById(projectId).orElseThrow(
                 () -> new ProjectException("Project with id " + projectId + " not found"));
-    }
-
-    private AccountProfile getAccountProfileById(UUID accountProfileId) throws AccountNotFoundException {
-        AccountProfileDto accountProfileDto = accountProfileApi.getById(accountProfileId);
-        if (accountProfileDto == null) {
-            throw new AccountNotFoundException("Account with id " + accountProfileId + " not found");
-        }
-        return accountProfileMapper.toDomain(accountProfileDto);
     }
 
     private ProjectAccount createProjectAccount(Project project, AccountProfile accountProfile, UUID projectId, UUID accountProfileId) {
