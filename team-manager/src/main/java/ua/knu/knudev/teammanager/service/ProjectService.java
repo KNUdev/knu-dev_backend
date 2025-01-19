@@ -46,8 +46,8 @@ public class ProjectService implements ProjectApi {
     @Override
     @Transactional
     public FullProjectDto create(ProjectCreationRequest projectCreationRequest) {
-        MultiLanguageField name = multiLanguageFieldMapper.map(projectCreationRequest.name());
-        MultiLanguageField description = multiLanguageFieldMapper.map(projectCreationRequest.description());
+        MultiLanguageField name = multiLanguageFieldMapper.toDomain(projectCreationRequest.name());
+        MultiLanguageField description = multiLanguageFieldMapper.toDomain(projectCreationRequest.description());
 
         String filename = imageServiceApi.uploadFile(
                 projectCreationRequest.avatarFile(),
@@ -136,8 +136,8 @@ public class ProjectService implements ProjectApi {
         Page<Project> allProjectsPage = projectRepository.findAll(pageable);
 
         return allProjectsPage.map(project -> new ShortProjectDto(
-                multiLanguageFieldMapper.map(project.getName()),
-                multiLanguageFieldMapper.map(project.getDescription()),
+                multiLanguageFieldMapper.toDto(project.getName()),
+                multiLanguageFieldMapper.toDto(project.getDescription()),
                 project.getStatus(),
                 project.getAvatarFilename(),
                 project.getTags()

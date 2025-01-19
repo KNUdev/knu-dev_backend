@@ -18,7 +18,7 @@ import java.util.Set;
 public class ShortProjectDto {
 
     @Schema(description = "Project name (multi-language field)", implementation = MultiLanguageFieldDto.class)
-    protected MultiLanguageFieldDto name;
+    private MultiLanguageFieldDto name;
 
     @Schema(description = "Project description (multi-language field)", implementation = MultiLanguageFieldDto.class)
     private MultiLanguageFieldDto description;

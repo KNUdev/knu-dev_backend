@@ -28,7 +28,7 @@ public class AdminProjectController {
 
     private final ProjectApi projectApi;
 
-    @PostMapping("/create")
+    @PostMapping(value = "/create", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @ResponseStatus(HttpStatus.CREATED)
     @Operation(
             summary = "Create a new project",

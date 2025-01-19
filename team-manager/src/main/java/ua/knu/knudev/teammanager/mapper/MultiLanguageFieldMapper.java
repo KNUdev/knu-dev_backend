@@ -13,12 +13,12 @@ public interface MultiLanguageFieldMapper {
             @Mapping(target = "en", source = "en"),
             @Mapping(target = "uk", source = "uk")
     })
-    MultiLanguageField map(MultiLanguageFieldDto multiLanguageFieldDto);
+    MultiLanguageField toDomain(MultiLanguageFieldDto multiLanguageFieldDto);
 
     @Mappings({
             @Mapping(target = "en", source = "en"),
             @Mapping(target = "uk", source = "uk")
     })
-    MultiLanguageFieldDto map(MultiLanguageField multiLanguageField);
+    MultiLanguageFieldDto toDto(MultiLanguageField multiLanguageField);
 
 }
