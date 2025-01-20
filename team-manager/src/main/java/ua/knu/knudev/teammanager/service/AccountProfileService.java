@@ -15,7 +15,6 @@ import org.springframework.web.multipart.MultipartFile;
 import ua.knu.knudev.fileserviceapi.api.ImageServiceApi;
 import ua.knu.knudev.fileserviceapi.subfolder.ImageSubfolder;
 import ua.knu.knudev.knudevcommon.constant.KNUdevUnit;
-import ua.knu.knudev.teammanagerapi.constant.AccountsCriteriaFilterOption;
 import ua.knu.knudev.knudevcommon.exception.FileException;
 import ua.knu.knudev.knudevcommon.utils.AcademicUnitsIds;
 import ua.knu.knudev.knudevcommon.utils.FullName;
@@ -28,8 +27,10 @@ import ua.knu.knudev.teammanager.domain.Specialty;
 import ua.knu.knudev.teammanager.mapper.AccountProfileMapper;
 import ua.knu.knudev.teammanager.repository.AccountProfileRepository;
 import ua.knu.knudev.teammanagerapi.api.AccountProfileApi;
-import ua.knu.knudev.teammanagerapi.dto.AccountSearchCriteria;
+import ua.knu.knudev.teammanagerapi.constant.AccountsCriteriaFilterOption;
 import ua.knu.knudev.teammanagerapi.dto.AccountProfileDto;
+import ua.knu.knudev.teammanagerapi.dto.AccountSearchCriteria;
+import ua.knu.knudev.teammanagerapi.dto.ShortAccountProfileDto;
 import ua.knu.knudev.teammanagerapi.exception.AccountException;
 import ua.knu.knudev.teammanagerapi.response.AccountRegistrationResponse;
 
@@ -102,6 +103,24 @@ public class AccountProfileService implements AccountProfileApi {
         Map<AccountsCriteriaFilterOption, Object> filtersMap = buildAccountsFiltersMap(accountSearchCriteria);
         Page<AccountProfile> searchedAccountsPage = accountProfileRepository.findAllAccountsByFilters(filtersMap, paging);
         return searchedAccountsPage.map(accountProfileMapper::toDto);
+    }
+
+    @Override
+    public Page<ShortAccountProfileDto> findAllTeamMembers(Integer pageNumber, Integer pageSize) {
+        Pageable paging = PageRequest.of(pageNumber, pageSize);
+        Page<AccountProfile> teamMembersPage = accountProfileRepository.findAllByUnit(KNUdevUnit.CAMPUS, paging);
+
+        return teamMembersPage.map(accountProfile ->
+                ShortAccountProfileDto.builder()
+                        .name(new FullName(
+                                accountProfile.getFirstName(),
+                                accountProfile.getLastName(),
+                                accountProfile.getMiddleName())
+                        )
+                        .avatarFilename(accountProfile.getAvatarFilename())
+                        .accountTechnicalRole(accountProfile.getTechnicalRole())
+                        .build()
+        );
     }
 
     public AccountProfile getDomainById(UUID id) {
