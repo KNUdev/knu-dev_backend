@@ -33,6 +33,8 @@ public interface AccountProfileRepository extends JpaRepository<AccountProfile, 
 
     List<AccountProfile> findAllByEmail(String email);
 
+    Page<AccountProfile> findAllByUnit(KNUdevUnit unit, Pageable pageable);
+
     default Page<AccountProfile> findAllAccountsByFilters(Map<AccountsCriteriaFilterOption, Object> filters, Pageable pageable) {
         BooleanBuilder predicate = new BooleanBuilder();
 
