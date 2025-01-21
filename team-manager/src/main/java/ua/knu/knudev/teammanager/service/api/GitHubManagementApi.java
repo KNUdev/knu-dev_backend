@@ -1,4 +1,4 @@
-package ua.knu.knudev.teammanager.service;
+package ua.knu.knudev.teammanager.service.api;
 
 import ua.knu.knudev.teammanagerapi.request.ReceiveUserCommitsAmountRequest;
 

@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import ua.knu.knudev.teammanager.service.api.GitHubManagementApi;
 import ua.knu.knudev.teammanagerapi.request.ReceiveUserCommitsAmountRequest;
 
 import java.io.IOException;
