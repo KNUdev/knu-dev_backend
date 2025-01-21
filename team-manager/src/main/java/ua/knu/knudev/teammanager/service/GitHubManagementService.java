@@ -18,7 +18,6 @@ import java.time.LocalDate;
 
 @Service
 @RequiredArgsConstructor
-
 public class GitHubManagementService implements GitHubManagementApi {
 
     @Value("${github.api.access-token}")
