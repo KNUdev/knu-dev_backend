@@ -89,3 +89,9 @@ application:
 springdoc:
   swagger-ui:
     path: /api/documentation
+
+github:
+  api:
+    access-token: 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
+    organization-name: KNUdev
+
