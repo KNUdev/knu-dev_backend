@@ -4,6 +4,6 @@ import ua.knu.knudev.teammanagerapi.requirements.PromotionRequirements;
 
 public interface Specification<T extends PromotionRequirements> {
 
-    boolean isSatisfiedBy(T t);
+    boolean isSatisfiedForEnhancement(T t);
 
 }

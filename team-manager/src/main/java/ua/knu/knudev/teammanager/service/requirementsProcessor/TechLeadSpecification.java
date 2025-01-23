@@ -5,15 +5,17 @@ import ua.knu.knudev.teammanagerapi.requirements.TechLeadRequirements;
 
 public class TechLeadSpecification implements Specification<TechLeadRequirements> {
 
-    @Value("${application.recruitment.requirements.tech-lead.duration-in-months-as-master}")
-    private int durationInMonthsAsMaster;
-    @Value("${application.recruitment.requirements.tech-lead.tech-lead-score}")
-    private int techLeadScore;
+    @Value("${application.recruitment.requirements.tech-lead.projects-completed-versions-amount}")
+    private Integer projectsCompletedVersionsAmount;
+    @Value("${application.recruitment.requirements.tech-lead.mentored-students-at-precampus-amount}")
+    private Integer mentoredStudentsAtPrecampusAmount;
+    @Value("${application.recruitment.requirements.tech-lead.masterclasses-amount}")
+    private Integer masterClassesAmount;
 
     @Override
-    public boolean isSatisfiedBy(TechLeadRequirements techLeadRequirements) {
-        return techLeadRequirements.getMasterDurationInMonths() > durationInMonthsAsMaster
-                && techLeadRequirements.getTechLeadScore() >= techLeadScore
-                && techLeadRequirements.getIsApproved();
+    public boolean isSatisfiedForEnhancement(TechLeadRequirements techLeadRequirements) {
+        return projectsCompletedVersionsAmount <= techLeadRequirements.getProjectsCompletedVersionsAmount()
+                && mentoredStudentsAtPrecampusAmount <= techLeadRequirements.getMentoredStudentsAtPreCampusAmount()
+                && masterClassesAmount <= techLeadRequirements.getMasterclassesAmount();
     }
 }

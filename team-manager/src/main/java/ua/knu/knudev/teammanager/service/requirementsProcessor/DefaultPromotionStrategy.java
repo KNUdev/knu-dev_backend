@@ -13,7 +13,6 @@ public class DefaultPromotionStrategy implements PromotionStrategy {
 
     public DefaultPromotionStrategy() {
         promotionMap = Map.of(
-                AccountTechnicalRole.INTERN, new DeveloperSpecification(),
                 AccountTechnicalRole.DEVELOPER, new PreMasterSpecification(),
                 AccountTechnicalRole.PREMASTER, new MasterSpecification(),
                 AccountTechnicalRole.MASTER, new TechLeadSpecification()

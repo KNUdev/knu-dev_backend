@@ -7,10 +7,9 @@ import lombok.Setter;
 @Setter
 public class MasterDeveloperRequirements implements PromotionRequirements{
 
-    private Integer preMasterProjectsCount;
-    private Double techLeadScore;
-    private Integer managedStudentsInPreCampus;
-    private Integer preMasterDurationInMonths;
+    private Integer commitsToMasterBranchAmount;
+    private Integer projectsCompletedVersionsAmount;
+
 }
 
 

@@ -165,6 +165,20 @@ public class ProjectService implements ProjectApi {
         return projectMapper.toDto(savedProject);
     }
 
+    @Override
+    public FullProjectDto updateVersion(UUID projectId, Integer newProjectVersion) {
+        Project project = getProjectById(projectId);
+
+        if (project.getProjectVersion() > newProjectVersion) {
+            throw new ProjectException("Project can`t have a new version less than previous version!");
+        }
+
+        project.setProjectVersion(newProjectVersion);
+        Project savedProject = projectRepository.save(project);
+        log.info("Project version updated: {}, in project: {}", newProjectVersion, projectId);
+        return projectMapper.toDto(savedProject);
+    }
+
     private Project getProjectById(UUID projectId) {
         return projectRepository.findById(projectId).orElseThrow(
                 () -> new ProjectException("Project with id " + projectId + " not found"));

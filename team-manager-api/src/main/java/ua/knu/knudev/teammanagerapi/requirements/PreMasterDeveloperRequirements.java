@@ -7,6 +7,6 @@ import lombok.Setter;
 @Setter
 public class PreMasterDeveloperRequirements implements PromotionRequirements{
 
-    private Integer developingTimeInCampus;
-    private Double techLeadScore;
+    private Integer commitsToMasterBranchAmount;
+
 }

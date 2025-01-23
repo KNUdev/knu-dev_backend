@@ -146,6 +146,32 @@ public class AdminProjectController {
         projectApi.updateStatus(projectId, status);
     }
 
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Project version was successfully changed",
+                    content = @Content(mediaType = "application/json")
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Project not found",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = ErrorResponse.class))
+            ),
+            @ApiResponse(
+                    responseCode = "403",
+                    description = "Unauthorized",
+                    content = @Content(
+                            mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = ErrorResponse.class)
+                    ))
+    })
+    @PatchMapping("/{projectId}/update/version")
+    @ResponseStatus(HttpStatus.OK)
+    public void updateVersion(@PathVariable UUID projectId, @RequestBody Integer version) {
+        projectApi.updateVersion(projectId, version);
+    }
+
     @Operation(
             summary = "Release a project",
             description = "This endpoint releases a project by associating it with a domain and saving the release info."
@@ -193,6 +219,5 @@ public class AdminProjectController {
     public void releaseProject(@PathVariable UUID projectId, @RequestBody String projectDomain) {
         projectApi.release(projectId, projectDomain);
     }
-
 
 }

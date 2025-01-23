@@ -72,4 +72,6 @@ public class Project {
     @OneToMany(mappedBy = "project", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<ProjectAccount> projectAccounts = new HashSet<>();
 
+//    @OneToMany(mappedBy = )
+
 }

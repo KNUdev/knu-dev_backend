@@ -5,9 +5,10 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class TechLeadRequirements implements PromotionRequirements{
+public class TechLeadRequirements implements PromotionRequirements {
 
-    private Integer masterDurationInMonths;
-    private Double techLeadScore;
-    private Boolean isApproved;
+    private Integer projectsCompletedVersionsAmount;
+    private Integer mentoredStudentsAtPreCampusAmount;
+    private Integer masterclassesAmount;
+
 }

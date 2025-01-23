@@ -22,4 +22,6 @@ public interface ProjectApi {
     Page<ShortProjectDto> getAll(Integer pageNumber, Integer pageSize);
 
     FullProjectDto release(UUID projectId, String projectDomain);
+
+    FullProjectDto updateVersion(UUID projectId, Integer newProjectVersion);
 }

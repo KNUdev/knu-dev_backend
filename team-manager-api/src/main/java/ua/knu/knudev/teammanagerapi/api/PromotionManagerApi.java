@@ -1,8 +1,8 @@
 package ua.knu.knudev.teammanagerapi.api;
 
-import ua.knu.knudev.teammanagerapi.dto.AccountProfileDto;
+import ua.knu.knudev.teammanagerapi.dto.AccountRoleEnhancementDto;
 
 public interface PromotionManagerApi {
 
-    boolean isReadyForPromotion(AccountProfileDto accountProfileDto);
+    boolean isReadyForPromotion(AccountRoleEnhancementDto accountRoleEnhancementDto);
 }

@@ -72,20 +72,15 @@ application:
     activation-expiry-in-days: 7
   recruitment:
     requirements:
-      developer:
-        pre-campus-projects-amount: 1
-        pre-campus-duration: 6
       pre-master-developer:
-        tech-lead-score: 7
-        developing-time-in-campus: 9
+        commits-to-master-branch-amount: 50
       master-developer:
-        duration-in-months-as-pre-master: 12
-        managed-students-in-pre-campus-amount: 2
-        pre-master-projects-amount: 1
-        tech-lead-score: 7
+        commits-to-master-branch-amount: 100
+        projects-completed-versions-amount: 1
       tech-lead:
-        duration-in-months-as-master: 6
-        tech-lead-score: 8
+        projects-completed-versions-amount: 2
+        mentored-students-at-precampus-amount: 2
+        masterclasses-amount: 1
 springdoc:
   swagger-ui:
     path: /api/documentation
