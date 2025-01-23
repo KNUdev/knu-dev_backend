@@ -1,29 +1,61 @@
 package ua.knu.knudev.fileserviceapi.subfolder;
 
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
+import ua.knu.knudev.knudevcommon.constant.AccountTechnicalRole;
+import ua.knu.knudev.knudevcommon.constant.LearningUnit;
 
-@Getter
-@RequiredArgsConstructor
-public enum PdfSubfolder implements FileSubfolder {
-    INTERN_ROLE_TASKS("/tasks/campus/intern-role-tasks"),
-    DEVELOPER_ROLE_TASKS("/tasks/campus/developer-role-tasks"),
-    PREMASTER_ROLE_TASKS("/tasks/campus/premaster-role-tasks"),
-    MASTER_ROLE_TASKS("/tasks/campus/master-role-tasks"),
-    TECHLEAD_ROLE_TASKS("/tasks/campus/techlead-role-tasks"),
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
-    PROGRAM_FINAL_TASKS("/education/programs/final-tasks"),
-    PROGRAM_SECTION_FINAL_TASKS("/education/programs/section/tasks"),
-    PROGRAM_MODULE_FINAL_TASKS("/education/programs/module/tasks"),
-    PROGRAM_TOPIC_TASKS("/education/programs/topic/tasks"),
+public enum PdfSubfolder implements PdfSubfolderI {
 
-    ROLE_TASKS("/education/programs/%s/tasks");
-    ;
+    // Static subfolders with placeholders:
+    ROLE_TASKS("/tasks/campus/%s-role-tasks"),
+    LEARNING_UNIT_TASKS("/education/programs/%s/tasks");
 
-    private final String subfolderPath;
+    private final String pathPattern;
+
+    // Cache for dynamic paths
+    private static final Map<String, PdfSubfolderI> DYNAMIC_SUBFOLDERS = new ConcurrentHashMap<>();
+
+    PdfSubfolder(String pattern) {
+        this.pathPattern = pattern;
+    }
 
     @Override
     public String getSubfolderPath() {
-        return subfolderPath;
+        return pathPattern;
+    }
+
+    // -------------- Dynamic Builders -------------- //
+
+    public PdfSubfolderI toRole(AccountTechnicalRole technicalRole) {
+        if (!this.name().contains("ROLE")) {
+            throw new UnsupportedOperationException(
+                    "toRole(...) not applicable to " + this.name()
+            );
+        }
+        // Dynamically generate the path
+        String dynamicPath = String.format(pathPattern, technicalRole.name().toLowerCase());
+
+        // Retrieve or create a dynamic subfolder instance
+        return getOrCreateDynamicSubfolder(dynamicPath);
+    }
+
+    public FileSubfolder toLearningUnitSubfolder(LearningUnit learningUnit) {
+        if (!this.name().contains("LEARNING_UNIT")) {
+            throw new UnsupportedOperationException(
+                    "toLearningUnitSubfolder(...) not applicable to " + this.name()
+            );
+        }
+        // Dynamically generate the path
+        String dynamicPath = String.format(pathPattern, learningUnit.name().toLowerCase());
+
+        // Retrieve or create a dynamic subfolder instance
+        return getOrCreateDynamicSubfolder(dynamicPath);
+    }
+
+    // Create or retrieve a dynamic subfolder instance
+    private PdfSubfolderI getOrCreateDynamicSubfolder(String dynamicPath) {
+        return DYNAMIC_SUBFOLDERS.computeIfAbsent(dynamicPath, path -> () -> path);
     }
 }

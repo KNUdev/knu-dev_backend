@@ -45,7 +45,7 @@ public class ImageService extends FileService implements ImageServiceApi {
     }
 
     private void checkFileValidity(MultipartFile file) {
-        checkFileExtensionAllowance(file, imageFileConfigProperties.allowedExtensions());
+        assertFileHasAllowedExtension(file, imageFileConfigProperties.allowedExtensions());
         checkFileSize(file);
     }
 

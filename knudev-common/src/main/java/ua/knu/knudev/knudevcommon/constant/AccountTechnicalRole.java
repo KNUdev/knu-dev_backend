@@ -29,4 +29,9 @@ public enum AccountTechnicalRole implements AccountRole {
         return displayName;
     }
 
+    public static AccountTechnicalRole getFromString(String stringAccountTechnicalRole) {
+        //todo checks
+        return AccountTechnicalRole.valueOf(stringAccountTechnicalRole);
+    }
+
 }

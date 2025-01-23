@@ -58,7 +58,7 @@ public class AccountProfileService implements AccountProfileApi {
         departmentService.validateAcademicUnitExistence(request.departmentId(), request.specialtyCodename());
 
         AuthAccountCreationResponse createdAuthAccount = accountAuthServiceApi.createAccount(request);
-        String uploadFilename = uploadAvatar(request.avatarFile());
+        String uploadFilename = imageServiceApi.uploadFile(request.avatarFile(), ImageSubfolder.ACCOUNT_PICTURES);
 
         AccountProfile accountProfileToSave = buildAccountProfile(request, uploadFilename, createdAuthAccount);
         AccountProfile savedAccount = accountProfileRepository.save(accountProfileToSave);
@@ -109,18 +109,6 @@ public class AccountProfileService implements AccountProfileApi {
                 .orElseThrow(() -> new AccountException(
                         String.format("Account with id %s does not exist", id)
                 ));
-    }
-
-    private String uploadAvatar(MultipartFile file) {
-        try {
-            boolean fileIsPresent = ObjectUtils.isNotEmpty(file) && ArrayUtils.getLength(file.getBytes()) != 0;
-            if (fileIsPresent) {
-                return imageServiceApi.uploadFile(file, ImageSubfolder.ACCOUNT_PICTURES);
-            }
-        } catch (IOException e) {
-            throw new FileException("Error while reading the file.");
-        }
-        return null;
     }
 
     private void validateEmailNotExists(String email) {

@@ -1,6 +1,8 @@
 package ua.knu.knudev.fileservice.service;
 
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -21,21 +23,23 @@ import java.util.UUID;
 public class FileService {
 
     private static final String FILE_EXTENSION_SEPARATOR = ".";
+    private static final String PATH_TRAVERSAL_TOKEN  = "..";
     private static final String ALLOWED_FILENAME_CHARACTERS_PATTERN = "^[a-zA-Z0-9]+$";
 
     private final FileUploadAdapter fileUploadAdapter;
 
     public String uploadFile(MultipartFile file,
-                             String filename,
+                             String customFilename,
                              FileFolderProperties<? extends FileSubfolder> fileFolderProperties) {
-        validateFileExtension(getExtension(file));
+        assertFileExtensionIsSafe(getExtension(file));
+        assertFileContentIsValid(file);
 
         String folderName = fileFolderProperties.getFolder().getName();
         String subfolderPath = fileFolderProperties.getSubfolder().getSubfolderPath();
 
         FileUploadPayload fileUploadPayload = FileUploadPayload.builder()
                 .inputStream(getInputStream(file))
-                .fileName(filename)
+                .fileName(customFilename)
                 .folderPath(FolderPath.builder()
                         .subfolderPath(subfolderPath)
                         .path(folderName)
@@ -67,7 +71,7 @@ public class FileService {
         return originalFilename.substring(fileExtensionIndex);
     }
 
-    protected void checkFileExtensionAllowance(MultipartFile file, Set<String> ALLOWED_FILE_EXTENSIONS) {
+    protected void assertFileHasAllowedExtension(MultipartFile file, Set<String> ALLOWED_FILE_EXTENSIONS) {
         String fileExtension = getExtension(file);
         String allowedExtensionsList = String.join(", ", ALLOWED_FILE_EXTENSIONS);
 
@@ -82,14 +86,26 @@ public class FileService {
 
     protected String generateRandomUUIDFilename(MultipartFile file) {
         String extension = getExtension(file);
-        validateFileExtension(extension);
+        assertFileExtensionIsSafe(extension);
         return UUID.randomUUID() + "." + extension;
     }
 
-    private void validateFileExtension(String extension) {
+    private void assertFileExtensionIsSafe(String extension) {
         if (!extension.matches(ALLOWED_FILENAME_CHARACTERS_PATTERN)
-                || StringUtils.contains(extension, "..")) {
+                || StringUtils.contains(extension, PATH_TRAVERSAL_TOKEN)) {
             throw new FileException("Invalid file extension.");
+        }
+    }
+
+    private void assertFileContentIsValid(MultipartFile file) {
+        boolean fileIsPresent;
+        try {
+            fileIsPresent = ObjectUtils.isNotEmpty(file) && ArrayUtils.getLength(file.getBytes()) != 0;
+        } catch (IOException ignored) {
+            throw new FileException("Error while reading file: " + file.getOriginalFilename());
+        }
+        if(!fileIsPresent) {
+            throw new FileException("Invalid file content of file: " + file.getOriginalFilename());
         }
     }
 

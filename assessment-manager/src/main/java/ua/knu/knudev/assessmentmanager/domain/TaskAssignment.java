@@ -40,4 +40,6 @@ public class TaskAssignment {
     @Column(nullable = false)
     private TaskAssignmentStatus status;
 
+    //todo here create separate some special task for assessment. For education,
+
 }

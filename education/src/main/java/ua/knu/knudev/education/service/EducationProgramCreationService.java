@@ -6,13 +6,12 @@ import org.springframework.stereotype.Service;
 import ua.knu.knudev.educationapi.api.EducationProgramApi;
 import ua.knu.knudev.educationapi.dto.EducationProgramDto;
 import ua.knu.knudev.educationapi.request.EducationProgramCreationRequest;
-import ua.knu.knudev.fileserviceapi.api.PDFServiceApi;
 
 @Service
 @RequiredArgsConstructor
 public class EducationProgramCreationService implements EducationProgramApi {
     private final EducationProgramRequestCoherenceValidator inputReqCoherenceValidator;
-    private final PDFServiceApi pdfServiceApi;
+//    private final PDFServiceApi pdfServiceApi;
 
     @Override
     @Transactional
