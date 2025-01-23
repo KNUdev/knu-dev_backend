@@ -22,7 +22,6 @@ public class PromotionManager implements PromotionManagerApi {
         Specification<PromotionRequirements> specification = promotionStrategy.getSpecification(accountTechnicalRole);
         /*
             ProjectService -> Account has .....
-            
 
          */
 

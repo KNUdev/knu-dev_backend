@@ -12,8 +12,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import ua.knu.knudev.knudevsecurityapi.response.ErrorResponse;
-import ua.knu.knudev.taskmanagerapi.api.TaskAPI;
-import ua.knu.knudev.taskmanagerapi.dto.TaskDto;
+import ua.knu.knudev.assessmentmanagerapi.api.TaskAPI;
+import ua.knu.knudev.assessmentmanagerapi.dto.TaskDto;
 
 @RestController
 @RequiredArgsConstructor

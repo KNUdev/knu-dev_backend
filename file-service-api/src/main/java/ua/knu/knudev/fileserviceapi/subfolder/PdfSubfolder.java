@@ -10,7 +10,15 @@ public enum PdfSubfolder implements FileSubfolder {
     DEVELOPER_ROLE_TASKS("/tasks/campus/developer-role-tasks"),
     PREMASTER_ROLE_TASKS("/tasks/campus/premaster-role-tasks"),
     MASTER_ROLE_TASKS("/tasks/campus/master-role-tasks"),
-    TECHLEAD_ROLE_TASKS("/tasks/campus/techlead-role-tasks"),;
+    TECHLEAD_ROLE_TASKS("/tasks/campus/techlead-role-tasks"),
+
+    PROGRAM_FINAL_TASKS("/education/programs/final-tasks"),
+    PROGRAM_SECTION_FINAL_TASKS("/education/programs/section/tasks"),
+    PROGRAM_MODULE_FINAL_TASKS("/education/programs/module/tasks"),
+    PROGRAM_TOPIC_TASKS("/education/programs/topic/tasks"),
+
+    ROLE_TASKS("/education/programs/%s/tasks");
+    ;
 
     private final String subfolderPath;
 

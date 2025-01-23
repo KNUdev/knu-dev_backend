@@ -30,7 +30,12 @@
         </dependency>
         <dependency>
             <groupId>ua.knu</groupId>
-            <artifactId>task-manager</artifactId>
+            <artifactId>assessment-manager</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>ua.knu</groupId>
+            <artifactId>education</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>

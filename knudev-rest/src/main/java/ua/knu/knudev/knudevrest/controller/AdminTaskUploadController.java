@@ -15,7 +15,7 @@ import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import ua.knu.knudev.knudevsecurityapi.response.ErrorResponse;
-import ua.knu.knudev.taskmanagerapi.api.TaskUploadAPI;
+import ua.knu.knudev.assessmentmanagerapi.api.TaskUploadAPI;
 
 @RestController
 @RequestMapping("/admin/task/upload")
@@ -31,7 +31,7 @@ public class AdminTaskUploadController {
                             The role is passed as a path variable, and the task file is sent as a multipart file.
                             Example:
                             - Role: Intern
-                            - File: task-details.pdf
+                            - File: Task_Developer_MoonlightWalk.pdf
                     """)
     @ApiResponses({
             @ApiResponse(

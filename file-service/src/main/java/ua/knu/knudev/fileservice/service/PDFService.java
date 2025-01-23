@@ -19,9 +19,9 @@ public class PDFService extends FileService implements PDFServiceApi {
     }
 
     @Override
-    public String uploadFile(MultipartFile file, String filename, PdfSubfolder subfolder) {
+    public String uploadFile(MultipartFile file, String customFilename, PdfSubfolder subfolder) {
         checkFileExtensionAllowance(file, ALLOWED_DOCUMENT_EXTENSIONS);
-        return uploadFile(file, filename, getFolderProperties(subfolder));
+        return uploadFile(file, customFilename, getFolderProperties(subfolder));
     }
 
     @Override

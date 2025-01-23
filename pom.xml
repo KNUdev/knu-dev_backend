@@ -32,8 +32,10 @@
         <module>knudev-common</module>
         <module>team-manager</module>
         <module>team-manager-api</module>
-        <module>task-manager</module>
-        <module>task-manager-api</module>
+        <module>assessment-manager</module>
+        <module>assessment-manager-api</module>
+        <module>education</module>
+        <module>education-api</module>
         <module>knudev-security</module>
         <module>knudev-security-api</module>
         <module>knudev-rest</module>
@@ -79,12 +81,12 @@
             </dependency>
             <dependency>
                 <groupId>ua.knu</groupId>
-                <artifactId>task-manager</artifactId>
+                <artifactId>assessment-manager</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>ua.knu</groupId>
-                <artifactId>task-manager-api</artifactId>
+                <artifactId>assessment-manager-api</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
@@ -95,6 +97,16 @@
             <dependency>
                 <groupId>ua.knu</groupId>
                 <artifactId>team-manager-api</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>ua.knu</groupId>
+                <artifactId>education</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>ua.knu</groupId>
+                <artifactId>education-api</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>

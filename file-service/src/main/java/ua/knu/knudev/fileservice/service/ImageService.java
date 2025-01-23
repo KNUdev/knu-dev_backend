@@ -26,9 +26,9 @@ public class ImageService extends FileService implements ImageServiceApi {
     }
 
     @Override
-    public String uploadFile(MultipartFile file, String filename, ImageSubfolder subfolder) {
+    public String uploadFile(MultipartFile file, String customFilename, ImageSubfolder subfolder) {
         checkFileValidity(file);
-        return uploadFile(file, filename, getProperties(subfolder));
+        return uploadFile(file, customFilename, getProperties(subfolder));
     }
 
     @Override
