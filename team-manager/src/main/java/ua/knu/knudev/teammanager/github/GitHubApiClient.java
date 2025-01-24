@@ -4,8 +4,11 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
+import ua.knu.knudev.teammanagerapi.exception.ApiClientException;
 
 import java.io.IOException;
 import java.net.URI;
@@ -15,6 +18,7 @@ import java.net.http.HttpResponse;
 import java.rmi.ConnectException;
 
 @Component
+@Slf4j
 @RequiredArgsConstructor
 public class GitHubApiClient {
 
@@ -25,7 +29,7 @@ public class GitHubApiClient {
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     private static final int MAX_RETRIES = 3;
-    private static final long RETRY_DELAY_MS = 1000;
+    private static final long RETRY_DELAY_MS = 150;
 
     @SneakyThrows
     public JsonNode invokeApi(String url) {
@@ -38,13 +42,13 @@ public class GitHubApiClient {
             } catch (IOException | InterruptedException e) {
                 attempt++;
                 if (attempt >= MAX_RETRIES) {
-                    throw new RuntimeException("Max retries reached. Unable to complete the request.", e);
+                    throw new ApiClientException("Max retries reached. Unable to complete the request.", HttpStatus.valueOf(503));
                 }
-                Thread.sleep(RETRY_DELAY_MS * attempt);
-                System.out.println("Retrying request, attempt: " + attempt);
+                Thread.sleep(RETRY_DELAY_MS);
+                log.warn("Retrying request, attempt: {}", attempt);
             }
         }
-        throw new RuntimeException("Unexpected error while invoking API.");
+        throw new ApiClientException("Unexpected error while invoking API.", HttpStatus.valueOf(503));
     }
 
     private HttpRequest buildHttpRequest(URI uri) {

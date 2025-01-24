@@ -6,7 +6,6 @@ import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import ua.knu.knudev.teammanager.service.api.GitHubManagementApi;
-import ua.knu.knudev.teammanagerapi.request.ReceiveUserCommitsAmountRequest;
 
 import java.time.LocalDate;
 
@@ -23,7 +22,7 @@ public class GitHubIntegrationService implements GitHubManagementApi {
 
     @Override
     @SneakyThrows
-    public int retrieveUserCommits(ReceiveUserCommitsAmountRequest request) {
+    public int retrieveUserCommits(RetrieveGithubUserCommitsAmountRequest request) {
         int commitsFromAllReposAmmount = 0;
 
         String allReposUrl = BASE_URL + "/orgs/" + organizationName + "/repos";
