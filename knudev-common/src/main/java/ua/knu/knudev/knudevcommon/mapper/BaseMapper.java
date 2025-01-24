@@ -15,4 +15,6 @@ public interface BaseMapper<Domain, Dto> {
 
     Set<Dto> toDtos(Set<Domain> domains);
 
+    Set<Domain> toDomains(Set<Dto> dtos);
+
 }

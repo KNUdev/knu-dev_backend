@@ -1,11 +1,8 @@
 package ua.knu.knudev.taskmanager.domain;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import ua.knu.knudev.taskmanager.domain.embeddable.QuestionAnswerVariant;
+import lombok.*;
+import org.hibernate.annotations.UuidGenerator;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -16,24 +13,18 @@ import java.util.UUID;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
+@Builder
 @Table(schema = "task_management", name = "test_question")
 public class TestQuestion {
 
     @Id
+    @UuidGenerator
     private UUID id;
 
     @Column(nullable = false)
-    private Integer questionNumber;
+    private String enQuestionBody;
 
-    @Column(nullable = false)
-    private String question;
-
-    @ElementCollection
-    @CollectionTable(
-            name = "question_answer_variant",
-            schema = "task_management",
-            joinColumns = @JoinColumn(name = "test_question_id")
-    )
+    @OneToMany(mappedBy = "testQuestion", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<QuestionAnswerVariant> answerVariants = new HashSet<>();
 
     @ManyToOne

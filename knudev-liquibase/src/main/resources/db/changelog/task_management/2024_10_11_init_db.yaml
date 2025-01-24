@@ -120,13 +120,14 @@ databaseChangeLog:
                     primaryKey: true
                     nullable: false
               - column:
-                  name: name_en
+                  name: en_name
                   type: varchar(255)
                   constraints:
                     nullable: false
               - column:
                   name: created_at
                   type: date
+                  defaultValueComputed: CURRENT_TIMESTAMP
                   constraints:
                     nullable: false
 
@@ -145,13 +146,8 @@ databaseChangeLog:
                     nullable: false
                     primaryKey: true
               - column:
-                  type: int
-                  name: question_number
-                  constraints:
-                    nullable: false
-              - column:
                   type: varchar(255)
-                  name: question
+                  name: en_question_body
                   constraints:
                     nullable: false
               - column:
@@ -159,7 +155,7 @@ databaseChangeLog:
                   name: test_id
 
   - changeSet:
-      id: create_question_answer_variants_table
+      id: create_question_answer_variant_table
       author: DenysLeonenko
       changes:
         - createTable:
@@ -168,17 +164,13 @@ databaseChangeLog:
             columns:
               - column:
                   type: uuid
-                  name: test_question_id
+                  name: id
                   constraints:
                     nullable: false
-              - column:
-                  type: int
-                  name: variant_number
-                  constraints:
-                    nullable: false
+                    primaryKey: true
               - column:
                   type: varchar(255)
-                  name: variant_body
+                  name: en_variant_body
                   constraints:
                     nullable: false
               - column:
@@ -186,6 +178,9 @@ databaseChangeLog:
                   name: is_correct_answer
                   constraints:
                     nullable: false
+              - column:
+                  type: uuid
+                  name: test_question_id
 
   - changeSet:
       id: add_foreign_key_constraints_to_tests_table_and_extended
