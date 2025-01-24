@@ -1,10 +1,11 @@
 package ua.knu.knudev.fileserviceapi.folder;
 
 import ua.knu.knudev.fileserviceapi.subfolder.PdfSubfolder;
+import ua.knu.knudev.fileserviceapi.subfolder.PdfSubfolderI;
 
 import java.util.List;
 
-public enum PdfFolder implements FileFolder<PdfSubfolder> {
+public enum PdfFolder implements FileFolder<PdfSubfolderI> {
     INSTANCE;
 
     @Override
@@ -13,7 +14,7 @@ public enum PdfFolder implements FileFolder<PdfSubfolder> {
     }
 
     @Override
-    public List<PdfSubfolder> getSubfolders() {
+    public List<PdfSubfolderI> getSubfolders() {
         return List.of(PdfSubfolder.values());
     }
 }

@@ -6,11 +6,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import ua.knu.knudev.assessmentmanager.domain.TaskDomain;
+import ua.knu.knudev.assessmentmanager.domain.RolePromotionTask;
 import ua.knu.knudev.assessmentmanager.domain.TaskAssignment;
 import ua.knu.knudev.assessmentmanager.domain.TaskAssignmentStatus;
+import ua.knu.knudev.assessmentmanager.repository.RolePromotionTaskRepository;
 import ua.knu.knudev.assessmentmanager.repository.TaskAssignmentRepository;
-import ua.knu.knudev.assessmentmanager.repository.TaskRepository;
 import ua.knu.knudev.assessmentmanagerapi.api.TaskAssignmentApi;
 import ua.knu.knudev.assessmentmanagerapi.exception.TaskAssignmentException;
 import ua.knu.knudev.assessmentmanagerapi.exception.TaskException;
@@ -25,7 +25,7 @@ import java.time.LocalDateTime;
 @Service
 @RequiredArgsConstructor
 public class TaskAssignmentService implements TaskAssignmentApi {
-    private final TaskRepository taskRepository;
+    private final RolePromotionTaskRepository rolePromotionTaskRepository;
     private final TaskAssignmentRepository taskAssignmentRepository;
     private final AccountProfileApi accountProfileApi;
     @Value("${application.assignments.activation-expiry-in-days}")
@@ -39,7 +39,8 @@ public class TaskAssignmentService implements TaskAssignmentApi {
         LocalDateTime currentDate = LocalDateTime.now();
         AccountProfileDto account = accountProfileApi.getByEmail(accountEmail);
 
-        TaskDomain availableTask = taskRepository.findRandomNotAssignedTaskByTechnicalRole(account.technicalRole())
+        RolePromotionTask availableTask = rolePromotionTaskRepository
+                .findRandomNotAssignedTaskByTechnicalRole(account.technicalRole())
                 .orElseThrow(() -> {
                     String errorMessage = String.format("No available tasks at the moment for role %S. " +
                             "Please contact support.", account.technicalRole());

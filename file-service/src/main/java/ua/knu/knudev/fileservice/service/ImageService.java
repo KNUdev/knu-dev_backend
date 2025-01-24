@@ -1,5 +1,6 @@
 package ua.knu.knudev.fileservice.service;
 
+import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import ua.knu.knudev.fileservice.adapter.FileUploadAdapter;
@@ -15,10 +16,6 @@ import java.io.IOException;
 @Service
 public class ImageService extends FileService implements ImageServiceApi {
     private final ImageFileConfigProperties imageFileConfigProperties;
-    //todo to config
-//    private static final Set<String> ALLOWED_IMAGE_EXTENSIONS = Set.of("jpg", "jpeg", "png", "webp");
-//    @Value("${application.files.images.profile-avatars.maximum-size-in-kilobytes}")
-//    private int MAX_IMAGE_SIZE_IN_KILOBYTES;
 
     public ImageService(FileUploadAdapter fileUploadAdapter, ImageFileConfigProperties imageFileConfigProperties) {
         super(fileUploadAdapter);
@@ -45,6 +42,9 @@ public class ImageService extends FileService implements ImageServiceApi {
     }
 
     private void checkFileValidity(MultipartFile file) {
+        if(ObjectUtils.isEmpty(file)) {
+            throw new FileException("Cannot upload null image");
+        }
         assertFileHasAllowedExtension(file, imageFileConfigProperties.allowedExtensions());
         checkFileSize(file);
     }
@@ -55,6 +55,7 @@ public class ImageService extends FileService implements ImageServiceApi {
                 .build();
     }
 
+    //todo perhaps use this method also for pdf service
     private void checkFileSize(MultipartFile file) {
         try {
             int fileSizeInKilobytes = file.getBytes().length / 1024;

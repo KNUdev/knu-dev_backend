@@ -1,13 +1,10 @@
 package ua.knu.knudev.education.domain.program;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import org.hibernate.annotations.UuidGenerator;
 import ua.knu.knudev.education.domain.MultiLanguageField;
-import ua.knu.knudev.education.domain.TaskProxy;
+import ua.knu.knudev.education.domain.EducationTaskProxy;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -18,6 +15,7 @@ import java.util.UUID;
 @AllArgsConstructor
 @Entity
 @Table(name = "section", schema = "education")
+@Builder
 public class ProgramSection {
 
     @Id
@@ -43,7 +41,7 @@ public class ProgramSection {
 
     @OneToOne
     @JoinColumn(name = "task_id")
-    private TaskProxy sectionFinalTask;
+    private EducationTaskProxy sectionFinalTask;
 
 
     @PreUpdate

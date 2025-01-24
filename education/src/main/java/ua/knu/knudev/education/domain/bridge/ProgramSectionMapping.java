@@ -1,12 +1,9 @@
 package ua.knu.knudev.education.domain.bridge;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import org.hibernate.annotations.UuidGenerator;
-import ua.knu.knudev.education.domain.Program;
+import ua.knu.knudev.education.domain.EducationProgram;
 import ua.knu.knudev.education.domain.program.ProgramSection;
 
 import java.util.UUID;
@@ -21,6 +18,7 @@ import java.util.UUID;
         schema = "education",
         uniqueConstraints = @UniqueConstraint(columnNames = {"program_id", "section_id"})
 )
+@Builder
 public class ProgramSectionMapping {
 
     @Id
@@ -29,7 +27,7 @@ public class ProgramSectionMapping {
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "program_id")
-    private Program program;
+    private EducationProgram educationProgram;
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "section_id")

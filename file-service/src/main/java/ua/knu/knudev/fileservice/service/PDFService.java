@@ -3,59 +3,47 @@ package ua.knu.knudev.fileservice.service;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import ua.knu.knudev.fileservice.adapter.FileUploadAdapter;
+import ua.knu.knudev.fileservice.config.TaskFileConfigProperties;
 import ua.knu.knudev.fileserviceapi.api.PDFServiceApi;
 import ua.knu.knudev.fileserviceapi.folder.FileFolderProperties;
 import ua.knu.knudev.fileserviceapi.folder.PdfFolder;
-import ua.knu.knudev.fileserviceapi.subfolder.FileSubfolder;
-import ua.knu.knudev.fileserviceapi.subfolder.PdfSubfolder;
-
-import java.util.Set;
+import ua.knu.knudev.fileserviceapi.subfolder.PdfSubfolderI;
 
 @Service
-public class PDFService extends FileService implements PDFServiceApi<T> {
-    private static final Set<String> ALLOWED_DOCUMENT_EXTENSIONS = Set.of("pdf");
+public class PDFService extends FileService implements PDFServiceApi {
+    private final TaskFileConfigProperties taskFileConfigProperties;
 
-    public PDFService(FileUploadAdapter fileUploadAdapter) {
+    public PDFService(FileUploadAdapter fileUploadAdapter, TaskFileConfigProperties taskFileConfigProperties) {
         super(fileUploadAdapter);
+        this.taskFileConfigProperties = taskFileConfigProperties;
     }
 
-//    @Override
-//    public String uploadFile(MultipartFile file, String customFilename, PdfSubfolder subfolder) {
-//        assertFileHasAllowedExtension(file, ALLOWED_DOCUMENT_EXTENSIONS);
-//        return uploadFile(file, customFilename, getFolderProperties(subfolder));
-//    }
-//
-//    @Override
-//    public String uploadFile(MultipartFile file, PdfSubfolder subfolder) {
-//        assertFileHasAllowedExtension(file, ALLOWED_DOCUMENT_EXTENSIONS);
-//
-//        String filename = generateRandomUUIDFilename(file);
-//        return uploadFile(file, filename, getFolderProperties(subfolder));
-//    }
-//
-//    @Override
-//    public boolean existsByFilename(String filename, PdfSubfolder subfolder) {
-//        return existsByFilename(filename, getFolderProperties(subfolder));
-//    }
+    @Override
+    public String uploadFile(MultipartFile file, String customFilename, PdfSubfolderI subfolder) {
+        assertFileSizeNotExceeds(file, taskFileConfigProperties.maximumSizeInKilobytes());
+        assertFileHasAllowedExtension(file, taskFileConfigProperties.allowedExtensions());
 
-    private FileFolderProperties<PdfSubfolder> getFolderProperties(PdfSubfolder pdfSubfolder) {
+        return uploadFile(file, customFilename, getFolderProperties(subfolder));
+    }
+
+    @Override
+    public String uploadFile(MultipartFile file, PdfSubfolderI subfolder) {
+        assertFileSizeNotExceeds(file, taskFileConfigProperties.maximumSizeInKilobytes());
+        assertFileHasAllowedExtension(file, taskFileConfigProperties.allowedExtensions());
+
+        String randomUUIDFilename = generateRandomUUIDFilename(file);
+        return uploadFile(file, randomUUIDFilename, getFolderProperties(subfolder));
+    }
+
+    @Override
+    public boolean existsByFilename(String filename, PdfSubfolderI subfolder) {
+        return existsByFilename(filename, getFolderProperties(subfolder));
+    }
+
+    private FileFolderProperties<PdfSubfolderI> getFolderProperties(PdfSubfolderI pdfSubfolder) {
         return FileFolderProperties.builder(PdfFolder.INSTANCE)
                 .subfolder(pdfSubfolder)
                 .build();
     }
 
-    @Override
-    public String uploadFile(MultipartFile file, String customFilename, FileSubfolder subfolder) {
-        return "";
-    }
-
-    @Override
-    public String uploadFile(MultipartFile file, FileSubfolder subfolder) {
-        return "";
-    }
-
-    @Override
-    public boolean existsByFilename(String filename, FileSubfolder subfolder) {
-        return false;
-    }
 }

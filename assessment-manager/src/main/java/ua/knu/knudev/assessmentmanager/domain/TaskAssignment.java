@@ -7,7 +7,7 @@ import org.hibernate.annotations.UuidGenerator;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-@Table(schema = "assessment_management", name = "task_assignment")
+@Table(schema = "assessment_management", name = "role_promotion_task_assignment")
 @Entity
 @Getter
 @Setter
@@ -23,8 +23,8 @@ public class TaskAssignment {
     private String assignedAccountEmail;
 
     @OneToOne(optional = false)
-    @JoinColumn(name = "task_id", unique = true)
-    private TaskDomain task;
+    @JoinColumn(name = "role_promotion_task_id", unique = true)
+    private RolePromotionTask task;
 
     @Column(nullable = false, unique = true, updatable = false)
     private String verificationCode;
@@ -39,7 +39,5 @@ public class TaskAssignment {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private TaskAssignmentStatus status;
-
-    //todo here create separate some special task for assessment. For education,
 
 }

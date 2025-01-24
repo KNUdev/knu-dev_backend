@@ -1,4 +1,4 @@
-package ua.knu.knudev.assessmentmanager.config;
+package ua.knu.knudev.fileservice.config;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.convert.DataSizeUnit;

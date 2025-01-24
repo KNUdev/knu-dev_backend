@@ -1,10 +1,7 @@
 package ua.knu.knudev.education.domain.bridge;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import org.hibernate.annotations.UuidGenerator;
 import ua.knu.knudev.education.domain.program.ProgramModule;
 import ua.knu.knudev.education.domain.program.ProgramSection;
@@ -21,6 +18,7 @@ import java.util.UUID;
         schema = "education",
         uniqueConstraints = @UniqueConstraint(columnNames = {"section_id", "module_id"})
 )
+@Builder
 public class SectionModuleMapping {
 
     @Id

@@ -10,10 +10,10 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.web.multipart.MultipartFile;
 import ua.knu.knudev.assessmentmanager.domain.TaskAssignment;
 import ua.knu.knudev.assessmentmanager.domain.TaskAssignmentStatus;
+import ua.knu.knudev.assessmentmanager.repository.RolePromotionTaskRepository;
 import ua.knu.knudev.assessmentmanager.repository.TaskAssignmentRepository;
-import ua.knu.knudev.assessmentmanager.repository.TaskRepository;
+import ua.knu.knudev.assessmentmanager.service.RolePromotionTaskService;
 import ua.knu.knudev.assessmentmanager.service.TaskAssignmentService;
-import ua.knu.knudev.assessmentmanager.service.TaskUploadService;
 import ua.knu.knudev.assessmentmanagerapi.exception.TaskAssignmentException;
 import ua.knu.knudev.assessmentmanagerapi.exception.TaskException;
 import ua.knu.knudev.assessmentmanagerapi.response.TaskAssignmentResponse;
@@ -39,7 +39,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest(classes = IntegrationTestsConfig.class)
 @ActiveProfiles("test")
-public class TaskDomainAssignmentServiceIntegrationTest {
+public class TaskAssignmentServiceIntegrationTest {
 
     private static final String TEST_EMAIL = "student@knu.ua";
     private static final String TEST_PASSWORD = "Password123!";
@@ -47,7 +47,7 @@ public class TaskDomainAssignmentServiceIntegrationTest {
     private static final String TEST_LAST_NAME = "Doe";
     private static final String TEST_MIDDLE_NAME = "Middle";
     private static final String TEST_FILE_NAME = "avatar.png";
-    private static final String TASK_FILE_NAME = "Task_Developer_MoonlightWalk.pdf";
+    private static final String TASK_FILE_NAME = "Task_DEVELOPER_MoonlightWalk.pdf";
     @Autowired
     private TaskAssignmentService taskAssignmentService;
     @Autowired
@@ -61,11 +61,11 @@ public class TaskDomainAssignmentServiceIntegrationTest {
     @Autowired
     private AccountProfileRepository accountProfileRepository;
     @Autowired
-    private TaskUploadService taskUploadService;
+    private RolePromotionTaskService taskUploadService;
     @Autowired
     private TaskAssignmentRepository taskAssignmentRepository;
     @Autowired
-    private TaskRepository taskRepository;
+    private RolePromotionTaskRepository taskRepository;
     @Value("${application.assignments.activation-expiry-in-days}")
     private Integer assignmentActivationExpiryInDays;
     private Department testDepartment;

@@ -14,15 +14,15 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import ua.knu.knudev.assessmentmanagerapi.api.RolePromotionTaskApi;
 import ua.knu.knudev.knudevsecurityapi.response.ErrorResponse;
-import ua.knu.knudev.assessmentmanagerapi.api.TaskUploadAPI;
 
 @RestController
 @RequestMapping("/admin/task/upload")
 @RequiredArgsConstructor
 public class AdminTaskUploadController {
 
-    private final TaskUploadAPI taskUploadAPI;
+    private final RolePromotionTaskApi taskUploadAPI;
 
     @Operation(
             summary = "Upload task for role",
@@ -39,7 +39,7 @@ public class AdminTaskUploadController {
                     description = "Task successfully uploaded.",
                     content = @Content(
                             mediaType = "text/plain;charset=UTF-8",
-                            schema = @Schema(type = "string", example = "Task uploaded successfully.")
+                            schema = @Schema(type = "string", example = "Task_Developer_MoonlightWalk.pdf")
                     )),
             @ApiResponse(
                     responseCode = "400",

@@ -4,5 +4,5 @@ import ua.knu.knudev.educationapi.dto.EducationProgramDto;
 import ua.knu.knudev.educationapi.request.EducationProgramCreationRequest;
 
 public interface EducationProgramApi {
-    EducationProgramDto create(EducationProgramCreationRequest programCreationRequest);
+    EducationProgramDto save(EducationProgramCreationRequest programCreationRequest);
 }

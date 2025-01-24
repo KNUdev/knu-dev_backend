@@ -10,6 +10,7 @@ import lombok.*;
 @NoArgsConstructor
 @EqualsAndHashCode
 @ToString
+@Builder
 public class MultiLanguageField {
     @Column(nullable = false, unique = true, updatable = false)
     private String en;

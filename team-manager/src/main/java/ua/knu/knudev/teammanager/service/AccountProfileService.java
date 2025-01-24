@@ -3,7 +3,6 @@ package ua.knu.knudev.teammanager.service;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -15,8 +14,6 @@ import org.springframework.web.multipart.MultipartFile;
 import ua.knu.knudev.fileserviceapi.api.ImageServiceApi;
 import ua.knu.knudev.fileserviceapi.subfolder.ImageSubfolder;
 import ua.knu.knudev.knudevcommon.constant.KNUdevUnit;
-import ua.knu.knudev.teammanagerapi.constant.AccountsCriteriaFilterOption;
-import ua.knu.knudev.knudevcommon.exception.FileException;
 import ua.knu.knudev.knudevcommon.utils.AcademicUnitsIds;
 import ua.knu.knudev.knudevcommon.utils.FullName;
 import ua.knu.knudev.knudevsecurityapi.api.AccountAuthServiceApi;
@@ -28,12 +25,12 @@ import ua.knu.knudev.teammanager.domain.Specialty;
 import ua.knu.knudev.teammanager.mapper.AccountProfileMapper;
 import ua.knu.knudev.teammanager.repository.AccountProfileRepository;
 import ua.knu.knudev.teammanagerapi.api.AccountProfileApi;
-import ua.knu.knudev.teammanagerapi.dto.AccountSearchCriteria;
+import ua.knu.knudev.teammanagerapi.constant.AccountsCriteriaFilterOption;
 import ua.knu.knudev.teammanagerapi.dto.AccountProfileDto;
+import ua.knu.knudev.teammanagerapi.dto.AccountSearchCriteria;
 import ua.knu.knudev.teammanagerapi.exception.AccountException;
 import ua.knu.knudev.teammanagerapi.response.AccountRegistrationResponse;
 
-import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.EnumMap;
 import java.util.Map;
@@ -58,7 +55,7 @@ public class AccountProfileService implements AccountProfileApi {
         departmentService.validateAcademicUnitExistence(request.departmentId(), request.specialtyCodename());
 
         AuthAccountCreationResponse createdAuthAccount = accountAuthServiceApi.createAccount(request);
-        String uploadFilename = imageServiceApi.uploadFile(request.avatarFile(), ImageSubfolder.ACCOUNT_PICTURES);
+        String uploadFilename = uploadImageAvatar(request.avatarFile());
 
         AccountProfile accountProfileToSave = buildAccountProfile(request, uploadFilename, createdAuthAccount);
         AccountProfile savedAccount = accountProfileRepository.save(accountProfileToSave);
@@ -202,5 +199,12 @@ public class AccountProfileService implements AccountProfileApi {
         if (value != null) {
             filters.put(option, value);
         }
+    }
+
+    private String uploadImageAvatar(MultipartFile avatarFile) {
+        if (ObjectUtils.isEmpty(avatarFile)) {
+            return null;
+        }
+        return imageServiceApi.uploadFile(avatarFile, ImageSubfolder.ACCOUNT_PICTURES);
     }
 }

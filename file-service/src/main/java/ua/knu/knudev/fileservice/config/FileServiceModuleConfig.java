@@ -6,7 +6,7 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 @ComponentScan("ua.knu.knudev.fileservice")
-@EnableConfigurationProperties(ImageFileConfigProperties.class)
+@EnableConfigurationProperties({ImageFileConfigProperties.class, TaskFileConfigProperties.class})
 public class FileServiceModuleConfig {
 
 }

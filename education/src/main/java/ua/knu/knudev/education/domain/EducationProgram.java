@@ -13,8 +13,10 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
+//todo maybe education_program, not just program
 @Table(name = "program", schema = "education")
-public class Program {
+@Builder
+public class EducationProgram {
 
     @Id
     @UuidGenerator
@@ -44,7 +46,7 @@ public class Program {
 
     @OneToOne(optional = false)
     @JoinColumn(name = "final_task_id", unique = true)
-    private TaskProxy finalTask;
+    private EducationTaskProxy finalTask;
 
     @PreUpdate
     public void onUpdate() {

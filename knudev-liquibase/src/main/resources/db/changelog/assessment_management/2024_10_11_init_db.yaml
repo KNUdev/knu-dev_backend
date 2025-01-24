@@ -1,18 +1,18 @@
 databaseChangeLog:
   - changeSet:
-      id: create_assessment_management_table
+      id: create_role_promotion_task_table
       author: Vladyslav Shtaiier
       changes:
         - createTable:
             schemaName: assessment_management
-            tableName: task
+            tableName: role_promotion_task
             columns:
               - column:
                   name: id
                   type: uuid
                   constraints:
                     primaryKey: true
-                    primaryKeyName: pk_task
+                    primaryKeyName: pk_role_promotion_task
                     nullable: false
                     unique: true
               - column:
@@ -24,6 +24,7 @@ databaseChangeLog:
               - column:
                   name: addition_date
                   type: date
+                  defaultValueComputed: CURRENT_TIMESTAMP
                   constraints:
                     nullable: false
               - column:
@@ -34,6 +35,13 @@ databaseChangeLog:
                   type: varchar(20)
                   constraints:
                     nullable: false
+        - createIndex:
+            indexName: idx_target_technical_role
+            tableName: role_promotion_task
+            schemaName: assessment_management
+            columns:
+              - column:
+                  name: target_technical_role
 
   - changeSet:
       id: create_task_assignment_table
@@ -104,3 +112,41 @@ databaseChangeLog:
             columns:
               - column:
                   name: assigned_account_email
+
+  - changeSet:
+      id: create_education_program_task_table
+      author: Vladyslav Shtaiier
+      changes:
+        - createTable:
+            schemaName: assessment_management
+            tableName: education_program_task
+            columns:
+              - column:
+                  name: id
+                  type: uuid
+                  constraints:
+                    primaryKey: true
+                    primaryKeyName: pk_education_program_task
+                    nullable: false
+                    unique: true
+              - column:
+                  name: filename
+                  type: varchar(75)
+                  constraints:
+                    unique: true
+                    nullable: false
+              - column:
+                  name: addition_date
+                  type: date
+                  defaultValueComputed: CURRENT_TIMESTAMP
+                  constraints:
+                    nullable: false
+              - column:
+                  name: last_update_date
+                  type: date
+              - column:
+                  name: learning_unit
+                  type: varchar(20)
+                  constraints:
+                    nullable: false
+

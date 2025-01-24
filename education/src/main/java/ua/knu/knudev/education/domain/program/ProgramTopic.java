@@ -4,7 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.UuidGenerator;
 import ua.knu.knudev.education.domain.MultiLanguageField;
-import ua.knu.knudev.education.domain.TaskProxy;
+import ua.knu.knudev.education.domain.EducationTaskProxy;
 
 import java.time.LocalDateTime;
 import java.util.*;
@@ -15,6 +15,7 @@ import java.util.*;
 @AllArgsConstructor
 @Entity
 @Table(name = "topic", schema = "education")
+@Builder
 public class ProgramTopic {
 
     @Id
@@ -48,7 +49,7 @@ public class ProgramTopic {
 
     @OneToOne
     @JoinColumn(name = "task_id")
-    private TaskProxy task;
+    private EducationTaskProxy task;
 
     //TODO TESTS
 

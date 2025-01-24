@@ -1,7 +1,6 @@
 package ua.knu.knudev.assessmentmanager.config;
 
 import org.springframework.boot.autoconfigure.domain.EntityScan;
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
@@ -10,7 +9,6 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 @ComponentScan("ua.knu.knudev.assessmentmanager")
 @EnableJpaRepositories(basePackages = "ua.knu.knudev.assessmentmanager.repository")
 @EntityScan("ua.knu.knudev.assessmentmanager.domain")
-@EnableConfigurationProperties(TaskFileConfigProperties.class)
 public class AssessmentManagerModuleConfig {
 
 }

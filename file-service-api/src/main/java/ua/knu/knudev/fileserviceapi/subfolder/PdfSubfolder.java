@@ -3,19 +3,16 @@ package ua.knu.knudev.fileserviceapi.subfolder;
 import ua.knu.knudev.knudevcommon.constant.AccountTechnicalRole;
 import ua.knu.knudev.knudevcommon.constant.LearningUnit;
 
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-
 public enum PdfSubfolder implements PdfSubfolderI {
+    EDUCATION_PROGRAM_PROGRAM_TASKS("/education/programs/programs/tasks"),
+    EDUCATION_PROGRAM_SECTION_TASKS("/education/programs/sections/tasks"),
+    EDUCATION_PROGRAM_MODULE_TASKS("/education/programs/modules/tasks"),
+    EDUCATION_PROGRAM_TOPIC_TASKS("/education/programs/topics/tasks"),
 
-    // Static subfolders with placeholders:
-    ROLE_TASKS("/tasks/campus/%s-role-tasks"),
-    LEARNING_UNIT_TASKS("/education/programs/%s/tasks");
+    //todo rename. This is for role elevation
+    ROLE_ASSIGNMENTS_TASK("/tasks/campus/%s-role-tasks");
 
     private final String pathPattern;
-
-    // Cache for dynamic paths
-    private static final Map<String, PdfSubfolderI> DYNAMIC_SUBFOLDERS = new ConcurrentHashMap<>();
 
     PdfSubfolder(String pattern) {
         this.pathPattern = pattern;
@@ -26,36 +23,36 @@ public enum PdfSubfolder implements PdfSubfolderI {
         return pathPattern;
     }
 
-    // -------------- Dynamic Builders -------------- //
-
-    public PdfSubfolderI toRole(AccountTechnicalRole technicalRole) {
-        if (!this.name().contains("ROLE")) {
+    /**
+     * Only valid if this == ROLE_TASKS; otherwise throws
+     */
+    public PdfSubfolderI forRole(AccountTechnicalRole technicalRole) {
+        if (this != ROLE_ASSIGNMENTS_TASK) {
             throw new UnsupportedOperationException(
-                    "toRole(...) not applicable to " + this.name()
+                    "forRole(...) only applicable to ROLE_TASKS"
             );
         }
-        // Dynamically generate the path
-        String dynamicPath = String.format(pathPattern, technicalRole.name().toLowerCase());
-
-        // Retrieve or create a dynamic subfolder instance
-        return getOrCreateDynamicSubfolder(dynamicPath);
+        // Return a separate PdfSubfolderI that formats the path dynamically
+        return new RolePdfSubfolder(pathPattern, technicalRole);
     }
 
-    public FileSubfolder toLearningUnitSubfolder(LearningUnit learningUnit) {
-        if (!this.name().contains("LEARNING_UNIT")) {
-            throw new UnsupportedOperationException(
-                    "toLearningUnitSubfolder(...) not applicable to " + this.name()
-            );
+    public static PdfSubfolder getFromLearningUnit(LearningUnit learningUnit) {
+        return switch (learningUnit) {
+            case PROGRAM -> EDUCATION_PROGRAM_PROGRAM_TASKS;
+            case SECTION -> EDUCATION_PROGRAM_SECTION_TASKS;
+            case MODULE -> EDUCATION_PROGRAM_MODULE_TASKS;
+            case TOPIC -> EDUCATION_PROGRAM_TOPIC_TASKS;
+        };
+    }
+
+    private record RolePdfSubfolder(
+            String pathPattern,
+            AccountTechnicalRole technicalRole
+    ) implements PdfSubfolderI {
+
+        @Override
+        public String getSubfolderPath() {
+            return String.format(pathPattern, technicalRole.getRoleId());
         }
-        // Dynamically generate the path
-        String dynamicPath = String.format(pathPattern, learningUnit.name().toLowerCase());
-
-        // Retrieve or create a dynamic subfolder instance
-        return getOrCreateDynamicSubfolder(dynamicPath);
-    }
-
-    // Create or retrieve a dynamic subfolder instance
-    private PdfSubfolderI getOrCreateDynamicSubfolder(String dynamicPath) {
-        return DYNAMIC_SUBFOLDERS.computeIfAbsent(dynamicPath, path -> () -> path);
     }
 }

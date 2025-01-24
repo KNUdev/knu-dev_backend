@@ -30,12 +30,12 @@ public class EducationProgramRequestCoherenceValidator {
         validateSequence(
                 section.modules(),
                 ModuleCreationRequest::orderIndex,
-                "topics in Section[orderIndex=" + section.orderIndex() + "]"
+                "modules in Section[orderIndex=" + section.orderIndex() + "]"
         );
-        section.modules().forEach(module -> validateModule(module, section));
+        section.modules().forEach(this::validateModule);
     }
 
-    private void validateModule(ModuleCreationRequest module, SectionCreationRequest parentSection) {
+    private void validateModule(ModuleCreationRequest module) {
         validateSequence(
                 module.topics(),
                 TopicCreationRequest::orderIndex,
