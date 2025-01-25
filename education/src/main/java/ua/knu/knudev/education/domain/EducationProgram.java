@@ -44,7 +44,7 @@ public class EducationProgram {
 
     private Integer version = 1;
 
-    @OneToOne(optional = false)
+    @OneToOne(optional = false, cascade = CascadeType.ALL)
     @JoinColumn(name = "final_task_id", unique = true)
     private EducationTaskProxy finalTask;
 

@@ -2,6 +2,7 @@ package ua.knu.knudev.assessmentmanager.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.support.TransactionTemplate;
 import org.springframework.web.multipart.MultipartFile;
 import ua.knu.knudev.assessmentmanager.domain.EducationTask;
 import ua.knu.knudev.assessmentmanager.repository.EducationTaskRepository;
@@ -18,6 +19,8 @@ public class EducationTaskService implements EducationTaskApi {
 
     private final EducationTaskRepository educationTaskRepository;
     private final PDFServiceApi pdfServiceApi;
+    private final TransactionTemplate transactionTemplate;
+
 
     @Override
     public Map<LearningUnit, Map<Integer, String>> uploadAll(
@@ -46,7 +49,8 @@ public class EducationTaskService implements EducationTaskApi {
         // 3) For each (learningUnit, orderIndex, MultipartFile) -> upload + create entity
         for (TaskTempHolder holder : allTasksToUpload) {
             // If you want a custom filename, build it here:
-            String customFilename = "";
+            //todo change
+            String customFilename = UUID.randomUUID().toString();
 
             // Subfolder from the LearningUnit
             PdfSubfolder subfolder = PdfSubfolder.getFromLearningUnit(holder.learningUnit);
@@ -73,8 +77,11 @@ public class EducationTaskService implements EducationTaskApi {
                     .put(holder.orderIndex, savedFilename);
         }
 
-        educationTaskRepository.saveAll(tasksForDb);
+        //todo maybe do not use transactionTemplate
+//        transactionTemplate.executeWithoutResult(status -> {
+//        });
 
+            educationTaskRepository.saveAllAndFlush(tasksForDb);
         return result;
     }
 

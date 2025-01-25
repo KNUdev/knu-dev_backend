@@ -11,7 +11,7 @@ import ua.knu.knudev.assessmentmanagerapi.dto.Task;
 import java.util.UUID;
 
 @Entity
-@Table(schema = "assessment_management", name = "education_task")
+@Table(schema = "assessment_management", name = "education_program_task")
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor

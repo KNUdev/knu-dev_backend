@@ -7,8 +7,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import ua.knu.knudev.assessmentmanagerapi.api.EducationTaskApi;
 import ua.knu.knudev.education.domain.EducationProgram;
-import ua.knu.knudev.education.domain.MultiLanguageField;
 import ua.knu.knudev.education.domain.EducationTaskProxy;
+import ua.knu.knudev.education.domain.MultiLanguageField;
 import ua.knu.knudev.education.domain.bridge.ModuleTopicMapping;
 import ua.knu.knudev.education.domain.bridge.ProgramSectionMapping;
 import ua.knu.knudev.education.domain.bridge.SectionModuleMapping;
@@ -58,12 +58,12 @@ public class EducationProgramCreationService implements EducationProgramApi {
         Map<LearningUnit, Map<Integer, MultipartFile>> tasksToUpload = buildEducationProgramAllTasksMap(programCreationReq);
         Map<LearningUnit, Map<Integer, String>> filenamesMap = educationTaskApi.uploadAll(tasksToUpload);
 
-        boolean programExists = ObjectUtils.isEmpty(programCreationReq.existingProgramId());
+        boolean programExists = ObjectUtils.isEmpty(programCreationReq.getExistingProgramId());
         EducationProgram program = programExists ? (
                 EducationProgram.builder()
-                        .name(buildField(programCreationReq.name()))
-                        .description(buildField(programCreationReq.description()))
-                        .expertise(programCreationReq.expertise())
+                        .name(buildField(programCreationReq.getName()))
+                        .description(buildField(programCreationReq.getDescription()))
+                        .expertise(programCreationReq.getExpertise())
                         .finalTask(
                                 EducationTaskProxy.builder()
                                         .taskFilename(
@@ -73,28 +73,30 @@ public class EducationProgramCreationService implements EducationProgramApi {
                         )
                         .lastModifiedDate(LocalDateTime.now())
                         .build()
-        ) : getProgramById(programCreationReq.existingProgramId());
+        ) : getProgramById(programCreationReq.getExistingProgramId());
 
+        //todo fix org.hibernate.id.IdentifierGenerationException: Identifier of entity 'ua.knu.knudev.education.domain.EducationTaskProxy' must be manually assigned before calling 'persist()'
+        //todo test fully via REST API
         educationProgramRepository.save(program);
 
-        programCreationReq.sections().forEach(sectionRequest -> {
-            ProgramSection section = ObjectUtils.isEmpty(sectionRequest.existingSectionId())
+        programCreationReq.getSections().forEach(sectionRequest -> {
+            ProgramSection section = ObjectUtils.isEmpty(sectionRequest.getExistingSectionId())
                     ? ProgramSection.builder()
-                    .name(buildField(sectionRequest.name()))
-                    .description(buildField(sectionRequest.description()))
+                    .name(buildField(sectionRequest.getName()))
+                    .description(buildField(sectionRequest.getDescription()))
                     .sectionFinalTask(
                             EducationTaskProxy.builder()
                                     .taskFilename(
                                             // Now just do direct map lookup by (LEARNING_UNIT, orderIndex)
                                             getFilenameForOrderIndex(LearningUnit.SECTION,
-                                                    sectionRequest.orderIndex(),
+                                                    sectionRequest.getOrderIndex(),
                                                     filenamesMap)
                                     )
                                     .build()
                     )
                     .lastModifiedDate(LocalDateTime.now())
                     .build()
-                    : getSectionById(sectionRequest.existingSectionId());
+                    : getSectionById(sectionRequest.getExistingSectionId());
 
             sectionRepository.save(section);
 
@@ -102,27 +104,27 @@ public class EducationProgramCreationService implements EducationProgramApi {
                     ProgramSectionMapping.builder()
                             .educationProgram(program)
                             .section(section)
-                            .orderIndex(sectionRequest.orderIndex())
+                            .orderIndex(sectionRequest.getOrderIndex())
                             .build()
             );
 
-            sectionRequest.modules().forEach(moduleRequest -> {
-                ProgramModule module = ObjectUtils.isEmpty(moduleRequest.existingModuleId())
+            sectionRequest.getModules().forEach(moduleRequest -> {
+                ProgramModule module = ObjectUtils.isEmpty(moduleRequest.getExistingModuleId())
                         ? ProgramModule.builder()
-                        .name(buildField(moduleRequest.name()))
-                        .description(buildField(moduleRequest.description()))
+                        .name(buildField(moduleRequest.getName()))
+                        .description(buildField(moduleRequest.getDescription()))
                         .moduleFinalTask(
                                 EducationTaskProxy.builder()
                                         .taskFilename(
                                                 getFilenameForOrderIndex(LearningUnit.MODULE,
-                                                        moduleRequest.orderIndex(),
+                                                        moduleRequest.getOrderIndex(),
                                                         filenamesMap)
                                         )
                                         .build()
                         )
                         .lastModifiedDate(LocalDateTime.now())
                         .build()
-                        : getModuleById(moduleRequest.existingModuleId());
+                        : getModuleById(moduleRequest.getExistingModuleId());
 
                 moduleRepository.save(module);
 
@@ -130,27 +132,27 @@ public class EducationProgramCreationService implements EducationProgramApi {
                         SectionModuleMapping.builder()
                                 .section(section)
                                 .module(module)
-                                .orderIndex(moduleRequest.orderIndex())
+                                .orderIndex(moduleRequest.getOrderIndex())
                                 .build()
                 );
 
-                moduleRequest.topics().forEach(topicRequest -> {
-                    ProgramTopic topic = ObjectUtils.isEmpty(topicRequest.existingTopicId())
+                moduleRequest.getTopics().forEach(topicRequest -> {
+                    ProgramTopic topic = ObjectUtils.isEmpty(topicRequest.getExistingTopicId())
                             ? ProgramTopic.builder()
-                            .name(buildField(topicRequest.name()))
-                            .description(buildField(topicRequest.description()))
+                            .name(buildField(topicRequest.getName()))
+                            .description(buildField(topicRequest.getDescription()))
                             .task(
                                     EducationTaskProxy.builder()
                                             .taskFilename(
                                                     getFilenameForOrderIndex(LearningUnit.TOPIC,
-                                                            topicRequest.orderIndex(),
+                                                            topicRequest.getOrderIndex(),
                                                             filenamesMap)
                                             )
                                             .build()
                             )
                             .lastModifiedDate(LocalDateTime.now())
                             .build()
-                            : getTopicById(topicRequest.existingTopicId());
+                            : getTopicById(topicRequest.getExistingTopicId());
 
                     topicRepository.save(topic);
 
@@ -159,7 +161,7 @@ public class EducationProgramCreationService implements EducationProgramApi {
                             ModuleTopicMapping.builder()
                                     .module(module)
                                     .topic(topic)
-                                    .orderIndex(topicRequest.orderIndex())
+                                    .orderIndex(topicRequest.getOrderIndex())
                                     .build()
                     );
                 });
@@ -176,43 +178,43 @@ public class EducationProgramCreationService implements EducationProgramApi {
     ) {
         Map<LearningUnit, Map<Integer, MultipartFile>> tasksMap = new HashMap<>();
 
-        boolean programNotExists = ObjectUtils.isEmpty(request.existingProgramId());
-        boolean programFinalTaskIsPresent = ObjectUtils.isNotEmpty(request.finalTask());
+        boolean programNotExists = ObjectUtils.isEmpty(request.getExistingProgramId());
+        boolean programFinalTaskIsPresent = ObjectUtils.isNotEmpty(request.getFinalTask());
         if (programNotExists && programFinalTaskIsPresent) {
             tasksMap
                     .computeIfAbsent(LearningUnit.PROGRAM, k -> new HashMap<>())
-                    .put(1, request.finalTask());
+                    .put(1, request.getFinalTask());
         }
 
-        request.sections().stream()
-                .filter(s -> ObjectUtils.isEmpty(s.existingSectionId()))
-                .filter(s -> ObjectUtils.isNotEmpty(s.finalTask()))
+        request.getSections().stream()
+                .filter(s -> ObjectUtils.isEmpty(s.getExistingSectionId()))
+                .filter(s -> ObjectUtils.isNotEmpty(s.getFinalTask()))
                 .forEach(s ->
                         tasksMap
                                 .computeIfAbsent(LearningUnit.SECTION, k -> new HashMap<>())
-                                .put(s.orderIndex(), s.finalTask())
+                                .put(s.getOrderIndex(), s.getFinalTask())
                 );
 
-        request.sections().forEach(s ->
-                s.modules().stream()
-                        .filter(m -> ObjectUtils.isEmpty(m.existingModuleId()))
-                        .filter(m -> ObjectUtils.isNotEmpty(m.finalTask()))
+        request.getSections().forEach(s ->
+                s.getModules().stream()
+                        .filter(m -> ObjectUtils.isEmpty(m.getExistingModuleId()))
+                        .filter(m -> ObjectUtils.isNotEmpty(m.getFinalTask()))
                         .forEach(m ->
                                 tasksMap
                                         .computeIfAbsent(LearningUnit.MODULE, k -> new HashMap<>())
-                                        .put(m.orderIndex(), m.finalTask())
+                                        .put(m.getOrderIndex(), m.getFinalTask())
                         )
         );
 
-        request.sections().forEach(s ->
-                s.modules().forEach(m ->
-                        m.topics().stream()
-                                .filter(t -> ObjectUtils.isEmpty(t.existingTopicId()))
-                                .filter(t -> ObjectUtils.isNotEmpty(t.task()))
-                                .forEach(t ->
+        request.getSections().forEach(s ->
+                s.getModules().forEach(m ->
+                        m.getTopics().stream()
+                                .filter(topic -> ObjectUtils.isEmpty(topic.getExistingTopicId()))
+                                .filter(topic -> ObjectUtils.isNotEmpty(topic.getTask()))
+                                .forEach(topic ->
                                         tasksMap
                                                 .computeIfAbsent(LearningUnit.TOPIC, k -> new HashMap<>())
-                                                .put(t.orderIndex(), t.task())
+                                                .put(topic.getOrderIndex(), topic.getTask())
                                 )
                 )
         );

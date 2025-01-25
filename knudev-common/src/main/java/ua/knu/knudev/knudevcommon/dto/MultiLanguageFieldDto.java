@@ -11,6 +11,7 @@ import lombok.*;
 @EqualsAndHashCode
 @AllArgsConstructor
 @NoArgsConstructor
+@Setter
 public class MultiLanguageFieldDto {
     @Schema(description = "The field in English.", example = "Historical")
     @NotEmpty(message = "Field 'en' cannot be blank or empty.")

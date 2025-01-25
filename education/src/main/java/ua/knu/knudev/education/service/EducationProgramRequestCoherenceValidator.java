@@ -19,43 +19,43 @@ public class EducationProgramRequestCoherenceValidator {
 
     public void validateProgramCreationRequest(EducationProgramCreationRequest program) {
         validateSequence(
-                program.sections(),
-                SectionCreationRequest::orderIndex,
+                program.getSections(),
+                SectionCreationRequest::getOrderIndex,
                 "sections in Program"
         );
-        program.sections().forEach(this::validateSection);
+        program.getSections().forEach(this::validateSection);
     }
 
     private void validateSection(SectionCreationRequest section) {
         validateSequence(
-                section.modules(),
-                ModuleCreationRequest::orderIndex,
-                "modules in Section[orderIndex=" + section.orderIndex() + "]"
+                section.getModules(),
+                ModuleCreationRequest::getOrderIndex,
+                "modules in Section[orderIndex=" + section.getOrderIndex() + "]"
         );
-        section.modules().forEach(this::validateModule);
+        section.getModules().forEach(this::validateModule);
     }
 
     private void validateModule(ModuleCreationRequest module) {
         validateSequence(
-                module.topics(),
-                TopicCreationRequest::orderIndex,
-                "topics in Module[orderIndex=" + module.orderIndex() + "]"
+                module.getTopics(),
+                TopicCreationRequest::getOrderIndex,
+                "topics in Module[orderIndex=" + module.getOrderIndex() + "]"
         );
     }
 
     private <T> void validateSequence(
-            Set<T> items,
+            List<T> learningUnitItems,
             ToIntFunction<T> getIndexFn,
             String context
     ) {
-        if (items == null || items.isEmpty()) {
+        if (learningUnitItems == null || learningUnitItems.isEmpty()) {
             //todo maybe not just return
             return; // or decide if empty is allowed
         }
 
-        int itemsSize = items.size();
+        int itemsSize = learningUnitItems.size();
 
-        List<Integer> indexes = items.stream()
+        List<Integer> indexes = learningUnitItems.stream()
                 .mapToInt(getIndexFn)
                 .boxed()
                 .toList();

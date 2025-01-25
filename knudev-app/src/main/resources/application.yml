@@ -38,6 +38,7 @@ logging:
   level:
     org:
       springframework:
+        web: debug
         transaction:
           support:
             TransactionSynchronizationUtils: info
