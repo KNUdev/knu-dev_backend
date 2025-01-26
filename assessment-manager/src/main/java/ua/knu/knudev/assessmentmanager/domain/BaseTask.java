@@ -1,6 +1,5 @@
 package ua.knu.knudev.assessmentmanager.domain;
 
-import jakarta.persistence.Column;
 import jakarta.persistence.Id;
 import jakarta.persistence.MappedSuperclass;
 import lombok.AllArgsConstructor;
@@ -24,10 +23,7 @@ public class BaseTask {
     @Id
     @UuidGenerator
     private UUID id;
-
-    @Column(unique = true, nullable = false)
-    private String filename;
-
+    private String taskFilename;
     @CreationTimestamp
     private LocalDateTime additionDate = LocalDateTime.now();
     private LocalDateTime lastUpdateDate;

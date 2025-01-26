@@ -2,6 +2,7 @@ package ua.knu.knudev.education.domain;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UuidGenerator;
 import ua.knu.knudev.knudevcommon.constant.Expertise;
 
@@ -36,15 +37,18 @@ public class EducationProgram {
     })
     private MultiLanguageField description;
 
-    private LocalDateTime createdDate = LocalDateTime.now();
+    @CreationTimestamp
+    private LocalDateTime createdDate;
     private LocalDateTime lastModifiedDate;
 
     @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
     private Expertise expertise;
 
-    private Integer version = 1;
+    @Column(name = "version", nullable = false, columnDefinition = "int default 1")
+    private Integer version;
 
-    @OneToOne(optional = false, cascade = CascadeType.ALL)
+    @OneToOne(optional = false)
     @JoinColumn(name = "final_task_id", unique = true)
     private EducationTaskProxy finalTask;
 

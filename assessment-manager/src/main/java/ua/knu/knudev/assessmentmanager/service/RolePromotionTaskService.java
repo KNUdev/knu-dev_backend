@@ -53,12 +53,12 @@ public class RolePromotionTaskService implements RolePromotionTaskApi {
 
         RolePromotionTask task = RolePromotionTask.builder()
                 .lastUpdateDate(LocalDateTime.now())
-                .filename(taskFilename)
+                .taskFilename(taskFilename)
                 .targetTechnicalRole(targetRole)
                 .build();
 
         RolePromotionTask savedTask = rolePromotionTaskRepository.save(task);
-        return savedTask.getFilename();
+        return savedTask.getTaskFilename();
     }
 
     private void validateFilename(MultipartFile file) {
@@ -95,7 +95,7 @@ public class RolePromotionTaskService implements RolePromotionTaskApi {
     }
 
     private void assertTaskDoesNotExist(String filename) {
-        boolean taskExists = rolePromotionTaskRepository.existsByFilename(filename);
+        boolean taskExists = rolePromotionTaskRepository.existsByTaskFilename(filename);
         if (taskExists) {
             throw new TaskException(
                     String.format("TaskDomain %s already exists", filename), HttpStatus.BAD_REQUEST

@@ -16,7 +16,7 @@ databaseChangeLog:
                     nullable: false
                     unique: true
               - column:
-                  name: filename
+                  name: task_filename
                   type: varchar(75)
                   constraints:
                     unique: true
@@ -100,7 +100,7 @@ databaseChangeLog:
             constraintName: fk_task_assignment_task
             baseTableName: task_assignment
             baseColumnNames: task_id
-            referencedTableName: task
+            referencedTableName: role_promotion_task
             referencedColumnNames: id
             baseTableSchemaName: assessment_management
             referencedTableSchemaName: assessment_management
@@ -130,7 +130,7 @@ databaseChangeLog:
                     nullable: false
                     unique: true
               - column:
-                  name: filename
+                  name: task_filename
                   type: varchar(75)
                   constraints:
                     unique: true

@@ -6,6 +6,7 @@ import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import ua.knu.knudev.assessmentmanagerapi.api.EducationTaskApi;
+import ua.knu.knudev.assessmentmanagerapi.dto.EducationTaskDto;
 import ua.knu.knudev.education.domain.EducationProgram;
 import ua.knu.knudev.education.domain.EducationTaskProxy;
 import ua.knu.knudev.education.domain.MultiLanguageField;
@@ -15,10 +16,7 @@ import ua.knu.knudev.education.domain.bridge.SectionModuleMapping;
 import ua.knu.knudev.education.domain.program.ProgramModule;
 import ua.knu.knudev.education.domain.program.ProgramSection;
 import ua.knu.knudev.education.domain.program.ProgramTopic;
-import ua.knu.knudev.education.repository.EducationProgramRepository;
-import ua.knu.knudev.education.repository.ModuleRepository;
-import ua.knu.knudev.education.repository.SectionRepository;
-import ua.knu.knudev.education.repository.TopicRepository;
+import ua.knu.knudev.education.repository.*;
 import ua.knu.knudev.education.repository.bridge.ModuleTopicMappingRepository;
 import ua.knu.knudev.education.repository.bridge.ProgramSectionMappingRepository;
 import ua.knu.knudev.education.repository.bridge.SectionModuleMappingRepository;
@@ -38,6 +36,9 @@ import java.util.UUID;
 @RequiredArgsConstructor
 //todo refactor and greatly test
 //todo create save and publish method. Save allows empty sections, publish does not allow empty program, section or module (with no sub-units)
+
+//todo check the number of done transactions
+//todo test with great amount of topics
 public class EducationProgramCreationService implements EducationProgramApi {
     private final EducationProgramRepository educationProgramRepository;
     private final SectionRepository sectionRepository;
@@ -56,7 +57,7 @@ public class EducationProgramCreationService implements EducationProgramApi {
         inputReqCoherenceValidator.validateProgramCreationRequest(programCreationReq);
 
         Map<LearningUnit, Map<Integer, MultipartFile>> tasksToUpload = buildEducationProgramAllTasksMap(programCreationReq);
-        Map<LearningUnit, Map<Integer, String>> filenamesMap = educationTaskApi.uploadAll(tasksToUpload);
+        Map<LearningUnit, Map<Integer, EducationTaskDto>> filenamesMap = educationTaskApi.uploadAll(tasksToUpload);
 
         boolean programExists = ObjectUtils.isEmpty(programCreationReq.getExistingProgramId());
         EducationProgram program = programExists ? (
@@ -65,18 +66,19 @@ public class EducationProgramCreationService implements EducationProgramApi {
                         .description(buildField(programCreationReq.getDescription()))
                         .expertise(programCreationReq.getExpertise())
                         .finalTask(
-                                EducationTaskProxy.builder()
-                                        .taskFilename(
-                                                getFilenameForOrderIndex(LearningUnit.PROGRAM, 1, filenamesMap)
+                                buildProxyFromDto(
+                                        LearningUnit.PROGRAM,
+                                        getFilenameForOrderIndex(
+                                                LearningUnit.PROGRAM,
+                                                1,
+                                                filenamesMap
                                         )
-                                        .build()
+                                )
                         )
                         .lastModifiedDate(LocalDateTime.now())
                         .build()
         ) : getProgramById(programCreationReq.getExistingProgramId());
 
-        //todo fix org.hibernate.id.IdentifierGenerationException: Identifier of entity 'ua.knu.knudev.education.domain.EducationTaskProxy' must be manually assigned before calling 'persist()'
-        //todo test fully via REST API
         educationProgramRepository.save(program);
 
         programCreationReq.getSections().forEach(sectionRequest -> {
@@ -85,14 +87,14 @@ public class EducationProgramCreationService implements EducationProgramApi {
                     .name(buildField(sectionRequest.getName()))
                     .description(buildField(sectionRequest.getDescription()))
                     .sectionFinalTask(
-                            EducationTaskProxy.builder()
-                                    .taskFilename(
-                                            // Now just do direct map lookup by (LEARNING_UNIT, orderIndex)
-                                            getFilenameForOrderIndex(LearningUnit.SECTION,
-                                                    sectionRequest.getOrderIndex(),
-                                                    filenamesMap)
+                            buildProxyFromDto(
+                                    LearningUnit.SECTION,
+                                    getFilenameForOrderIndex(
+                                            LearningUnit.SECTION,
+                                            sectionRequest.getOrderIndex(),
+                                            filenamesMap
                                     )
-                                    .build()
+                            )
                     )
                     .lastModifiedDate(LocalDateTime.now())
                     .build()
@@ -114,13 +116,14 @@ public class EducationProgramCreationService implements EducationProgramApi {
                         .name(buildField(moduleRequest.getName()))
                         .description(buildField(moduleRequest.getDescription()))
                         .moduleFinalTask(
-                                EducationTaskProxy.builder()
-                                        .taskFilename(
-                                                getFilenameForOrderIndex(LearningUnit.MODULE,
-                                                        moduleRequest.getOrderIndex(),
-                                                        filenamesMap)
+                                buildProxyFromDto(
+                                        LearningUnit.MODULE,
+                                        getFilenameForOrderIndex(
+                                                LearningUnit.MODULE,
+                                                moduleRequest.getOrderIndex(),
+                                                filenamesMap
                                         )
-                                        .build()
+                                )
                         )
                         .lastModifiedDate(LocalDateTime.now())
                         .build()
@@ -142,20 +145,20 @@ public class EducationProgramCreationService implements EducationProgramApi {
                             .name(buildField(topicRequest.getName()))
                             .description(buildField(topicRequest.getDescription()))
                             .task(
-                                    EducationTaskProxy.builder()
-                                            .taskFilename(
-                                                    getFilenameForOrderIndex(LearningUnit.TOPIC,
-                                                            topicRequest.getOrderIndex(),
-                                                            filenamesMap)
+                                    buildProxyFromDto(
+                                            LearningUnit.TOPIC,
+                                            getFilenameForOrderIndex(
+                                                    LearningUnit.TOPIC,
+                                                    topicRequest.getOrderIndex(),
+                                                    filenamesMap
                                             )
-                                            .build()
+                                    )
                             )
                             .lastModifiedDate(LocalDateTime.now())
                             .build()
                             : getTopicById(topicRequest.getExistingTopicId());
 
                     topicRepository.save(topic);
-
 
                     moduleTopicMappingRepository.save(
                             ModuleTopicMapping.builder()
@@ -172,6 +175,14 @@ public class EducationProgramCreationService implements EducationProgramApi {
         return null;
     }
 
+    //todo maybe mapper
+    private EducationTaskProxy buildProxyFromDto(LearningUnit learningUnit, EducationTaskDto taskDto) {
+        return EducationTaskProxy.builder()
+                .id(taskDto.getId())
+                .taskFilename(taskDto.getFilename())
+                .learningUnit(learningUnit)
+                .build();
+    }
 
     private Map<LearningUnit, Map<Integer, MultipartFile>> buildEducationProgramAllTasksMap(
             EducationProgramCreationRequest request
@@ -234,10 +245,10 @@ public class EducationProgramCreationService implements EducationProgramApi {
         return sectionRepository.findById(id).orElse(null);
     }
 
-    private String getFilenameForOrderIndex(
+    private EducationTaskDto getFilenameForOrderIndex(
             LearningUnit learningUnit,
             int orderIndex,
-            Map<LearningUnit, Map<Integer, String>> filenamesMap
+            Map<LearningUnit, Map<Integer, EducationTaskDto>> filenamesMap
     ) {
         return Optional.ofNullable(filenamesMap.get(learningUnit))
                 .map(innerMap -> innerMap.get(orderIndex))

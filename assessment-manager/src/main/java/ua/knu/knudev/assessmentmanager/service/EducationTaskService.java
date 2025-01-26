@@ -7,11 +7,14 @@ import org.springframework.web.multipart.MultipartFile;
 import ua.knu.knudev.assessmentmanager.domain.EducationTask;
 import ua.knu.knudev.assessmentmanager.repository.EducationTaskRepository;
 import ua.knu.knudev.assessmentmanagerapi.api.EducationTaskApi;
+import ua.knu.knudev.assessmentmanagerapi.dto.EducationTaskDto;
 import ua.knu.knudev.fileserviceapi.api.PDFServiceApi;
 import ua.knu.knudev.fileserviceapi.subfolder.PdfSubfolder;
 import ua.knu.knudev.knudevcommon.constant.LearningUnit;
 
 import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -21,9 +24,10 @@ public class EducationTaskService implements EducationTaskApi {
     private final PDFServiceApi pdfServiceApi;
     private final TransactionTemplate transactionTemplate;
 
-
+    //  Map<LearningUnit, Map<Integer, String>> - Integer - orderIndex, String - filename
+    //new solution - instead of string use EducationTaskDto
     @Override
-    public Map<LearningUnit, Map<Integer, String>> uploadAll(
+    public Map<LearningUnit, Map<Integer, EducationTaskDto>> uploadAll(
             Map<LearningUnit, Map<Integer, MultipartFile>> educationProgramTasks
     ) {
         // 1) Flatten the input into a simple list that keeps track of (learningUnit, orderIndex, file).
@@ -44,7 +48,7 @@ public class EducationTaskService implements EducationTaskApi {
         // 2) We’ll store all EducationTask entities here (for DB) and
         //    also build the final result map in parallel.
         List<EducationTask> tasksForDb = new ArrayList<>();
-        Map<LearningUnit, Map<Integer, String>> result = new HashMap<>();
+        Map<LearningUnit, Map<Integer, EducationTaskDto>> result = new HashMap<>();
 
         // 3) For each (learningUnit, orderIndex, MultipartFile) -> upload + create entity
         for (TaskTempHolder holder : allTasksToUpload) {
@@ -65,24 +69,57 @@ public class EducationTaskService implements EducationTaskApi {
             // 3b) Build the entity (no orderIndex in your DB, so we omit it)
             EducationTask newTask = EducationTask.builder()
                     .learningUnit(holder.learningUnit)
-                    .filename(savedFilename)
+                    .taskFilename(savedFilename)
                     .build();
 
             tasksForDb.add(newTask);
 
             // 3c) Fill in the final result mapping
             //     (learningUnit -> (orderIndex -> savedFilename))
+            EducationTaskDto taskDto = EducationTaskDto.builder()
+                    .filename(savedFilename)
+                    .build();
             result
                     .computeIfAbsent(holder.learningUnit, k -> new HashMap<>())
-                    .put(holder.orderIndex, savedFilename);
+                    .put(holder.orderIndex, taskDto);
         }
 
         //todo maybe do not use transactionTemplate
 //        transactionTemplate.executeWithoutResult(status -> {
+//            educationTaskRepository.saveAllAndFlush(tasksForDb);
 //        });
+        List<EducationTask> educationTasks = educationTaskRepository.saveAllAndFlush(tasksForDb);
 
-            educationTaskRepository.saveAllAndFlush(tasksForDb);
-        return result;
+        return buildResult(result, educationTasks);
+    }
+
+    private Map<LearningUnit, Map<Integer, EducationTaskDto>> buildResult(
+            Map<LearningUnit, Map<Integer, EducationTaskDto>> unmappedResult, List<EducationTask> savedEducationTasks
+    ) {
+
+        Map<String, EducationTask> filenameTaskMap = savedEducationTasks.stream()
+                .collect(Collectors.toMap(EducationTask::getTaskFilename, Function.identity()));
+
+        // Preserve the LearningUnit key
+        // Preserve the Integer key
+        return unmappedResult.entrySet().stream()
+                .collect(Collectors.toMap(
+                        Map.Entry::getKey, // Preserve the LearningUnit key
+                        entry -> entry.getValue().entrySet().stream()
+                                .collect(Collectors.toMap(
+                                        Map.Entry::getKey, // Preserve the Integer key
+                                        innerEntry -> {
+                                            EducationTaskDto dto = innerEntry.getValue();
+                                            EducationTask task = filenameTaskMap.get(dto.getFilename());
+
+                                            if (task != null) {
+                                                dto.setId(task.getId());
+                                            }
+
+                                            return dto;
+                                        }
+                                ))
+                ));
     }
 
     @Override

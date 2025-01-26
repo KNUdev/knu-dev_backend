@@ -13,7 +13,7 @@ import ua.knu.knudev.knudevcommon.constant.LearningUnit;
         name = "education_program_task",
         indexes = {
                 @Index(columnList = "learning_unit", name = "idx_learning_unit"),
-                @Index(columnList = "filename", name = "idx_filename"),
+                @Index(columnList = "task_filename", name = "idx_filename"),
         }
 )
 @NoArgsConstructor

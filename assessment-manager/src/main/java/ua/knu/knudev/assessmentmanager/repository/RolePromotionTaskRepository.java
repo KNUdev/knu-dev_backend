@@ -18,5 +18,5 @@ public interface RolePromotionTaskRepository extends JpaRepository<RolePromotion
             "ORDER BY function('random') LIMIT 1")
     Optional<RolePromotionTask> findRandomNotAssignedTaskByTechnicalRole(@Param("role") AccountTechnicalRole role);
 
-    boolean existsByFilename(String taskFilename);
+    boolean existsByTaskFilename(String taskFilename);
 }

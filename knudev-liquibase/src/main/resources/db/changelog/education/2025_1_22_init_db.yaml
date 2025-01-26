@@ -63,7 +63,7 @@ databaseChangeLog:
             baseTableName: program
             baseColumnNames: final_task_id
             constraintName: fk_program_final_task
-            referencedTableName: task
+            referencedTableName: education_program_task
             referencedColumnNames: id
             referencedTableSchemaName: assessment_management
 
@@ -117,7 +117,7 @@ databaseChangeLog:
             baseTableName: section
             baseColumnNames: task_id
             constraintName: fk_section_task
-            referencedTableName: task
+            referencedTableName: education_program_task
             referencedColumnNames: id
             referencedTableSchemaName: assessment_management
 
@@ -172,7 +172,7 @@ databaseChangeLog:
             baseTableName: module
             baseColumnNames: task_id
             constraintName: fk_module_task
-            referencedTableName: task
+            referencedTableName: education_program_task
             referencedColumnNames: id
             referencedTableSchemaName: assessment_management
 
@@ -227,7 +227,7 @@ databaseChangeLog:
             baseTableName: topic
             baseColumnNames: task_id
             constraintName: fk_topic_task
-            referencedTableName: task
+            referencedTableName: education_program_task
             referencedColumnNames: id
             referencedTableSchemaName: assessment_management
 

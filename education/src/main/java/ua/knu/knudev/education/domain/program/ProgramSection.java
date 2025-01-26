@@ -2,6 +2,7 @@ package ua.knu.knudev.education.domain.program;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UuidGenerator;
 import ua.knu.knudev.education.domain.MultiLanguageField;
 import ua.knu.knudev.education.domain.EducationTaskProxy;
@@ -36,10 +37,11 @@ public class ProgramSection {
     })
     private MultiLanguageField description;
 
-    private LocalDateTime createdDate = LocalDateTime.now();
+    @CreationTimestamp
+    private LocalDateTime createdDate;
     private LocalDateTime lastModifiedDate;
 
-    @OneToOne
+    @OneToOne(optional = false)
     @JoinColumn(name = "task_id")
     private EducationTaskProxy sectionFinalTask;
 
