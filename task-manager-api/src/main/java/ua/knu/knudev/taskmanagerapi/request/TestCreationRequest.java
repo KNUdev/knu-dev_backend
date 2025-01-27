@@ -7,7 +7,7 @@ import jakarta.validation.constraints.Pattern;
 import lombok.Builder;
 import ua.knu.knudev.taskmanagerapi.dto.TestQuestionDto;
 
-import java.util.Set;
+import java.util.List;
 
 @Builder
 @Schema(description = "Request object for creating a test with name and questions")
@@ -31,6 +31,6 @@ public record TestCreationRequest(
                 requiredMode = Schema.RequiredMode.REQUIRED,
                 implementation = TestQuestionDto.class
         )
-        Set<@Valid TestQuestionDto> testQuestionDtos
+        List<@Valid TestQuestionDto> questions
 ) {
 }
