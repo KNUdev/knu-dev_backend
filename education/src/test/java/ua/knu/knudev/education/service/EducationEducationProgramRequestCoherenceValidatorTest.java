@@ -28,7 +28,7 @@ class EducationEducationProgramRequestCoherenceValidatorTest {
     private void assertValidationThrowsError(EducationProgramCreationRequest programCreationRequest) {
         assertThrows(
                 EducationProgramException.class,
-                () -> validator.validateProgramCreationRequest(programCreationRequest)
+                () -> validator.validateProgramOrderSequence(programCreationRequest)
         );
     }
 
@@ -106,7 +106,7 @@ class EducationEducationProgramRequestCoherenceValidatorTest {
 
         EducationProgramCreationRequest programRequest = createProgram(List.of(section1, section2));
 
-        assertDoesNotThrow(() -> validator.validateProgramCreationRequest(programRequest));
+        assertDoesNotThrow(() -> validator.validateProgramOrderSequence(programRequest));
     }
 
     @Test
@@ -114,7 +114,7 @@ class EducationEducationProgramRequestCoherenceValidatorTest {
     void should_ValidateSuccessfully_When_SectionDoesNotHaveModules() {
         EducationProgramCreationRequest programRequest = createProgram(List.of());
 
-        assertDoesNotThrow(() -> validator.validateProgramCreationRequest(programRequest));
+        assertDoesNotThrow(() -> validator.validateProgramOrderSequence(programRequest));
     }
 
     @Test
@@ -128,7 +128,7 @@ class EducationEducationProgramRequestCoherenceValidatorTest {
 
         EducationProgramCreationRequest programRequest = createProgram(List.of(section));
 
-        assertDoesNotThrow(() -> validator.validateProgramCreationRequest(programRequest));
+        assertDoesNotThrow(() -> validator.validateProgramOrderSequence(programRequest));
     }
 
     @Test

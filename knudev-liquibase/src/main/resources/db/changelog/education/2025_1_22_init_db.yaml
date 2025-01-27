@@ -54,6 +54,11 @@ databaseChangeLog:
                   constraints:
                     nullable: false
               - column:
+                  name: is_published
+                  type: boolean
+                  constraints:
+                    nullable: false
+              - column:
                   name: final_task_id
                   type: uuid
                   constraints:

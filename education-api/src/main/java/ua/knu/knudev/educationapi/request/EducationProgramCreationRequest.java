@@ -5,6 +5,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.web.multipart.MultipartFile;
+import ua.knu.knudev.educationapi.validation.ValidCreationRequest;
 import ua.knu.knudev.knudevcommon.constant.Expertise;
 import ua.knu.knudev.knudevcommon.dto.MultiLanguageFieldDto;
 
@@ -16,6 +17,7 @@ import java.util.UUID;
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
+@ValidCreationRequest
 public class EducationProgramCreationRequest {
     private UUID existingProgramId;
     private MultiLanguageFieldDto name;

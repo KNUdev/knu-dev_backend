@@ -48,6 +48,9 @@ public class EducationProgram {
     @Column(name = "version", nullable = false, columnDefinition = "int default 1")
     private Integer version;
 
+    @Column(name = "is_published", nullable = false)
+    private boolean isPublished;
+
     @OneToOne(optional = false)
     @JoinColumn(name = "final_task_id", unique = true)
     private EducationTaskProxy finalTask;

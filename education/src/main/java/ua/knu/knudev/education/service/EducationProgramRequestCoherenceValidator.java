@@ -17,7 +17,7 @@ import java.util.function.ToIntFunction;
 @Component
 public class EducationProgramRequestCoherenceValidator {
 
-    public void validateProgramCreationRequest(EducationProgramCreationRequest program) {
+    public void validateProgramOrderSequence(EducationProgramCreationRequest program) {
         validateSequence(
                 program.getSections(),
                 SectionCreationRequest::getOrderIndex,
