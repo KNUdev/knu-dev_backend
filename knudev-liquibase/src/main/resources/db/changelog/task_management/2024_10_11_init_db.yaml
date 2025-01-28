@@ -104,3 +104,102 @@ databaseChangeLog:
             columns:
               - column:
                   name: assigned_account_email
+
+  - changeSet:
+      id: create_test_domain_table
+      author: DenysLeonenko
+      changes:
+        - createTable:
+            tableName: test_domain
+            schemaName: task_management
+            columns:
+              - column:
+                  name: id
+                  type: uuid
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: en_name
+                  type: varchar(255)
+                  constraints:
+                    nullable: false
+                    unique: true
+              - column:
+                  name: created_at
+                  type: date
+                  defaultValueComputed: CURRENT_TIMESTAMP
+                  constraints:
+                    nullable: false
+
+  - changeSet:
+      id: create_test_question_table
+      author: DenysLeonenko
+      changes:
+        - createTable:
+            tableName: test_question
+            schemaName: task_management
+            columns:
+              - column:
+                  type: uuid
+                  name: id
+                  constraints:
+                    nullable: false
+                    primaryKey: true
+              - column:
+                  type: varchar(255)
+                  name: en_question_body
+                  constraints:
+                    nullable: false
+              - column:
+                  type: uuid
+                  name: test_id
+
+  - changeSet:
+      id: create_question_answer_variant_table
+      author: DenysLeonenko
+      changes:
+        - createTable:
+            tableName: question_answer_variant
+            schemaName: task_management
+            columns:
+              - column:
+                  type: uuid
+                  name: id
+                  constraints:
+                    nullable: false
+                    primaryKey: true
+              - column:
+                  type: varchar(255)
+                  name: en_variant_body
+                  constraints:
+                    nullable: false
+              - column:
+                  type: boolean
+                  name: is_correct_answer
+                  constraints:
+                    nullable: false
+              - column:
+                  type: uuid
+                  name: test_question_id
+
+  - changeSet:
+      id: add_foreign_key_constraints_to_tests_table_and_extended
+      author: DenysLeonenko
+      changes:
+        - addForeignKeyConstraint:
+            baseTableSchemaName: task_management
+            baseTableName: test_question
+            baseColumnNames: test_id
+            referencedTableSchemaName: task_management
+            referencedTableName: test_domain
+            referencedColumnNames: id
+            constraintName: fk_test_question_test
+        - addForeignKeyConstraint:
+            baseTableSchemaName: task_management
+            baseTableName: question_answer_variant
+            baseColumnNames: test_question_id
+            referencedTableSchemaName: task_management
+            referencedTableName: test_question
+            referencedColumnNames: id
+            constraintName: fk_question_answer_variant_test_question
