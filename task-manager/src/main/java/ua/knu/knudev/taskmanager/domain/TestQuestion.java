@@ -29,6 +29,6 @@ public class TestQuestion {
 
     @ManyToOne
     @JoinColumn(name = "test_id", referencedColumnName = "id", nullable = false)
-    private Test test;
+    private TestDomain testDomain;
 
 }

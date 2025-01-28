@@ -7,9 +7,9 @@ import java.util.List;
 import java.util.UUID;
 
 public interface TestQuestionRepository extends JpaRepository<TestQuestion, UUID> {
-    boolean existsByTest_Id(UUID testId);
+    boolean existsByTestDomain_Id(UUID testDomainId);
 
-    List<TestQuestion> findAllByTest_Id(UUID testId);
+    List<TestQuestion> findAllByTestDomain_Id(UUID testDomainId);
 
     boolean existsTestQuestionByEnQuestionBody(String enQuestionBody);
 

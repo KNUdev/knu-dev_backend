@@ -6,7 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import ua.knu.knudev.taskmanager.domain.QuestionAnswerVariant;
-import ua.knu.knudev.taskmanager.domain.Test;
+import ua.knu.knudev.taskmanager.domain.TestDomain;
 import ua.knu.knudev.taskmanager.domain.TestQuestion;
 import ua.knu.knudev.taskmanager.mapper.QuestionAnswerVariantMapper;
 import ua.knu.knudev.taskmanager.mapper.TestMapper;
@@ -42,26 +42,28 @@ public class TestManagementService implements TestManagementApi {
     @Override
     @Transactional
     public FullTestDto create(TestCreationRequest testCreationRequest) {
+        if (testRepository.existsTestDomainByEnName(testCreationRequest.enName())) {
+            throw new TestException("Test domain with name " + testCreationRequest.enName() + " already exists");
+        }
         Set<TestQuestion> testQuestions = new HashSet<>(testQuestionMapper.toDomains(testCreationRequest.questions()));
 
-        Test test = Test.builder()
+        TestDomain testDomain = TestDomain.builder()
                 .createdAt(LocalDate.now())
                 .testQuestions(testQuestions)
                 .enName(testCreationRequest.enName())
                 .build();
 
-        associateTestWithQuestionsAndVariants(test, testQuestions);
-
-        Test savedTest = testRepository.save(test);
-        log.info("Saved test: {}", savedTest);
-        return testMapper.toDto(savedTest);
+        testDomain.associateTestWithQuestionsAndVariants();
+        TestDomain savedTestDomain = testRepository.save(testDomain);
+        log.info("Saved test: {}", savedTestDomain);
+        return testMapper.toDto(savedTestDomain);
     }
 
     @Override
     @Transactional
     public FullTestDto getById(UUID testId) {
-        Test test = getTestById(testId);
-        return testMapper.toDto(test);
+        TestDomain testDomain = getTestById(testId);
+        return testMapper.toDto(testDomain);
     }
 
     @Override
@@ -73,64 +75,64 @@ public class TestManagementService implements TestManagementApi {
 
     @Override
     public FullTestDto changeTestEnName(UUID testId, String newEnName) {
-        Test test = getTestById(testId);
+        TestDomain testDomain = getTestById(testId);
 
         if (StringUtils.isBlank(newEnName)) {
             throw new TestException("New enName is blank");
         }
-        if (test.getEnName().equals(newEnName)) {
-            log.warn("New enName the same with old enName: {}, so nothing was changed", test.getEnName());
-            return testMapper.toDto(test);
+        if (testDomain.getEnName().equals(newEnName)) {
+            log.warn("New enName the same with old enName: {}, so nothing was changed", testDomain.getEnName());
+            return testMapper.toDto(testDomain);
         }
 
         log.info("Changing test enName for test ID {}: '{}' -> '{}'",
-                testId, test.getEnName(), newEnName);
+                testId, testDomain.getEnName(), newEnName);
 
-        test.setEnName(newEnName);
-        Test savedTest = testRepository.save(test);
-        return testMapper.toDto(savedTest);
+        testDomain.setEnName(newEnName);
+        TestDomain savedTestDomain = testRepository.save(testDomain);
+        return testMapper.toDto(savedTestDomain);
     }
 
     @Override
     @Transactional
     public FullTestDto addTestQuestion(UUID testId, TestQuestionDto testQuestionDto) {
-        Test test = getTestById(testId);
+        TestDomain testDomain = getTestById(testId);
         TestQuestion testQuestion = testQuestionMapper.toDomain(testQuestionDto);
-        associateTestWithQuestionsAndVariants(test, Set.of(testQuestion));
 
-        List<String> questionsNames = test.getTestQuestions().stream()
+        List<String> questionsNames = testDomain.getTestQuestions().stream()
                 .map(TestQuestion::getEnQuestionBody)
                 .toList();
 
         if (questionsNames.contains(testQuestion.getEnQuestionBody())) {
             log.warn("TestQuestion with such name already exists");
-            return testMapper.toDto(test);
+            return testMapper.toDto(testDomain);
         }
 
-        test.getTestQuestions().add(testQuestion);
-        Test savedTest = testRepository.save(test);
+        testDomain.getTestQuestions().add(testQuestion);
+        testDomain.associateTestWithQuestionsAndVariants();
+        TestDomain savedTestDomain = testRepository.save(testDomain);
         log.info("Added test question: {}", testQuestion);
-        return testMapper.toDto(savedTest);
+        return testMapper.toDto(savedTestDomain);
     }
 
     @Override
     public FullTestDto deleteTestQuestion(UUID testId, UUID questionId) {
-        Test test = getTestById(testId);
+        TestDomain testDomain = getTestById(testId);
 
-        if (test.getTestQuestions().size() < 2) {
+        if (testDomain.getTestQuestions().size() < 2) {
             throw new TestException("Test must contain at least 1 question");
         }
 
-        TestQuestion questionToDelete = test.getTestQuestions()
+        TestQuestion questionToDelete = testDomain.getTestQuestions()
                 .stream()
                 .filter(question -> question.getId().equals(questionId))
                 .findFirst()
                 .orElseThrow(() -> new TestException("Question with ID " + questionId + " does not exist in test " + testId));
 
         log.info("Removing question with id: {}", questionId);
-        test.getTestQuestions().remove(questionToDelete);
+        testDomain.getTestQuestions().remove(questionToDelete);
         testQuestionRepository.delete(questionToDelete);
-        return testMapper.toDto(test);
+        return testMapper.toDto(testDomain);
     }
 
 
@@ -217,6 +219,9 @@ public class TestManagementService implements TestManagementApi {
             log.warn("New enVariantBody: {}, the same with old enVariantBody, so nothing will be changed", newEnBody);
             return questionAnswerVariantMapper.toDto(questionAnswerVariant);
         }
+        if (StringUtils.isBlank(newEnBody)) {
+            throw new TestException("New enVariantBody is empty");
+        }
 
         questionAnswerVariant.setEnVariantBody(newEnBody);
         QuestionAnswerVariant savedQuestionAnswerVariant = questionAnswerVariantRepository.save(questionAnswerVariant);
@@ -243,7 +248,7 @@ public class TestManagementService implements TestManagementApi {
         return questionAnswerVariantMapper.toDto(changedQuestionAnswerVariant);
     }
 
-    private Test getTestById(UUID testId) {
+    private TestDomain getTestById(UUID testId) {
         return testRepository.findById(testId).orElseThrow(
                 () -> new TestException("Test with testId " + testId + " not found"));
     }
@@ -256,14 +261,6 @@ public class TestManagementService implements TestManagementApi {
     private QuestionAnswerVariant getQuestionAnswerVariantById(UUID questionAnswerVariantId) {
         return questionAnswerVariantRepository.findById(questionAnswerVariantId).orElseThrow(
                 () -> new TestException("QuestionAnswerVariant with ID " + questionAnswerVariantId + " does not exist"));
-    }
-
-    private void associateTestWithQuestionsAndVariants(Test test, Set<TestQuestion> testQuestions) {
-        testQuestions.forEach(question -> question.setTest(test));
-
-        testQuestions.forEach(testQuestion ->
-                testQuestion.getAnswerVariants().forEach(variant -> variant.setTestQuestion(testQuestion))
-        );
     }
 
 }

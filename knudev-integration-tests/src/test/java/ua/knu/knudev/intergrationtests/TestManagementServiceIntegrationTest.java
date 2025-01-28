@@ -1,16 +1,13 @@
 package ua.knu.knudev.intergrationtests;
 
 import jakarta.transaction.Transactional;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import ua.knu.knudev.intergrationtests.config.IntegrationTestsConfig;
 import ua.knu.knudev.taskmanager.domain.QuestionAnswerVariant;
-import ua.knu.knudev.taskmanager.domain.Test;
+import ua.knu.knudev.taskmanager.domain.TestDomain;
 import ua.knu.knudev.taskmanager.domain.TestQuestion;
 import ua.knu.knudev.taskmanager.repository.QuestionAnswerVariantRepository;
 import ua.knu.knudev.taskmanager.repository.TestQuestionRepository;
@@ -58,11 +55,11 @@ public class TestManagementServiceIntegrationTest {
     @Autowired
     private QuestionAnswerVariantRepository questionAnswerVariantRepository;
 
-    private Test test;
+    private TestDomain testDomain;
 
     @BeforeEach
     public void setUp() {
-        test = createTestAndSave();
+        testDomain = createTestAndSave();
     }
 
     @AfterEach
@@ -70,8 +67,8 @@ public class TestManagementServiceIntegrationTest {
         testRepository.deleteAll();
     }
 
-    private Test createTestAndSave() {
-        Test createdTest = Test.builder()
+    private TestDomain createTestAndSave() {
+        TestDomain createdTestDomain = TestDomain.builder()
                 .id(TEST_ID)
                 .createdAt(LocalDate.now())
                 .enName(TEST_EN_NAME)
@@ -90,21 +87,21 @@ public class TestManagementServiceIntegrationTest {
         );
 
         Set<TestQuestion> testQuestions = Set.of(
-                createTestQuestions(FIRST_TEST_QUESTION_ID, FIRST_QUESTION_BODY, firstQuestionAnswerVariants, createdTest),
-                createTestQuestions(SECOND_TEST_QUESTION_ID, SECOND_QUESTION_BODY, secondQuestionAnswerVariants, createdTest)
+                createTestQuestions(FIRST_TEST_QUESTION_ID, FIRST_QUESTION_BODY, firstQuestionAnswerVariants, createdTestDomain),
+                createTestQuestions(SECOND_TEST_QUESTION_ID, SECOND_QUESTION_BODY, secondQuestionAnswerVariants, createdTestDomain)
         );
 
-        createdTest.setTestQuestions(testQuestions);
+        createdTestDomain.setTestQuestions(testQuestions);
 
-        return testRepository.save(createdTest);
+        return testRepository.save(createdTestDomain);
     }
 
-    private TestQuestion createTestQuestions(UUID id, String enQuestionBody, Set<QuestionAnswerVariant> variants, Test test) {
+    private TestQuestion createTestQuestions(UUID id, String enQuestionBody, Set<QuestionAnswerVariant> variants, TestDomain testDomain) {
         TestQuestion question = TestQuestion.builder()
                 .id(id)
                 .enQuestionBody(enQuestionBody)
                 .answerVariants(variants)
-                .test(test)
+                .testDomain(testDomain)
                 .build();
 
         variants.forEach(variant -> variant.setTestQuestion(question));
@@ -119,7 +116,7 @@ public class TestManagementServiceIntegrationTest {
                 .build();
     }
 
-    private TestCreationRequest getTestCreationRequest() {
+    private TestCreationRequest getTestCreationRequest(String enName) {
         Set<QuestionAnswerVariantDto> firstQuestionAnswers = Set.of(
                 getQuestionAnswerVariantDto(FIRST_BASE_QUESTION_ANSWER_VARIANT_BODY + "first", true),
                 getQuestionAnswerVariantDto(FIRST_BASE_QUESTION_ANSWER_VARIANT_BODY + "second", false),
@@ -138,7 +135,7 @@ public class TestManagementServiceIntegrationTest {
         );
 
         return TestCreationRequest.builder()
-                .enName(TEST_EN_NAME)
+                .enName(enName)
                 .questions(questionDtos)
                 .build();
     }
@@ -168,14 +165,14 @@ public class TestManagementServiceIntegrationTest {
     }
 
     private UUID getQuestionIdFromTest() {
-        return test.getTestQuestions().stream()
+        return testDomain.getTestQuestions().stream()
                 .findAny()
                 .orElseThrow()
                 .getId();
     }
 
     private UUID getQuestionAnswerVariantIdFromTest() {
-        return test.getTestQuestions().stream()
+        return testDomain.getTestQuestions().stream()
                 .findAny()
                 .orElseThrow()
                 .getAnswerVariants()
@@ -188,13 +185,13 @@ public class TestManagementServiceIntegrationTest {
 
     @Nested
     @DisplayName("Create academic test tests")
-    class CreateAcademicTestTests {
+    class CreateAcademicTestDomainTests {
 
-        @org.junit.jupiter.api.Test
+        @Test
         @DisplayName("Should create test successfully when provided valid creation request")
         public void should_CreateTestSuccessfully_When_ProvidedValidCreationRequest() {
             //Arrange
-            TestCreationRequest request = getTestCreationRequest();
+            TestCreationRequest request = getTestCreationRequest(TEST_EN_NAME + " " + TEST_EN_NAME);
 
             //Act
             FullTestDto response = testManagementService.create(request);
@@ -208,25 +205,32 @@ public class TestManagementServiceIntegrationTest {
                 answersAmountPerAllQuestions.addAndGet(testQuestionDto.answerVariantDtos().size());
             });
 
-            UUID questionId = testQuestionRepository.findAllByTest_Id(response.id()).get(0).getId();
+            UUID questionId = testQuestionRepository.findAllByTestDomain_Id(response.id()).get(0).getId();
 
             assertEquals(2, response.testQuestionDtos().size());
-            assertEquals(TEST_EN_NAME, response.enName());
+            assertEquals(TEST_EN_NAME + " " + TEST_EN_NAME, response.enName());
             assertEquals(6, answersAmountPerAllQuestions.get());
-            assertTrue(testQuestionRepository.existsByTest_Id(response.id()));
+            assertTrue(testQuestionRepository.existsByTestDomain_Id(response.id()));
             assertTrue(questionAnswerVariantRepository.existsQuestionAnswerVariantByTestQuestion_Id(questionId));
+        }
+
+        @Test
+        @DisplayName("Should throw exception when provided duplicated test name")
+        public void should_ThrowTestException_When_ProvidedDuplicatedTestName() {
+            TestCreationRequest request = getTestCreationRequest(TEST_EN_NAME);
+            assertThrows(TestException.class, () -> testManagementService.create(request));
         }
 
     }
 
     @Nested
     @DisplayName("Get test by id tests")
-    class GetTestByIdTests {
+    class GetTestDomainByIdTests {
 
-        @org.junit.jupiter.api.Test
+        @Test
         @DisplayName("Should successfully return test when provided valid id")
         public void should_GetTestByIdSuccessfully_When_ProvidedValidId() {
-            FullTestDto response = testManagementService.getById(test.getId());
+            FullTestDto response = testManagementService.getById(testDomain.getId());
 
             assertNotNull(response, "Response should not be null");
             assertNotNull(response.createdAt(), "Created at should not be null");
@@ -234,9 +238,9 @@ public class TestManagementServiceIntegrationTest {
             assertEquals(TEST_EN_NAME, response.enName());
         }
 
-        @org.junit.jupiter.api.Test
+        @Test
         @DisplayName("Should not return test by id when id not valid")
-        public void should_NotGetTestByIdSuccessfully_When_IdNotValid() {
+        public void should_ThrowTestException_When_IdNotValid() {
             assertThrows(TestException.class,
                     () -> testManagementService.getById(UUID.randomUUID()));
         }
@@ -245,38 +249,38 @@ public class TestManagementServiceIntegrationTest {
 
     @Nested
     @DisplayName("Change test name tests")
-    class ChangeTestNameTests {
+    class ChangeTestDomainNameTests {
 
-        @org.junit.jupiter.api.Test
+        @Test
         @DisplayName("Should successfully change test name if provided valid data")
         public void should_ChangeTestNameSuccessfully_When_ProvidedValidData() {
-            FullTestDto response = testManagementService.changeTestEnName(test.getId(), "New name");
+            FullTestDto response = testManagementService.changeTestEnName(testDomain.getId(), "New name");
 
             assertNotNull(response, "Response should not be null");
             assertEquals("New name", response.enName());
-            assertTrue(testRepository.existsTestByEnName("New name"));
+            assertTrue(testRepository.existsTestDomainByEnName("New name"));
         }
 
-        @org.junit.jupiter.api.Test
+        @Test
         @DisplayName("Should not change test name when id not valid")
-        public void should_NotGetTestByIdSuccessfully_When_IdNotValid() {
+        public void should_ThrowTestException_When_IdNotValid() {
             assertThrows(TestException.class,
                     () -> testManagementService.changeTestEnName(UUID.randomUUID(), "New name"));
         }
 
-        @org.junit.jupiter.api.Test
+        @Test
         @DisplayName("Should not change test name if new name is blank")
-        public void should_NotChangeTestNameSuccessfully_When_NewNameIsBlank() {
+        public void should_ThrowTestException_When_NewNameIsBlank() {
             assertThrows(TestException.class,
-                    () -> testManagementService.changeTestEnName(test.getId(), "  "));
+                    () -> testManagementService.changeTestEnName(testDomain.getId(), "  "));
         }
     }
 
     @Nested
     @DisplayName("Add test question tests")
-    class AddTestQuestionTests {
+    class AddTestDomainQuestionTests {
 
-        @org.junit.jupiter.api.Test
+        @Test
         @DisplayName("Should successfully add test question when provided valid data")
         @Transactional
         public void should_AddTestQuestionSuccessfully_When_ProvidedValidData() {
@@ -284,7 +288,7 @@ public class TestManagementServiceIntegrationTest {
             TestQuestionDto request = getCompliteTestQuestionDto("New " + FIRST_QUESTION_BODY);
 
             //Act
-            FullTestDto response = testManagementService.addTestQuestion(test.getId(), request);
+            FullTestDto response = testManagementService.addTestQuestion(testDomain.getId(), request);
 
             //Assert
             AtomicInteger allAnswersQuantity = new AtomicInteger();
@@ -295,7 +299,7 @@ public class TestManagementServiceIntegrationTest {
             assertNotNull(response, "Response should not be null");
             assertEquals(3, response.testQuestionDtos().size());
             assertEquals(10, allAnswersQuantity.get());
-            assertEquals(3, testQuestionRepository.findAllByTest_Id(response.id()).size());
+            assertEquals(3, testQuestionRepository.findAllByTestDomain_Id(response.id()).size());
             assertEquals(10, questionAnswerVariantRepository.findAll().size());
 
             allAnswersQuantity.set(0);
@@ -307,21 +311,21 @@ public class TestManagementServiceIntegrationTest {
             assertEquals(10, allAnswersQuantity.get());
         }
 
-        @org.junit.jupiter.api.Test
+        @Test
         @DisplayName("Shouldn`t add question if such already exist")
         public void should_NotAddQuestion_When_SuchQuestionAlreadyExist() {
             TestQuestionDto request = getCompliteTestQuestionDto(FIRST_QUESTION_BODY);
 
-            FullTestDto response = testManagementService.addTestQuestion(test.getId(), request);
+            FullTestDto response = testManagementService.addTestQuestion(testDomain.getId(), request);
 
             assertNotNull(response, "Response should not be null");
             assertEquals(2, response.testQuestionDtos().size());
-            assertEquals(2, testQuestionRepository.findAllByTest_Id(response.id()).size());
+            assertEquals(2, testQuestionRepository.findAllByTestDomain_Id(response.id()).size());
         }
 
-        @org.junit.jupiter.api.Test
+        @Test
         @DisplayName("Should not add test question when test id not valid")
-        public void should_NotGetTestByIdSuccessfully_When_IdNotValid() {
+        public void should_ThrowTestException_When_IdNotValid() {
             assertThrows(TestException.class,
                     () -> testManagementService.addTestQuestion(UUID.randomUUID(),
                             getCompliteTestQuestionDto("New " + FIRST_QUESTION_BODY)));
@@ -333,48 +337,48 @@ public class TestManagementServiceIntegrationTest {
     @DisplayName("Delete question tests")
     class QuestionDeleteTests {
 
-        @org.junit.jupiter.api.Test
+        @Test
         @DisplayName("Should successfully delete question when provided valid data")
         @Transactional
         public void should_DeleteQuestionSuccessfully_When_ProvidedValidData() {
             //Arrange
-            UUID questionId = test.getTestQuestions().stream()
+            UUID questionId = testDomain.getTestQuestions().stream()
                     .map(TestQuestion::getId)
                     .findFirst()
                     .orElseThrow();
 
             //Act
-            FullTestDto response = testManagementService.deleteTestQuestion(test.getId(), questionId);
+            FullTestDto response = testManagementService.deleteTestQuestion(testDomain.getId(), questionId);
 
             //Assert
             assertNotNull(response, "Response should not be null");
-            int testQuestionsAmount = testRepository.findById(test.getId()).orElseThrow()
+            int testQuestionsAmount = testRepository.findById(testDomain.getId()).orElseThrow()
                     .getTestQuestions()
                     .size();
 
             assertEquals(1, response.testQuestionDtos().size());
             assertEquals(1, testQuestionsAmount);
-            assertEquals(1, testQuestionRepository.findAllByTest_Id(response.id()).size());
+            assertEquals(1, testQuestionRepository.findAllByTestDomain_Id(response.id()).size());
             assertEquals(3, questionAnswerVariantRepository.findAll().size());
         }
 
-        @org.junit.jupiter.api.Test
+        @Test
         @DisplayName("Shouldn`t delete question when it only one in test")
         @Transactional
-        public void should_NotDeleteQuestionSuccessfully_When_OnlyOneInTest() {
-            List<UUID> questionsIds = test.getTestQuestions().stream()
+        public void should_ThrowTestException_When_OnlyOneQuestionInTest() {
+            List<UUID> questionsIds = testDomain.getTestQuestions().stream()
                     .map(TestQuestion::getId)
                     .toList();
-            testManagementService.deleteTestQuestion(test.getId(), questionsIds.get(0));
+            testManagementService.deleteTestQuestion(testDomain.getId(), questionsIds.get(0));
 
             assertThrows(TestException.class,
-                    () -> testManagementService.deleteTestQuestion(test.getId(), questionsIds.get(1))
+                    () -> testManagementService.deleteTestQuestion(testDomain.getId(), questionsIds.get(1))
             );
         }
 
-        @org.junit.jupiter.api.Test
+        @Test
         @DisplayName("Should not delete test question when test id not valid")
-        public void should_NotGetTestByIdSuccessfully_When_IdNotValid() {
+        public void should_ThrowTestException_When_IdNotValid() {
             assertThrows(TestException.class,
                     () -> testManagementService.deleteTestQuestion(UUID.randomUUID(), FIRST_TEST_QUESTION_ID)
             );
@@ -386,7 +390,7 @@ public class TestManagementServiceIntegrationTest {
     @DisplayName("Change question body tests")
     class ChangeQuestionBodyTests {
 
-        @org.junit.jupiter.api.Test
+        @Test
         @DisplayName("Should successfully change question body when provided valid data")
         public void should_ChangeQuestionBodySuccessfully_When_ProvidedValidData() {
             UUID questionId = getQuestionIdFromTest();
@@ -398,11 +402,11 @@ public class TestManagementServiceIntegrationTest {
             assertEquals(3, response.answerVariantDtos().size());
         }
 
-        @org.junit.jupiter.api.Test
+        @Test
         @DisplayName("Shouldn`t change test question body when question with such body already provided")
         public void should_NotChangeQuestionBodySuccessfully_When_QuestionWithSuchBodyAlreadyProvided() {
             //Arrange
-            UUID questionId = test.getTestQuestions().stream()
+            UUID questionId = testDomain.getTestQuestions().stream()
                     .filter(question ->
                             question.getEnQuestionBody().equals(SECOND_QUESTION_BODY))
                     .findFirst()
@@ -418,9 +422,9 @@ public class TestManagementServiceIntegrationTest {
             assertEquals(1, testQuestionRepository.findAllByEnQuestionBody(SECOND_QUESTION_BODY).size());
         }
 
-        @org.junit.jupiter.api.Test
+        @Test
         @DisplayName("Shouldn`t change test body when provided not valid question id")
-        public void should_NotChangeQuestionBodySuccessfully_When_NotValidQuestionId() {
+        public void should_ThrowTestException_When_NotValidQuestionId() {
             assertThrows(TestException.class,
                     () -> testManagementService.changeTestQuestionEnBody(UUID.randomUUID(), FIRST_QUESTION_BODY)
             );
@@ -431,7 +435,7 @@ public class TestManagementServiceIntegrationTest {
     @DisplayName("Add question answer variant tests")
     class AddQuestionAnswerVariantTests {
 
-        @org.junit.jupiter.api.Test
+        @Test
         @DisplayName("Should successfully add answer variant to test when provided valid data")
         public void should_AddAnswerVariantSuccessfully_When_ProvidedValidData() {
             UUID questionId = getQuestionIdFromTest();
@@ -445,21 +449,21 @@ public class TestManagementServiceIntegrationTest {
             assertTrue(questionAnswerVariantRepository.existsQuestionAnswerVariantByEnVariantBody("New created answer variant"));
         }
 
-        @org.junit.jupiter.api.Test
+        @Test
         @DisplayName("Shouldn`t add question answer variant when provided not valid question id")
-        public void should_NotAddAnswerVariantSuccessfully_When_NotValidQuestionId() {
+        public void should_ThrowTestException_When_NotValidQuestionId() {
             assertThrows(TestException.class,
                     () -> testManagementService.addQuestionAnswerVariant(UUID.randomUUID(),
                             getQuestionAnswerVariantDto("New created answer variant", false))
             );
         }
 
-        @org.junit.jupiter.api.Test
+        @Test
         @DisplayName("Shouldn`t add question answer when provided already existed variant")
         public void should_NotAddAnswerVariantSuccessfully_When_AlreadyExistedVariant() {
             //Arrange
             UUID questionId = getQuestionIdFromTest();
-            String enVariantBody = test.getTestQuestions().stream()
+            String enVariantBody = testDomain.getTestQuestions().stream()
                     .filter(question -> question.getId().equals(questionId))
                     .findFirst()
                     .orElseThrow()
@@ -485,13 +489,13 @@ public class TestManagementServiceIntegrationTest {
     @DisplayName("Delete question answer variant tests")
     class DeleteQuestionAnswerVariantTests {
 
-        @org.junit.jupiter.api.Test
+        @Test
         @DisplayName("Should successfully delete question answer variant when provided valid data")
         @Transactional
         public void should_DeleteAnswerVariantSuccessfully_When_ProvidedValidData() {
             //Arrange
             UUID questionId = getQuestionIdFromTest();
-            UUID answerVariantId = test.getTestQuestions().stream()
+            UUID answerVariantId = testDomain.getTestQuestions().stream()
                     .filter(question -> question.getId().equals(questionId))
                     .findFirst()
                     .orElseThrow()
@@ -512,13 +516,13 @@ public class TestManagementServiceIntegrationTest {
             assertEquals(2, testQuestionRepository.findById(questionId).get().getAnswerVariants().size());
         }
 
-        @org.junit.jupiter.api.Test
+        @Test
         @DisplayName("Shouldn`t delete question answer variant when question has less than 2 answers")
         @Transactional
         public void should_NotDeleteAnswerVariantSuccessfully_When_QuestionHasLessThanTwoAnswers() {
             //Arrange
             UUID questionId = getQuestionIdFromTest();
-            List<QuestionAnswerVariant> answerVariantsByQuestion = test.getTestQuestions().stream()
+            List<QuestionAnswerVariant> answerVariantsByQuestion = testDomain.getTestQuestions().stream()
                     .filter(question -> question.getId().equals(questionId))
                     .findFirst()
                     .orElseThrow()
@@ -538,17 +542,17 @@ public class TestManagementServiceIntegrationTest {
             assertTrue(testQuestionRepository.existsById(questionId));
         }
 
-        @org.junit.jupiter.api.Test
+        @Test
         @DisplayName("Shouldn`t delete question answer variant when there are no question answer variants id in question")
-        public void should_NotDeleteAnswerVariantSuccessfully_When_QuestionHasNoQuestionAnswerVariantId() {
+        public void should_ThrowTestException_When_QuestionHasNoQuestionAnswerVariantId() {
             assertThrows(TestException.class,
                     () -> testManagementService.deleteQuestionAnswerVariant(getQuestionIdFromTest(), UUID.randomUUID())
             );
         }
 
-        @org.junit.jupiter.api.Test
+        @Test
         @DisplayName("Shouldn`t add question answer variant when provided not valid question id")
-        public void should_NotAddAnswerVariantSuccessfully_When_NotValidQuestionId() {
+        public void should_ThrowTestException_When_NotValidQuestionId() {
             assertThrows(TestException.class,
                     () -> testManagementService.deleteQuestionAnswerVariant(UUID.randomUUID(), UUID.randomUUID())
             );
@@ -560,7 +564,7 @@ public class TestManagementServiceIntegrationTest {
     @DisplayName("Change question answer variant body tests")
     class ChangeQuestionAnswerVariantBodyTests {
 
-        @org.junit.jupiter.api.Test
+        @Test
         @DisplayName("Should successfully change question answer variant body")
         public void should_ChangeAnswerVariantBodySuccessfully_When_ProvidedValidData() {
             //Arrange
@@ -578,12 +582,20 @@ public class TestManagementServiceIntegrationTest {
             assertEquals("New changed body!!!", response.enVariantBody());
         }
 
-        @org.junit.jupiter.api.Test
+        @Test
         @DisplayName("Shouldn`t change question answer variant body when provided not valid id")
-        public void should_NotChangeAnswerVariantBodySuccessfully_When_NotValidId() {
+        public void should_ThrowTestException_When_NotValidId() {
             assertThrows(TestException.class,
                     () -> testManagementService.changeQuestionAnswerVariantEnBody(UUID.randomUUID(), "New changed body!!!")
             );
+        }
+
+        @Test
+        @DisplayName("Should throw test exception when provided null name value")
+        public void should_ThrowTestException_When_NullNameValue() {
+            UUID questionAnswerVariantId = getQuestionAnswerVariantIdFromTest();
+            assertThrows(TestException.class,
+                    () -> testManagementService.changeQuestionAnswerVariantEnBody(questionAnswerVariantId, null));
         }
 
     }
@@ -592,7 +604,7 @@ public class TestManagementServiceIntegrationTest {
     @DisplayName("Change question answer variant correctness tests")
     class ChangeQuestionAnswerVariantCorrectnessTests {
 
-        @org.junit.jupiter.api.Test
+        @Test
         @DisplayName("Should successfully change question answer variant correctness when provided valid data")
         public void should_ChangeAnswerVariantCorrectnessSuccessfully_When_ProvidedValidData() {
             //Arrange
@@ -608,17 +620,17 @@ public class TestManagementServiceIntegrationTest {
             assertTrue(response.isCorrectAnswer());
         }
 
-        @org.junit.jupiter.api.Test
+        @Test
         @DisplayName("Shouldn`t change question answer variant correctness when new correctness is null")
-        public void should_NotChangeAnswerVariantCorrectnessSuccessfully_When_NewCorrectnessIsNull() {
+        public void should_ThrowTestException_When_NewCorrectnessIsNull() {
             assertThrows(TestException.class,
                     () -> testManagementService.changeQuestionAnswerVariantCorrectness(getQuestionAnswerVariantIdFromTest(), null)
             );
         }
 
-        @org.junit.jupiter.api.Test
+        @Test
         @DisplayName("Shouldn`t change question answer variant correctness when provided not valid variant id")
-        public void should_NotChangeAnswerVariantCorrectnessSuccessfully_When_NotValidVariantId() {
+        public void should_ThrowTestException_When_NotValidVariantId() {
             assertThrows(TestException.class,
                     () -> testManagementService.changeQuestionAnswerVariantCorrectness(UUID.randomUUID(), true)
             );

@@ -106,11 +106,11 @@ databaseChangeLog:
                   name: assigned_account_email
 
   - changeSet:
-      id: create_test_table
+      id: create_test_domain_table
       author: DenysLeonenko
       changes:
         - createTable:
-            tableName: test
+            tableName: test_domain
             schemaName: task_management
             columns:
               - column:
@@ -124,6 +124,7 @@ databaseChangeLog:
                   type: varchar(255)
                   constraints:
                     nullable: false
+                    unique: true
               - column:
                   name: created_at
                   type: date
@@ -191,7 +192,7 @@ databaseChangeLog:
             baseTableName: test_question
             baseColumnNames: test_id
             referencedTableSchemaName: task_management
-            referencedTableName: test
+            referencedTableName: test_domain
             referencedColumnNames: id
             constraintName: fk_test_question_test
         - addForeignKeyConstraint:
