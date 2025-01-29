@@ -26,11 +26,11 @@ public class ModuleTopicMapping {
     private UUID id;
 
     @ManyToOne(optional = false)
-    @JoinColumn(name = "module_id")
+    @JoinColumn(name = "module_id", referencedColumnName = "id")
     private ProgramModule module;
 
     @ManyToOne(optional = false)
-    @JoinColumn(name = "topic_id")
+    @JoinColumn(name = "topic_id", referencedColumnName = "id")
     private ProgramTopic topic;
 
     @Column(nullable = false)

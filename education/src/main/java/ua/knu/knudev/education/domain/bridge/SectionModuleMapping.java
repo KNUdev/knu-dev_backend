@@ -26,11 +26,11 @@ public class SectionModuleMapping {
     private UUID id;
 
     @ManyToOne(optional = false)
-    @JoinColumn(name = "section_id")
+    @JoinColumn(name = "section_id", referencedColumnName = "id")
     private ProgramSection section;
 
     @ManyToOne(optional = false)
-    @JoinColumn(name = "module_id")
+    @JoinColumn(name = "module_id", referencedColumnName = "id")
     private ProgramModule module;
 
     @Column(nullable = false)

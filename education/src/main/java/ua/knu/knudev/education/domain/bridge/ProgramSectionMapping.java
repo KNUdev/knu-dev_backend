@@ -26,11 +26,11 @@ public class ProgramSectionMapping {
     private UUID id;
 
     @ManyToOne(optional = false)
-    @JoinColumn(name = "program_id")
+    @JoinColumn(name = "program_id", referencedColumnName = "id")
     private EducationProgram educationProgram;
 
     @ManyToOne(optional = false)
-    @JoinColumn(name = "section_id")
+    @JoinColumn(name = "section_id", referencedColumnName = "id")
     private ProgramSection section;
 
     @Column(nullable = false)

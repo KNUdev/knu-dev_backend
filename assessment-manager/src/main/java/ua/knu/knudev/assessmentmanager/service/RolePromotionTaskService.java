@@ -30,7 +30,6 @@ public class RolePromotionTaskService implements RolePromotionTaskApi {
     private final RolePromotionTaskRepository rolePromotionTaskRepository;
     private final PDFServiceApi pdfServiceApi;
 
-
     @Override
     public String uploadTaskForRole(String stringAccountTechnicalRole, MultipartFile file) {
         validateFilename(file);
@@ -101,14 +100,9 @@ public class RolePromotionTaskService implements RolePromotionTaskApi {
                     String.format("TaskDomain %s already exists", filename), HttpStatus.BAD_REQUEST
             );
         }
-
     }
 
-    @Override
-    public String upload(MultipartFile file) {
-        return "";
-    }
-
+    //todo
     @Override
     public String getById(UUID id) {
         return "";

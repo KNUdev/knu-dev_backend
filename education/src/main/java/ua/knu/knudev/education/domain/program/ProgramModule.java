@@ -44,7 +44,6 @@ public class ProgramModule {
     @OneToOne(optional = false)
     @JoinColumn(name = "task_id", unique = true)
     private EducationTaskProxy moduleFinalTask;
-//    private UUID moduleFinalTaskId;
 
     @PreUpdate
     public void onUpdate() {

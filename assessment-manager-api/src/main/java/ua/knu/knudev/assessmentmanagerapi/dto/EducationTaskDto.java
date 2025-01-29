@@ -1,11 +1,13 @@
 package ua.knu.knudev.assessmentmanagerapi.dto;
 
-import lombok.Builder;
-import lombok.Data;
+import lombok.*;
 
 import java.util.UUID;
 
-@Data
+@AllArgsConstructor
+@NoArgsConstructor
+@Getter
+@Setter
 @Builder
 public class EducationTaskDto {
     private UUID id;

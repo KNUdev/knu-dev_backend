@@ -26,19 +26,7 @@ public class EducationTaskService implements EducationTaskApi {
     public Map<LearningUnit, Map<Integer, EducationTaskDto>> uploadAll(
             Map<LearningUnit, Map<Integer, MultipartFile>> educationProgramTasks
     ) {
-        List<TaskTempHolder> allTasksToUpload = educationProgramTasks.entrySet().stream()
-                .flatMap(learningUnitEntry -> {
-                    LearningUnit learningUnit = learningUnitEntry.getKey();
-                    Map<Integer, MultipartFile> indexToFileMap = learningUnitEntry.getValue();
-
-                    return indexToFileMap.entrySet().stream()
-                            .map(indexFileEntry -> new TaskTempHolder(
-                                    learningUnit,
-                                    indexFileEntry.getKey(),
-                                    indexFileEntry.getValue()
-                            ));
-                })
-                .toList();
+        List<TaskTempHolder> allTasksToUpload = toTempHolderTasks(educationProgramTasks);
 
         List<EducationTask> tasksForDb = new ArrayList<>();
         Map<LearningUnit, Map<Integer, EducationTaskDto>> result = new HashMap<>();
@@ -60,22 +48,46 @@ public class EducationTaskService implements EducationTaskApi {
             EducationTaskDto taskDto = EducationTaskDto.builder()
                     .filename(savedFilename)
                     .build();
-            result
-                    .computeIfAbsent(holder.learningUnit, k -> new HashMap<>())
+
+            result.computeIfAbsent(holder.learningUnit, k -> new HashMap<>())
                     .put(holder.orderIndex, taskDto);
         });
 
         List<EducationTask> educationTasks = educationTaskRepository.saveAllAndFlush(tasksForDb);
-        return buildResult(result, educationTasks);
+        return buildTasksResponse(result, educationTasks);
+    }
+
+    //todo for vlad shtaiier
+    @Override
+    public String getById(UUID id) {
+        return "";
     }
 
     @Override
     public String getTask() {
-        //todo
+        //todo for vlad shtaiier
         return "";
     }
 
-    private Map<LearningUnit, Map<Integer, EducationTaskDto>> buildResult(
+    private List<TaskTempHolder> toTempHolderTasks(
+            Map<LearningUnit, Map<Integer, MultipartFile>> educationProgramTasks
+    ) {
+        return educationProgramTasks.entrySet().stream()
+                .flatMap(learningUnitEntry -> {
+                    LearningUnit learningUnit = learningUnitEntry.getKey();
+                    Map<Integer, MultipartFile> indexToFileMap = learningUnitEntry.getValue();
+
+                    return indexToFileMap.entrySet().stream()
+                            .map(indexFileEntry -> new TaskTempHolder(
+                                    learningUnit,
+                                    indexFileEntry.getKey(),
+                                    indexFileEntry.getValue()
+                            ));
+                })
+                .toList();
+    }
+
+    private Map<LearningUnit, Map<Integer, EducationTaskDto>> buildTasksResponse(
             Map<LearningUnit, Map<Integer, EducationTaskDto>> unmappedResult,
             List<EducationTask> savedEducationTasks
     ) {
@@ -100,16 +112,6 @@ public class EducationTaskService implements EducationTaskApi {
                                         }
                                 ))
                 ));
-    }
-
-    @Override
-    public String upload(MultipartFile file) {
-        return "";
-    }
-
-    @Override
-    public String getById(UUID id) {
-        return "";
     }
 
     private record TaskTempHolder(

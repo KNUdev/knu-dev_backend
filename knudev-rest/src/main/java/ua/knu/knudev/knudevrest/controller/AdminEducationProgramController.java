@@ -15,8 +15,10 @@ public class AdminEducationProgramController {
 
     private final EducationProgramApi educationProgramApi;
 
+
     @PostMapping(value = "/save", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public void createProgram(@ModelAttribute EducationProgramCreationRequest creationRequest) {
+
         educationProgramApi.save(creationRequest);
     }
 
@@ -45,7 +47,6 @@ public class AdminEducationProgramController {
 //    public void updateProgramNode(@RequestBody UUID programId, @PathVariable UUID programId) {
 //
 //    }
-
 
 
 }

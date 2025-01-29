@@ -14,7 +14,6 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-//todo maybe education_program, not just program
 @Table(name = "program", schema = "education")
 @Builder
 public class EducationProgram {

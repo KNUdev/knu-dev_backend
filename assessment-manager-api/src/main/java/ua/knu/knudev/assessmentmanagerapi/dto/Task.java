@@ -4,5 +4,6 @@ import java.util.UUID;
 
 public interface Task {
     UUID getId();
+
     String getFilename();
 }

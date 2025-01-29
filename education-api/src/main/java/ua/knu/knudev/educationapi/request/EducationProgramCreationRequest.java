@@ -12,7 +12,6 @@ import ua.knu.knudev.knudevcommon.dto.MultiLanguageFieldDto;
 import java.util.List;
 import java.util.UUID;
 
-//todo validate. Either UUID and nothing all. Or all and no UUID
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor

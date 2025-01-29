@@ -2,6 +2,7 @@ package ua.knu.knudev.educationapi.validation;
 
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
+import org.apache.commons.lang3.ObjectUtils;
 import ua.knu.knudev.educationapi.request.ModuleCreationRequest;
 
 public class ModuleCreationRequestValidator implements ConstraintValidator<ValidCreationRequest, ModuleCreationRequest> {
@@ -13,18 +14,23 @@ public class ModuleCreationRequestValidator implements ConstraintValidator<Valid
         }
 
         boolean hasExistingId = request.getExistingModuleId() != null;
-        boolean hasAllFields = request.getName() != null
-                && request.getDescription() != null
-                && request.getTopics() != null
-                && request.getFinalTask() != null
-                && request.getTestId() != null;
+        boolean hasAllFields = ObjectUtils.allNotNull(
+                request.getName(),
+                request.getDescription(),
+                request.getTopics(),
+                request.getFinalTask(),
+                request.getTestId()
+        );
 
         if (hasExistingId) {
-            boolean onlyExistingAndOrder = request.getName() == null
-                    && request.getDescription() == null
-                    && request.getTopics() == null
-                    && request.getFinalTask() == null
-                    && request.getTestId() == null;
+            boolean onlyExistingAndOrder = ObjectUtils.allNull(
+                    request.getName(),
+                    request.getDescription(),
+                    request.getTopics(),
+                    request.getFinalTask(),
+                    request.getTestId()
+            );
+
             if (!onlyExistingAndOrder) {
                 context.disableDefaultConstraintViolation();
                 context.buildConstraintViolationWithTemplate(

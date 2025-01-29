@@ -6,9 +6,10 @@ import jakarta.validation.Payload;
 import java.lang.annotation.*;
 
 @Constraint(validatedBy = {
+        ProgramCreationRequestValidator.class,
+        SectionCreationRequestValidator.class,
         ModuleCreationRequestValidator.class,
         TopicCreationRequestValidator.class,
-        SectionCreationRequestValidator.class
 })
 @Documented
 @Target({ ElementType.TYPE })
