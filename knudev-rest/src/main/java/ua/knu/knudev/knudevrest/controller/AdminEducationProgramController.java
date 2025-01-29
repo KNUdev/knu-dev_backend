@@ -26,4 +26,26 @@ public class AdminEducationProgramController {
 //        educationProgramApi.publish(programId);
     }
 
+//    @PatchMapping("/topic/{topicId}/update")
+//    public void updateTopic(@RequestBody UUID programId, @PathVariable UUID topicId) {
+//
+//    }
+//
+//    @PatchMapping("/module/{moduleId}/update")
+//    public void updateModule(@RequestBody UUID programId, @PathVariable UUID moduleId) {
+//
+//    }
+//
+//    @PatchMapping("/section/{sectionId}/update")
+//    public void updateSection(@RequestBody UUID programId, @PathVariable UUID sectionId) {
+//
+//    }
+//
+//    @PatchMapping("/program/{programId}/update")
+//    public void updateProgramNode(@RequestBody UUID programId, @PathVariable UUID programId) {
+//
+//    }
+
+
+
 }

@@ -9,7 +9,6 @@ import ua.knu.knudev.assessmentmanagerapi.api.EducationTaskApi;
 import ua.knu.knudev.assessmentmanagerapi.dto.EducationTaskDto;
 import ua.knu.knudev.education.domain.EducationProgram;
 import ua.knu.knudev.education.domain.EducationTaskProxy;
-import ua.knu.knudev.education.domain.MultiLanguageField;
 import ua.knu.knudev.education.domain.bridge.ModuleTopicMapping;
 import ua.knu.knudev.education.domain.bridge.ProgramSectionMapping;
 import ua.knu.knudev.education.domain.bridge.SectionModuleMapping;
@@ -31,7 +30,6 @@ import ua.knu.knudev.educationapi.request.ModuleCreationRequest;
 import ua.knu.knudev.educationapi.request.SectionCreationRequest;
 import ua.knu.knudev.educationapi.request.TopicCreationRequest;
 import ua.knu.knudev.knudevcommon.constant.LearningUnit;
-import ua.knu.knudev.knudevcommon.dto.MultiLanguageFieldDto;
 
 import java.time.LocalDateTime;
 import java.util.HashMap;
@@ -79,6 +77,11 @@ public class EducationProgramCreationService implements EducationProgramApi {
 
         // TODO: Return a proper DTO
         return null;
+    }
+
+    @Override
+    public String getTest() {
+        return "";
     }
 
     private Map<LearningUnit, Map<Integer, MultipartFile>> buildEducationProgramAllTasksMap(
@@ -253,8 +256,8 @@ public class EducationProgramCreationService implements EducationProgramApi {
     }
 
     private void buildAndSaveTopic(TopicCreationRequest topicRequest,
-                                           Map<LearningUnit, Map<Integer, EducationTaskDto>> filenamesMap,
-                                           ProgramModule module) {
+                                   Map<LearningUnit, Map<Integer, EducationTaskDto>> filenamesMap,
+                                   ProgramModule module) {
         ProgramTopic topic = ObjectUtils.isEmpty(topicRequest.getExistingTopicId())
                 ? ProgramTopic.builder()
                 .name(multiLangFieldMapper.toDomain(topicRequest.getName()))

@@ -46,4 +46,9 @@ public class PDFService extends FileService implements PDFServiceApi {
                 .build();
     }
 
+    @Override
+    public String getFile() {
+        //todo
+        return null;
+    }
 }

@@ -5,4 +5,5 @@ import ua.knu.knudev.educationapi.request.EducationProgramCreationRequest;
 
 public interface EducationProgramApi {
     EducationProgramDto save(EducationProgramCreationRequest programCreationRequest);
+    String getTest();
 }

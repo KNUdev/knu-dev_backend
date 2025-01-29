@@ -49,6 +49,11 @@ public class FileService {
         return fileUploadAdapter.saveFile(fileUploadPayload);
     }
 
+    protected String getByFilename() {
+        //todo
+        return null;
+    }
+
     public boolean existsByFilename(String filename, FileFolderProperties<? extends FileSubfolder> fileFolderProperties) {
         return fileUploadAdapter.existsByFilename(filename, fileFolderProperties);
     }

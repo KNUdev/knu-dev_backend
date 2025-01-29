@@ -1,7 +1,17 @@
 package ua.knu.knudev.educationapi.dto;
 
-import lombok.Data;
+import ua.knu.knudev.knudevcommon.constant.Expertise;
+import ua.knu.knudev.knudevcommon.dto.MultiLanguageFieldDto;
 
-@Data
-public class EducationProgramDto {
+import java.util.UUID;
+
+public record EducationProgramDto(
+        UUID id,
+        MultiLanguageFieldDto name,
+        MultiLanguageFieldDto description,
+        Expertise expertise,
+        int version
+
+) {
+
 }

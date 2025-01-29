@@ -12,4 +12,6 @@ public interface EducationTaskApi extends BaseTaskApi<String> {
             Map<LearningUnit, Map<Integer, MultipartFile>> educationProgramTasks
     );
 
+    String getTask();
+
 }
