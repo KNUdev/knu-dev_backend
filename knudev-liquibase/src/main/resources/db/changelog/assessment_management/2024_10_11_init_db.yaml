@@ -150,3 +150,103 @@ databaseChangeLog:
                   constraints:
                     nullable: false
 
+
+
+  - changeSet:
+      id: create_test_domain_table
+      author: DenysLeonenko
+      changes:
+        - createTable:
+            tableName: test
+            schemaName: assessment_management
+            columns:
+              - column:
+                  name: id
+                  type: uuid
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: en_name
+                  type: varchar(255)
+                  constraints:
+                    nullable: false
+                    unique: true
+              - column:
+                  name: created_at
+                  type: date
+                  defaultValueComputed: CURRENT_TIMESTAMP
+                  constraints:
+                    nullable: false
+
+  - changeSet:
+      id: create_test_question_table
+      author: DenysLeonenko
+      changes:
+        - createTable:
+            tableName: test_question
+            schemaName: assessment_management
+            columns:
+              - column:
+                  type: uuid
+                  name: id
+                  constraints:
+                    nullable: false
+                    primaryKey: true
+              - column:
+                  type: varchar(255)
+                  name: en_question_body
+                  constraints:
+                    nullable: false
+              - column:
+                  type: uuid
+                  name: test_id
+
+  - changeSet:
+      id: create_question_answer_variant_table
+      author: DenysLeonenko
+      changes:
+        - createTable:
+            tableName: question_answer_variant
+            schemaName: assessment_management
+            columns:
+              - column:
+                  type: uuid
+                  name: id
+                  constraints:
+                    nullable: false
+                    primaryKey: true
+              - column:
+                  type: varchar(255)
+                  name: en_variant_body
+                  constraints:
+                    nullable: false
+              - column:
+                  type: boolean
+                  name: is_correct_answer
+                  constraints:
+                    nullable: false
+              - column:
+                  type: uuid
+                  name: test_question_id
+
+  - changeSet:
+      id: add_foreign_key_constraints_to_tests_table_and_extended
+      author: DenysLeonenko
+      changes:
+        - addForeignKeyConstraint:
+            baseTableSchemaName: assessment_management
+            baseTableName: test_question
+            baseColumnNames: test_id
+            referencedTableSchemaName: assessment_management
+            referencedTableName: test
+            referencedColumnNames: id
+            constraintName: fk_test_question_test
+        - addForeignKeyConstraint:
+            baseTableSchemaName: assessment_management
+            baseTableName: question_answer_variant
+            baseColumnNames: test_question_id
+            referencedTableSchemaName: assessment_management
+            referencedTableName: test_question
+            referencedColumnNames: id
+            constraintName: fk_question_answer_variant_test_question

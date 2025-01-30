@@ -28,7 +28,7 @@ public class AdminProjectController {
 
     private final ProjectApi projectApi;
 
-    @PostMapping("/create")
+    @PostMapping(value = "/create", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @ResponseStatus(HttpStatus.CREATED)
     @Operation(
             summary = "Create a new project",
@@ -57,7 +57,8 @@ public class AdminProjectController {
                     description = "Project creation data",
                     in = ParameterIn.HEADER,
                     required = true,
-                    schema = @Schema(description = "Project creation request payload")
+                    schema = @Schema(description = "Project creation request payload",
+                            implementation = ProjectCreationRequest.class)
             ) ProjectCreationRequest projectCreationRequest) {
         projectApi.create(projectCreationRequest);
     }
@@ -176,7 +177,7 @@ public class AdminProjectController {
             @Parameter(
                     name = "projectId",
                     description = "The id of project which we want to release",
-                    example = "f3b1c1b7d287b9f5acdb2f941517c7a9fcbf4bb2d9e8b3d3cfc622b1f67d34e8",
+                    example = "550e8400-e29b-41d4-a716-446655440000",
                     required = true,
                     in = ParameterIn.HEADER
             ),

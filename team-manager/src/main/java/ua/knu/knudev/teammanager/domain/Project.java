@@ -2,6 +2,7 @@ package ua.knu.knudev.teammanager.domain;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.BatchSize;
 import org.hibernate.annotations.UuidGenerator;
 import ua.knu.knudev.knudevcommon.constant.ProjectStatus;
 import ua.knu.knudev.knudevcommon.constant.ProjectTag;
@@ -19,6 +20,7 @@ import java.util.UUID;
 @Entity
 @Table(schema = "team_management", name = "project")
 @Builder
+@BatchSize(size = 10)
 public class Project {
 
     @Id
@@ -51,12 +53,14 @@ public class Project {
     @Column(nullable = false)
     private ProjectStatus status;
 
+    @BatchSize(size = 40)
     @ElementCollection(targetClass = ProjectTag.class)
     @CollectionTable(schema = "team_management", name = "tag", joinColumns = @JoinColumn(name = "project_id"))
     @Enumerated(EnumType.STRING)
     @Column(name = "tags", nullable = false)
     private Set<ProjectTag> tags = new HashSet<>();
 
+    @BatchSize(size = 20)
     @ElementCollection
     @CollectionTable(schema = "team_management", name = "github_repo_links", joinColumns = @JoinColumn(name = "project_id"))
     @Column(name = "github_repo_link", nullable = false)
