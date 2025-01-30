@@ -1,9 +1,6 @@
 package ua.knu.knudev.education.domain;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.NoArgsConstructor;
@@ -24,6 +21,7 @@ public class EducationTaskProxy implements Task {
     private UUID id;
     private String taskFilename;
     @Column(name = "learning_unit", nullable = false)
+    @Enumerated(EnumType.STRING)
     private LearningUnit learningUnit;
 
     @Override

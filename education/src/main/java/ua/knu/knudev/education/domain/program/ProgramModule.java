@@ -41,8 +41,8 @@ public class ProgramModule {
     private LocalDateTime createdDate;
     private LocalDateTime lastModifiedDate;
 
-    @OneToOne(optional = false)
-    @JoinColumn(name = "task_id", unique = true)
+    @OneToOne(optional = false, fetch = FetchType.LAZY)
+    @JoinColumn(name = "task_id", referencedColumnName = "id")
     private EducationTaskProxy moduleFinalTask;
 
     @PreUpdate

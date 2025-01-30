@@ -125,9 +125,7 @@ databaseChangeLog:
             referencedTableName: education_program_task
             referencedColumnNames: id
             referencedTableSchemaName: assessment_management
-
 #todo test
-        # 3) Create 'module' table
         - createTable:
             tableName: module
             schemaName: education
@@ -182,7 +180,6 @@ databaseChangeLog:
             referencedTableSchemaName: assessment_management
 
         #todo tests
-        # 4) Create 'topic' table
         - createTable:
             tableName: topic
             schemaName: education

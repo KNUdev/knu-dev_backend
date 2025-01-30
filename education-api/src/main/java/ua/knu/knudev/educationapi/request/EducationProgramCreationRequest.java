@@ -1,9 +1,7 @@
 package ua.knu.knudev.educationapi.request;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import jakarta.validation.constraints.NotNull;
+import lombok.*;
 import org.springframework.web.multipart.MultipartFile;
 import ua.knu.knudev.educationapi.validation.ValidCreationRequest;
 import ua.knu.knudev.knudevcommon.constant.Expertise;
@@ -15,7 +13,8 @@ import java.util.UUID;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-@Data
+@Getter
+@Setter
 @ValidCreationRequest
 public class EducationProgramCreationRequest {
     private UUID existingProgramId;
@@ -23,5 +22,6 @@ public class EducationProgramCreationRequest {
     private MultiLanguageFieldDto description;
     private List<SectionCreationRequest> sections;
     private Expertise expertise;
+    @NotNull
     private MultipartFile finalTask;
 }

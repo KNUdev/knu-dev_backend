@@ -18,7 +18,7 @@ public class SectionCreationRequestValidator
         boolean hasAllFields = ObjectUtils.allNotNull(
                 request.getName(),
                 request.getDescription(),
-                request.getModules(),
+//                request.getModules(),
                 request.getFinalTask(),
                 request.getFinalTestId()
         );
@@ -27,7 +27,7 @@ public class SectionCreationRequestValidator
             boolean onlyExistingAndOrder = ObjectUtils.allNull(
                     request.getName(),
                     request.getDescription(),
-                    request.getModules(),
+//                    request.getModules(),
                     request.getFinalTask(),
                     request.getFinalTestId()
             );

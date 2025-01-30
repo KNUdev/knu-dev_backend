@@ -51,7 +51,7 @@ public class EducationProgram {
     private boolean isPublished;
 
     @OneToOne(optional = false)
-    @JoinColumn(name = "final_task_id", unique = true)
+    @JoinColumn(name = "final_task_id", referencedColumnName = "id")
     private EducationTaskProxy finalTask;
 
     @PreUpdate

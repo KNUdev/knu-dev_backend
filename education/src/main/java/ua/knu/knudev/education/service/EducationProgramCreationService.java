@@ -15,7 +15,7 @@ import ua.knu.knudev.education.domain.bridge.SectionModuleMapping;
 import ua.knu.knudev.education.domain.program.ProgramModule;
 import ua.knu.knudev.education.domain.program.ProgramSection;
 import ua.knu.knudev.education.domain.program.ProgramTopic;
-import ua.knu.knudev.education.mapper.MultiLanguageFieldMapper;
+import ua.knu.knudev.education.mapper.*;
 import ua.knu.knudev.education.repository.EducationProgramRepository;
 import ua.knu.knudev.education.repository.ModuleRepository;
 import ua.knu.knudev.education.repository.SectionRepository;
@@ -25,6 +25,9 @@ import ua.knu.knudev.education.repository.bridge.ProgramSectionMappingRepository
 import ua.knu.knudev.education.repository.bridge.SectionModuleMappingRepository;
 import ua.knu.knudev.educationapi.api.EducationProgramApi;
 import ua.knu.knudev.educationapi.dto.EducationProgramDto;
+import ua.knu.knudev.educationapi.dto.ProgramModuleDto;
+import ua.knu.knudev.educationapi.dto.ProgramSectionDto;
+import ua.knu.knudev.educationapi.dto.ProgramTopicDto;
 import ua.knu.knudev.educationapi.request.EducationProgramCreationRequest;
 import ua.knu.knudev.educationapi.request.ModuleCreationRequest;
 import ua.knu.knudev.educationapi.request.SectionCreationRequest;
@@ -32,19 +35,12 @@ import ua.knu.knudev.educationapi.request.TopicCreationRequest;
 import ua.knu.knudev.knudevcommon.constant.LearningUnit;
 
 import java.time.LocalDateTime;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
-//todo refactor and greatly test
-//todo create save and publish method. Save allows empty sections, publish does not allow empty program, section or module (with no sub-units)
-
-//todo check the number of done transactions
-//todo test with great amount of topics
 public class EducationProgramCreationService implements EducationProgramApi {
+
     private final EducationProgramRepository educationProgramRepository;
     private final SectionRepository sectionRepository;
     private final ModuleRepository moduleRepository;
@@ -56,32 +52,55 @@ public class EducationProgramCreationService implements EducationProgramApi {
     private final EducationTaskApi educationTaskApi;
     private final MultiLanguageFieldMapper multiLangFieldMapper;
 
+    private final ProgramMapper programMapper;
+    private final SectionMapper sectionMapper;
+    private final ModuleMapper moduleMapper;
+    private final TopicMapper topicMapper;
+
     @Transactional
     public EducationProgramDto save(EducationProgramCreationRequest programCreationReq) {
         inputReqCoherenceValidator.validateProgramOrderSequence(programCreationReq);
 
-        Map<LearningUnit, Map<Integer, MultipartFile>> tasksToUpload = buildEducationProgramAllTasksMap(programCreationReq);
-        Map<LearningUnit, Map<Integer, EducationTaskDto>> filenamesMap = educationTaskApi.uploadAll(tasksToUpload);
+        Map<LearningUnit, Map<Integer, MultipartFile>> tasksToUpload =
+                buildEducationProgramAllTasksMap(programCreationReq);
+        Map<LearningUnit, Map<Integer, EducationTaskDto>> filenamesMap =
+                educationTaskApi.uploadAll(tasksToUpload);
 
         EducationProgram program = buildAndSaveProgram(programCreationReq, filenamesMap);
 
-        programCreationReq.getSections().forEach(sectionRequest -> {
-            ProgramSection section = buildAndSaveSection(sectionRequest, filenamesMap, program);
+        EducationProgramDto programDto = programMapper.toDto(program);
+        programDto.setFinalTaskUrl(program.getFinalTask().getFilename());
 
-            sectionRequest.getModules().forEach(moduleRequest -> {
-                ProgramModule module = buildAndSaveModule(moduleRequest, filenamesMap, section);
+        Optional.ofNullable(programCreationReq.getSections())
+                .orElse(Collections.emptyList())
+                .forEach(sectionRequest -> {
+                    ProgramSection section = buildAndSaveSection(sectionRequest, filenamesMap, program);
+                    ProgramSectionDto sectionDto = sectionMapper.toDto(section);
+                    programDto.getSections().add(sectionDto);
+                    sectionDto.setFinalTaskUrl(section.getSectionFinalTask().getFilename());
 
-                moduleRequest.getTopics().forEach(topicRequest -> buildAndSaveTopic(topicRequest, filenamesMap, module));
-            });
-        });
+                    Optional.ofNullable(sectionRequest.getModules())
+                            .orElse(Collections.emptyList())
+                            .forEach(moduleRequest -> {
+                                ProgramModule module = buildAndSaveModule(moduleRequest, filenamesMap, section);
+                                ProgramModuleDto moduleDto = moduleMapper.toDto(module);
+                                moduleDto.setFinalTaskUrl(module.getModuleFinalTask().getFilename());
+                                sectionDto.getModules().add(moduleDto);
 
-        // TODO: Return a proper DTO
-        return null;
-    }
+                                Optional.ofNullable(moduleRequest.getTopics())
+                                        .orElse(Collections.emptyList())
+                                        .forEach(topicRequest -> {
+                                            ProgramTopic topic = buildAndSaveTopic(topicRequest, filenamesMap, module);
+                                            ProgramTopicDto topicDto = topicMapper.toDto(topic);
+                                            topicDto.setTaskUrl(topic.getTask().getFilename());
+                                            topicDto.setLearningResources(topic.getLearningResources());
 
-    @Override
-    public String getTest() {
-        return "";
+                                            moduleDto.getTopics().add(topicDto);
+                                        });
+                            });
+                });
+
+        return programDto;
     }
 
     private Map<LearningUnit, Map<Integer, MultipartFile>> buildEducationProgramAllTasksMap(
@@ -89,41 +108,199 @@ public class EducationProgramCreationService implements EducationProgramApi {
     ) {
         Map<LearningUnit, Map<Integer, MultipartFile>> tasksMap = new HashMap<>();
 
-        boolean programNotExists = ObjectUtils.isEmpty(request.getExistingProgramId());
-        boolean programFinalTaskIsPresent = ObjectUtils.isNotEmpty(request.getFinalTask());
-        if (programNotExists && programFinalTaskIsPresent) {
+        if (ObjectUtils.isEmpty(request.getExistingProgramId())
+                && ObjectUtils.isNotEmpty(request.getFinalTask())) {
             tasksMap.computeIfAbsent(LearningUnit.PROGRAM, k -> new HashMap<>())
                     .put(1, request.getFinalTask());
         }
 
-        request.getSections().stream()
-                .filter(s -> ObjectUtils.isEmpty(s.getExistingSectionId()))
-                .filter(s -> ObjectUtils.isNotEmpty(s.getFinalTask()))
-                .forEach(section -> tasksMap.computeIfAbsent(LearningUnit.SECTION, k -> new HashMap<>())
-                        .put(section.getOrderIndex(), section.getFinalTask())
-                );
-
-        request.getSections().forEach(s ->
-                s.getModules().stream()
-                        .filter(module -> ObjectUtils.isEmpty(module.getExistingModuleId()))
-                        .filter(module -> ObjectUtils.isNotEmpty(module.getFinalTask()))
-                        .forEach(module -> tasksMap.computeIfAbsent(LearningUnit.MODULE, k -> new HashMap<>())
-                                .put(module.getOrderIndex(), module.getFinalTask())
-                        )
-        );
-
-        request.getSections().forEach(s ->
-                s.getModules().forEach(m ->
-                        m.getTopics().stream()
+        Optional.ofNullable(request.getSections()).orElse(Collections.emptyList())
+                .stream()
+                .peek(section -> {
+                    if (ObjectUtils.isEmpty(section.getExistingSectionId())
+                            && ObjectUtils.isNotEmpty(section.getFinalTask())) {
+                        tasksMap.computeIfAbsent(LearningUnit.SECTION, k -> new HashMap<>())
+                                .put(section.getOrderIndex(), section.getFinalTask());
+                    }
+                })
+                .flatMap(section -> Optional.ofNullable(section.getModules())
+                        .orElse(Collections.emptyList())
+                        .stream()
+                        .peek(module -> {
+                            if (ObjectUtils.isEmpty(module.getExistingModuleId())
+                                    && ObjectUtils.isNotEmpty(module.getFinalTask())) {
+                                tasksMap.computeIfAbsent(LearningUnit.MODULE, k -> new HashMap<>())
+                                        .put(module.getOrderIndex(), module.getFinalTask());
+                            }
+                        })
+                        .flatMap(module -> Optional.ofNullable(module.getTopics())
+                                .orElse(Collections.emptyList())
+                                .stream()
                                 .filter(topic -> ObjectUtils.isEmpty(topic.getExistingTopicId()))
                                 .filter(topic -> ObjectUtils.isNotEmpty(topic.getTask()))
-                                .forEach(topic -> tasksMap.computeIfAbsent(LearningUnit.TOPIC, k -> new HashMap<>())
-                                        .put(topic.getOrderIndex(), topic.getTask())
-                                )
+                                .peek(topic -> tasksMap
+                                        .computeIfAbsent(LearningUnit.TOPIC, k -> new HashMap<>())
+                                        .put(topic.getOrderIndex(), topic.getTask()))
+                        )
                 )
-        );
+                .forEach(x -> { });
 
         return tasksMap;
+    }
+
+    private EducationProgram buildAndSaveProgram(
+            EducationProgramCreationRequest programCreationReq,
+            Map<LearningUnit, Map<Integer, EducationTaskDto>> filenamesMap
+    ) {
+        boolean programExists = ObjectUtils.isNotEmpty(programCreationReq.getExistingProgramId());
+        EducationProgram program;
+        if (programExists) {
+            program = getProgramById(programCreationReq.getExistingProgramId());
+        } else {
+            EducationTaskProxy finalTaskProxy = null;
+            if (ObjectUtils.isNotEmpty(programCreationReq.getFinalTask())) {
+                EducationTaskDto taskDto = getFilenameForOrderIndex(
+                        LearningUnit.PROGRAM,
+                        1,
+                        filenamesMap
+                );
+                finalTaskProxy = buildTaskProxy(LearningUnit.PROGRAM, taskDto);
+            }
+
+            program = EducationProgram.builder()
+                    .name(multiLangFieldMapper.toDomain(programCreationReq.getName()))
+                    .description(multiLangFieldMapper.toDomain(programCreationReq.getDescription()))
+                    .expertise(programCreationReq.getExpertise())
+                    .finalTask(finalTaskProxy)
+                    .version(1)
+                    .lastModifiedDate(LocalDateTime.now())
+                    .build();
+        }
+        return educationProgramRepository.save(program);
+    }
+
+    private ProgramSection buildAndSaveSection(
+            SectionCreationRequest sectionRequest,
+            Map<LearningUnit, Map<Integer, EducationTaskDto>> filenamesMap,
+            EducationProgram program
+    ) {
+        boolean sectionExists = ObjectUtils.isNotEmpty(sectionRequest.getExistingSectionId());
+        ProgramSection section;
+
+        if (sectionExists) {
+            section = getSectionById(sectionRequest.getExistingSectionId());
+        } else {
+            EducationTaskProxy sectionFinalTask = null;
+            if (ObjectUtils.isNotEmpty(sectionRequest.getFinalTask())) {
+                EducationTaskDto dto = getFilenameForOrderIndex(
+                        LearningUnit.SECTION,
+                        sectionRequest.getOrderIndex(),
+                        filenamesMap
+                );
+                sectionFinalTask = buildTaskProxy(LearningUnit.SECTION, dto);
+            }
+
+            section = ProgramSection.builder()
+                    .name(multiLangFieldMapper.toDomain(sectionRequest.getName()))
+                    .description(multiLangFieldMapper.toDomain(sectionRequest.getDescription()))
+                    .sectionFinalTask(sectionFinalTask)
+                    .lastModifiedDate(LocalDateTime.now())
+                    .build();
+        }
+
+        ProgramSection savedSection = sectionRepository.save(section);
+
+        programSectionMappingRepository.save(
+                ProgramSectionMapping.builder()
+                        .educationProgram(program)
+                        .section(savedSection)
+                        .orderIndex(sectionRequest.getOrderIndex())
+                        .build()
+        );
+        return savedSection;
+    }
+
+    private ProgramModule buildAndSaveModule(
+            ModuleCreationRequest moduleRequest,
+            Map<LearningUnit, Map<Integer, EducationTaskDto>> filenamesMap,
+            ProgramSection section
+    ) {
+        boolean moduleExists = ObjectUtils.isNotEmpty(moduleRequest.getExistingModuleId());
+        ProgramModule module;
+
+        if (moduleExists) {
+            module = getModuleById(moduleRequest.getExistingModuleId());
+        } else {
+            EducationTaskProxy moduleFinalTask = null;
+            if (ObjectUtils.isNotEmpty(moduleRequest.getFinalTask())) {
+                EducationTaskDto dto = getFilenameForOrderIndex(
+                        LearningUnit.MODULE,
+                        moduleRequest.getOrderIndex(),
+                        filenamesMap
+                );
+                moduleFinalTask = buildTaskProxy(LearningUnit.MODULE, dto);
+            }
+
+            module = ProgramModule.builder()
+                    .name(multiLangFieldMapper.toDomain(moduleRequest.getName()))
+                    .description(multiLangFieldMapper.toDomain(moduleRequest.getDescription()))
+                    .moduleFinalTask(moduleFinalTask)
+                    .lastModifiedDate(LocalDateTime.now())
+                    .build();
+        }
+
+        ProgramModule savedModule = moduleRepository.save(module);
+
+        sectionModuleMappingRepository.save(
+                SectionModuleMapping.builder()
+                        .section(section)
+                        .module(savedModule)
+                        .orderIndex(moduleRequest.getOrderIndex())
+                        .build()
+        );
+        return savedModule;
+    }
+
+    private ProgramTopic buildAndSaveTopic(
+            TopicCreationRequest topicRequest,
+            Map<LearningUnit, Map<Integer, EducationTaskDto>> filenamesMap,
+            ProgramModule module
+    ) {
+        boolean topicExists = ObjectUtils.isNotEmpty(topicRequest.getExistingTopicId());
+        ProgramTopic topic;
+
+        if (topicExists) {
+            topic = getTopicById(topicRequest.getExistingTopicId());
+        } else {
+            EducationTaskProxy topicTaskProxy = null;
+            if (ObjectUtils.isNotEmpty(topicRequest.getTask())) {
+                EducationTaskDto dto = getFilenameForOrderIndex(
+                        LearningUnit.TOPIC,
+                        topicRequest.getOrderIndex(),
+                        filenamesMap
+                );
+                topicTaskProxy = buildTaskProxy(LearningUnit.TOPIC, dto);
+            }
+
+            topic = ProgramTopic.builder()
+                    .name(multiLangFieldMapper.toDomain(topicRequest.getName()))
+                    .description(multiLangFieldMapper.toDomain(topicRequest.getDescription()))
+                    .task(topicTaskProxy)
+                    .learningResources(topicRequest.getLearningMaterials())
+                    .lastModifiedDate(LocalDateTime.now())
+                    .build();
+        }
+
+        ProgramTopic savedTopic = topicRepository.save(topic);
+
+        moduleTopicMappingRepository.save(
+                ModuleTopicMapping.builder()
+                        .module(module)
+                        .topic(savedTopic)
+                        .orderIndex(topicRequest.getOrderIndex())
+                        .build()
+        );
+        return savedTopic;
     }
 
     private EducationTaskDto getFilenameForOrderIndex(
@@ -138,13 +315,22 @@ public class EducationProgramCreationService implements EducationProgramApi {
                 ));
     }
 
+    private EducationTaskProxy buildTaskProxy(LearningUnit learningUnit, EducationTaskDto taskDto) {
+        return EducationTaskProxy.builder()
+                .id(taskDto.getId())
+                .taskFilename(taskDto.getFilename())
+                .learningUnit(learningUnit)
+                .build();
+    }
+
     private EducationProgram getProgramById(UUID id) {
         return educationProgramRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Program not found for ID: " + id));
     }
 
     private ProgramSection getSectionById(UUID id) {
-        return sectionRepository.findById(id).orElse(null);
+        return sectionRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Section not found for ID: " + id));
     }
 
     private ProgramModule getModuleById(UUID id) {
@@ -157,151 +343,9 @@ public class EducationProgramCreationService implements EducationProgramApi {
                 .orElseThrow(() -> new IllegalArgumentException("Topic not found for ID: " + id));
     }
 
-    private EducationProgram buildAndSaveProgram(EducationProgramCreationRequest programCreationReq,
-                                                 Map<LearningUnit, Map<Integer, EducationTaskDto>> filenamesMap) {
-        boolean programExists = ObjectUtils.isNotEmpty(programCreationReq.getExistingProgramId());
-        EducationProgram program;
-        if (programExists) {
-            program = getProgramById(programCreationReq.getExistingProgramId());
-        } else {
-            program = EducationProgram.builder()
-                    .name(multiLangFieldMapper.toDomain(programCreationReq.getName()))
-                    .description(multiLangFieldMapper.toDomain(programCreationReq.getDescription()))
-                    .expertise(programCreationReq.getExpertise())
-                    .finalTask(
-                            buildTaskProxy(
-                                    LearningUnit.PROGRAM,
-                                    getFilenameForOrderIndex(
-                                            LearningUnit.PROGRAM,
-                                            1,
-                                            filenamesMap
-                                    )
-                            )
-                    )
-                    .version(1)
-                    .lastModifiedDate(LocalDateTime.now())
-                    .build();
-        }
-        return educationProgramRepository.save(program);
+    @Override
+    public String getTest() {
+        return "";
     }
-
-    private ProgramSection buildAndSaveSection(SectionCreationRequest sectionRequest,
-                                               Map<LearningUnit, Map<Integer, EducationTaskDto>> filenamesMap,
-                                               EducationProgram program) {
-        boolean sectionExists = ObjectUtils.isNotEmpty(sectionRequest.getExistingSectionId());
-        ProgramSection section;
-        if (sectionExists) {
-            section = getSectionById(sectionRequest.getExistingSectionId());
-        } else {
-            section = ProgramSection.builder()
-                    .name(multiLangFieldMapper.toDomain(sectionRequest.getName()))
-                    .description(multiLangFieldMapper.toDomain(sectionRequest.getDescription()))
-                    .sectionFinalTask(
-                            buildTaskProxy(
-                                    LearningUnit.SECTION,
-                                    getFilenameForOrderIndex(
-                                            LearningUnit.SECTION,
-                                            sectionRequest.getOrderIndex(),
-                                            filenamesMap
-                                    )
-                            )
-                    )
-                    .lastModifiedDate(LocalDateTime.now())
-                    .build();
-        }
-
-        ProgramSection savedSection = sectionRepository.save(section);
-
-        programSectionMappingRepository.save(
-                ProgramSectionMapping.builder()
-                        .educationProgram(program)
-                        .section(section)
-                        .orderIndex(sectionRequest.getOrderIndex())
-                        .build()
-        );
-        return savedSection;
-    }
-
-    private ProgramModule buildAndSaveModule(ModuleCreationRequest moduleRequest,
-                                             Map<LearningUnit, Map<Integer, EducationTaskDto>> filenamesMap,
-                                             ProgramSection section) {
-        boolean moduleExists = ObjectUtils.isNotEmpty(moduleRequest.getExistingModuleId());
-        ProgramModule module;
-        if (moduleExists) {
-            module = getModuleById(moduleRequest.getExistingModuleId());
-        } else {
-            module = ProgramModule.builder()
-                    .name(multiLangFieldMapper.toDomain(moduleRequest.getName()))
-                    .description(multiLangFieldMapper.toDomain(moduleRequest.getDescription()))
-                    .moduleFinalTask(
-                            buildTaskProxy(
-                                    LearningUnit.MODULE,
-                                    getFilenameForOrderIndex(
-                                            LearningUnit.MODULE,
-                                            moduleRequest.getOrderIndex(),
-                                            filenamesMap
-                                    )
-                            )
-                    )
-                    .lastModifiedDate(LocalDateTime.now())
-                    .build();
-        }
-
-        ProgramModule savedModule = moduleRepository.save(module);
-
-        sectionModuleMappingRepository.save(
-                SectionModuleMapping.builder()
-                        .section(section)
-                        .module(module)
-                        .orderIndex(moduleRequest.getOrderIndex())
-                        .build()
-        );
-        return savedModule;
-    }
-
-    private void buildAndSaveTopic(TopicCreationRequest topicRequest,
-                                   Map<LearningUnit, Map<Integer, EducationTaskDto>> filenamesMap,
-                                   ProgramModule module) {
-        boolean topicExists = ObjectUtils.isNotEmpty(topicRequest.getExistingTopicId());
-        ProgramTopic topic;
-        if (topicExists) {
-            topic = getTopicById(topicRequest.getExistingTopicId());
-        } else {
-            topic = ProgramTopic.builder()
-                    .name(multiLangFieldMapper.toDomain(topicRequest.getName()))
-                    .description(multiLangFieldMapper.toDomain(topicRequest.getDescription()))
-                    .task(
-                            buildTaskProxy(
-                                    LearningUnit.TOPIC,
-                                    getFilenameForOrderIndex(
-                                            LearningUnit.TOPIC,
-                                            topicRequest.getOrderIndex(),
-                                            filenamesMap
-                                    )
-                            )
-                    )
-                    .lastModifiedDate(LocalDateTime.now())
-                    .build();
-        }
-
-        topicRepository.save(topic);
-
-        moduleTopicMappingRepository.save(
-                ModuleTopicMapping.builder()
-                        .module(module)
-                        .topic(topic)
-                        .orderIndex(topicRequest.getOrderIndex())
-                        .build()
-        );
-
-    }
-
-    private EducationTaskProxy buildTaskProxy(LearningUnit learningUnit, EducationTaskDto taskDto) {
-        return EducationTaskProxy.builder()
-                .id(taskDto.getId())
-                .taskFilename(taskDto.getFilename())
-                .learningUnit(learningUnit)
-                .build();
-    }
-
 }
+

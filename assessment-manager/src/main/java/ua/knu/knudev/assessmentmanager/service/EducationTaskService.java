@@ -1,5 +1,6 @@
 package ua.knu.knudev.assessmentmanager.service;
 
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -23,6 +24,7 @@ public class EducationTaskService implements EducationTaskApi {
     private final PDFServiceApi pdfServiceApi;
 
     @Override
+    @Transactional
     public Map<LearningUnit, Map<Integer, EducationTaskDto>> uploadAll(
             Map<LearningUnit, Map<Integer, MultipartFile>> educationProgramTasks
     ) {

@@ -1,15 +1,22 @@
 package ua.knu.knudev.educationapi.dto;
 
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import ua.knu.knudev.knudevcommon.dto.MultiLanguageFieldDto;
 
 import java.util.Set;
 import java.util.UUID;
 
-public record ProgramTopicDto(
-        UUID id,
-        MultiLanguageFieldDto name,
-        MultiLanguageFieldDto description,
-        Set<String> learningResources,
-        String taskUrl
-) {
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+public class ProgramTopicDto {
+    private UUID id;
+    private MultiLanguageFieldDto name;
+    private MultiLanguageFieldDto description;
+    private Set<String> learningResources;
+    private String taskUrl;
 }

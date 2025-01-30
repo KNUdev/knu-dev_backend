@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import ua.knu.knudev.educationapi.api.EducationProgramApi;
+import ua.knu.knudev.educationapi.dto.EducationProgramDto;
 import ua.knu.knudev.educationapi.request.EducationProgramCreationRequest;
 
 import java.util.UUID;
@@ -17,9 +18,8 @@ public class AdminEducationProgramController {
 
 
     @PostMapping(value = "/save", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public void createProgram(@ModelAttribute EducationProgramCreationRequest creationRequest) {
-
-        educationProgramApi.save(creationRequest);
+    public EducationProgramDto createProgram(@ModelAttribute EducationProgramCreationRequest creationRequest) {
+        return educationProgramApi.save(creationRequest);
     }
 
     @PatchMapping("/publish")

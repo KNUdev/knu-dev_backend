@@ -60,7 +60,7 @@ public class FileService {
 
     protected String getExtension(MultipartFile file) {
         String originalFilename = file.getOriginalFilename();
-        if (StringUtils.isEmpty(originalFilename) || !StringUtils.contains(originalFilename, ".")) {
+        if (StringUtils.isEmpty(originalFilename) || !StringUtils.contains(originalFilename, FILE_EXTENSION_SEPARATOR)) {
             throw new FileException("Invalid file name: no extension found.");
         }
 
@@ -84,7 +84,7 @@ public class FileService {
     protected String generateRandomUUIDFilename(MultipartFile file) {
         String extension = getExtension(file);
         assertFileExtensionIsSafe(extension);
-        return UUID.randomUUID() + "." + extension;
+        return UUID.randomUUID() + FILE_EXTENSION_SEPARATOR + extension;
     }
 
     protected void assertFileSizeNotExceeds(MultipartFile file, final long MAX_FILE_SIZE_IN_KILOBYTES) {

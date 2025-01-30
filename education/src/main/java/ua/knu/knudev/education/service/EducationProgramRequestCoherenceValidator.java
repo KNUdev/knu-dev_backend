@@ -1,5 +1,6 @@
 package ua.knu.knudev.education.service;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import ua.knu.knudev.educationapi.exception.EducationProgramException;
@@ -18,21 +19,30 @@ import java.util.function.ToIntFunction;
 public class EducationProgramRequestCoherenceValidator {
 
     public void validateProgramOrderSequence(EducationProgramCreationRequest program) {
+        List<SectionCreationRequest> sections = program.getSections();
+
         validateSequence(
-                program.getSections(),
+                sections,
                 SectionCreationRequest::getOrderIndex,
                 "sections in Program"
         );
-        program.getSections().forEach(this::validateSection);
+        if(CollectionUtils.isNotEmpty(sections)) {
+            sections.forEach(this::validateSection);
+        }
     }
 
     private void validateSection(SectionCreationRequest section) {
+        List<ModuleCreationRequest> modules = section.getModules();
+
         validateSequence(
-                section.getModules(),
+                modules,
                 ModuleCreationRequest::getOrderIndex,
                 "modules in Section[orderIndex=" + section.getOrderIndex() + "]"
         );
-        section.getModules().forEach(this::validateModule);
+
+        if(CollectionUtils.isNotEmpty(modules)) {
+            modules.forEach(this::validateModule);
+        }
     }
 
     private void validateModule(ModuleCreationRequest module) {
@@ -50,7 +60,7 @@ public class EducationProgramRequestCoherenceValidator {
     ) {
         if (learningUnitItems == null || learningUnitItems.isEmpty()) {
             //todo maybe not just return
-            return; // or decide if empty is allowed
+            return;
         }
 
         int itemsSize = learningUnitItems.size();

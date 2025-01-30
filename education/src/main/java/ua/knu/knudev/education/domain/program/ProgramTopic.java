@@ -46,11 +46,11 @@ public class ProgramTopic {
             name = "topic_learning_resources",
             joinColumns = @JoinColumn(name = "topic_id")
     )
-    @Column(name = "learning_resources")
+    @Column(name = "learning_resources", nullable = false)
     private Set<String> learningResources = new HashSet<>();
 
-    @OneToOne(optional = false)
-    @JoinColumn(name = "task_id")
+    @OneToOne(optional = false, fetch = FetchType.LAZY)
+    @JoinColumn(name = "task_id", referencedColumnName = "id")
     private EducationTaskProxy task;
 
     //TODO TESTS

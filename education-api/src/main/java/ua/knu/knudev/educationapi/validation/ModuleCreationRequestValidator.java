@@ -17,7 +17,7 @@ public class ModuleCreationRequestValidator implements ConstraintValidator<Valid
         boolean hasAllFields = ObjectUtils.allNotNull(
                 request.getName(),
                 request.getDescription(),
-                request.getTopics(),
+//                request.getTopics(),
                 request.getFinalTask(),
                 request.getTestId()
         );
@@ -26,7 +26,7 @@ public class ModuleCreationRequestValidator implements ConstraintValidator<Valid
             boolean onlyExistingAndOrder = ObjectUtils.allNull(
                     request.getName(),
                     request.getDescription(),
-                    request.getTopics(),
+//                    request.getTopics(),
                     request.getFinalTask(),
                     request.getTestId()
             );
