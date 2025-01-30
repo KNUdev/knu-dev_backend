@@ -1,10 +1,10 @@
-
 spring:
   datasource:
     url: '
       jdbc:h2:mem:testdb;MODE=PostgreSQL;DB_CLOSE_DELAY=-1;INIT=
       CREATE SCHEMA IF NOT EXISTS TEAM_MANAGEMENT\; 
-      CREATE SCHEMA IF NOT EXISTS TASK_MANAGEMENT\; 
+      CREATE SCHEMA IF NOT EXISTS ASSESSMENT_MANAGEMENT\; 
+      CREATE SCHEMA IF NOT EXISTS EDUCATION\;
       CREATE SCHEMA IF NOT EXISTS SECURITY_MANAGEMENT
     '
     driver-class-name: org.h2.Driver
@@ -14,11 +14,13 @@ spring:
     change-log: classpath:db/master.yaml
   jpa:
 #    show-sql: true
+    hibernate:
+      ddl-auto: create-drop
+#    show-sql: true
     properties:
       hibernate:
         format_sql: true
-    hibernate:
-      ddl-auto: create-drop
+
 application:
   minio:
     access-key: minioadmin
@@ -44,3 +46,8 @@ application:
         maximum-size-in-kilobytes: 2048
   assignments:
     activation-expiry-in-days: 7
+
+github:
+  api:
+    access-token: TEST
+    organization-name: KNUdev

@@ -1,0 +1,252 @@
+databaseChangeLog:
+  - changeSet:
+      id: create_role_promotion_task_table
+      author: Vladyslav Shtaiier
+      changes:
+        - createTable:
+            schemaName: assessment_management
+            tableName: role_promotion_task
+            columns:
+              - column:
+                  name: id
+                  type: uuid
+                  constraints:
+                    primaryKey: true
+                    primaryKeyName: pk_role_promotion_task
+                    nullable: false
+                    unique: true
+              - column:
+                  name: task_filename
+                  type: varchar(75)
+                  constraints:
+                    unique: true
+                    nullable: false
+              - column:
+                  name: addition_date
+                  type: date
+                  defaultValueComputed: CURRENT_TIMESTAMP
+                  constraints:
+                    nullable: false
+              - column:
+                  name: last_update_date
+                  type: date
+              - column:
+                  name: target_technical_role
+                  type: varchar(20)
+                  constraints:
+                    nullable: false
+        - createIndex:
+            indexName: idx_target_technical_role
+            tableName: role_promotion_task
+            schemaName: assessment_management
+            columns:
+              - column:
+                  name: target_technical_role
+
+  - changeSet:
+      id: create_task_assignment_table
+      author: Vladyslav Shtaiier
+      changes:
+        - createTable:
+            schemaName: assessment_management
+            tableName: task_assignment
+            columns:
+              - column:
+                  name: id
+                  type: uuid
+                  constraints:
+                    primaryKey: true
+                    primaryKeyName: pk_task_assignment
+                    nullable: false
+                    unique: true
+              - column:
+                  name: assigned_account_email
+                  type: varchar(75)
+                  constraints:
+                    nullable: false
+                    unique: true
+              - column:
+                  name: verification_code
+                  type: varchar(6)
+                  constraints:
+                    unique: true
+                    nullable: false
+              - column:
+                  name: task_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+                    unique: true
+              - column:
+                  name: creation_date
+                  type: datetime
+                  constraints:
+                    nullable: false
+                    unique: false
+              - column:
+                  name: activation_expiry_date
+                  type: datetime
+                  constraints:
+                    nullable: false
+              - column:
+                  name: dispatch_expiry_date
+                  type: datetime
+              - column:
+                  name: status
+                  type: varchar(15)
+                  constraints:
+                    nullable: false
+        - addForeignKeyConstraint:
+            constraintName: fk_task_assignment_task
+            baseTableName: task_assignment
+            baseColumnNames: task_id
+            referencedTableName: role_promotion_task
+            referencedColumnNames: id
+            baseTableSchemaName: assessment_management
+            referencedTableSchemaName: assessment_management
+            onDelete: CASCADE
+        - createIndex:
+            indexName: idx_task_assignment_assigned_account_email
+            tableName: task_assignment
+            schemaName: assessment_management
+            columns:
+              - column:
+                  name: assigned_account_email
+
+  - changeSet:
+      id: create_education_program_task_table
+      author: Vladyslav Shtaiier
+      changes:
+        - createTable:
+            schemaName: assessment_management
+            tableName: education_program_task
+            columns:
+              - column:
+                  name: id
+                  type: uuid
+                  constraints:
+                    primaryKey: true
+                    primaryKeyName: pk_education_program_task
+                    nullable: false
+                    unique: true
+              - column:
+                  name: task_filename
+                  type: varchar(75)
+                  constraints:
+                    unique: true
+                    nullable: false
+              - column:
+                  name: addition_date
+                  type: date
+                  defaultValueComputed: CURRENT_TIMESTAMP
+                  constraints:
+                    nullable: false
+              - column:
+                  name: last_update_date
+                  type: date
+              - column:
+                  name: learning_unit
+                  type: varchar(20)
+                  constraints:
+                    nullable: false
+
+
+
+  - changeSet:
+      id: create_test_domain_table
+      author: DenysLeonenko
+      changes:
+        - createTable:
+            tableName: test
+            schemaName: assessment_management
+            columns:
+              - column:
+                  name: id
+                  type: uuid
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: en_name
+                  type: varchar(255)
+                  constraints:
+                    nullable: false
+                    unique: true
+              - column:
+                  name: created_at
+                  type: date
+                  defaultValueComputed: CURRENT_TIMESTAMP
+                  constraints:
+                    nullable: false
+
+  - changeSet:
+      id: create_test_question_table
+      author: DenysLeonenko
+      changes:
+        - createTable:
+            tableName: test_question
+            schemaName: assessment_management
+            columns:
+              - column:
+                  type: uuid
+                  name: id
+                  constraints:
+                    nullable: false
+                    primaryKey: true
+              - column:
+                  type: varchar(255)
+                  name: en_question_body
+                  constraints:
+                    nullable: false
+              - column:
+                  type: uuid
+                  name: test_id
+
+  - changeSet:
+      id: create_question_answer_variant_table
+      author: DenysLeonenko
+      changes:
+        - createTable:
+            tableName: question_answer_variant
+            schemaName: assessment_management
+            columns:
+              - column:
+                  type: uuid
+                  name: id
+                  constraints:
+                    nullable: false
+                    primaryKey: true
+              - column:
+                  type: varchar(255)
+                  name: en_variant_body
+                  constraints:
+                    nullable: false
+              - column:
+                  type: boolean
+                  name: is_correct_answer
+                  constraints:
+                    nullable: false
+              - column:
+                  type: uuid
+                  name: test_question_id
+
+  - changeSet:
+      id: add_foreign_key_constraints_to_tests_table_and_extended
+      author: DenysLeonenko
+      changes:
+        - addForeignKeyConstraint:
+            baseTableSchemaName: assessment_management
+            baseTableName: test_question
+            baseColumnNames: test_id
+            referencedTableSchemaName: assessment_management
+            referencedTableName: test
+            referencedColumnNames: id
+            constraintName: fk_test_question_test
+        - addForeignKeyConstraint:
+            baseTableSchemaName: assessment_management
+            baseTableName: question_answer_variant
+            baseColumnNames: test_question_id
+            referencedTableSchemaName: assessment_management
+            referencedTableName: test_question
+            referencedColumnNames: id
+            constraintName: fk_question_answer_variant_test_question

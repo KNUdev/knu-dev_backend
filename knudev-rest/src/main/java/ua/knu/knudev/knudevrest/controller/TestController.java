@@ -1,12 +1,17 @@
 package ua.knu.knudev.knudevrest.controller;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import ua.knu.knudev.educationapi.api.EducationProgramApi;
 
 @RestController
 @RequestMapping("/test")
+@RequiredArgsConstructor
 public class TestController {
+
+    private final EducationProgramApi educationProgramApi;
 
     @GetMapping("/guest")
     public String guest() {
@@ -31,6 +36,11 @@ public class TestController {
     @GetMapping(value = "/cyrillic", produces = "text/plain;charset=UTF-8")
     public String testCyrillic() {
         return "Перевірка нашого українського алфавіту!";
+    }
+
+    @GetMapping("/image")
+    public String getImageUrl() {
+        return educationProgramApi.getTest();
     }
 
 }

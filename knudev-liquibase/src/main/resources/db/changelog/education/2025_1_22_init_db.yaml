@@ -1,0 +1,499 @@
+databaseChangeLog:
+  - changeSet:
+      id: create_education_tables
+      author: Vladyslav Shtaiier
+      changes:
+
+        # 1) Create 'program' table
+        - createTable:
+            tableName: program
+            schemaName: education
+            columns:
+              - column:
+                  name: id
+                  type: uuid
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: en_name
+                  type: varchar(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: uk_name
+                  type: varchar(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: en_description
+                  type: varchar(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: uk_description
+                  type: varchar(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: created_date
+                  type: timestamp
+                  defaultValueComputed: CURRENT_TIMESTAMP
+                  constraints:
+                    nullable: false
+              - column:
+                  name: last_modified_date
+                  type: timestamp
+              - column:
+                  name: expertise
+                  type: varchar(50)
+              - column:
+                  name: version
+                  type: int
+                  defaultValueNumeric: 1
+                  constraints:
+                    nullable: false
+              - column:
+                  name: is_published
+                  type: boolean
+                  constraints:
+                    nullable: false
+              - column:
+                  name: final_task_id
+                  type: uuid
+                  constraints:
+                    nullable: false
+        - addForeignKeyConstraint:
+            baseTableSchemaName: education
+            baseTableName: program
+            baseColumnNames: final_task_id
+            constraintName: fk_program_final_task
+            referencedTableName: education_program_task
+            referencedColumnNames: id
+            referencedTableSchemaName: assessment_management
+
+        #todo test
+        - createTable:
+            tableName: section
+            schemaName: education
+            columns:
+              - column:
+                  name: id
+                  type: uuid
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: en_name
+                  type: varchar(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: uk_name
+                  type: varchar(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: en_description
+                  type: varchar(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: uk_description
+                  type: varchar(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: created_date
+                  type: timestamp
+                  defaultValueComputed: CURRENT_TIMESTAMP
+                  constraints:
+                    nullable: false
+              - column:
+                  name: last_modified_date
+                  type: timestamp
+              - column:
+                  name: task_id
+                  type: uuid
+                  constraints:
+                    nullable: true
+        - addForeignKeyConstraint:
+            baseTableSchemaName: education
+            baseTableName: section
+            baseColumnNames: task_id
+            constraintName: fk_section_task
+            referencedTableName: education_program_task
+            referencedColumnNames: id
+            referencedTableSchemaName: assessment_management
+#todo test
+        - createTable:
+            tableName: module
+            schemaName: education
+            columns:
+              - column:
+                  name: id
+                  type: uuid
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: en_name
+                  type: varchar(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: uk_name
+                  type: varchar(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: en_description
+                  type: varchar(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: uk_description
+                  type: varchar(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: created_date
+                  type: timestamp
+                  defaultValueComputed: CURRENT_TIMESTAMP
+                  constraints:
+                    nullable: false
+              - column:
+                  name: last_modified_date
+                  type: timestamp
+              - column:
+                  name: task_id
+                  type: uuid
+                  constraints:
+                    nullable: false
+        - addForeignKeyConstraint:
+            baseTableSchemaName: education
+            baseTableName: module
+            baseColumnNames: task_id
+            constraintName: fk_module_task
+            referencedTableName: education_program_task
+            referencedColumnNames: id
+            referencedTableSchemaName: assessment_management
+
+        #todo tests
+        - createTable:
+            tableName: topic
+            schemaName: education
+            columns:
+              - column:
+                  name: id
+                  type: uuid
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: en_name
+                  type: varchar(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: uk_name
+                  type: varchar(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: en_description
+                  type: varchar(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: uk_description
+                  type: varchar(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: created_date
+                  type: timestamp
+                  defaultValueComputed: CURRENT_TIMESTAMP
+                  constraints:
+                    nullable: false
+              - column:
+                  name: last_modified_date
+                  type: timestamp
+              - column:
+                  name: task_id
+                  type: uuid
+                  constraints:
+                    nullable: true
+        - addForeignKeyConstraint:
+            baseTableSchemaName: education
+            baseTableName: topic
+            baseColumnNames: task_id
+            constraintName: fk_topic_task
+            referencedTableName: education_program_task
+            referencedColumnNames: id
+            referencedTableSchemaName: assessment_management
+
+
+        # 4a) 'topic_learning_materials' table for collection
+        - createTable:
+            tableName: topic_learning_resources
+            schemaName: education
+            columns:
+              - column:
+                  name: topic_id
+                  type: uuid
+                  constraints:
+                    nullable: false
+              - column:
+                  name: learning_resource
+                  type: varchar(255)
+        - addPrimaryKey:
+            columnNames: "topic_id, learning_resource"
+            constraintName: pk_topic_learning_resources
+            tableName: topic_learning_resources
+            schemaName: education
+        - addForeignKeyConstraint:
+            baseTableSchemaName: education
+            baseTableName: topic_learning_resources
+            baseColumnNames: topic_id
+            constraintName: fk_topic_learning_resources_topic
+            referencedTableName: topic
+            referencedColumnNames: id
+            referencedTableSchemaName: education
+
+        # 5) bridging: program_section_mapping
+        - createTable:
+            tableName: program_section_mapping
+            schemaName: education
+            columns:
+              - column:
+                  name: id
+                  type: uuid
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: program_id
+                  type: uuid
+                  constraints:
+                    nullable: false
+              - column:
+                  name: section_id
+                  type: uuid
+                  constraints:
+                    nullable: false
+              - column:
+                  name: order_index
+                  type: int
+                  constraints:
+                    nullable: false
+        - addForeignKeyConstraint:
+            baseTableSchemaName: education
+            baseTableName: program_section_mapping
+            baseColumnNames: program_id
+            constraintName: fk_psm_program
+            referencedTableName: program
+            referencedColumnNames: id
+            referencedTableSchemaName: education
+        - addForeignKeyConstraint:
+            baseTableSchemaName: education
+            baseTableName: program_section_mapping
+            baseColumnNames: section_id
+            constraintName: fk_psm_section
+            referencedTableName: section
+            referencedColumnNames: id
+            referencedTableSchemaName: education
+        - addUniqueConstraint:
+            tableName: program_section_mapping
+            schemaName: education
+            columnNames: "program_id, section_id"
+            constraintName: uq_psm_program_section_pair
+        - addUniqueConstraint:
+            tableName: program_section_mapping
+            schemaName: education
+            columnNames: "program_id, order_index"
+            constraintName: uq_psm_program_order
+
+        # Create indexes for bridging:
+        # foreign key columns
+        - createIndex:
+            tableName: program_section_mapping
+            schemaName: education
+            indexName: idx_psm_program_id
+            columns:
+              - column:
+                  name: program_id
+        - createIndex:
+            tableName: program_section_mapping
+            schemaName: education
+            indexName: idx_psm_section_id
+            columns:
+              - column:
+                  name: section_id
+
+        # multi-column (program_id, order_index)
+        - createIndex:
+            tableName: program_section_mapping
+            schemaName: education
+            indexName: idx_psm_program_order
+            columns:
+              - column:
+                  name: program_id
+              - column:
+                  name: order_index
+
+        # 6) bridging: section_module_mapping
+        - createTable:
+            tableName: section_module_mapping
+            schemaName: education
+            columns:
+              - column:
+                  name: id
+                  type: uuid
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: section_id
+                  type: uuid
+                  constraints:
+                    nullable: false
+              - column:
+                  name: module_id
+                  type: uuid
+                  constraints:
+                    nullable: false
+              - column:
+                  name: order_index
+                  type: int
+                  constraints:
+                    nullable: false
+        - addForeignKeyConstraint:
+            baseTableSchemaName: education
+            baseTableName: section_module_mapping
+            baseColumnNames: section_id
+            constraintName: fk_smm_section
+            referencedTableName: section
+            referencedColumnNames: id
+            referencedTableSchemaName: education
+        - addForeignKeyConstraint:
+            baseTableSchemaName: education
+            baseTableName: section_module_mapping
+            baseColumnNames: module_id
+            constraintName: fk_smm_module
+            referencedTableName: module
+            referencedColumnNames: id
+            referencedTableSchemaName: education
+        - addUniqueConstraint:
+            tableName: section_module_mapping
+            schemaName: education
+            columnNames: "section_id, module_id"
+            constraintName: uq_smm_section_module_pair
+        - addUniqueConstraint:
+            tableName: section_module_mapping
+            schemaName: education
+            columnNames: "section_id, order_index"
+            constraintName: uq_smm_section_order
+
+        # Create indexes for bridging:
+        - createIndex:
+            tableName: section_module_mapping
+            schemaName: education
+            indexName: idx_smm_section_id
+            columns:
+              - column:
+                  name: section_id
+        - createIndex:
+            tableName: section_module_mapping
+            schemaName: education
+            indexName: idx_smm_module_id
+            columns:
+              - column:
+                  name: module_id
+        - createIndex:
+            tableName: section_module_mapping
+            schemaName: education
+            indexName: idx_smm_section_order
+            columns:
+              - column:
+                  name: section_id
+              - column:
+                  name: order_index
+
+        # 7) bridging: module_topic_mapping
+        - createTable:
+            tableName: module_topic_mapping
+            schemaName: education
+            columns:
+              - column:
+                  name: id
+                  type: uuid
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: module_id
+                  type: uuid
+                  constraints:
+                    nullable: false
+              - column:
+                  name: topic_id
+                  type: uuid
+                  constraints:
+                    nullable: false
+              - column:
+                  name: order_index
+                  type: int
+                  constraints:
+                    nullable: false
+        - addForeignKeyConstraint:
+            baseTableSchemaName: education
+            baseTableName: module_topic_mapping
+            baseColumnNames: module_id
+            constraintName: fk_mtm_module
+            referencedTableName: module
+            referencedColumnNames: id
+            referencedTableSchemaName: education
+        - addForeignKeyConstraint:
+            baseTableSchemaName: education
+            baseTableName: module_topic_mapping
+            baseColumnNames: topic_id
+            constraintName: fk_mtm_topic
+            referencedTableName: topic
+            referencedColumnNames: id
+            referencedTableSchemaName: education
+        - addUniqueConstraint:
+            tableName: module_topic_mapping
+            schemaName: education
+            columnNames: "module_id, topic_id"
+            constraintName: uq_mtm_module_topic_pair
+        - addUniqueConstraint:
+            tableName: module_topic_mapping
+            schemaName: education
+            columnNames: "module_id, order_index"
+            constraintName: uq_mtm_module_order
+
+        # Create indexes for bridging:
+        - createIndex:
+            tableName: module_topic_mapping
+            schemaName: education
+            indexName: idx_mtm_module_id
+            columns:
+              - column:
+                  name: module_id
+        - createIndex:
+            tableName: module_topic_mapping
+            schemaName: education
+            indexName: idx_mtm_topic_id
+            columns:
+              - column:
+                  name: topic_id
+        - createIndex:
+            tableName: module_topic_mapping
+            schemaName: education
+            indexName: idx_mtm_module_order
+            columns:
+              - column:
+                  name: module_id
+              - column:
+                  name: order_index

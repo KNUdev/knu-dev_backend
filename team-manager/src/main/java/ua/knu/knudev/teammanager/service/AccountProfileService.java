@@ -3,7 +3,6 @@ package ua.knu.knudev.teammanager.service;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -31,10 +30,10 @@ import ua.knu.knudev.teammanagerapi.constant.AccountsCriteriaFilterOption;
 import ua.knu.knudev.teammanagerapi.dto.AccountProfileDto;
 import ua.knu.knudev.teammanagerapi.dto.AccountSearchCriteria;
 import ua.knu.knudev.teammanagerapi.dto.ShortAccountProfileDto;
+import ua.knu.knudev.teammanagerapi.dto.AccountSearchCriteria;
 import ua.knu.knudev.teammanagerapi.exception.AccountException;
 import ua.knu.knudev.teammanagerapi.response.AccountRegistrationResponse;
 
-import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.EnumMap;
 import java.util.Map;
@@ -59,7 +58,7 @@ public class AccountProfileService implements AccountProfileApi {
         departmentService.validateAcademicUnitExistence(request.departmentId(), request.specialtyCodename());
 
         AuthAccountCreationResponse createdAuthAccount = accountAuthServiceApi.createAccount(request);
-        String uploadFilename = uploadAvatar(request.avatarFile());
+        String uploadFilename = uploadImageAvatar(request.avatarFile());
 
         AccountProfile accountProfileToSave = buildAccountProfile(request, uploadFilename, createdAuthAccount);
         AccountProfile savedAccount = accountProfileRepository.save(accountProfileToSave);
@@ -128,18 +127,6 @@ public class AccountProfileService implements AccountProfileApi {
                 .orElseThrow(() -> new AccountException(
                         String.format("Account with id %s does not exist", id)
                 ));
-    }
-
-    private String uploadAvatar(MultipartFile file) {
-        try {
-            boolean fileIsPresent = ObjectUtils.isNotEmpty(file) && ArrayUtils.getLength(file.getBytes()) != 0;
-            if (fileIsPresent) {
-                return imageServiceApi.uploadFile(file, ImageSubfolder.ACCOUNT_PICTURES);
-            }
-        } catch (IOException e) {
-            throw new FileException("Error while reading the file.");
-        }
-        return null;
     }
 
     private void validateEmailNotExists(String email) {
@@ -233,5 +220,12 @@ public class AccountProfileService implements AccountProfileApi {
         if (value != null) {
             filters.put(option, value);
         }
+    }
+
+    private String uploadImageAvatar(MultipartFile avatarFile) {
+        if (ObjectUtils.isEmpty(avatarFile)) {
+            return null;
+        }
+        return imageServiceApi.uploadFile(avatarFile, ImageSubfolder.ACCOUNT_PICTURES);
     }
 }

@@ -35,11 +35,11 @@
         </dependency>
         <dependency>
             <groupId>ua.knu</groupId>
-            <artifactId>task-manager</artifactId>
+            <artifactId>assessment-manager</artifactId>
         </dependency>
         <dependency>
             <groupId>ua.knu</groupId>
-            <artifactId>task-manager-api</artifactId>
+            <artifactId>assessment-manager-api</artifactId>
         </dependency>
         <dependency>
             <groupId>ua.knu</groupId>
@@ -48,6 +48,14 @@
         <dependency>
             <groupId>ua.knu</groupId>
             <artifactId>team-manager-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>ua.knu</groupId>
+            <artifactId>education</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>ua.knu</groupId>
+            <artifactId>education-api</artifactId>
         </dependency>
         <dependency>
             <groupId>ua.knu</groupId>

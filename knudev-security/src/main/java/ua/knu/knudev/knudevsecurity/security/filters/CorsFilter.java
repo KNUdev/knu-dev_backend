@@ -29,22 +29,22 @@ public class CorsFilter extends OncePerRequestFilter {
                                     FilterChain filterChain)
             throws ServletException, IOException {
 
-        String origin = request.getHeader("Origin");
-
-        // Check if origin is allowed
-        if (isAllowedOrigin(origin)) {
-            setCorsHeaders(response, origin);
-
-            // Handle preflight OPTIONS request
-            if (isPreflightRequest(request)) {
-                handlePreflightRequest(request, response);
-                return;  // Short-circuit after responding to preflight
-            }
-        } else {
-            // Reject requests from disallowed origins
-            response.sendError(HttpServletResponse.SC_FORBIDDEN, "CORS origin denied");
-            return;
-        }
+//        String origin = request.getHeader("Origin");
+//
+//        // Check if origin is allowed
+//        if (isAllowedOrigin(origin)) {
+//            setCorsHeaders(response, origin);
+//
+//            // Handle preflight OPTIONS request
+//            if (isPreflightRequest(request)) {
+//                handlePreflightRequest(request, response);
+//                return;  // Short-circuit after responding to preflight
+//            }
+//        } else {
+//            // Reject requests from disallowed origins
+//            response.sendError(HttpServletResponse.SC_FORBIDDEN, "CORS origin denied");
+//            return;
+//        }
 
         filterChain.doFilter(request, response);
     }

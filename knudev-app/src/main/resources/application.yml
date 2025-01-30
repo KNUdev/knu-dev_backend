@@ -38,6 +38,7 @@ logging:
   level:
     org:
       springframework:
+        web: debug
         transaction:
           support:
             TransactionSynchronizationUtils: info
@@ -67,7 +68,7 @@ application:
       tasks:
         allowed-extensions:
           - pdf
-        maximum-size-in-kilobytes: 2048
+        maximum-size-in-kilobytes: 5120
   assignments:
     activation-expiry-in-days: 7
   recruitment:

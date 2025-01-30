@@ -8,20 +8,20 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.web.multipart.MultipartFile;
+import ua.knu.knudev.assessmentmanager.domain.TaskAssignment;
+import ua.knu.knudev.assessmentmanager.domain.TaskAssignmentStatus;
+import ua.knu.knudev.assessmentmanager.repository.RolePromotionTaskRepository;
+import ua.knu.knudev.assessmentmanager.repository.TaskAssignmentRepository;
+import ua.knu.knudev.assessmentmanager.service.RolePromotionTaskService;
+import ua.knu.knudev.assessmentmanager.service.TaskAssignmentService;
+import ua.knu.knudev.assessmentmanagerapi.exception.TaskAssignmentException;
+import ua.knu.knudev.assessmentmanagerapi.exception.TaskException;
+import ua.knu.knudev.assessmentmanagerapi.response.TaskAssignmentResponse;
 import ua.knu.knudev.intergrationtests.config.IntegrationTestsConfig;
 import ua.knu.knudev.knudevcommon.constant.AccountTechnicalRole;
 import ua.knu.knudev.knudevcommon.constant.Expertise;
 import ua.knu.knudev.knudevsecurity.repository.AccountAuthRepository;
 import ua.knu.knudev.knudevsecurityapi.request.AccountCreationRequest;
-import ua.knu.knudev.taskmanager.domain.TaskAssignment;
-import ua.knu.knudev.taskmanager.domain.TaskAssignmentStatus;
-import ua.knu.knudev.taskmanager.repository.TaskAssignmentRepository;
-import ua.knu.knudev.taskmanager.repository.TaskRepository;
-import ua.knu.knudev.taskmanager.service.TaskAssignmentService;
-import ua.knu.knudev.taskmanager.service.TaskUploadService;
-import ua.knu.knudev.taskmanagerapi.exception.TaskAssignmentException;
-import ua.knu.knudev.taskmanagerapi.exception.TaskException;
-import ua.knu.knudev.taskmanagerapi.response.TaskAssignmentResponse;
 import ua.knu.knudev.teammanager.domain.Department;
 import ua.knu.knudev.teammanager.domain.Specialty;
 import ua.knu.knudev.teammanager.domain.embeddable.MultiLanguageField;
@@ -47,7 +47,7 @@ public class TaskAssignmentServiceIntegrationTest {
     private static final String TEST_LAST_NAME = "Doe";
     private static final String TEST_MIDDLE_NAME = "Middle";
     private static final String TEST_FILE_NAME = "avatar.png";
-    private static final String TASK_FILE_NAME = "Task_Developer_MoonlightWalk.pdf";
+    private static final String TASK_FILE_NAME = "Task_DEVELOPER_MoonlightWalk.pdf";
     @Autowired
     private TaskAssignmentService taskAssignmentService;
     @Autowired
@@ -61,11 +61,11 @@ public class TaskAssignmentServiceIntegrationTest {
     @Autowired
     private AccountProfileRepository accountProfileRepository;
     @Autowired
-    private TaskUploadService taskUploadService;
+    private RolePromotionTaskService taskUploadService;
     @Autowired
     private TaskAssignmentRepository taskAssignmentRepository;
     @Autowired
-    private TaskRepository taskRepository;
+    private RolePromotionTaskRepository taskRepository;
     @Value("${application.assignments.activation-expiry-in-days}")
     private Integer assignmentActivationExpiryInDays;
     private Department testDepartment;
@@ -143,12 +143,14 @@ public class TaskAssignmentServiceIntegrationTest {
     }
 
     @Nested
-    @DisplayName("Assign Task Tests")
-    class AssignTaskTests {
+    @DisplayName("Assign TaskDomain Tests")
+    class AssignTaskDomainTests {
 
         @Test
         @DisplayName("Should create task assignment when given valid data")
         public void should_CreateTaskAssignment_When_GivenValidData() {
+            //Arrange
+
             // Act
             TaskAssignmentResponse response = taskAssignmentService.assignTaskToAccount(accountEmail);
 
@@ -157,12 +159,12 @@ public class TaskAssignmentServiceIntegrationTest {
             assertNotNull(response.verificationCode(), "Verification code should not be null");
 
             Optional<TaskAssignment> assignmentOpt = taskAssignmentRepository.findByAssignedAccountEmail(accountEmail);
-            assertTrue(assignmentOpt.isPresent(), "Task assignment should be saved in repository");
+            assertTrue(assignmentOpt.isPresent(), "TaskDomain assignment should be saved in repository");
 
             TaskAssignment assignment = assignmentOpt.get();
             assertEquals(accountEmail, assignment.getAssignedAccountEmail(), "Assigned account email should match");
             assertNotNull(assignment.getVerificationCode(), "Verification code should not be null");
-            assertNotNull(assignment.getTask(), "Task should not be null");
+            assertNotNull(assignment.getTask(), "TaskDomain should not be null");
             assertEquals(TaskAssignmentStatus.PENDING, assignment.getStatus(), "Status should be PENDING");
             assertNotNull(assignment.getCreationDate(), "Creation date should not be null");
             assertNotNull(assignment.getActivationExpiryDate(), "Activation expiry date should not be null");
@@ -181,7 +183,7 @@ public class TaskAssignmentServiceIntegrationTest {
                     () -> taskAssignmentService.assignTaskToAccount(accountEmail)
             );
 
-            assertEquals("Task for this account is already assigned", exception.getMessage());
+            assertEquals("TaskDomain for this account is already assigned", exception.getMessage());
         }
 
         @Test

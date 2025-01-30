@@ -1,6 +1,7 @@
 package ua.knu.knudev.fileserviceapi.api;
 
-import ua.knu.knudev.fileserviceapi.subfolder.PdfSubfolder;
+import ua.knu.knudev.fileserviceapi.subfolder.PdfSubfolderI;
 
-public interface PDFServiceApi extends BaseFileServiceApi<PdfSubfolder> {
+public interface PDFServiceApi extends BaseFileServiceApi<PdfSubfolderI> {
+    String getFile();
 }

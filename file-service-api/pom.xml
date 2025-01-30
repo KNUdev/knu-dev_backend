@@ -11,5 +11,11 @@
     </parent>
 
     <artifactId>file-service-api</artifactId>
+    <dependencies>
+        <dependency>
+            <groupId>ua.knu</groupId>
+            <artifactId>knudev-common</artifactId>
+        </dependency>
+    </dependencies>
 
 </project>

@@ -13,8 +13,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import ua.knu.knudev.knudevsecurityapi.response.ErrorResponse;
-import ua.knu.knudev.taskmanagerapi.api.TaskAssignmentApi;
-import ua.knu.knudev.taskmanagerapi.response.TaskAssignmentResponse;
+import ua.knu.knudev.assessmentmanagerapi.api.TaskAssignmentApi;
+import ua.knu.knudev.assessmentmanagerapi.response.TaskAssignmentResponse;
 
 @RestController
 @RequiredArgsConstructor

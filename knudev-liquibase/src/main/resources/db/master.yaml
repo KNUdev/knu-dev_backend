@@ -1,9 +1,12 @@
 databaseChangeLog:
   - includeAll:
-      path: changelog/task_management/
+      path: changelog/assessment_management/
       relativeToChangelogFile: true
   - includeAll:
       path: changelog/team_management/
+      relativeToChangelogFile: true
+  - includeAll:
+      path: changelog/education/
       relativeToChangelogFile: true
   - includeAll:
       path: changelog/security_management/

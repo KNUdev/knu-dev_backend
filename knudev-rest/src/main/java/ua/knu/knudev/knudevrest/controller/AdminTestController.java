@@ -13,12 +13,12 @@ import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
+import ua.knu.knudev.assessmentmanagerapi.api.TestManagementApi;
+import ua.knu.knudev.assessmentmanagerapi.dto.FullTestDto;
+import ua.knu.knudev.assessmentmanagerapi.dto.QuestionAnswerVariantDto;
+import ua.knu.knudev.assessmentmanagerapi.dto.TestQuestionDto;
+import ua.knu.knudev.assessmentmanagerapi.request.TestCreationRequest;
 import ua.knu.knudev.knudevsecurityapi.response.ErrorResponse;
-import ua.knu.knudev.taskmanagerapi.api.TestManagementApi;
-import ua.knu.knudev.taskmanagerapi.dto.FullTestDto;
-import ua.knu.knudev.taskmanagerapi.dto.QuestionAnswerVariantDto;
-import ua.knu.knudev.taskmanagerapi.dto.TestQuestionDto;
-import ua.knu.knudev.taskmanagerapi.request.TestCreationRequest;
 
 import java.util.UUID;
 
