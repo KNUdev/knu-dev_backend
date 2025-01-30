@@ -8,6 +8,8 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
@@ -51,7 +53,7 @@ public class AdminTestController {
             )
     })
     @PostMapping("/create")
-    public FullTestDto createTest(@RequestParam @Parameter(
+    public FullTestDto createTest(@Valid @NotNull @RequestParam @Parameter(
             name = "Test creation request",
             description = "Test creation data",
             in = ParameterIn.HEADER,
@@ -209,7 +211,8 @@ public class AdminTestController {
             )
     })
     @PatchMapping("/{testId}/question/add")
-    public void addQuestion(@PathVariable UUID testId, @RequestParam TestQuestionDto question) {
+    public void addQuestion(@PathVariable UUID testId,
+                            @Valid @NotNull @RequestParam TestQuestionDto question) {
         testManagementApi.addTestQuestion(testId, question);
     }
 
@@ -338,7 +341,8 @@ public class AdminTestController {
             )
     })
     @PatchMapping("/question/{questionId}/add/answer-variant")
-    public void addQuestionAnswer(@PathVariable UUID questionId, @RequestParam QuestionAnswerVariantDto answerVariant) {
+    public void addQuestionAnswer(@PathVariable UUID questionId,
+                                  @Valid @NotNull @RequestParam QuestionAnswerVariantDto answerVariant) {
         testManagementApi.addQuestionAnswerVariant(questionId, answerVariant);
     }
 
