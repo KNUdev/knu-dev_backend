@@ -1,4 +1,4 @@
-package ua.knu.knudev.taskmanagerapi.dto;
+package ua.knu.knudev.assessmentmanagerapi.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotEmpty;

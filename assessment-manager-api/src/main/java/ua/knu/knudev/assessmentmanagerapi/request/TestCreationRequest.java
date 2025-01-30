@@ -1,11 +1,11 @@
-package ua.knu.knudev.taskmanagerapi.request;
+package ua.knu.knudev.assessmentmanagerapi.request;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Pattern;
 import lombok.Builder;
-import ua.knu.knudev.taskmanagerapi.dto.TestQuestionDto;
+import ua.knu.knudev.assessmentmanagerapi.dto.TestQuestionDto;
 
 import java.util.List;
 

@@ -1,7 +1,7 @@
-package ua.knu.knudev.taskmanager.repository;
+package ua.knu.knudev.assessmentmanager.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
-import ua.knu.knudev.taskmanager.domain.QuestionAnswerVariant;
+import ua.knu.knudev.assessmentmanager.domain.QuestionAnswerVariant;
 
 import java.util.UUID;
 

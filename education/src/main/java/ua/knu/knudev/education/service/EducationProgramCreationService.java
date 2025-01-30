@@ -50,7 +50,7 @@ public class EducationProgramCreationService implements EducationProgramApi {
     private final ModuleTopicMappingRepository moduleTopicMappingRepository;
     private final EducationProgramRequestCoherenceValidator inputReqCoherenceValidator;
     private final EducationTaskApi educationTaskApi;
-    private final MultiLanguageFieldMapper multiLangFieldMapper;
+    private final EducationMultiLanguageFieldMapper multiLangFieldMapper;
 
     private final ProgramMapper programMapper;
     private final SectionMapper sectionMapper;

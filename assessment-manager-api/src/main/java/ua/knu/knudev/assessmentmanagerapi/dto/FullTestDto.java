@@ -1,4 +1,4 @@
-package ua.knu.knudev.taskmanagerapi.dto;
+package ua.knu.knudev.assessmentmanagerapi.dto;
 
 import lombok.Builder;
 

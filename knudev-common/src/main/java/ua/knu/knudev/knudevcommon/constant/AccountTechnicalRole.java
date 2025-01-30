@@ -28,18 +28,13 @@ public enum AccountTechnicalRole implements AccountRole {
     private final String displayName;
     private final String roleId;
 
-    @Override
-    public String getDisplayName() {
-        return displayName;
-    }
-
     public static AccountTechnicalRole getFromString(String stringAccountTechnicalRole) {
         //todo checks
         return AccountTechnicalRole.valueOf(stringAccountTechnicalRole);
     }
 
     public static AccountTechnicalRole getById(String id) {
-        if(StringUtils.isEmpty(id)) {
+        if (StringUtils.isEmpty(id)) {
             throw new IllegalArgumentException("Role id is null or empty");
         }
         for (AccountTechnicalRole role : values()) {
@@ -48,6 +43,11 @@ public enum AccountTechnicalRole implements AccountRole {
             }
         }
         throw new IllegalArgumentException("No AccountTechnicalRole found for id: " + id);
+    }
+
+    @Override
+    public String getDisplayName() {
+        return displayName;
     }
 
 }

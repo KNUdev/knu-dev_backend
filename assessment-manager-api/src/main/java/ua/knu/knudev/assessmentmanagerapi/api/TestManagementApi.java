@@ -1,9 +1,9 @@
-package ua.knu.knudev.taskmanagerapi.api;
+package ua.knu.knudev.assessmentmanagerapi.api;
 
-import ua.knu.knudev.taskmanagerapi.dto.FullTestDto;
-import ua.knu.knudev.taskmanagerapi.dto.QuestionAnswerVariantDto;
-import ua.knu.knudev.taskmanagerapi.dto.TestQuestionDto;
-import ua.knu.knudev.taskmanagerapi.request.TestCreationRequest;
+import ua.knu.knudev.assessmentmanagerapi.dto.FullTestDto;
+import ua.knu.knudev.assessmentmanagerapi.dto.QuestionAnswerVariantDto;
+import ua.knu.knudev.assessmentmanagerapi.dto.TestQuestionDto;
+import ua.knu.knudev.assessmentmanagerapi.request.TestCreationRequest;
 
 import java.util.UUID;
 

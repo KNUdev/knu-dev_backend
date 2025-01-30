@@ -1,4 +1,4 @@
-package ua.knu.knudev.taskmanager.domain;
+package ua.knu.knudev.assessmentmanager.domain;
 
 import jakarta.persistence.*;
 import lombok.*;
@@ -12,7 +12,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @Entity
 @Builder
-@Table(schema = "task_management", name = "question_answer_variant")
+@Table(schema = "assessment_management", name = "question_answer_variant")
 public class QuestionAnswerVariant {
     @Id
     @UuidGenerator

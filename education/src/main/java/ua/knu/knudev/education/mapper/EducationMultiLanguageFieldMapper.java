@@ -6,5 +6,6 @@ import ua.knu.knudev.knudevcommon.dto.MultiLanguageFieldDto;
 import ua.knu.knudev.knudevcommon.mapper.BaseMapper;
 
 @Mapper(componentModel = "spring")
-public interface MultiLanguageFieldMapper extends BaseMapper<MultiLanguageField, MultiLanguageFieldDto> {
+//todo move to common
+public interface EducationMultiLanguageFieldMapper extends BaseMapper<MultiLanguageField, MultiLanguageFieldDto> {
 }

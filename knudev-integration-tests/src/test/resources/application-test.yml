@@ -14,12 +14,9 @@ spring:
     change-log: classpath:db/master.yaml
   jpa:
 #    show-sql: true
-    properties:
-      hibernate:
-        format_sql: true
     hibernate:
       ddl-auto: create-drop
-    show-sql: true
+#    show-sql: true
     properties:
       hibernate:
         format_sql: true
@@ -49,3 +46,8 @@ application:
         maximum-size-in-kilobytes: 2048
   assignments:
     activation-expiry-in-days: 7
+
+github:
+  api:
+    access-token: TEST
+    organization-name: KNUdev
