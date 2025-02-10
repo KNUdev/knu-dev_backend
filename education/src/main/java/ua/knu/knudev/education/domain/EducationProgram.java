@@ -36,6 +36,9 @@ public class EducationProgram {
     })
     private MultiLanguageField description;
 
+    @Column(name = "banner", nullable = false)
+    private String banner;
+
     @CreationTimestamp
     private LocalDateTime createdDate;
     private LocalDateTime lastModifiedDate;

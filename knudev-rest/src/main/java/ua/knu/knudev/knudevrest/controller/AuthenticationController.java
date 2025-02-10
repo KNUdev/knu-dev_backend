@@ -7,6 +7,8 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -63,4 +65,14 @@ public class AuthenticationController {
     ) {
         return ResponseEntity.ok(authServiceApi.authenticate(authenticationRequest));
     }
+
+//    @PostMapping("/refresh-token")
+//    public void refreshToken(HttpServletRequest request, HttpServletResponse response) throws IOException {
+//        authApi.refreshToken(request, response);
+//    }
+//
+//    @PostMapping("/tfa/code/verify")
+//    public AuthenticationResponse verifyTfaCode(@Valid TfaVerificationRequest request) {
+//        return authApi.verifyTfaCode(request);
+//    }
 }

@@ -152,7 +152,7 @@ public class AccountProfileServiceIntegrationTest {
         assertEquals(testSpecialty.getCodeName(), savedAccount.getSpecialty().getCodeName(), "Specialty code names should match");
 
         assertTrue(accountAuthRepository.existsByEmail(TEST_EMAIL), "Auth account should exist");
-        assertTrue(imageService.existsByFilename(savedAccount.getAvatarFilename(), ImageSubfolder.ACCOUNT_PICTURES), "Avatar file should exist");
+        assertTrue(imageService.existsByFilename(savedAccount.getAvatarFilename(), ImageSubfolder.ACCOUNT_AVATARS), "Avatar file should exist");
     }
 
     @Test

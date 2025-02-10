@@ -85,6 +85,9 @@ public record AccountCreationRequest(
         @Schema(description = "Avatar file of the user", implementation = MultipartFile.class)
         MultipartFile avatarFile,
 
+        @Schema(description = "Banner file of the user", implementation = MultipartFile.class)
+        MultipartFile bannerFile,
+
         @Schema(description = "Defines the expertise areas of an employee", requiredMode = Schema.RequiredMode.REQUIRED)
         @NotNull(message = "Expertise must not be null")
         Expertise expertise,

@@ -270,12 +270,12 @@ class AccountProfileServiceTest {
     }
 
     private Object uploadAvatar() {
-        return imageServiceApi.uploadFile(mockAvatarFile, ImageSubfolder.ACCOUNT_PICTURES);
+        return imageServiceApi.uploadFile(mockAvatarFile, ImageSubfolder.ACCOUNT_AVATARS);
     }
 
     private void verifyUploadAvatar() {
         verify(imageServiceApi, times(1))
-                .uploadFile(mockAvatarFile, ImageSubfolder.ACCOUNT_PICTURES);
+                .uploadFile(mockAvatarFile, ImageSubfolder.ACCOUNT_AVATARS);
     }
 
 }

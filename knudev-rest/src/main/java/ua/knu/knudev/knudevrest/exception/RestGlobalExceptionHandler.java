@@ -25,8 +25,8 @@ import java.util.*;
 public class RestGlobalExceptionHandler {
 
     @ExceptionHandler
-    public String handleAccountException(AccountException exception) {
-        return exception.getMessage();
+    public ResponseEntity<String> handleAccountException(AccountException exception) {
+        return new ResponseEntity<>(exception.getMessage(), exception.getStatus());
     }
 
     @ExceptionHandler(DepartmentException.class)

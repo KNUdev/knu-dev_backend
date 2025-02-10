@@ -26,7 +26,7 @@ public class FileService {
     private static final String PATH_TRAVERSAL_TOKEN = "..";
     private static final String ALLOWED_FILENAME_CHARACTERS_PATTERN = "^[a-zA-Z0-9]+$";
 
-    private final FileUploadAdapter fileUploadAdapter;
+    protected final FileUploadAdapter fileUploadAdapter;
 
     public String uploadFile(MultipartFile file,
                              final String customFilename,
@@ -49,12 +49,16 @@ public class FileService {
         return fileUploadAdapter.saveFile(fileUploadPayload);
     }
 
-    protected String getByFilename() {
-        //todo
-        return null;
+    protected String getPathByFilename(String filename,
+                                   FileFolderProperties<? extends FileSubfolder> fileFolderProperties) {
+        if(StringUtils.isEmpty(filename)) {
+            throw new FileException("Cannot retrieve empty file");
+        }
+        return fileUploadAdapter.getPathByFilename(filename, fileFolderProperties);
     }
 
-    public boolean existsByFilename(String filename, FileFolderProperties<? extends FileSubfolder> fileFolderProperties) {
+    public boolean existsByFilename(String filename,
+                                    FileFolderProperties<? extends FileSubfolder> fileFolderProperties) {
         return fileUploadAdapter.existsByFilename(filename, fileFolderProperties);
     }
 

@@ -40,6 +40,21 @@ public class PDFService extends FileService implements PDFServiceApi {
         return existsByFilename(filename, getFolderProperties(subfolder));
     }
 
+    @Override
+    public String getPathByFilename(String filename, PdfSubfolderI subfolder) {
+        return "";
+    }
+
+    @Override
+    public void removeByFilename(String filename, PdfSubfolderI subfolder) {
+
+    }
+
+    @Override
+    public String updateByFilename(String oldFilename, MultipartFile newFile, PdfSubfolderI subfolder) {
+        return "";
+    }
+
     private FileFolderProperties<PdfSubfolderI> getFolderProperties(PdfSubfolderI pdfSubfolder) {
         return FileFolderProperties.builder(PdfFolder.INSTANCE)
                 .subfolder(pdfSubfolder)

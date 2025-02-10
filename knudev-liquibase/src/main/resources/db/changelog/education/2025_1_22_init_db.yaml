@@ -26,6 +26,11 @@ databaseChangeLog:
                   constraints:
                     nullable: false
               - column:
+                  name: banner
+                  type: varchar(255)
+                  constraints:
+                    nullable: false
+              - column:
                   name: en_description
                   type: varchar(255)
                   constraints:
