@@ -18,7 +18,7 @@ public class CorsFilter extends OncePerRequestFilter {
     // Allow multiple trusted origins for flexibility in development/production
     private static final List<String> ALLOWED_ORIGINS = Arrays.asList("http://localhost:3000", "https://example.com");
 
-    private static final String ALLOWED_METHODS = "GET, POST, PUT, DELETE, OPTIONS";
+    private static final String ALLOWED_METHODS = "GET, POST, PUT, DELETE, PATCH, OPTIONS";
     private static final String ALLOWED_HEADERS = "Authorization,authorization,Content-Type,content-type";
     private static final String ALLOW_CREDENTIALS = "true";
     private static final long MAX_AGE = 3600; // 1 hour in seconds
@@ -29,22 +29,22 @@ public class CorsFilter extends OncePerRequestFilter {
                                     FilterChain filterChain)
             throws ServletException, IOException {
 
-//        String origin = request.getHeader("Origin");
-//
-//        // Check if origin is allowed
-//        if (isAllowedOrigin(origin)) {
-//            setCorsHeaders(response, origin);
-//
-//            // Handle preflight OPTIONS request
-//            if (isPreflightRequest(request)) {
-//                handlePreflightRequest(request, response);
-//                return;  // Short-circuit after responding to preflight
-//            }
-//        } else {
-//            // Reject requests from disallowed origins
-//            response.sendError(HttpServletResponse.SC_FORBIDDEN, "CORS origin denied");
-//            return;
-//        }
+        String origin = request.getHeader("Origin");
+
+        // Check if origin is allowed
+        if (isAllowedOrigin(origin)) {
+            setCorsHeaders(response, origin);
+
+            // Handle preflight OPTIONS request
+            if (isPreflightRequest(request)) {
+                handlePreflightRequest(request, response);
+                return;  // Short-circuit after responding to preflight
+            }
+        } else {
+            // Reject requests from disallowed origins
+            response.sendError(HttpServletResponse.SC_FORBIDDEN, "CORS origin denied");
+            return;
+        }
 
         filterChain.doFilter(request, response);
     }

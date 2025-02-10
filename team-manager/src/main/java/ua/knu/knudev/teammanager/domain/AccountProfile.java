@@ -35,6 +35,7 @@ public class AccountProfile {
     @Column(nullable = false, updatable = false, unique = true)
     private String email;
     private String avatarFilename;
+    private String bannerFilename;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "technical_role", nullable = false)

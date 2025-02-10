@@ -18,7 +18,7 @@ import ua.knu.knudev.assessmentmanagerapi.response.TaskAssignmentResponse;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/task/assign")
+@RequestMapping("/task")
 public class TaskAssignmentController {
 
     private final TaskAssignmentApi taskAssignmentApi;
@@ -50,11 +50,30 @@ public class TaskAssignmentController {
                             schema = @Schema(implementation = ErrorResponse.class)
                     ))
     })
-    @PostMapping("/to/{email}")
-    public TaskAssignmentResponse assignTask(
+    @PostMapping("/assign/to/{email}")
+    public TaskAssignmentResponse assignRolePromotionTask(
             @Parameter(name = "Account email", description = "Email address of the account to assign the task to",
                     example = "email@knu.ua", in = ParameterIn.HEADER, required = true)
             @PathVariable(name = "email") String accountEmail) {
         return taskAssignmentApi.assignTaskToAccount(accountEmail);
+    }
+
+    @PostMapping("/pass")
+    public void passRolePromotionTask() {
+        /*  todo
+            1. Receive the code and the .zip file. Validate the file before processing
+
+            2. Validate the code
+            3.
+
+            4. Remove the assignment, so task becomes free to take again
+            Fully remove or put to some completed assignments?
+         */
+
+
+        //Code
+        //Solution itself (github link or task file ??)
+        //
+
     }
 }

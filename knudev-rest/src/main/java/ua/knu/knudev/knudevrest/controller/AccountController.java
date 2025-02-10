@@ -12,17 +12,21 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import ua.knu.knudev.knudevsecurityapi.request.AccountCreationRequest;
 import ua.knu.knudev.knudevsecurityapi.response.ErrorResponse;
 import ua.knu.knudev.teammanagerapi.api.AccountProfileApi;
 import ua.knu.knudev.teammanagerapi.response.AccountRegistrationResponse;
+import ua.knu.knudev.teammanagerapi.response.GetAccountByIdResponse;
+
+import java.util.UUID;
 
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/account")
 public class AccountController {
 
-    private final AccountProfileApi accountAuthServiceApi;
+    private final AccountProfileApi accountProfileApi;
 
     @Operation(
             summary = "Register a new account",
@@ -57,6 +61,31 @@ public class AccountController {
                     required = true,
                     schema = @Schema(implementation = AccountCreationRequest.class)
             ) AccountCreationRequest registrationRequest) {
-        return accountAuthServiceApi.register(registrationRequest);
+        return accountProfileApi.register(registrationRequest);
+    }
+
+    @GetMapping("/{accountId}")
+    public GetAccountByIdResponse getById(@PathVariable String accountId) {
+        return accountProfileApi.getById(accountId);
+    }
+
+    @PatchMapping(value = "/{accountId}/avatar/update", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public String updateAvatar(@PathVariable UUID accountId, @RequestParam("newAvatar") MultipartFile newAvatar) {
+        return accountProfileApi.updateAvatar(accountId, newAvatar);
+    }
+
+    @DeleteMapping("/{accountId}/avatar/remove")
+    public void removeAvatar(@PathVariable UUID accountId) {
+        accountProfileApi.removeAvatar(accountId);
+    }
+
+    @PatchMapping(value = "/{accountId}/banner/update", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public String updateBanner(@PathVariable UUID accountId, @RequestParam("newBanner") MultipartFile newBanner) {
+        return accountProfileApi.updateBanner(accountId, newBanner);
+    }
+
+    @DeleteMapping("/{accountId}/banner/remove")
+    public void removeBanner(@PathVariable UUID accountId) {
+        accountProfileApi.removeBanner(accountId);
     }
 }

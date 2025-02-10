@@ -26,7 +26,10 @@ public record AccountProfileDto(
         AcademicUnitsIds academicUnitsIds,
 
         @Schema(description = "Avatar filename of the user", example = "avatar.png")
-        String avatarFilename
+        String avatarFilename,
+
+        @Schema(description = "Banner filename of the user", example = "banner.png")
+        String bannerFilename
 ) {
 }
 

@@ -12,4 +12,5 @@ public interface ShortDepartmentMapper extends BaseMapper<Department, ShortDepar
 
     MultiLanguageField map(MultiLanguageFieldDto dto);
 
+
 }

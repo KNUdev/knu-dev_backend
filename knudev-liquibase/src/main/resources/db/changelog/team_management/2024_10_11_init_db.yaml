@@ -167,8 +167,9 @@ databaseChangeLog:
               - column:
                   name: avatar_filename
                   type: varchar(75)
-                  constraints:
-                    nullable: true
+              - column:
+                  name: banner_filename
+                  type: varchar(75)
               - column:
                   name: expertise
                   type: varchar(30)

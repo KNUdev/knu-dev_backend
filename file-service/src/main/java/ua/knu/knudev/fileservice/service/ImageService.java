@@ -1,6 +1,7 @@
 package ua.knu.knudev.fileservice.service;
 
 import org.apache.commons.lang3.ObjectUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import ua.knu.knudev.fileservice.adapter.FileUploadAdapter;
@@ -25,7 +26,7 @@ public class ImageService extends FileService implements ImageServiceApi {
     @Override
     public String uploadFile(MultipartFile file, String customFilename, ImageSubfolder subfolder) {
         checkFileValidity(file);
-        return uploadFile(file, customFilename, getProperties(subfolder));
+        return uploadFile(file, customFilename, getFolderProperties(subfolder));
     }
 
     @Override
@@ -33,12 +34,36 @@ public class ImageService extends FileService implements ImageServiceApi {
         checkFileValidity(file);
 
         String filename = generateRandomUUIDFilename(file);
-        return uploadFile(file, filename, getProperties(subfolder));
+        return uploadFile(file, filename, getFolderProperties(subfolder));
     }
 
     @Override
     public boolean existsByFilename(String filename, ImageSubfolder subfolder) {
-        return existsByFilename(filename, getProperties(subfolder));
+        return existsByFilename(filename, getFolderProperties(subfolder));
+    }
+
+    @Override
+    public String getPathByFilename(String filename, ImageSubfolder subfolder) {
+        return getPathByFilename(filename, getFolderProperties(subfolder));
+    }
+
+    @Override
+    public void removeByFilename(String filename, ImageSubfolder subfolder) {
+        FileFolderProperties<ImageSubfolder> folderProperties = getFolderProperties(subfolder);
+        boolean fileExists = existsByFilename(filename, folderProperties);
+        if(!fileExists) {
+            throw new FileException(String.format("File with filename %s does not exist", filename));
+        }
+
+        fileUploadAdapter.deleteByFilename(filename, folderProperties);
+    }
+
+    @Override
+    public String updateByFilename(String oldFilename, MultipartFile newFile, ImageSubfolder subfolder) {
+        if(StringUtils.isNotEmpty(oldFilename)) {
+            removeByFilename(oldFilename, subfolder);
+        }
+        return uploadFile(newFile, subfolder);
     }
 
     private void checkFileValidity(MultipartFile file) {
@@ -49,7 +74,7 @@ public class ImageService extends FileService implements ImageServiceApi {
         checkFileSize(file);
     }
 
-    private FileFolderProperties<ImageSubfolder> getProperties(ImageSubfolder imageSubfolder) {
+    private FileFolderProperties<ImageSubfolder> getFolderProperties(ImageSubfolder imageSubfolder) {
         return FileFolderProperties.builder(ImageFolder.INSTANCE)
                 .subfolder(imageSubfolder)
                 .build();
