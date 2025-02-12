@@ -93,6 +93,6 @@ springdoc:
 
 github:
   api:
-    access-token: ${GITHUB_API_ACCESS_TOKEN}
+    access-token: ${GITHUB_API_ACCESS_TOKEN:dfdsffd}
     organization-name: KNUdev
 

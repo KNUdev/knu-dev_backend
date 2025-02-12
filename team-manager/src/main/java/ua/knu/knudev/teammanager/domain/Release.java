@@ -2,6 +2,7 @@ package ua.knu.knudev.teammanager.domain;
 
 import jakarta.persistence.*;
 import lombok.*;
+
 import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.Set;
@@ -20,29 +21,26 @@ public class Release {
     @Column(updatable = false, nullable = false)
     private UUID id;
 
-
     @Column
     //todo Це перший комміт після минулого релізу або баг фіксу
     private LocalDate releaseStartDate;
 
-
     @Column
     private LocalDate releaseFinishDate;
 
-    //todo maybe desctiption
-    //todo add version. major.minor.bf
+    @Column(nullable = false)
+    private String version;
 
-    @OneToOne
-    @MapsId
-    @JoinColumn(name = "id")
-    private Project project;
+    @ManyToOne
+    @MapsId("subprojectId")
+    @JoinColumn(name = "subproject_id", referencedColumnName = "id", nullable = false)
+    private Subproject subproject;
 
-    //todo logs
-    private String changesEn;
+    @Column(nullable = false)
+    private String changesLogEn;
 
+    @Column(nullable = false, updatable = false)
     private Integer aggregatedGithubCommitCount;
-
-    //todo maybe add more interesting metadata
 
     @OneToMany(mappedBy = "release", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<ReleaseParticipation> releaseDevelopers = new HashSet<>();

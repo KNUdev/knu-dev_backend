@@ -29,16 +29,12 @@ public class Subproject {
     @Column(nullable = false)
     private SubprojectType type;
 
-    //todo status
-
     @Column(name = "resource_url")
     private String resourceUrl;
 
-    //todo name better to represent active developers
-    //todo maybe put to release
-    @OneToMany(mappedBy = "subproject", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<SubprojectAccount> activeDevelopers = new HashSet<>();
-
     @OneToMany(mappedBy = "subproject", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<Release> releases = new HashSet<>();
+
+    @OneToMany(mappedBy = "subproject", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<SubprojectAccount> allDevelopers = new HashSet<>();
 }
