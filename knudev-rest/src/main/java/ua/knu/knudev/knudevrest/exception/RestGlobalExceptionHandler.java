@@ -14,6 +14,8 @@ import ua.knu.knudev.knudevcommon.constant.Expertise;
 import ua.knu.knudev.knudevcommon.exception.FileException;
 import ua.knu.knudev.assessmentmanagerapi.exception.TaskAssignmentException;
 import ua.knu.knudev.assessmentmanagerapi.exception.TaskException;
+import ua.knu.knudev.knudevsecurityapi.exception.AccountAuthException;
+import ua.knu.knudev.knudevsecurityapi.exception.TokenException;
 import ua.knu.knudev.teammanagerapi.exception.AccountException;
 import ua.knu.knudev.teammanagerapi.exception.DepartmentException;
 import ua.knu.knudev.teammanagerapi.exception.RecruitmentException;
@@ -42,6 +44,11 @@ public class RestGlobalExceptionHandler {
 
     @ExceptionHandler
     public ResponseEntity<String> handleTaskException(TaskException ex) {
+        return new ResponseEntity<>(ex.getMessage(), ex.getStatusCode());
+    }
+
+    @ExceptionHandler
+    public ResponseEntity<String> handleTokenException(TokenException ex) {
         return new ResponseEntity<>(ex.getMessage(), ex.getStatusCode());
     }
 
@@ -88,6 +95,12 @@ public class RestGlobalExceptionHandler {
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ResponseEntity<String> handleBadCredentialsException(AccountAuthException exception) {
+        return new ResponseEntity<>(exception.getMessage(), exception.getStatus());
+    }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
     public String handleIllegalArgumentException(IllegalArgumentException exception) {
         return exception.getMessage();
     }
@@ -97,7 +110,6 @@ public class RestGlobalExceptionHandler {
                 && "typeMismatch".equals(fieldError.getCode())) {
             return "Invalid Expertise value. Possible values are: " + Arrays.toString(Expertise.values());
         }
-
         return fieldError.getDefaultMessage();
     }
 

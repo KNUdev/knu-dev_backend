@@ -63,21 +63,13 @@ public class AccountAuth implements Serializable, UserDetails {
     }
 
     @Override
-    public boolean isAccountNonExpired() {
-        return true;
-    }
-
-    @Override
     public boolean isAccountNonLocked() {
         return nonLocked;
     }
 
-    @Override
-    public boolean isCredentialsNonExpired() {
-        return true;
-    }
-
     public Set<AccountRole> getRoles() {
-        return new HashSet<>(Set.of(technicalRole, administrativeRole));
+        return Stream.of(technicalRole, administrativeRole)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toSet());
     }
 }

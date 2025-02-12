@@ -36,7 +36,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @SpringBootTest(classes = IntegrationTestsConfig.class)
 @ActiveProfiles("test")
-class EducationProgramCreationIntegrationTest {
+class EducationProgramCreationServiceIntegrationTest {
 
     @Autowired
     private EducationProgramCreationService creationService;
