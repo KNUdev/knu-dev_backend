@@ -46,9 +46,13 @@ public class AccountAuthService implements AccountAuthServiceApi {
 
     public AccountAuthDto getByEmail(String email) {
         String errorMessage = String.format("Account with email %s does not exist", email);
-        AccountAuth account = Optional.ofNullable(accountAuthRepository.findAccountAuthByEmail(email))
+        AccountAuth account = getDomainByEmail(email)
                 .orElseThrow(() -> new AccountAuthException(errorMessage));
         return accountAuthMapper.toDto(account);
+    }
+
+    public Optional<AccountAuth> getDomainByEmail(String email) {
+        return Optional.ofNullable(accountAuthRepository.findAccountAuthByEmail(email));
     }
 
     private void setAccountAuthDefaults(AccountAuth accountAuth) {

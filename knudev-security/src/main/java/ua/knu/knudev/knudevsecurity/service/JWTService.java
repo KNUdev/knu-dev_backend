@@ -34,7 +34,7 @@ public class JWTService {
         this.signingKeyProvider = signingKeyProvider;
     }
 
-    public String extractUsername(String token) {
+    public String extractEmail(String token) {
         return extractClaim(token, Claims::getSubject);
     }
 
@@ -66,9 +66,9 @@ public class JWTService {
         try {
             Date expiryDate = extractClaim(token, Claims::getExpiration);
             boolean isTokenExpired = expiryDate.before(new Date());
-            String username = extractUsername(token);
+            String email = extractEmail(token);
 
-            return StringUtils.equals(username, userDetails.getUsername()) && !isTokenExpired;
+            return StringUtils.equals(email, userDetails.getUsername()) && !isTokenExpired;
         } catch (SignatureException e) {
             return false;
         }
@@ -81,7 +81,7 @@ public class JWTService {
                 .build();
     }
 
-    private String generateAccessToken(UserDetails userDetails) {
+    public String generateAccessToken(UserDetails userDetails) {
         AccountAuth account = (AccountAuth) userDetails;
         return buildToken(buildExtraClaims(true, account.getRoles()),
                 userDetails,
@@ -89,7 +89,7 @@ public class JWTService {
         );
     }
 
-    private String generateRefreshToken(UserDetails userDetails) {
+    public String generateRefreshToken(UserDetails userDetails) {
         AccountAuth account = (AccountAuth) userDetails;
         return buildToken(buildExtraClaims(false, account.getRoles()),
                 userDetails,

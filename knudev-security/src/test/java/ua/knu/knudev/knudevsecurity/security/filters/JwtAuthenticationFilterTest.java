@@ -91,7 +91,7 @@ public class JwtAuthenticationFilterTest {
     public void should_Throw403Exception_When_BearerHeaderIsRefreshToken() throws ServletException, IOException {
         when(request.getServletPath()).thenReturn(SECURED_URL);
         when(jwtFiltersHelper.extractJWTHeader(request)).thenReturn(getJWT());
-        when(jwtService.extractUsername(TEST_JWT_TOKEN)).thenReturn("user@example.com");
+        when(jwtService.extractEmail(TEST_JWT_TOKEN)).thenReturn("user@example.com");
         when(jwtService.isAccessToken(TEST_JWT_TOKEN)).thenReturn(false);
 
         jwtAuthenticationFilter.doFilterInternal(request, response, filterChain);
@@ -112,7 +112,7 @@ public class JwtAuthenticationFilterTest {
         when(request.getServletPath()).thenReturn(SECURED_URL);
         when(jwtFiltersHelper.extractJWTHeader(request)).thenReturn(buildJWT(TEST_JWT_TOKEN));
 
-        when(jwtService.extractUsername(TEST_JWT_TOKEN)).thenReturn(TEST_USERNAME);
+        when(jwtService.extractEmail(TEST_JWT_TOKEN)).thenReturn(TEST_USERNAME);
         when(jwtService.isAccessToken(TEST_JWT_TOKEN)).thenReturn(true);
         when(jwtService.extractAccountRoles(TEST_JWT_TOKEN)).thenReturn(Set.of("DEVELOPER"));
         when(jwtService.isTokenValid(eq(TEST_JWT_TOKEN), any())).thenReturn(true);
@@ -136,7 +136,7 @@ public class JwtAuthenticationFilterTest {
         when(request.getServletPath()).thenReturn(SECURED_URL);
         when(jwtFiltersHelper.extractJWTHeader(request)).thenReturn(getJWT());
 
-        when(jwtService.extractUsername(TEST_JWT_TOKEN)).thenReturn(TEST_USERNAME);
+        when(jwtService.extractEmail(TEST_JWT_TOKEN)).thenReturn(TEST_USERNAME);
         when(jwtService.isAccessToken(TEST_JWT_TOKEN)).thenReturn(true);
         when(jwtService.isTokenValid(eq(TEST_JWT_TOKEN), any())).thenReturn(false);
         when(jwtService.extractAccountRoles(TEST_JWT_TOKEN)).thenReturn(Set.of("DEVELOPER"));
@@ -158,7 +158,7 @@ public class JwtAuthenticationFilterTest {
         // Arrange
         when(request.getServletPath()).thenReturn(SECURED_URL);
         when(jwtFiltersHelper.extractJWTHeader(request)).thenReturn(getJWT());
-        when(jwtService.extractUsername(TEST_JWT_TOKEN)).thenReturn(TEST_USERNAME);
+        when(jwtService.extractEmail(TEST_JWT_TOKEN)).thenReturn(TEST_USERNAME);
 
         SecurityContext securityContext = mockSecurityContext();
         Authentication existingAuth = mock(Authentication.class);

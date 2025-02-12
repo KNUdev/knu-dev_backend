@@ -59,10 +59,10 @@ public class JWTServiceTest {
     public void should_ExtractEmailFromJWT_When_GivenValidTokens() {
         Tokens tokens = jwtService.generateTokens(account);
 
-        String usernameFromAccessToken = jwtService.extractUsername(tokens.accessToken());
+        String usernameFromAccessToken = jwtService.extractEmail(tokens.accessToken());
         assertEquals(TEST_EMAIL, usernameFromAccessToken, "Extracted username from access token should match");
 
-        String usernameFromRefreshToken = jwtService.extractUsername(tokens.refreshToken());
+        String usernameFromRefreshToken = jwtService.extractEmail(tokens.refreshToken());
         assertEquals(TEST_EMAIL, usernameFromRefreshToken, "Extracted username from refresh token should match");
     }
 
@@ -119,7 +119,7 @@ public class JWTServiceTest {
     public void should_ThrowJwtException_When_TryToExtractClaimWithInvalidToken() {
         String invalidToken = "invalid.token.value";
 
-        assertThrows(JwtException.class, () -> jwtService.extractUsername(invalidToken),
+        assertThrows(JwtException.class, () -> jwtService.extractEmail(invalidToken),
                 "Extracting username from an invalid token should throw JwtException");
     }
 

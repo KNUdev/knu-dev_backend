@@ -10,6 +10,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -19,6 +20,8 @@ import ua.knu.knudev.knudevsecurityapi.api.AuthServiceApi;
 import ua.knu.knudev.knudevsecurityapi.request.AuthenticationRequest;
 import ua.knu.knudev.knudevsecurityapi.response.AuthenticationResponse;
 import ua.knu.knudev.knudevsecurityapi.response.ErrorResponse;
+
+import java.io.IOException;
 
 @RestController
 @RequiredArgsConstructor
@@ -66,13 +69,52 @@ public class AuthenticationController {
         return ResponseEntity.ok(authServiceApi.authenticate(authenticationRequest));
     }
 
-//    @PostMapping("/refresh-token")
-//    public void refreshToken(HttpServletRequest request, HttpServletResponse response) throws IOException {
-//        authApi.refreshToken(request, response);
-//    }
-//
-//    @PostMapping("/tfa/code/verify")
-//    public AuthenticationResponse verifyTfaCode(@Valid TfaVerificationRequest request) {
-//        return authApi.verifyTfaCode(request);
-//    }
+    @Operation(
+            summary = "Refresh access token",
+            description = "Refresh the access token using a valid refresh token provided in the Authorization header. "
+                    + "The header must be in the format 'Bearer <refreshToken>'. On success, returns a new access token along with the provided refresh token.",
+            parameters = {
+                    @Parameter(
+                            name = HttpHeaders.AUTHORIZATION,
+                            in = ParameterIn.HEADER,
+                            required = true,
+                            description = "Bearer token containing the refresh token",
+                            schema = @Schema(
+                                    type = "string",
+                                    example = "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c"
+                            )
+                    )
+            }
+    )
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Token refreshed successfully",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = AuthenticationResponse.class)
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "Bad request - either an access token was provided instead of a refresh token, or the token is invalid.",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ErrorResponse.class)
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "401",
+                    description = "Unauthorized - missing or invalid Authorization header, or the provided token has expired.",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ErrorResponse.class)
+                    )
+            )
+    })
+    @PostMapping("/refresh-token")
+    public void refreshToken(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        authServiceApi.refreshToken(request, response);
+    }
+
 }
