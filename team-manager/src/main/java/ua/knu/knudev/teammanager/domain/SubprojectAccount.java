@@ -1,28 +1,29 @@
 package ua.knu.knudev.teammanager.domain;
 
+
 import jakarta.persistence.*;
 import lombok.*;
-import ua.knu.knudev.teammanager.domain.embeddable.ProjectAccountId;
+import org.hibernate.annotations.BatchSize;
+import ua.knu.knudev.knudevcommon.constant.AccountTechnicalRole;
 
 import java.time.LocalDate;
-import java.time.LocalTime;
 
-@Entity
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
+@Entity
+@Table(schema = "team_management", name = "subproject_account")
 @Builder
-@Table(schema = "team_management", name = "project_account")
-public class ProjectAccount {
+public class    SubprojectAccount {
 
     @EmbeddedId
-    private ProjectAccountId id;
+    private SubprojectAccountId id;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @MapsId("subprojectId")
     @JoinColumn(name = "subproject_id", referencedColumnName = "id", nullable = false)
-    private Subproject project;
+    private Subproject subproject;
 
     @ManyToOne
     @MapsId("accountId")
@@ -32,10 +33,8 @@ public class ProjectAccount {
     @Column(nullable = false)
     private LocalDate dateJoined;
 
-    @Column
-    private LocalTime dateLeft;
+    private LocalDate dateLeft;
 
-    //todo total commits
-    //todo total lines of code
-    //todo add more metadata
+    @Enumerated(EnumType.STRING)
+    private AccountTechnicalRole currentRole;
 }

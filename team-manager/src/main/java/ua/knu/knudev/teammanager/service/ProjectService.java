@@ -14,7 +14,7 @@ import ua.knu.knudev.knudevcommon.constant.ProjectStatus;
 import ua.knu.knudev.teammanager.domain.AccountProfile;
 import ua.knu.knudev.teammanager.domain.Project;
 import ua.knu.knudev.teammanager.domain.ProjectAccount;
-import ua.knu.knudev.teammanager.domain.ProjectReleaseInfo;
+import ua.knu.knudev.teammanager.domain.Release;
 import ua.knu.knudev.teammanager.domain.embeddable.MultiLanguageField;
 import ua.knu.knudev.teammanager.domain.embeddable.ProjectAccountId;
 import ua.knu.knudev.teammanager.mapper.MultiLanguageFieldMapper;
@@ -152,13 +152,13 @@ public class ProjectService implements ProjectApi {
         if (project.getReleaseInfo() != null) {
             throw new ProjectException("Project already has a release!");
         }
-        ProjectReleaseInfo projectReleaseInfo = ProjectReleaseInfo.builder()
+        Release release = Release.builder()
                 .releaseDate(LocalDate.now())
                 .projectDomain(projectDomain)
                 .project(project)
                 .build();
 
-        project.setReleaseInfo(projectReleaseInfo);
+        project.setReleaseInfo(release);
 
         Project savedProject = projectRepository.save(project);
         log.info("Project released: {}", projectId);

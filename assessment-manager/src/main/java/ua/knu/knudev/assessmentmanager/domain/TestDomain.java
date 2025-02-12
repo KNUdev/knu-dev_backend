@@ -35,8 +35,9 @@ public class TestDomain {
         Set<TestQuestion> questions = this.getTestQuestions();
         questions.forEach(question -> question.setTestDomain(this));
 
-        questions.forEach(testQuestion ->
-                testQuestion.getAnswerVariants().forEach(variant -> variant.setTestQuestion(testQuestion))
+        questions.forEach(testQuestion -> testQuestion
+                .getAnswerVariants()
+                .forEach(variant -> variant.setTestQuestion(testQuestion))
         );
     }
 
