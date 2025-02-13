@@ -747,9 +747,6 @@ databaseChangeLog:
               - column:
                   name: subproject_id
 
-  # ============================================================================
-  # Create the RELEASE_PARTICIPATION table
-  # ============================================================================
   - changeSet:
       id: create-table-release_participation
       author: yourname
