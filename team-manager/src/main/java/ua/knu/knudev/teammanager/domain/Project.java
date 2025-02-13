@@ -9,6 +9,7 @@ import ua.knu.knudev.knudevcommon.constant.ProjectTag;
 import ua.knu.knudev.teammanager.domain.embeddable.MultiLanguageField;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
@@ -44,10 +45,13 @@ public class Project {
     private MultiLanguageField description;
 
     @Column
-    private String avatarFilename;
+    private String banner;
 
     @Column
     private LocalDate startedAt;
+
+    @Column
+    private LocalDateTime lastUpdatedAt;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
@@ -60,16 +64,15 @@ public class Project {
     @Column(name = "tags", nullable = false)
     private Set<ProjectTag> tags = new HashSet<>();
 
-    @BatchSize(size = 20)
-    @ElementCollection
-    @CollectionTable(schema = "team_management", name = "github_repo_links", joinColumns = @JoinColumn(name = "project_id"))
-    @Column(name = "github_repo_link", nullable = false)
-    private Set<String> githubRepoLinks = new HashSet<>();
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "architect_account_id", referencedColumnName = "id", nullable = false, updatable = false)
+    private AccountProfile architect;
 
-    @OneToOne(mappedBy = "project", cascade = CascadeType.ALL, orphanRemoval = true)
-    private ProjectReleaseInfo releaseInfo;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "supervisor_account_id", referencedColumnName = "id")
+    private AccountProfile supervisor;
 
     @OneToMany(mappedBy = "project", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<ProjectAccount> projectAccounts = new HashSet<>();
+    private Set<Subproject> subprojects = new HashSet<>();
 
 }

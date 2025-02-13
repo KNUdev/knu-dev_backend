@@ -451,98 +451,191 @@ databaseChangeLog:
 
   - changeSet:
       id: create_project_table
-      author: DenysLeonenko
+      author: Vladyslav Shtaiier
       changes:
         - createTable:
-            tableName: project
             schemaName: team_management
+            tableName: project
             columns:
               - column:
                   name: id
-                  type: uuid
+                  type: UUID
                   constraints:
                     primaryKey: true
                     nullable: false
               - column:
                   name: name_en
                   type: varchar(255)
-                  constraints:
-                    nullable: false
-                    unique: true
               - column:
                   name: name_uk
                   type: varchar(255)
-                  constraints:
-                    nullable: false
-                    unique: true
               - column:
                   name: description_en
-                  type: varchar(255)
-                  constraints:
-                    nullable: false
+                  type: text
               - column:
                   name: description_uk
-                  type: varchar(255)
-                  constraints:
-                    nullable: false
+                  type: text
               - column:
-                  name: avatar_filename
+                  name: banner
                   type: varchar(255)
               - column:
                   name: started_at
                   type: date
               - column:
+                  name: last_updated_at
+                  type: timestamp
+              - column:
                   name: status
                   type: varchar(50)
                   constraints:
                     nullable: false
-
-        - createTable:
-            tableName: project_tag
-            schemaName: team_management
-            columns:
               - column:
-                  name: project_id
-                  type: uuid
+                  name: architect_account_id
+                  type: UUID
                   constraints:
                     nullable: false
               - column:
-                  name: tag
+                  name: supervisor_account_id
+                  type: UUID
+
+  - changeSet:
+      id: add_fk_project_accounts_table
+      author: Vladyslav Shtaiier
+      changes:
+        - addForeignKeyConstraint:
+            constraintName: fk_project_architect
+            baseTableName: project
+            baseColumnNames: architect_account_id
+            referencedTableName: profile_account
+            referencedColumnNames: id
+            baseTableSchemaName: team_management
+            referencedTableSchemaName: team_management
+        - addForeignKeyConstraint:
+            constraintName: fk_project_supervisor
+            baseTableName: project
+            baseColumnNames: supervisor_account_id
+            referencedTableName: profile_account
+            referencedColumnNames: id
+            baseTableSchemaName: team_management
+            referencedTableSchemaName: team_management
+
+  - changeSet:
+      id: add_indexes_project
+      author: Vladyslav Shtaiier
+      changes:
+        - createIndex:
+            indexName: idx_project_status
+            tableName: project
+            schemaName: team_management
+            columns:
+              - column:
+                  name: status
+        - createIndex:
+            indexName: idx_project_architect_account
+            tableName: project
+            schemaName: team_management
+            columns:
+              - column:
+                  name: architect_account_id
+        - createIndex:
+            indexName: idx_project_supervisor_account
+            tableName: project
+            schemaName: team_management
+            columns:
+              - column:
+                  name: supervisor_account_id
+
+  - changeSet:
+      id: create_tag_table
+      author: Vladyslav Shtaiier
+      changes:
+        - createTable:
+            schemaName: team_management
+            tableName: tag
+            columns:
+              - column:
+                  name: project_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+              - column:
+                  name: tags
                   type: varchar(50)
                   constraints:
                     nullable: false
+        - addPrimaryKey:
+            columnNames: project_id,tags
+            constraintName: pk_tag
+            tableName: tag
+            schemaName: team_management
+        - addForeignKeyConstraint:
+            constraintName: fk_tag_project
+            baseTableName: tag
+            baseColumnNames: project_id
+            referencedTableName: project
+            referencedColumnNames: id
+            baseTableSchemaName: team_management
+            referencedTableSchemaName: team_management
 
+  - changeSet:
+      id: create_subproject_table
+      author: Vladyslav Shtaiier
+      changes:
         - createTable:
-            tableName: github_repo_links
+            schemaName: team_management
+            tableName: subproject
+            columns:
+              - column:
+                  name: id
+                  type: UUID
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: project_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+              - column:
+                  name: type
+                  type: varchar(50)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: resource_url
+                  type: varchar(255)
+        - addForeignKeyConstraint:
+            constraintName: fk_subproject_project
+            baseTableName: subproject
+            baseColumnNames: project_id
+            referencedTableName: project
+            referencedColumnNames: id
+            baseTableSchemaName: team_management
+            referencedTableSchemaName: team_management
+        - createIndex:
+            indexName: idx_subproject_project
+            tableName: subproject
             schemaName: team_management
             columns:
               - column:
                   name: project_id
-                  type: uuid
-                  constraints:
-                    nullable: false
-              - column:
-                  name: github_repo_link
-                  type: varchar(255)
-                  constraints:
-                    nullable: false
 
   - changeSet:
       id: create_project_account_table
-      author: DenysLeonenko
+      author: Vladyslav Shtaiier
       changes:
         - createTable:
-            tableName: project_account
             schemaName: team_management
+            tableName: project_account
             columns:
               - column:
-                  name: project_id
-                  type: uuid
+                  name: subproject_id
+                  type: UUID
                   constraints:
                     nullable: false
               - column:
                   name: account_id
-                  type: uuid
+                  type: UUID
                   constraints:
                     nullable: false
               - column:
@@ -550,73 +643,170 @@ databaseChangeLog:
                   type: date
                   constraints:
                     nullable: false
+              - column:
+                  name: date_left
+                  type: date
+              - column:
+                  name: last_commit_date
+                  type: date
+              - column:
+                  name: total_commits
+                  type: int
+              - column:
+                  name: total_lines_of_code_written
+                  type: int
         - addPrimaryKey:
+            columnNames: subproject_id,account_id
+            constraintName: pk_project_account
             tableName: project_account
             schemaName: team_management
-            columnNames: project_id, account_id
-
-  - changeSet:
-      id: create_project_release_info_table
-      author: DenysLeonenko
-      changes:
-        - createTable:
-            tableName: project_release_info
+        - addForeignKeyConstraint:
+            constraintName: fk_project_account_subproject
+            baseTableName: project_account
+            baseColumnNames: subproject_id
+            referencedTableName: subproject
+            referencedColumnNames: id
+            baseTableSchemaName: team_management
+            referencedTableSchemaName: team_management
+        - addForeignKeyConstraint:
+            constraintName: fk_project_account_account
+            baseTableName: project_account
+            baseColumnNames: account_id
+            referencedTableName: profile_account
+            referencedColumnNames: id
+            baseTableSchemaName: team_management
+            referencedTableSchemaName: team_management
+        - createIndex:
+            indexName: idx_project_account_subproject
+            tableName: project_account
             schemaName: team_management
             columns:
               - column:
+                  name: subproject_id
+        - createIndex:
+            indexName: idx_project_account_account
+            tableName: project_account
+            schemaName: team_management
+            columns:
+              - column:
+                  name: account_id
+
+  - changeSet:
+      id: create_release_table
+      author: Vladyslav Shtaiier
+      changes:
+        - createTable:
+            schemaName: team_management
+            tableName: release
+            columns:
+              - column:
                   name: id
-                  type: uuid
+                  type: UUID
                   constraints:
                     primaryKey: true
                     nullable: false
               - column:
-                  name: release_date
+                  name: release_start_date
                   type: date
               - column:
-                  name: project_domain
+                  name: release_finish_date
+                  type: date
+              - column:
+                  name: version
                   type: varchar(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: subproject_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+              - column:
+                  name: changes_log_en
+                  type: text
+                  constraints:
+                    nullable: false
+              - column:
+                  name: aggregated_github_commit_count
+                  type: int
+                  constraints:
+                    nullable: false
+        - addForeignKeyConstraint:
+            constraintName: fk_release_subproject
+            baseTableName: release
+            baseColumnNames: subproject_id
+            referencedTableName: subproject
+            referencedColumnNames: id
+            baseTableSchemaName: team_management
+            referencedTableSchemaName: team_management
+        - createIndex:
+            indexName: idx_release_subproject
+            tableName: release
+            schemaName: team_management
+            columns:
+              - column:
+                  name: subproject_id
 
   - changeSet:
-      id: add_foreign_keys_to_project_and_project_release_info_tables
-      author: DenysLeonenko
+      id: create-table-release_participation
+      author: yourname
       changes:
+        - createTable:
+            schemaName: team_management
+            tableName: release_participation
+            columns:
+              - column:
+                  name: release_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+              - column:
+                  name: account_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+              - column:
+                  name: role_snapshot
+                  type: VARCHAR(50)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: commit_count
+                  type: INT
+                  constraints:
+                    nullable: false
+        - addPrimaryKey:
+            columnNames: release_id,account_id
+            constraintName: pk_release_participation
+            tableName: release_participation
+            schemaName: team_management
         - addForeignKeyConstraint:
-            baseTableSchemaName: team_management
-            baseTableName: project
-            baseColumnNames: id
-            constraintName: fk_project_release_info
-            referencedTableSchemaName: team_management
-            referencedTableName: project_release_info
+            constraintName: fk_release_participation_release
+            baseTableName: release_participation
+            baseColumnNames: release_id
+            referencedTableName: release
             referencedColumnNames: id
-        - addForeignKeyConstraint:
             baseTableSchemaName: team_management
-            baseTableName: project_tag
-            baseColumnNames: project_id
-            constraintName: fk_project_tags_project
             referencedTableSchemaName: team_management
-            referencedTableName: project
-            referencedColumnNames: id
         - addForeignKeyConstraint:
-            baseTableSchemaName: team_management
-            baseTableName: github_repo_links
-            baseColumnNames: project_id
-            constraintName: fk_github_repo_links_project
-            referencedTableSchemaName: team_management
-            referencedTableName: project
-            referencedColumnNames: id
-        - addForeignKeyConstraint:
-            baseTableSchemaName: team_management
-            baseTableName: project_account
-            baseColumnNames: project_id
-            constraintName: fk_project_accounts_project
-            referencedTableSchemaName: team_management
-            referencedTableName: project
-            referencedColumnNames: id
-        - addForeignKeyConstraint:
-            baseTableSchemaName: team_management
-            baseTableName: project_account
+            constraintName: fk_release_participation_account
+            baseTableName: release_participation
             baseColumnNames: account_id
-            constraintName: fk_project_accounts_profile_account
-            referencedTableSchemaName: team_management
             referencedTableName: profile_account
             referencedColumnNames: id
+            baseTableSchemaName: team_management
+            referencedTableSchemaName: team_management
+        - createIndex:
+            indexName: idx_release_participation_release
+            tableName: release_participation
+            schemaName: team_management
+            columns:
+              - column:
+                  name: release_id
+        - createIndex:
+            indexName: idx_release_participation_account
+            tableName: release_participation
+            schemaName: team_management
+            columns:
+              - column:
+                  name: account_id

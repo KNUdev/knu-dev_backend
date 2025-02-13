@@ -1,9 +1,8 @@
-package ua.knu.knudev.teammanager.domain.embeddable;
+package ua.knu.knudev.teammanager.domain;
 
 import jakarta.persistence.Embeddable;
 import lombok.*;
 
-import java.io.Serializable;
 import java.util.UUID;
 
 @Getter
@@ -13,7 +12,7 @@ import java.util.UUID;
 @EqualsAndHashCode
 @Builder
 @Embeddable
-public class ProjectAccountId implements Serializable {
-    private UUID projectId;
+public class SubprojectAccountId {
+    private UUID subprojectId;
     private UUID accountId;
 }

@@ -189,7 +189,8 @@ public class AccountProfileService implements AccountProfileApi {
         boolean emailExists = existsByEmail(email);
         if (emailExists) {
             throw new AccountException(
-                    String.format("Account with email %s already exists", email)
+                    String.format("Account with email %s already exists", email),
+                    HttpStatus.BAD_REQUEST
             );
         }
     }

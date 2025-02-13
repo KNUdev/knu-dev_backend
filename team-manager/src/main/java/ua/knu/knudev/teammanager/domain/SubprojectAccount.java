@@ -2,7 +2,6 @@ package ua.knu.knudev.teammanager.domain;
 
 import jakarta.persistence.*;
 import lombok.*;
-import ua.knu.knudev.teammanager.domain.embeddable.ProjectAccountId;
 
 import java.time.LocalDate;
 
@@ -13,15 +12,15 @@ import java.time.LocalDate;
 @NoArgsConstructor
 @Builder
 @Table(schema = "team_management", name = "project_account")
-public class ProjectAccount {
+public class SubprojectAccount {
 
     @EmbeddedId
-    private ProjectAccountId id;
+    private SubprojectAccountId id;
 
     @ManyToOne
-    @MapsId("projectId")
-    @JoinColumn(name = "project_id", referencedColumnName = "id", nullable = false)
-    private Project project;
+    @MapsId("subprojectId")
+    @JoinColumn(name = "subproject_id", referencedColumnName = "id", nullable = false)
+    private Subproject subproject;
 
     @ManyToOne
     @MapsId("accountId")
@@ -30,4 +29,11 @@ public class ProjectAccount {
 
     @Column(nullable = false)
     private LocalDate dateJoined;
+
+    @Column
+    private LocalDate dateLeft;
+
+    private LocalDate lastCommitDate;
+    private Integer totalCommits;
+    private Integer totalLinesOfCodeWritten;
 }
