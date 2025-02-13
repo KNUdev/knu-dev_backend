@@ -10,11 +10,11 @@ import java.util.UUID;
 
 public interface ProjectRepository extends JpaRepository<Project, UUID> {
 
-    List<Project> findProjectByName(MultiLanguageField name);
-
-    boolean existsProjectByAvatarFilename(String avatarFilename);
-
-    boolean existsProjectById(UUID id);
-
-    boolean existsByStatus(ProjectStatus status);
+//    List<Project> findProjectByName(MultiLanguageField name);
+//
+//    boolean existsProjectByAvatarFilename(String avatarFilename);
+//
+//    boolean existsProjectById(UUID id);
+//
+//    boolean existsByStatus(ProjectStatus status);
 }
