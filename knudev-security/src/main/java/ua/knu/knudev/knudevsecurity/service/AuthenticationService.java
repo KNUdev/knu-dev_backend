@@ -2,18 +2,15 @@ package ua.knu.knudev.knudevsecurity.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.security.SignatureException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.DisabledException;
-import org.springframework.security.authentication.LockedException;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.authentication.*;
 import org.springframework.security.core.AuthenticationException;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import ua.knu.knudev.knudevsecurity.domain.AccountAuth;
 import ua.knu.knudev.knudevsecurityapi.api.AuthServiceApi;
@@ -36,14 +33,15 @@ public class AuthenticationService implements AuthServiceApi {
     @Override
     public AuthenticationResponse authenticate(AuthenticationRequest authReq) {
         Optional<AccountAuth> account = accountService.getDomainByEmail(authReq.email());
-        if (account.isEmpty()) {
-            throw new AccountAuthException("Invalid email or password", HttpStatus.FORBIDDEN);
-        }
-        checkAccountValidity(account.get(), authReq.email());
+        checkAccountValidity(account);
 
-        authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(authReq.email(), authReq.password())
-        );
+        try {
+            authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(authReq.email(), authReq.password())
+            );
+        } catch (BadCredentialsException e) {
+            throw new AccountAuthException("Invalid email or password", HttpStatus.UNAUTHORIZED);
+        }
 
         Tokens tokens = jwtService.generateTokens(account.get());
         return AuthenticationResponse.builder()
@@ -70,8 +68,8 @@ public class AuthenticationService implements AuthServiceApi {
             }
         } catch (ExpiredJwtException ex) {
             throw new TokenException("Your token is expired. Please re-authenticate", HttpStatus.UNAUTHORIZED);
-        } catch (SignatureException ex) {
-            throw new TokenException("Your token is invalid", HttpStatus.BAD_REQUEST);
+        } catch (SignatureException | MalformedJwtException ex) {
+            throw new TokenException("Your token is invalid", HttpStatus.UNAUTHORIZED);
         }
 
         String email = jwtService.extractEmail(refreshToken);
@@ -97,12 +95,11 @@ public class AuthenticationService implements AuthServiceApi {
         }
     }
 
-    private void checkAccountValidity(AccountAuth account, String email) throws AuthenticationException {
-        if (account == null) {
-            throw new UsernameNotFoundException(
-                    String.format("Account with email %s does not exist.", email)
-            );
+    private void checkAccountValidity(Optional<AccountAuth> optionalAccount) throws AuthenticationException {
+        if (optionalAccount.isEmpty()) {
+            throw new AccountAuthException("Invalid email or password", HttpStatus.UNAUTHORIZED);
         }
+        AccountAuth account = optionalAccount.get();
 
         if (!account.isEnabled()) {
             throw new DisabledException(

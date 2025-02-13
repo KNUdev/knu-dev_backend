@@ -5,10 +5,10 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.SignatureException;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 import ua.knu.knudev.knudevcommon.constant.AccountRole;
 import ua.knu.knudev.knudevsecurity.domain.AccountAuth;
+import ua.knu.knudev.knudevsecurity.security.AuthUserDetails;
 import ua.knu.knudev.knudevsecurity.utils.JWTSigningKeyProvider;
 import ua.knu.knudev.knudevsecurityapi.dto.Tokens;
 
@@ -62,46 +62,45 @@ public class JWTService {
         return isAccessToken != null && isAccessToken;
     }
 
-    public boolean isTokenValid(String token, UserDetails userDetails) {
+    public boolean isTokenValid(String token, AuthUserDetails userDetails) {
         try {
             Date expiryDate = extractClaim(token, Claims::getExpiration);
             boolean isTokenExpired = expiryDate.before(new Date());
             String email = extractEmail(token);
 
-            return StringUtils.equals(email, userDetails.getUsername()) && !isTokenExpired;
+            return StringUtils.equals(email, userDetails.getEmail()) && !isTokenExpired;
         } catch (SignatureException e) {
             return false;
         }
     }
 
-    public Tokens generateTokens(UserDetails userDetails) {
+    public Tokens generateTokens(AuthUserDetails userDetails) {
         return Tokens.builder()
                 .accessToken(generateAccessToken(userDetails))
                 .refreshToken(generateRefreshToken(userDetails))
                 .build();
     }
 
-    public String generateAccessToken(UserDetails userDetails) {
+    public String generateAccessToken(AuthUserDetails userDetails) {
         AccountAuth account = (AccountAuth) userDetails;
-        return buildToken(buildExtraClaims(true, account.getRoles()),
+        return buildToken(buildExtraClaims(true, account),
                 userDetails,
                 accessTokenExpirationInMillis
         );
     }
 
-    public String generateRefreshToken(UserDetails userDetails) {
-        AccountAuth account = (AccountAuth) userDetails;
-        return buildToken(buildExtraClaims(false, account.getRoles()),
+    public String generateRefreshToken(AuthUserDetails userDetails) {
+        return buildToken(buildExtraClaims(false, userDetails),
                 userDetails,
                 refreshTokenExpirationInMillis
         );
     }
 
-    private String buildToken(Map<String, Object> extraClaims, UserDetails userDetails, long expiration) {
+    private String buildToken(Map<String, Object> extraClaims, AuthUserDetails userDetails, long expiration) {
         return Jwts
                 .builder()
                 .claims(extraClaims)
-                .subject(userDetails.getUsername())
+                .subject(userDetails.getEmail())
                 .issuer(issuerName)
                 .issuedAt(new Date(System.currentTimeMillis()))
                 .expiration(new Date(System.currentTimeMillis() + expiration))
@@ -109,14 +108,15 @@ public class JWTService {
                 .compact();
     }
 
-    private Map<String, Object> buildExtraClaims(boolean isAccessToken, Set<AccountRole> roles) {
+    private Map<String, Object> buildExtraClaims(boolean isAccessToken, AuthUserDetails userDetails) {
         Map<String, Object> extraClaimsMap = new HashMap<>();
         extraClaimsMap.put("isacct", isAccessToken);
 
-        Set<String> accountRoles = roles.stream()
+        Set<String> accountRoles = userDetails.getRoles().stream()
                 .map(AccountRole::name)
                 .collect(Collectors.toSet());
         extraClaimsMap.put("roles", accountRoles);
+        extraClaimsMap.put("userid", userDetails.getId());
         return extraClaimsMap;
     }
 
