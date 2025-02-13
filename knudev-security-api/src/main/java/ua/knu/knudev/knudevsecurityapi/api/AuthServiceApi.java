@@ -9,5 +9,6 @@ import java.io.IOException;
 
 public interface AuthServiceApi {
     AuthenticationResponse authenticate(AuthenticationRequest authReq);
+
     void refreshToken(HttpServletRequest request, HttpServletResponse response) throws IOException;
 }

@@ -17,6 +17,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import ua.knu.knudev.knudevcommon.constant.AccountAdministrativeRole;
 import ua.knu.knudev.knudevcommon.constant.AccountTechnicalRole;
 import ua.knu.knudev.knudevsecurity.domain.AccountAuth;
+import ua.knu.knudev.knudevsecurity.security.AuthUserDetails;
 import ua.knu.knudev.knudevsecurity.service.JWTService;
 import ua.knu.knudev.knudevsecurity.utils.RolesUtils;
 import ua.knu.knudev.knudevsecurityapi.exception.AccountRoleException;
@@ -61,7 +62,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 );
                 return;
             }
-            UserDetails userDetails = buildUserDetails(accountUsername, jwt);
+            AuthUserDetails userDetails = buildUserDetails(accountUsername, jwt);
 
             if (jwtService.isTokenValid(jwt, userDetails)) {
                 setAuthentication(userDetails, request);
@@ -70,7 +71,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         filterChain.doFilter(request, response);
     }
 
-    private UserDetails buildUserDetails(String accountUsername, String jwt) {
+    private AuthUserDetails buildUserDetails(String accountUsername, String jwt) {
         Set<String> roles = jwtService.extractAccountRoles(jwt);
 
         AccountTechnicalRole technicalRole = roles.stream()

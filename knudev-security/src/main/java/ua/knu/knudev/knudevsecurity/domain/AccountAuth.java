@@ -5,13 +5,17 @@ import lombok.*;
 import org.hibernate.annotations.UuidGenerator;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.userdetails.UserDetails;
-import ua.knu.knudev.knudevcommon.constant.AccountRole;
 import ua.knu.knudev.knudevcommon.constant.AccountAdministrativeRole;
+import ua.knu.knudev.knudevcommon.constant.AccountRole;
 import ua.knu.knudev.knudevcommon.constant.AccountTechnicalRole;
+import ua.knu.knudev.knudevsecurity.security.AuthUserDetails;
+import ua.knu.knudev.knudevsecurityapi.exception.AccountAuthException;
 
 import java.io.Serializable;
-import java.util.*;
+import java.util.Collection;
+import java.util.Objects;
+import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -22,7 +26,7 @@ import java.util.stream.Stream;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class AccountAuth implements Serializable, UserDetails {
+public class AccountAuth implements Serializable, AuthUserDetails {
 
     @Id
     @UuidGenerator
@@ -59,7 +63,7 @@ public class AccountAuth implements Serializable, UserDetails {
 
     @Override
     public String getUsername() {
-        return email;
+        throw new AccountAuthException("Account does not have username");
     }
 
     @Override
@@ -67,6 +71,7 @@ public class AccountAuth implements Serializable, UserDetails {
         return nonLocked;
     }
 
+    @Override
     public Set<AccountRole> getRoles() {
         return Stream.of(technicalRole, administrativeRole)
                 .filter(Objects::nonNull)

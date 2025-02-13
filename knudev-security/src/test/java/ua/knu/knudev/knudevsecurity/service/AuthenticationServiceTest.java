@@ -221,7 +221,7 @@ public class AuthenticationServiceTest {
         // Act & Assert
         TokenException ex = assertThrows(TokenException.class,
                 () -> authenticationService.refreshToken(request, response));
-        assertEquals(HttpStatus.BAD_REQUEST, ex.getStatusCode());
+        assertEquals(HttpStatus.UNAUTHORIZED, ex.getStatusCode());
     }
 
     @Test
