@@ -48,7 +48,8 @@ application:
   email-verification-token:
     expiration: 60 #60 minutes
   minio:
-    url: ${MINIO_URL}
+#    url: ${MINIO_URL}
+    url: http://localhost:9000
     access-key: ${MINIO_ACCESS_KEY}
     secret-key: ${MINIO_SECRET_KEY}
   jwt:
