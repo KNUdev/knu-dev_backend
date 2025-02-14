@@ -5,6 +5,7 @@ import io.minio.errors.MinioException;
 import io.minio.http.Method;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ua.knu.knudev.fileservice.adapter.FileUploadAdapter;
 import ua.knu.knudev.fileserviceapi.dto.FileUploadPayload;
@@ -14,6 +15,7 @@ import ua.knu.knudev.fileserviceapi.subfolder.FileSubfolder;
 import java.util.concurrent.TimeUnit;
 
 @Service
+@Slf4j
 @RequiredArgsConstructor
 public class MinioAdapter implements FileUploadAdapter {
 
@@ -47,11 +49,14 @@ public class MinioAdapter implements FileUploadAdapter {
     @SneakyThrows
     public String getPathByFilename(String filename, FileFolderProperties<? extends FileSubfolder> fileFolderProperties) {
         String filePath = fileFolderProperties.getSubfolder().getSubfolderPath() + "/" + filename;
+        log.info("1: " + minioProperties.getExternalUrl());
 
         MinioClient externalClient = MinioClient.builder()
                 .endpoint(minioProperties.getExternalUrl())
                 .credentials(minioProperties.getAccessKey(), minioProperties.getSecretKey())
                 .build();
+        log.info("2: " + minioProperties.getExternalUrl());
+        log.info("Getting path for file: {}", filePath);
 
         return externalClient.getPresignedObjectUrl(
                 GetPresignedObjectUrlArgs.builder()
