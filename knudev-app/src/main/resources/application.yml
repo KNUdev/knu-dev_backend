@@ -45,12 +45,12 @@ logging:
 
 application:
   base-url: ${BASE_URL:http://localhost:5000}
-  email-verification-token:
-    expiration: 60 #60 minutes
   minio:
     url: ${MINIO_URL:http://minio:9000}
     access-key: ${MINIO_ACCESS_KEY:minioadmin}
     secret-key: ${MINIO_SECRET_KEY:minioadmin}
+  email-verification-token:
+    expiration: 60 #60 minutes
   jwt:
     issuer: KNUdev
     expiration: 600000 #10 minutes
