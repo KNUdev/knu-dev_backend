@@ -18,6 +18,7 @@ import java.util.concurrent.TimeUnit;
 public class MinioAdapter implements FileUploadAdapter {
 
     private final MinioClient minioClient;
+    private final MinioProperties minioProperties;
 
     @Override
     public String saveFile(FileUploadPayload payload) {
@@ -47,7 +48,12 @@ public class MinioAdapter implements FileUploadAdapter {
     public String getPathByFilename(String filename, FileFolderProperties<? extends FileSubfolder> fileFolderProperties) {
         String filePath = fileFolderProperties.getSubfolder().getSubfolderPath() + "/" + filename;
 
-        return minioClient.getPresignedObjectUrl(
+        MinioClient externalClient = MinioClient.builder()
+                .endpoint(minioProperties.getExternalUrl())
+                .credentials(minioProperties.getAccessKey(), minioProperties.getSecretKey())
+                .build();
+
+        return externalClient.getPresignedObjectUrl(
                 GetPresignedObjectUrlArgs.builder()
                         .method(Method.GET)
                         .bucket(fileFolderProperties.getFolder().getName())

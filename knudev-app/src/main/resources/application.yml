@@ -46,7 +46,8 @@ logging:
 application:
   base-url: ${BASE_URL:http://localhost:5000}
   minio:
-    url: ${MINIO_URL:http://minio:9000}
+    internal-url: ${MINIO_INTERNAL_URL:http://minio:9000}
+    external-url: ${MINIO_EXTERNAL_URL:http://localhost:9000}
     access-key: ${MINIO_ACCESS_KEY:minioadmin}
     secret-key: ${MINIO_SECRET_KEY:minioadmin}
   email-verification-token:

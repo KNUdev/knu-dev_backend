@@ -10,7 +10,8 @@ import org.springframework.stereotype.Component;
 @Setter
 @ConfigurationProperties(prefix = "application.minio")
 public class MinioProperties {
-    private String url;
+    private String internalUrl;
+    private String externalUrl;
     private String accessKey;
     private String secretKey;
 }
