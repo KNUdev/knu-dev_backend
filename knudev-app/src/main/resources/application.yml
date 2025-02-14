@@ -50,6 +50,7 @@ application:
     external-url: ${MINIO_EXTERNAL_URL:http://localhost:9000}
     access-key: ${MINIO_ACCESS_KEY:minioadmin}
     secret-key: ${MINIO_SECRET_KEY:minioadmin}
+    use-proxy: ${MINIO_USE_PROXY:false}
   email-verification-token:
     expiration: 60 #60 minutes
   jwt:

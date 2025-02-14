@@ -14,4 +14,5 @@ public class MinioProperties {
     private String externalUrl;
     private String accessKey;
     private String secretKey;
+    private boolean useProxy;
 }

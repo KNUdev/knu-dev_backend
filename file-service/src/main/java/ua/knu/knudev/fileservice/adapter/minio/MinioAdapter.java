@@ -53,9 +53,11 @@ public class MinioAdapter implements FileUploadAdapter {
     public String getPathByFilename(String filename, FileFolderProperties<? extends FileSubfolder> fileFolderProperties) {
         String filePath = fileFolderProperties.getSubfolder().getSubfolderPath() + "/" + filename;
 
-        OkHttpClient okHttpClient = new OkHttpClient.Builder()
-                .proxy(new Proxy(Proxy.Type.HTTP, new InetSocketAddress("minio", 9000)))
-                .build();
+        OkHttpClient.Builder okHttpClientBuilder = new OkHttpClient.Builder();
+        if (minioProperties.isUseProxy()) {
+            okHttpClientBuilder.proxy(new Proxy(Proxy.Type.HTTP, new InetSocketAddress("minio", 9000)));
+        }
+        OkHttpClient okHttpClient = okHttpClientBuilder.build();
 
         MinioClient externalClient = MinioClient.builder()
                 .endpoint(minioProperties.getExternalUrl())

@@ -51,10 +51,11 @@ services:
       SPRING_DATASOURCE_USERNAME: ${POSTGRES_USERNAME:-postgres}
       SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:-knudevpass}
 
-      # MinIO Configuration
-      MINIO_URL: http://minio:9000
+      MINIO_INTERNAL_URL: http://minio:9000
+      MINIO_EXTERNAL_URL: http://localhost:9000
       MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY:-minioadmin}
       MINIO_SECRET_KEY: ${MINIO_SECRET_KEY:-minioadmin}
+      MINIO_USE_PROXY: "true"
 
       # Application Configuration
       BASE_URL: http://localhost:5001
@@ -71,6 +72,7 @@ services:
         condition: service_healthy
     networks:
       - knudev-network
+
 
 volumes:
   db-data:
