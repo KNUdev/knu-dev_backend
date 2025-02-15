@@ -39,7 +39,7 @@ import java.util.*;
 
 @Service
 @RequiredArgsConstructor
-public class EducationProgramCreationService implements EducationProgramApi {
+public class EducationProgramService implements EducationProgramApi {
 
     private final EducationProgramRepository educationProgramRepository;
     private final SectionRepository sectionRepository;
@@ -58,6 +58,7 @@ public class EducationProgramCreationService implements EducationProgramApi {
     private final TopicMapper topicMapper;
 
     @Transactional
+    @Override
     public EducationProgramDto save(EducationProgramCreationRequest programCreationReq) {
         inputReqCoherenceValidator.validateProgramOrderSequence(programCreationReq);
 
@@ -323,7 +324,7 @@ public class EducationProgramCreationService implements EducationProgramApi {
                 .build();
     }
 
-    private EducationProgram getProgramById(UUID id) {
+    public EducationProgram getProgramById(UUID id) {
         return educationProgramRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Program not found for ID: " + id));
     }

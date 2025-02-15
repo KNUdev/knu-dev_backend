@@ -41,7 +41,7 @@ public class ProgramSection {
     private LocalDateTime createdDate;
     private LocalDateTime lastModifiedDate;
 
-@OneToOne(optional = false, fetch = FetchType.LAZY)
+    @OneToOne(optional = false, fetch = FetchType.LAZY)
     @JoinColumn(name = "task_id", referencedColumnName = "id")
     private EducationTaskProxy sectionFinalTask;
 

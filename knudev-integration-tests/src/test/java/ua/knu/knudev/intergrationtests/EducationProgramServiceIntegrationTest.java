@@ -16,7 +16,7 @@ import ua.knu.knudev.education.repository.TopicRepository;
 import ua.knu.knudev.education.repository.bridge.ModuleTopicMappingRepository;
 import ua.knu.knudev.education.repository.bridge.ProgramSectionMappingRepository;
 import ua.knu.knudev.education.repository.bridge.SectionModuleMappingRepository;
-import ua.knu.knudev.education.service.EducationProgramCreationService;
+import ua.knu.knudev.education.service.EducationProgramService;
 import ua.knu.knudev.educationapi.dto.EducationProgramDto;
 import ua.knu.knudev.educationapi.dto.ProgramSectionDto;
 import ua.knu.knudev.educationapi.dto.ProgramTopicDto;
@@ -36,10 +36,10 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @SpringBootTest(classes = IntegrationTestsConfig.class)
 @ActiveProfiles("test")
-class EducationProgramCreationServiceIntegrationTest {
+class EducationProgramServiceIntegrationTest {
 
     @Autowired
-    private EducationProgramCreationService creationService;
+    private EducationProgramService creationService;
 
     @Autowired
     private EducationProgramRepository programRepository;
