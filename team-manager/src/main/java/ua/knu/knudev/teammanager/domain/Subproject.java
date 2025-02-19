@@ -19,6 +19,7 @@ public class Subproject {
 
     @Id
     @UuidGenerator
+    @Column(updatable = false, nullable = false)
     private UUID id;
 
     @ManyToOne(fetch = FetchType.LAZY)

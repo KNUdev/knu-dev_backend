@@ -3,13 +3,25 @@ package ua.knu.knudev.teammanager.github;
 import com.fasterxml.jackson.databind.JsonNode;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import ua.knu.knudev.teammanager.github.dto.GitHubRepoDataDto;
+import ua.knu.knudev.teammanager.github.dto.ReleaseDto;
+import ua.knu.knudev.teammanager.github.dto.UserCommitsDto;
 import ua.knu.knudev.teammanager.service.api.GitHubManagementApi;
 
+import java.net.URI;
+import java.net.http.HttpRequest;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 @Service
+@Slf4j
 @RequiredArgsConstructor
 public class GitHubIntegrationService implements GitHubManagementApi {
 
@@ -23,7 +35,7 @@ public class GitHubIntegrationService implements GitHubManagementApi {
     @Override
     @SneakyThrows
     public int retrieveUserCommits(RetrieveGithubUserCommitsAmountRequest request) {
-        int commitsFromAllReposAmmount = 0;
+        AtomicInteger commitsFromAllReposAmount = new AtomicInteger();
 
         String allReposUrl = BASE_URL + "/orgs/" + organizationName + "/repos";
         JsonNode repos = githubApiClient.invokeApi(allReposUrl);
@@ -31,33 +43,178 @@ public class GitHubIntegrationService implements GitHubManagementApi {
         String commitsStartDate = transformLocalDateToISO8601(request.firstCommitDate());
         String commitsToDate = transformLocalDateToISO8601(request.lastCommitDate().plusDays(1));
 
-        for (JsonNode repo : repos) {
+        repos.forEach(repo -> {
             String repoName = repo.get("name").textValue();
-            String commitsUrl = buildUrlForMasterCommits(repoName, commitsStartDate, commitsToDate, request.gitHubUsername(), request.isUndated());
+            String defaultBranch = detectDefaultBranch(repoName);
+            String commitsUrl = buildUrlForBranchCommits(repoName, commitsStartDate, commitsToDate, request.gitHubUsername(), request.isUndated(), defaultBranch);
 
             JsonNode commits = githubApiClient.invokeApi(commitsUrl);
-            commitsFromAllReposAmmount += commits.size();
-        }
+            commitsFromAllReposAmount.addAndGet(commits.size());
+        });
 
-        return commitsFromAllReposAmmount;
+        return commitsFromAllReposAmount.get();
     }
 
-    private String buildUrlForMasterCommits(String repoName,
-                                            String firstCommitDate,
-                                            String lastCommitDate,
-                                            String gitHubUsername,
-                                            boolean isUndated) {
-        String allUserCommitsUrl = BASE_URL + "/repos/" + organizationName + "/" + repoName +
-                "/commits?author=" + gitHubUsername +
-                "&sha=master";
-        if (!isUndated) {
-            allUserCommitsUrl = allUserCommitsUrl + "&since=" + firstCommitDate + "&until=" + lastCommitDate;
+    @Override
+    public List<GitHubRepoDataDto> getAllGitHubRepos() {
+        List<GitHubRepoDataDto> gitHubRepoDataDtos = new ArrayList<>();
+        String allReposUrl = BASE_URL + "/orgs/" + organizationName + "/repos";
+        JsonNode repos = githubApiClient.invokeApi(allReposUrl);
+
+        if (repos == null || !repos.isArray()) {
+            log.error("No repos found!");
+            return null;
         }
 
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss'Z'");
+
+        repos.forEach(repo -> {
+            String repoName = repo.path("name").asText();
+            LocalDate startedAt = LocalDateTime.parse(repo.path("created_at").asText(), formatter).toLocalDate();
+            LocalDateTime updatedAt = LocalDateTime.parse(repo.path("updated_at").asText(), formatter);
+            String resourceUrl = repo.path("html_url").asText();
+            List<String> contributors = getRepositoryContributorsByRepoName(repoName);
+
+            GitHubRepoDataDto gitHubRepoDataDto = GitHubRepoDataDto.builder()
+                    .name(repoName)
+                    .startedAt(startedAt)
+                    .lastUpdatedAt(updatedAt)
+                    .contributors(contributors)
+                    .resourceUrl(resourceUrl)
+                    .build();
+
+            gitHubRepoDataDtos.add(gitHubRepoDataDto);
+        });
+
+        return gitHubRepoDataDtos;
+    }
+
+    @Override
+    public UserCommitsDto getUserCommitsDto(String username, String repoName) {
+        String defaultBranch = detectDefaultBranch(repoName);
+        String commitsUrl = buildUrlForBranchCommits(repoName, null, null, username, true, defaultBranch);
+
+        JsonNode commits = githubApiClient.invokeApi(commitsUrl);
+        int totalCommits = commits.size();
+        LocalDate lastCommitDate = null;
+
+        if (commits.isArray() && totalCommits > 0) {
+            String latestCommitDateStr = commits.get(0).get("commit").get("committer").get("date").asText();
+            lastCommitDate = LocalDate.parse(latestCommitDateStr.substring(0, 10));
+        }
+
+        return UserCommitsDto.builder()
+                .lastCommitDate(lastCommitDate)
+                .totalCommits(totalCommits)
+                .build();
+    }
+
+    @Override
+    public Set<ReleaseDto> getReleaseInfo(String repoName) {
+        String releaseUrl = BASE_URL + "/repos/" + organizationName + "/" + repoName + "/releases";
+        JsonNode releases = githubApiClient.invokeApi(releaseUrl);
+
+        if (releases == null || releases.isEmpty()) {
+            log.warn("No releases found for repository: {}", repoName);
+            return Collections.emptySet();
+        }
+
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss'Z'");
+
+        Set<ReleaseDto> releaseDtos = releases
+                .findParents("id")
+                .stream()
+                .map(release -> {
+                    LocalDateTime releaseStartDateTime = parseDate(release.get("created_at"), formatter);
+                    LocalDateTime releaseFinishDateTime = parseDate(release.get("published_at"), formatter);
+
+                    if (releaseStartDateTime == null || releaseFinishDateTime == null) {
+                        log.warn("Skipping release due to missing dates in repository: {}", repoName);
+                        return null;
+                    }
+
+                    LocalDate releaseStartDate = releaseStartDateTime.toLocalDate();
+                    LocalDate releaseFinishDate = releaseFinishDateTime.toLocalDate();
+
+                    String allCommitsPerPeriodUrl = BASE_URL + "/repos/" + organizationName + "/" + repoName + "/commits" +
+                            "?since=" + releaseStartDate + "T00:00:00Z" +
+                            "&until=" + releaseFinishDate + "T23:59:59Z";
+
+                    JsonNode commitsPerPeriod = githubApiClient.invokeApi(allCommitsPerPeriodUrl);
+                    int aggregatedGitHubCommitCount = (commitsPerPeriod != null) ? commitsPerPeriod.size() : 0;
+
+                    String version = Optional.ofNullable(release.get("name")).map(JsonNode::textValue).orElse("Unknown");
+                    String changeLogEn = Optional.ofNullable(release.get("body")).map(JsonNode::textValue).orElse("No changelog available.");
+
+                    return new ReleaseDto(
+                            releaseStartDateTime,
+                            releaseFinishDateTime,
+                            version,
+                            changeLogEn,
+                            aggregatedGitHubCommitCount
+                    );
+                })
+                .filter(Objects::nonNull)
+                .collect(Collectors.toSet());
+
+        return releaseDtos;
+    }
+
+    private LocalDateTime parseDate(JsonNode dateNode, DateTimeFormatter formatter) {
+        return Optional.ofNullable(dateNode)
+                .map(JsonNode::asText)
+                .filter(date -> !date.isEmpty())
+                .map(date -> LocalDateTime.parse(date, formatter))
+                .orElse(null);
+    }
+
+    @Override
+    public boolean existsByUsername(String username) {
+        try {
+            HttpRequest request = githubApiClient.buildHttpRequest(URI.create(BASE_URL + "/users/" + username));
+            githubApiClient.sendHttpResponse(request);
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    private String buildUrlForBranchCommits(String repoName, String firstCommitDate, String lastCommitDate, String gitHubUsername, boolean isUndated, String branch) {
+        String allUserCommitsUrl = BASE_URL + "/repos/" + organizationName + "/" + repoName
+                + "/commits?author="
+                + gitHubUsername
+                + "&sha=" + branch;
+        if (!isUndated) {
+            allUserCommitsUrl += "&since=" + firstCommitDate + "&until=" + lastCommitDate;
+        }
         return allUserCommitsUrl;
+    }
+
+    private String detectDefaultBranch(String repoName) {
+        try {
+            String repoUrl = BASE_URL + "/repos/" + organizationName + "/" + repoName;
+            JsonNode repoData = githubApiClient.invokeApi(repoUrl);
+            return repoData.has("default_branch")
+                    ? repoData.get("default_branch").asText()
+                    : "master";
+        } catch (Exception e) {
+            return "master";
+        }
     }
 
     private String transformLocalDateToISO8601(LocalDate date) {
         return date.atStartOfDay() + "Z";
+    }
+
+    private List<String> getRepositoryContributorsByRepoName(String repoName) {
+        List<String> contributors = new ArrayList<>();
+        JsonNode contributorsNode = githubApiClient.invokeApi(BASE_URL + "/repos/" + organizationName + "/" + repoName + "/contributors");
+
+        contributorsNode.forEach(contributor -> {
+            String nickname = contributor.get("login").textValue();
+            contributors.add(nickname);
+        });
+
+        return contributors;
     }
 }

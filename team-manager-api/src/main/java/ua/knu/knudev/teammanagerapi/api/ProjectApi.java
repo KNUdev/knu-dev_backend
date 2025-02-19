@@ -11,9 +11,7 @@ import java.util.UUID;
 
 public interface ProjectApi {
 
-    FullProjectDto create(ProjectCreationRequest projectCreationRequest);
-
-    FullProjectDto addDeveloper(AddProjectDeveloperRequest addProjectDeveloperRequest);
+    //update all dtos
 
     FullProjectDto updateStatus(UUID projectId, ProjectStatus newProjectStatus);
 
@@ -21,5 +19,11 @@ public interface ProjectApi {
 
     Page<ShortProjectDto> getAll(Integer pageNumber, Integer pageSize);
 
-    FullProjectDto release(UUID projectId, String projectDomain);
+    FullProjectDto addSubproject(
+            //add subproject dto creation request
+    );
+
+    //return subrojectDto
+    void addDevelopersToSubproject();
+
 }
