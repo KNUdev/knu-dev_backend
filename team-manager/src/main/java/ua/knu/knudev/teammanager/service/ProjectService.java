@@ -3,9 +3,8 @@ package ua.knu.knudev.teammanager.service;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.boot.context.event.ApplicationReadyEvent;
-import org.springframework.context.event.EventListener;
 import org.springframework.data.domain.Page;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import ua.knu.knudev.knudevcommon.constant.ProjectStatus;
 import ua.knu.knudev.teammanager.domain.*;
@@ -25,7 +24,6 @@ import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static ua.knu.knudev.teammanager.domain.QSubproject.subproject;
 import static ua.knu.knudev.teammanager.domain.SubprojectType.detectSubprojectType;
 
 @Slf4j
@@ -39,7 +37,7 @@ public class ProjectService implements ProjectApi {
 
     private final GitHubManagementApi gitHubManagementApi;
 
-    @EventListener(ApplicationReadyEvent.class)
+    @Scheduled(cron = "0 0 0 */3 * *")
     @Transactional
     public void createOrModifyProject() {
         List<GitHubRepoDataDto> allGitHubRepos = gitHubManagementApi.getAllGitHubRepos();
