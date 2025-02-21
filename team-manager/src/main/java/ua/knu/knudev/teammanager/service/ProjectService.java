@@ -4,27 +4,39 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import ua.knu.knudev.knudevcommon.constant.ProjectStatus;
-import ua.knu.knudev.teammanager.domain.*;
+import ua.knu.knudev.knudevcommon.constant.SubprojectType;
+import ua.knu.knudev.knudevcommon.dto.MultiLanguageFieldDto;
+import ua.knu.knudev.teammanager.domain.Project;
+import ua.knu.knudev.teammanager.domain.Release;
+import ua.knu.knudev.teammanager.domain.Subproject;
+import ua.knu.knudev.teammanager.domain.SubprojectAccount;
 import ua.knu.knudev.teammanager.github.dto.GitHubRepoDataDto;
-import ua.knu.knudev.teammanager.github.dto.ReleaseDto;
 import ua.knu.knudev.teammanager.github.dto.UserCommitsDto;
-import ua.knu.knudev.teammanager.mapper.ReleaseMapper;
+import ua.knu.knudev.teammanager.mapper.*;
 import ua.knu.knudev.teammanager.repository.AccountProfileRepository;
 import ua.knu.knudev.teammanager.repository.ProjectRepository;
+import ua.knu.knudev.teammanager.repository.SubprojectRepository;
 import ua.knu.knudev.teammanager.service.api.GitHubManagementApi;
 import ua.knu.knudev.teammanagerapi.api.ProjectApi;
 import ua.knu.knudev.teammanagerapi.dto.FullProjectDto;
+import ua.knu.knudev.teammanagerapi.dto.ReleaseDto;
 import ua.knu.knudev.teammanagerapi.dto.ShortProjectDto;
+import ua.knu.knudev.teammanagerapi.dto.SubprojectDto;
 import ua.knu.knudev.teammanagerapi.exception.ProjectException;
+import ua.knu.knudev.teammanagerapi.request.ProjectUpdateRequest;
+import ua.knu.knudev.teammanagerapi.request.SubprojectUpdateRequest;
 
 import java.time.LocalDate;
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import static ua.knu.knudev.teammanager.domain.SubprojectType.detectSubprojectType;
+import static ua.knu.knudev.knudevcommon.constant.SubprojectType.detectSubprojectType;
 
 @Slf4j
 @Service
@@ -33,7 +45,13 @@ public class ProjectService implements ProjectApi {
 
     private final ProjectRepository projectRepository;
     private final AccountProfileRepository accountProfileRepository;
+    private final SubprojectRepository subprojectRepository;
     private final ReleaseMapper releaseMapper;
+    private final ProjectMapper projectMapper;
+    private final MultiLanguageFieldMapper multiLanguageFieldMapper;
+    private final AccountProfileMapper accountProfileMapper;
+    private final SubprojectMapper subprojectMapper;
+    private final SubprojectAccountMapper subprojectAccountMapper;
 
     private final GitHubManagementApi gitHubManagementApi;
 
@@ -47,28 +65,69 @@ public class ProjectService implements ProjectApi {
     }
 
     @Override
-    public FullProjectDto updateStatus(UUID projectId, ProjectStatus newProjectStatus) {
-        return null;
-    }
-
-    @Override
+    @Transactional
     public FullProjectDto getById(UUID projectId) {
-        return null;
+        Project project = projectRepository.findById(projectId).orElseThrow(
+                () -> new ProjectException("Project with id: " + projectId + " not found"));
+        return projectMapper.toDto(project);
     }
 
     @Override
+    @Transactional
     public Page<ShortProjectDto> getAll(Integer pageNumber, Integer pageSize) {
-        return null;
+        Pageable pageable = PageRequest.of(pageNumber, pageSize);
+        Page<Project> projectsPage = projectRepository.findAll(pageable);
+
+        return projectsPage.map(project -> {
+            MultiLanguageFieldDto description = project.getDescription() != null
+                    ? multiLanguageFieldMapper.toDto(project.getDescription())
+                    : null;
+
+            return ShortProjectDto.builder()
+                    .name(project.getName())
+                    .description(description)
+                    .status(project.getStatus())
+                    .tags(project.getTags())
+                    .banner(project.getBanner())
+                    .lastUpdate(project.getLastUpdatedAt())
+                    .build();
+        });
     }
 
     @Override
-    public FullProjectDto addSubproject() {
-        return null;
+    public FullProjectDto updateProject(ProjectUpdateRequest request) {
+        Project project = projectRepository.findById(request.id())
+                .orElseThrow(() -> new ProjectException("Project with id: " + request.id() + " not found!"));
+
+        project.setName(getOrDefault(request.name(), project.getName()));
+        project.setDescription(getOrDefault(request.description(), project.getDescription(), multiLanguageFieldMapper::toDomain));
+        project.setBanner(getOrDefault(request.banner(), project.getBanner()));
+        project.setStatus(getOrDefault(request.status(), project.getStatus()));
+
+        project.setArchitect(mapIfNull(project.getArchitect(), request.architect(), accountProfileMapper::toDomain));
+        project.setSupervisor(mapIfNull(project.getSupervisor(), request.supervisor(), accountProfileMapper::toDomain));
+
+        if (request.tags() != null) {
+            project.getTags().addAll(request.tags());
+        }
+
+        if (request.subprojects() != null) {
+            project.getSubprojects().addAll(subprojectMapper.toDomains(request.subprojects()));
+        }
+
+        project = projectRepository.save(project);
+        return projectMapper.toDto(project);
     }
 
     @Override
-    public void addDevelopersToSubproject() {
+    public SubprojectDto updateSubproject(SubprojectUpdateRequest request) {
+        Subproject subproject = subprojectRepository.findById(request.id())
+                .orElseThrow(() -> new ProjectException("Subproject with id: " + request.id() + " not found!"));
 
+        subproject.getAllDevelopers().addAll(subprojectAccountMapper.toDomains(request.subprojectAccountDtos()));
+
+        subproject = subprojectRepository.save(subproject);
+        return subprojectMapper.toDto(subproject);
     }
 
     private void processRepository(GitHubRepoDataDto repo, Set<Project> projectsToCreate) {
@@ -124,7 +183,7 @@ public class ProjectService implements ProjectApi {
             project.getSubprojects().add(newSubproject);
         } else {
             Subproject subproject = existingSubproject.get();
-            
+
             Set<SubprojectAccount> existingAccounts = subproject.getAllDevelopers();
             Set<SubprojectAccount> newAccounts = subprojectAccounts.stream()
                     .filter(account -> !existingAccounts.contains(account))
@@ -208,142 +267,16 @@ public class ProjectService implements ProjectApi {
         return subproject;
     }
 
+    private <T> T getOrDefault(T newValue, T currentValue) {
+        return newValue != null ? newValue : currentValue;
+    }
 
-//    @Override
-//    @Transactional
-//    public FullProjectDto create(ProjectCreationRequest projectCreationRequest) {
-//        MultiLanguageField name = multiLanguageFieldMapper.toDomain(projectCreationRequest.name());
-//        MultiLanguageField description = multiLanguageFieldMapper.toDomain(projectCreationRequest.description());
-//
-//        String filename = imageServiceApi.uploadFile(
-//                projectCreationRequest.avatarFile(),
-//                name.getEn(),
-//                ImageSubfolder.PROJECTS_AVATARS
-//        );
-//
-//        Project project = Project.builder()
-//                .name(name)
-//                .description(description)
-//                .avatarFilename(filename)
-//                .tags(projectCreationRequest.tags())
-//                .startedAt(null)
-//                .githubRepoLinks(projectCreationRequest.githubRepoUrls())
-//                .status(ProjectStatus.PLANNED)
-//                .build();
-//
-//        Project savedProject = projectRepository.save(project);
-//        log.info("Project was created: {}", project.getId());
-//        return projectMapper.toDto(savedProject);
-//    }
-//
-//    @Override
-//    @SneakyThrows
-//    @Transactional
-//    public FullProjectDto addDeveloper(AddProjectDeveloperRequest addProjectDeveloperRequest) {
-//        UUID projectId = addProjectDeveloperRequest.projectId();
-//        UUID accountProfileId = addProjectDeveloperRequest.accountProfileId();
-//        Project project = getProjectById(projectId);
-//        AccountProfile accountProfile = accountProfileService.getDomainById(accountProfileId);
-//
-//        Set<SubprojectAccount> subprojectAccounts = project.getProjectAccounts();
-//        SubprojectAccount subprojectAccount = createProjectAccount(
-//                project,
-//                accountProfile,
-//                projectId,
-//                accountProfileId
-//        );
-//
-//        List<UUID> accountProfileIds = subprojectAccounts.stream()
-//                .map(account -> account.getAccountProfile().getId())
-//                .toList();
-//
-//        if (accountProfileIds.stream().anyMatch(id -> accountProfile.getId().equals(id))) {
-//            throw new ProjectException("Account with ID: " + accountProfileId +
-//                    " is already assigned to project: " + projectId);
-//        }
-//
-//        subprojectAccounts.add(subprojectAccount);
-//        Project savedProject = projectRepository.save(project);
-//        log.info("Added developer: {}, to project: {}", subprojectAccount.getId().getAccountId(), projectId);
-//        return projectMapper.toDto(savedProject);
-//    }
-//
-//    @Override
-//    @Transactional
-//    public FullProjectDto updateStatus(UUID projectId, ProjectStatus newProjectStatus) {
-//        if (newProjectStatus == null) {
-//            throw new ProjectException("Project status can't be null!");
-//        }
-//
-//        Project project = getProjectById(projectId);
-//
-//        if (project.getStatus() == ProjectStatus.PLANNED &&
-//                newProjectStatus == ProjectStatus.UNDER_DEVELOPMENT) {
-//            project.setStartedAt(LocalDate.now());
-//        }
-//
-//        project.setStatus(newProjectStatus);
-//        Project savedProject = projectRepository.save(project);
-//        log.info("Project status updated: {}, in project: {}", newProjectStatus, projectId);
-//        return projectMapper.toDto(savedProject);
-//    }
-//
-//    @Override
-//    @Transactional
-//    public FullProjectDto getById(UUID projectId) {
-//        Project project = getProjectById(projectId);
-//        return projectMapper.toDto(project);
-//    }
-//
-//    @Override
-//    @Transactional
-//    public Page<ShortProjectDto> getAll(Integer pageNumber, Integer pageSize) {
-//        Pageable pageable = PageRequest.of(pageNumber, pageSize);
-//        Page<Project> allProjectsPage = projectRepository.findAll(pageable);
-//
-//        return allProjectsPage.map(project -> new ShortProjectDto(
-//                multiLanguageFieldMapper.toDto(project.getName()),
-//                multiLanguageFieldMapper.toDto(project.getDescription()),
-//                project.getStatus(),
-//                project.getAvatarFilename(),
-//                project.getTags()
-//        ));
-//    }
-//
-//    @Override
-//    @Transactional
-//    public FullProjectDto release(UUID projectId, String projectDomain) {
-//        Project project = getProjectById(projectId);
-//
-//        if (project.getReleaseInfo() != null) {
-//            throw new ProjectException("Project already has a release!");
-//        }
-//        Release release = Release.builder()
-//                .releaseDate(LocalDate.now())
-//                .projectDomain(projectDomain)
-//                .project(project)
-//                .build();
-//
-//        project.setReleaseInfo(release);
-//
-//        Project savedProject = projectRepository.save(project);
-//        log.info("Project released: {}", projectId);
-//        return projectMapper.toDto(savedProject);
-//    }
-//
-//    private Project getProjectById(UUID projectId) {
-//        return projectRepository.findById(projectId).orElseThrow(
-//                () -> new ProjectException("Project with id " + projectId + " not found"));
-//    }
-//
-//    private SubprojectAccount createProjectAccount(Project project, AccountProfile accountProfile, UUID projectId, UUID accountProfileId) {
-//        ProjectAccountId projectAccountId = new ProjectAccountId(projectId, accountProfileId);
-//        return SubprojectAccount.builder()
-//                .id(projectAccountId)
-//                .accountProfile(accountProfile)
-//                .project(project)
-//                .dateJoined(LocalDate.now())
-//                .build();
-//    }
+    private <T, R> R getOrDefault(T newValue, R currentValue, Function<T, R> mapper) {
+        return newValue != null ? Objects.requireNonNullElse(mapper.apply(newValue), currentValue) : currentValue;
+    }
+
+    private <T, R> R mapIfNull(R currentValue, T newValue, Function<T, R> mapper) {
+        return (currentValue == null && newValue != null) ? mapper.apply(newValue) : currentValue;
+    }
 
 }

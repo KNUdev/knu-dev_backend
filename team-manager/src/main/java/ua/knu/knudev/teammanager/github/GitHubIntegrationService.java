@@ -7,7 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import ua.knu.knudev.teammanager.github.dto.GitHubRepoDataDto;
-import ua.knu.knudev.teammanager.github.dto.ReleaseDto;
+import ua.knu.knudev.teammanagerapi.dto.ReleaseDto;
 import ua.knu.knudev.teammanager.github.dto.UserCommitsDto;
 import ua.knu.knudev.teammanager.service.api.GitHubManagementApi;
 
@@ -146,13 +146,13 @@ public class GitHubIntegrationService implements GitHubManagementApi {
                     String version = Optional.ofNullable(release.get("name")).map(JsonNode::textValue).orElse("Unknown");
                     String changeLogEn = Optional.ofNullable(release.get("body")).map(JsonNode::textValue).orElse("No changelog available.");
 
-                    return new ReleaseDto(
-                            releaseStartDateTime,
-                            releaseFinishDateTime,
-                            version,
-                            changeLogEn,
-                            aggregatedGitHubCommitCount
-                    );
+                    return ReleaseDto.builder()
+                            .initializedAt(releaseStartDateTime)
+                            .releaseFinishDate(releaseFinishDateTime)
+                            .version(version)
+                            .changesLogEn(changeLogEn)
+                            .aggregatedGithubCommitCount(aggregatedGitHubCommitCount)
+                            .build();
                 })
                 .filter(Objects::nonNull)
                 .collect(Collectors.toSet());

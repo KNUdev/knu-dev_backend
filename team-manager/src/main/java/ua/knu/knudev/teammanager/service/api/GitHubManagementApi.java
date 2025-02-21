@@ -1,7 +1,7 @@
 package ua.knu.knudev.teammanager.service.api;
 
 import ua.knu.knudev.teammanager.github.dto.GitHubRepoDataDto;
-import ua.knu.knudev.teammanager.github.dto.ReleaseDto;
+import ua.knu.knudev.teammanagerapi.dto.ReleaseDto;
 import ua.knu.knudev.teammanager.github.RetrieveGithubUserCommitsAmountRequest;
 import ua.knu.knudev.teammanager.github.dto.UserCommitsDto;
 

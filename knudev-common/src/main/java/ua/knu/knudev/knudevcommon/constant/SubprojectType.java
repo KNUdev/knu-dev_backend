@@ -1,7 +1,6 @@
-package ua.knu.knudev.teammanager.domain;
+package ua.knu.knudev.knudevcommon.constant;
 
 import lombok.RequiredArgsConstructor;
-import ua.knu.knudev.teammanagerapi.exception.ProjectException;
 
 import java.util.Arrays;
 
@@ -17,12 +16,12 @@ public enum SubprojectType {
 
     public static SubprojectType detectSubprojectType(String subprojectType) {
         if (subprojectType == null) {
-            throw new ProjectException("Subproject type is null");
+            throw new IllegalArgumentException("Subproject type is null");
         }
 
         return Arrays.stream(SubprojectType.values())
                 .filter(type -> type.subprojectType.equals(subprojectType.toLowerCase().trim()))
                 .findFirst()
-                .orElseThrow(() -> new ProjectException("Invalid subproject type: " + subprojectType));
+                .orElseThrow(() -> new IllegalArgumentException("Invalid subproject type: " + subprojectType));
     }
 }
