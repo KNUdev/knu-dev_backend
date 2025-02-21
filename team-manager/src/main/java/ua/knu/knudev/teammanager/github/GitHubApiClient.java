@@ -42,7 +42,8 @@ public class GitHubApiClient {
             } catch (IOException | InterruptedException e) {
                 attempt++;
                 if (attempt >= MAX_RETRIES) {
-                    throw new ApiClientException("Max retries reached. Unable to complete the request.", HttpStatus.valueOf(503));
+                    throw new ApiClientException("Max retries reached. Unable to complete the request.",
+                            HttpStatus.valueOf(503));
                 }
                 Thread.sleep(RETRY_DELAY_MS);
                 log.warn("Retrying request, attempt: {}", attempt);
@@ -51,7 +52,7 @@ public class GitHubApiClient {
         throw new ApiClientException("Unexpected error while invoking API.", HttpStatus.valueOf(503));
     }
 
-    private HttpRequest buildHttpRequest(URI uri) {
+    protected HttpRequest buildHttpRequest(URI uri) {
         return HttpRequest.newBuilder()
                 .uri(uri)
                 .header("Authorization", "Bearer " + accessToken)
@@ -59,7 +60,7 @@ public class GitHubApiClient {
                 .build();
     }
 
-    private HttpResponse<String> sendHttpResponse(HttpRequest request) throws InterruptedException, IOException {
+    protected HttpResponse<String> sendHttpResponse(HttpRequest request) throws InterruptedException, IOException {
         HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
         if (response.statusCode() < 200 || response.statusCode() >= 300) {
             throw new ConnectException("Failed with status code: " + response.statusCode() + ", body: " + response.body());

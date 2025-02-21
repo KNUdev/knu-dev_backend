@@ -60,7 +60,7 @@ public class AdminProjectController {
                     schema = @Schema(description = "Project creation request payload",
                             implementation = ProjectCreationRequest.class)
             ) ProjectCreationRequest projectCreationRequest) {
-        projectApi.create(projectCreationRequest);
+//        projectApi.create(projectCreationRequest);
     }
 
     @Operation(
@@ -96,7 +96,7 @@ public class AdminProjectController {
             required = true,
             schema = @Schema(implementation = AddProjectDeveloperRequest.class)
     ) AddProjectDeveloperRequest addProjectDeveloperRequest) {
-        projectApi.addDeveloper(addProjectDeveloperRequest);
+//        projectApi.addDeveloper(addProjectDeveloperRequest);
     }
 
     @Operation(
@@ -191,7 +191,7 @@ public class AdminProjectController {
     @PatchMapping("/{projectId}/release")
     @ResponseStatus(HttpStatus.OK)
     public void releaseProject(@PathVariable UUID projectId, @RequestBody String projectDomain) {
-        projectApi.release(projectId, projectDomain);
+//        projectApi.release(projectId, projectDomain);
     }
 
 

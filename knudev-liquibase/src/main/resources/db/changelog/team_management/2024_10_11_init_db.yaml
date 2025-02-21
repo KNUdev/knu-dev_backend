@@ -464,11 +464,10 @@ databaseChangeLog:
                     primaryKey: true
                     nullable: false
               - column:
-                  name: name_en
+                  name: name
                   type: varchar(255)
-              - column:
-                  name: name_uk
-                  type: varchar(255)
+                  constraints:
+                    nullable: false
               - column:
                   name: description_en
                   type: text
@@ -492,8 +491,6 @@ databaseChangeLog:
               - column:
                   name: architect_account_id
                   type: UUID
-                  constraints:
-                    nullable: false
               - column:
                   name: supervisor_account_id
                   type: UUID
@@ -706,11 +703,11 @@ databaseChangeLog:
                     primaryKey: true
                     nullable: false
               - column:
-                  name: release_start_date
-                  type: date
+                  name: initialized_at
+                  type: datetime
               - column:
                   name: release_finish_date
-                  type: date
+                  type: datetime
               - column:
                   name: version
                   type: varchar(255)
@@ -810,3 +807,17 @@ databaseChangeLog:
             columns:
               - column:
                   name: account_id
+
+  - changeSet:
+      author: DenysLeonenko
+      id: add_github_nickname_column_to_account_profile
+      changes:
+        - addColumn:
+            schemaName: team_management
+            tableName: profile_account
+            columns:
+              - column:
+                  name: git_hub_nickname
+                  type: varchar(150)
+#                  constraints:
+#                    nullable: false

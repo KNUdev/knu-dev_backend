@@ -1,19 +1,13 @@
-//package ua.knu.knudev.teammanager.mapper;
-//
-//import org.mapstruct.Mapper;
-//import org.mapstruct.Mapping;
-//import org.mapstruct.Mappings;
-//import ua.knu.knudev.knudevcommon.mapper.BaseMapper;
-//import ua.knu.knudev.teammanager.domain.Project;
-//import ua.knu.knudev.teammanager.domain.SubprojectAccount;
-//import ua.knu.knudev.teammanagerapi.dto.FullProjectDto;
-//import ua.knu.knudev.teammanagerapi.dto.ProjectAccountDto;
-//
-//import java.util.Set;
-//
-//@Mapper(componentModel = "spring", uses = {MultiLanguageFieldMapper.class})
-//public interface ProjectMapper extends BaseMapper<Project, FullProjectDto> {
-//
+package ua.knu.knudev.teammanager.mapper;
+
+import org.mapstruct.Mapper;
+import ua.knu.knudev.knudevcommon.mapper.BaseMapper;
+import ua.knu.knudev.teammanager.domain.Project;
+import ua.knu.knudev.teammanagerapi.dto.FullProjectDto;
+
+@Mapper(componentModel = "spring", uses = {MultiLanguageFieldMapper.class})
+public interface ProjectMapper extends BaseMapper<Project, FullProjectDto> {
+
 ////    @Mappings({
 ////            @Mapping(target = "projectAccounts", source = "projectAccounts"),
 ////            @Mapping(target = "releaseInfo", source = "releaseInfo")
@@ -29,4 +23,4 @@
 //    ProjectAccountDto toProjectAccountDto(SubprojectAccount subprojectAccount);
 //
 //    Set<ProjectAccountDto> toProjectAccountDtoSet(Set<SubprojectAccount> subprojectAccounts);
-//}
+}
