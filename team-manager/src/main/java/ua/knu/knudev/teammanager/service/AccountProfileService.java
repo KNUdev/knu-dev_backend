@@ -280,7 +280,7 @@ public class AccountProfileService implements AccountProfileApi {
     }
 
     @Override
-    public AccountProfileDto getByGitHubUsername(String githubUsername) {
+    public AccountProfileDto getByGithubUsername(String githubUsername) {
         AccountProfile accountProfile = accountProfileRepository.findAccountProfileByGithubAccountNickname(githubUsername)
                 .orElseThrow(() -> new AccountException("Account with githubUsername " + githubUsername + " not found!"));
         return accountProfileMapper.toDto(accountProfile);

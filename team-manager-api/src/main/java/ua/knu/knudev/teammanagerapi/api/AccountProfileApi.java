@@ -38,5 +38,5 @@ public interface AccountProfileApi {
 
     void removeBanner(UUID accountProfileId);
 
-    AccountProfileDto getByGitHubUsername(String githubUsername);
+    AccountProfileDto getByGithubUsername(String githubUsername);
 }
