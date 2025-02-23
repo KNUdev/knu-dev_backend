@@ -7,9 +7,9 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @Builder
-public record GitHubRepoDataDto (
+public record GithubRepoDataDto(
     String name,
-    LocalDate startedAt,
+    LocalDate initializedAt,
     LocalDateTime lastUpdatedAt,
     List<String> contributors,
     String resourceUrl

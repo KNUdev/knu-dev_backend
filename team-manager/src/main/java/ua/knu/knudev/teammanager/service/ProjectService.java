@@ -15,13 +15,13 @@ import ua.knu.knudev.teammanager.domain.Project;
 import ua.knu.knudev.teammanager.domain.Release;
 import ua.knu.knudev.teammanager.domain.Subproject;
 import ua.knu.knudev.teammanager.domain.SubprojectAccount;
-import ua.knu.knudev.teammanager.github.dto.GitHubRepoDataDto;
+import ua.knu.knudev.teammanager.github.dto.GithubRepoDataDto;
 import ua.knu.knudev.teammanager.github.dto.UserCommitsDto;
 import ua.knu.knudev.teammanager.mapper.*;
 import ua.knu.knudev.teammanager.repository.AccountProfileRepository;
 import ua.knu.knudev.teammanager.repository.ProjectRepository;
 import ua.knu.knudev.teammanager.repository.SubprojectRepository;
-import ua.knu.knudev.teammanager.service.api.GitHubManagementApi;
+import ua.knu.knudev.teammanager.service.api.GithubManagementApi;
 import ua.knu.knudev.teammanagerapi.api.ProjectApi;
 import ua.knu.knudev.teammanagerapi.dto.FullProjectDto;
 import ua.knu.knudev.teammanagerapi.dto.ReleaseDto;
@@ -53,12 +53,12 @@ public class ProjectService implements ProjectApi {
     private final SubprojectMapper subprojectMapper;
     private final SubprojectAccountMapper subprojectAccountMapper;
 
-    private final GitHubManagementApi gitHubManagementApi;
+    private final GithubManagementApi gitHubManagementApi;
 
     @Scheduled(cron = "0 0 0 */3 * *")
     @Transactional
     public void createOrModifyProject() {
-        List<GitHubRepoDataDto> allGitHubRepos = gitHubManagementApi.getAllGitHubRepos();
+        List<GithubRepoDataDto> allGitHubRepos = gitHubManagementApi.getAllGithubRepos();
         Set<Project> projectsToCreate = new HashSet<>();
         allGitHubRepos.forEach(repo -> processRepository(repo, projectsToCreate));
         saveProjects(projectsToCreate);
@@ -130,7 +130,7 @@ public class ProjectService implements ProjectApi {
         return subprojectMapper.toDto(subproject);
     }
 
-    private void processRepository(GitHubRepoDataDto repo, Set<Project> projectsToCreate) {
+    private void processRepository(GithubRepoDataDto repo, Set<Project> projectsToCreate) {
         String resourceUrl = repo.resourceUrl();
         List<String> contributors = repo.contributors();
         String[] repoNameParts = repo.name().split("_");
@@ -207,11 +207,11 @@ public class ProjectService implements ProjectApi {
     }
 
     private void createNewProject(String projectName, SubprojectType subprojectType, String resourceUrl, String repoName,
-                                  Set<SubprojectAccount> subprojectAccounts, Set<Project> projectsToCreate, GitHubRepoDataDto repo) {
+                                  Set<SubprojectAccount> subprojectAccounts, Set<Project> projectsToCreate, GithubRepoDataDto repo) {
         Project newProject = new Project();
 
         newProject.setName(projectName);
-        newProject.setStartedAt(repo.startedAt());
+        newProject.setStartedAt(repo.initializedAt());
         newProject.setLastUpdatedAt(repo.lastUpdatedAt());
         newProject.setStatus(ProjectStatus.UNDER_DEVELOPMENT);
 
@@ -230,7 +230,7 @@ public class ProjectService implements ProjectApi {
 
     private SubprojectAccount createSubprojectAccount(String contributor, String repoName) {
         UserCommitsDto userCommitsDto = gitHubManagementApi.getUserCommitsDto(contributor, repoName);
-        return accountProfileRepository.findByGitHubNickname(contributor)
+        return accountProfileRepository.findAccountProfileByGithubAccountNickname(contributor)
                 .map(accountProfile -> SubprojectAccount.builder()
                         .subproject(null)
                         .accountProfile(accountProfile)

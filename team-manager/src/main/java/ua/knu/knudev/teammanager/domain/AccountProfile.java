@@ -57,9 +57,16 @@ public class AccountProfile {
     private KNUdevUnit unit;
 
     @Column(
+            updatable = false
 //            nullable = false
     )
-    private String gitHubNickname;
+    private Integer githubAccountId;
+
+    @Column(
+            updatable = false
+//            nullable = false
+    )
+    private String githubAccountNickname;
 
     @ManyToOne
     @JoinColumn(name = "department_id", referencedColumnName = "id", nullable = false)

@@ -98,7 +98,7 @@
 //                .name(name)
 //                .description(description)
 //                .avatarFilename(TEST_PROJECT_NAME_IN_ENGLISH)
-//                .startedAt(null)
+//                .initializedAt(null)
 //                .status(ProjectStatus.PLANNED)
 //                .tags(tags)
 //                .githubRepoLinks(repoLinks)
@@ -268,7 +268,7 @@
 //        }
 //
 //        @Test
-//        @DisplayName("Should set startedAt on now when status was PLANNED and new status is UNDER_DEVELOPMENT")
+//        @DisplayName("Should set initializedAt on now when status was PLANNED and new status is UNDER_DEVELOPMENT")
 //        public void should_SetStartedAtOnNow_When_ProjectStatusWasPLANNED_AndNewProjectStatusIsUNDER_DEVELOPMENT() {
 //            FullProjectDto response = projectService.updateStatus(testProject.getId(), ProjectStatus.UNDER_DEVELOPMENT);
 //

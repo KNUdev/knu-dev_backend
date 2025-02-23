@@ -6,10 +6,10 @@ import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import ua.knu.knudev.teammanager.github.dto.GitHubRepoDataDto;
+import ua.knu.knudev.teammanager.github.dto.GithubRepoDataDto;
 import ua.knu.knudev.teammanagerapi.dto.ReleaseDto;
 import ua.knu.knudev.teammanager.github.dto.UserCommitsDto;
-import ua.knu.knudev.teammanager.service.api.GitHubManagementApi;
+import ua.knu.knudev.teammanager.service.api.GithubManagementApi;
 
 import java.net.URI;
 import java.net.http.HttpRequest;
@@ -23,12 +23,12 @@ import java.util.stream.Collectors;
 @Service
 @Slf4j
 @RequiredArgsConstructor
-public class GitHubIntegrationService implements GitHubManagementApi {
+public class GithubIntegrationService implements GithubManagementApi {
 
     @Value("${github.api.organization-name}")
     private String organizationName;
 
-    private final GitHubApiClient githubApiClient;
+    private final GithubApiClient githubApiClient;
 
     private static final String BASE_URL = "https://api.github.com";
 
@@ -46,7 +46,7 @@ public class GitHubIntegrationService implements GitHubManagementApi {
         repos.forEach(repo -> {
             String repoName = repo.get("name").textValue();
             String defaultBranch = detectDefaultBranch(repoName);
-            String commitsUrl = buildUrlForBranchCommits(repoName, commitsStartDate, commitsToDate, request.gitHubUsername(), request.isUndated(), defaultBranch);
+            String commitsUrl = buildUrlForBranchCommits(repoName, commitsStartDate, commitsToDate, request.githubUsername(), request.isUndated(), defaultBranch);
 
             JsonNode commits = githubApiClient.invokeApi(commitsUrl);
             commitsFromAllReposAmount.addAndGet(commits.size());
@@ -56,8 +56,8 @@ public class GitHubIntegrationService implements GitHubManagementApi {
     }
 
     @Override
-    public List<GitHubRepoDataDto> getAllGitHubRepos() {
-        List<GitHubRepoDataDto> gitHubRepoDataDtos = new ArrayList<>();
+    public List<GithubRepoDataDto> getAllGithubRepos() {
+        List<GithubRepoDataDto> githubRepoDataDtos = new ArrayList<>();
         String allReposUrl = BASE_URL + "/orgs/" + organizationName + "/repos";
         JsonNode repos = githubApiClient.invokeApi(allReposUrl);
 
@@ -70,23 +70,23 @@ public class GitHubIntegrationService implements GitHubManagementApi {
 
         repos.forEach(repo -> {
             String repoName = repo.path("name").asText();
-            LocalDate startedAt = LocalDateTime.parse(repo.path("created_at").asText(), formatter).toLocalDate();
+            LocalDate initializedAt = LocalDateTime.parse(repo.path("created_at").asText(), formatter).toLocalDate();
             LocalDateTime updatedAt = LocalDateTime.parse(repo.path("updated_at").asText(), formatter);
             String resourceUrl = repo.path("html_url").asText();
             List<String> contributors = getRepositoryContributorsByRepoName(repoName);
 
-            GitHubRepoDataDto gitHubRepoDataDto = GitHubRepoDataDto.builder()
+            GithubRepoDataDto githubRepoDataDto = GithubRepoDataDto.builder()
                     .name(repoName)
-                    .startedAt(startedAt)
+                    .initializedAt(initializedAt)
                     .lastUpdatedAt(updatedAt)
                     .contributors(contributors)
                     .resourceUrl(resourceUrl)
                     .build();
 
-            gitHubRepoDataDtos.add(gitHubRepoDataDto);
+            githubRepoDataDtos.add(githubRepoDataDto);
         });
 
-        return gitHubRepoDataDtos;
+        return githubRepoDataDtos;
     }
 
     @Override
@@ -179,10 +179,10 @@ public class GitHubIntegrationService implements GitHubManagementApi {
         }
     }
 
-    private String buildUrlForBranchCommits(String repoName, String firstCommitDate, String lastCommitDate, String gitHubUsername, boolean isUndated, String branch) {
+    private String buildUrlForBranchCommits(String repoName, String firstCommitDate, String lastCommitDate, String githubUsername, boolean isUndated, String branch) {
         String allUserCommitsUrl = BASE_URL + "/repos/" + organizationName + "/" + repoName
                 + "/commits?author="
-                + gitHubUsername
+                + githubUsername
                 + "&sha=" + branch;
         if (!isUndated) {
             allUserCommitsUrl += "&since=" + firstCommitDate + "&until=" + lastCommitDate;

@@ -20,7 +20,7 @@ import java.rmi.ConnectException;
 @Component
 @Slf4j
 @RequiredArgsConstructor
-public class GitHubApiClient {
+public class GithubApiClient {
 
     @Value("${github.api.access-token}")
     private String accessToken;

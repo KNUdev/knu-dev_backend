@@ -97,9 +97,9 @@ public record AccountCreationRequest(
         @NotNull
         Integer yearOfStudy
 
-//        @Schema(description = "GitHub username", requiredMode = Schema.RequiredMode.REQUIRED)
+//        @Schema(description = "GitHub account username", requiredMode = Schema.RequiredMode.REQUIRED)
 //        @NotNull
-//        String gitHubUsername
+//        String githubAccountUsername
 
 ) {
 }

@@ -206,6 +206,16 @@ databaseChangeLog:
                   name: unit
                   type: varchar(10)
                   defaultOnNull: true
+              - column:
+                  name: github_account_id
+                  type: int
+              #                  constraints:
+              #                    nullable: false
+              - column:
+                  name: github_account_nickname
+                  type: varchar(255)
+        #                  constraints:
+        #                    nullable: false
         - addForeignKeyConstraint:
             referencedTableSchemaName: team_management
             baseTableSchemaName: team_management
@@ -807,17 +817,3 @@ databaseChangeLog:
             columns:
               - column:
                   name: account_id
-
-  - changeSet:
-      author: DenysLeonenko
-      id: add_github_nickname_column_to_account_profile
-      changes:
-        - addColumn:
-            schemaName: team_management
-            tableName: profile_account
-            columns:
-              - column:
-                  name: git_hub_nickname
-                  type: varchar(150)
-#                  constraints:
-#                    nullable: false

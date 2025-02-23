@@ -31,8 +31,11 @@ public record AccountProfileDto(
         @Schema(description = "Banner filename of the user", example = "banner.png")
         String bannerFilename,
 
-        @Schema(description = "GitHub username", example = "JohnDoe")
-        String gitHubNickname
+        @Schema(description = "GitHub account username", example = "JohnDoe")
+        String githubNickname,
+
+        @Schema(description = "GitHub account id", example = "1144885")
+        Integer githubAccountId
 ) {
 }
 

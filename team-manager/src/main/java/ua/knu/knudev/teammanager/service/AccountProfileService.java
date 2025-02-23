@@ -29,7 +29,7 @@ import ua.knu.knudev.teammanager.mapper.MultiLanguageFieldMapper;
 import ua.knu.knudev.teammanager.mapper.ShortDepartmentMapper;
 import ua.knu.knudev.teammanager.mapper.SpecialtyMapper;
 import ua.knu.knudev.teammanager.repository.AccountProfileRepository;
-import ua.knu.knudev.teammanager.service.api.GitHubManagementApi;
+import ua.knu.knudev.teammanager.service.api.GithubManagementApi;
 import ua.knu.knudev.teammanagerapi.api.AccountProfileApi;
 import ua.knu.knudev.teammanagerapi.constant.AccountsCriteriaFilterOption;
 import ua.knu.knudev.teammanagerapi.dto.AccountProfileDto;
@@ -56,18 +56,18 @@ public class AccountProfileService implements AccountProfileApi {
     private final ImageServiceApi imageServiceApi;
     private final DepartmentService departmentService;
     private final AccountProfileMapper accountProfileMapper;
-    private final MultiLanguageFieldMapper multiLangFieldMapper;
+    private final MultiLanguageFieldMapper multiLanguageFieldMapper;
     private final ShortDepartmentMapper shortDepartmentMapper;
     private final SpecialtyMapper specialtyMapper;
-    private final GitHubManagementApi gitHubManagementApi;
+    private final GithubManagementApi gitHubManagementApi;
 
     @Override
     @Transactional
     public AccountRegistrationResponse register(@Valid AccountCreationRequest request) {
         validateEmailNotExists(request.email());
         departmentService.validateAcademicUnitExistence(request.departmentId(), request.specialtyCodename());
-//        boolean validGitHubUsername = gitHubManagementApi.existsByUsername(request.gitHubUsername());
-//        if (!validGitHubUsername) {
+//        boolean validGithubUsername = gitHubManagementApi.existsByUsername(request.githubUsername());
+//        if (!validGithubUsername) {
 //            throw new AccountException("Git Hub Username is not valid", HttpStatus.BAD_REQUEST);
 //        }
 
@@ -281,7 +281,7 @@ public class AccountProfileService implements AccountProfileApi {
 
     @Override
     public AccountProfileDto getByGitHubUsername(String githubUsername) {
-        AccountProfile accountProfile = accountProfileRepository.findByGitHubNickname(githubUsername)
+        AccountProfile accountProfile = accountProfileRepository.findAccountProfileByGithubAccountNickname(githubUsername)
                 .orElseThrow(() -> new AccountException("Account with githubUsername " + githubUsername + " not found!"));
         return accountProfileMapper.toDto(accountProfile);
     }
