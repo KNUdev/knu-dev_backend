@@ -229,7 +229,7 @@ public class ProjectService implements ProjectApi {
     }
 
     private SubprojectAccount createSubprojectAccount(String contributor, String repoName) {
-        UserCommitsDto userCommitsDto = gitHubManagementApi.getUserCommitsDto(contributor, repoName);
+        UserCommitsDto userCommitsDto = gitHubManagementApi.getRepoUserCommitsCount(contributor, repoName);
         return accountProfileRepository.findAccountProfileByGithubAccountNickname(contributor)
                 .map(accountProfile -> SubprojectAccount.builder()
                         .subproject(null)

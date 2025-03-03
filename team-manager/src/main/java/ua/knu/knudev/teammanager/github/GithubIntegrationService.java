@@ -34,7 +34,7 @@ public class GithubIntegrationService implements GithubManagementApi {
 
     @Override
     @SneakyThrows
-    public int retrieveUserCommits(RetrieveGithubUserCommitsAmountRequest request) {
+    public int getTotalUserCommitsCount(RetrieveGithubUserCommitsAmountRequest request) {
         AtomicInteger commitsFromAllReposAmount = new AtomicInteger();
 
         String allReposUrl = BASE_URL + "/orgs/" + organizationName + "/repos";
@@ -90,7 +90,7 @@ public class GithubIntegrationService implements GithubManagementApi {
     }
 
     @Override
-    public UserCommitsDto getUserCommitsDto(String username, String repoName) {
+    public UserCommitsDto getRepoUserCommitsCount(String username, String repoName) {
         String defaultBranch = detectDefaultBranch(repoName);
         String commitsUrl = buildUrlForBranchCommits(repoName, null, null, username, true, defaultBranch);
 

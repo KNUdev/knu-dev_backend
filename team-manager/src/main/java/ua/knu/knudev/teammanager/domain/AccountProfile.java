@@ -60,13 +60,7 @@ public class AccountProfile {
             updatable = false
 //            nullable = false
     )
-    private Integer githubAccountId;
-
-    @Column(
-            updatable = false
-//            nullable = false
-    )
-    private String githubAccountNickname;
+    private String githubAccountUsername;
 
     @ManyToOne
     @JoinColumn(name = "department_id", referencedColumnName = "id", nullable = false)

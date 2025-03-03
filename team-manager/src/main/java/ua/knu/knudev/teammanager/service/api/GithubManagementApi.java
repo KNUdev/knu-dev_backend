@@ -10,11 +10,11 @@ import java.util.Set;
 
 public interface GithubManagementApi {
 
-    int retrieveUserCommits(RetrieveGithubUserCommitsAmountRequest request);
+    int getTotalUserCommitsCount(RetrieveGithubUserCommitsAmountRequest request);
 
     List<GithubRepoDataDto> getAllGithubRepos();
 
-    UserCommitsDto getUserCommitsDto(String username, String repoName);
+    UserCommitsDto getRepoUserCommitsCount(String username, String repoName);
 
     Set<ReleaseDto> getReleaseInfo(String repoName);
 

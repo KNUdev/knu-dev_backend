@@ -207,12 +207,7 @@ databaseChangeLog:
                   type: varchar(10)
                   defaultOnNull: true
               - column:
-                  name: github_account_id
-                  type: int
-              #                  constraints:
-              #                    nullable: false
-              - column:
-                  name: github_account_nickname
+                  name: github_account_username
                   type: varchar(255)
         #                  constraints:
         #                    nullable: false
