@@ -1,6 +1,7 @@
 package ua.knu.knudev.educationapi.request;
 
 import lombok.*;
+import lombok.experimental.SuperBuilder;
 import org.springframework.web.multipart.MultipartFile;
 import ua.knu.knudev.educationapi.validation.ValidCreationRequest;
 import ua.knu.knudev.knudevcommon.dto.MultiLanguageFieldDto;
@@ -8,18 +9,21 @@ import ua.knu.knudev.knudevcommon.dto.MultiLanguageFieldDto;
 import java.util.List;
 import java.util.UUID;
 
-@Builder(toBuilder = true)
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
 @Setter
 @ValidCreationRequest
-public class SectionCreationRequest {
+public class SectionCreationRequest extends BaseLearningUnitSaveRequest{
     private UUID existingSectionId;
-    private MultiLanguageFieldDto name;
-    private MultiLanguageFieldDto description;
     private List<ModuleCreationRequest> modules;
-    private MultipartFile finalTask;
     private Integer orderIndex;
-    private UUID finalTestId;
+
+    @Builder(toBuilder = true)
+    public SectionCreationRequest(MultiLanguageFieldDto name, MultiLanguageFieldDto description, MultipartFile finalTask, UUID existingSectionId, List<ModuleCreationRequest> modules, Integer orderIndex) {
+        super(name, description, finalTask);
+        this.existingSectionId = existingSectionId;
+        this.modules = modules;
+        this.orderIndex = orderIndex;
+    }
 }

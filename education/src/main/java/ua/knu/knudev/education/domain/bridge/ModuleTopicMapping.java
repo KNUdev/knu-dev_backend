@@ -33,6 +33,10 @@ public class ModuleTopicMapping {
     @JoinColumn(name = "topic_id", referencedColumnName = "id")
     private ProgramTopic topic;
 
+    //todo section
+
+    //todo add program
+
     @Column(nullable = false)
     private int orderIndex;
 

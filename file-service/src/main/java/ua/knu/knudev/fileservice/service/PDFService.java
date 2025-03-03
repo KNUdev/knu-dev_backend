@@ -1,5 +1,6 @@
 package ua.knu.knudev.fileservice.service;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import ua.knu.knudev.fileservice.adapter.FileUploadAdapter;
@@ -7,7 +8,10 @@ import ua.knu.knudev.fileservice.config.TaskFileConfigProperties;
 import ua.knu.knudev.fileserviceapi.api.PDFServiceApi;
 import ua.knu.knudev.fileserviceapi.folder.FileFolderProperties;
 import ua.knu.knudev.fileserviceapi.folder.PdfFolder;
+import ua.knu.knudev.fileserviceapi.subfolder.ImageSubfolder;
+import ua.knu.knudev.fileserviceapi.subfolder.PdfSubfolder;
 import ua.knu.knudev.fileserviceapi.subfolder.PdfSubfolderI;
+import ua.knu.knudev.knudevcommon.exception.FileException;
 
 @Service
 public class PDFService extends FileService implements PDFServiceApi {
@@ -42,17 +46,26 @@ public class PDFService extends FileService implements PDFServiceApi {
 
     @Override
     public String getPathByFilename(String filename, PdfSubfolderI subfolder) {
-        return "";
+        return getPathByFilename(filename, getFolderProperties(subfolder));
     }
 
     @Override
     public void removeByFilename(String filename, PdfSubfolderI subfolder) {
+        FileFolderProperties<PdfSubfolderI> folderProperties = getFolderProperties(subfolder);
+        boolean fileExists = existsByFilename(filename, folderProperties);
+        if(!fileExists) {
+            throw new FileException(String.format("File with filename %s does not exist", filename));
+        }
 
+        fileUploadAdapter.deleteByFilename(filename, folderProperties);
     }
 
     @Override
     public String updateByFilename(String oldFilename, MultipartFile newFile, PdfSubfolderI subfolder) {
-        return "";
+        if(StringUtils.isNotEmpty(oldFilename)) {
+            removeByFilename(oldFilename, subfolder);
+        }
+        return uploadFile(newFile, subfolder);
     }
 
     private FileFolderProperties<PdfSubfolderI> getFolderProperties(PdfSubfolderI pdfSubfolder) {

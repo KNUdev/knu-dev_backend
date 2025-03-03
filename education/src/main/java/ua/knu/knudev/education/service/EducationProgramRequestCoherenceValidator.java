@@ -1,6 +1,7 @@
 package ua.knu.knudev.education.service;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import ua.knu.knudev.educationapi.exception.EducationProgramException;
@@ -19,38 +20,44 @@ import java.util.function.ToIntFunction;
 public class EducationProgramRequestCoherenceValidator {
 
     public void validateProgramOrderSequence(EducationProgramCreationRequest program) {
-        List<SectionCreationRequest> sections = program.getSections();
+        if(ObjectUtils.isEmpty(program.getExistingProgramId())) {
+            List<SectionCreationRequest> sections = program.getSections();
 
-        validateSequence(
-                sections,
-                SectionCreationRequest::getOrderIndex,
-                "sections in Program"
-        );
-        if(CollectionUtils.isNotEmpty(sections)) {
-            sections.forEach(this::validateSection);
+            validateSequence(
+                    sections,
+                    SectionCreationRequest::getOrderIndex,
+                    "sections in Program"
+            );
+            if(CollectionUtils.isNotEmpty(sections)) {
+                sections.forEach(this::validateSection);
+            }
         }
     }
 
     private void validateSection(SectionCreationRequest section) {
-        List<ModuleCreationRequest> modules = section.getModules();
+        if(ObjectUtils.isEmpty(section.getExistingSectionId())) {
+            List<ModuleCreationRequest> modules = section.getModules();
 
-        validateSequence(
-                modules,
-                ModuleCreationRequest::getOrderIndex,
-                "modules in Section[orderIndex=" + section.getOrderIndex() + "]"
-        );
+            validateSequence(
+                    modules,
+                    ModuleCreationRequest::getOrderIndex,
+                    "modules in Section[orderIndex=" + section.getOrderIndex() + "]"
+            );
 
-        if(CollectionUtils.isNotEmpty(modules)) {
-            modules.forEach(this::validateModule);
+            if (CollectionUtils.isNotEmpty(modules)) {
+                modules.forEach(this::validateModule);
+            }
         }
     }
 
     private void validateModule(ModuleCreationRequest module) {
-        validateSequence(
-                module.getTopics(),
-                TopicCreationRequest::getOrderIndex,
-                "topics in Module[orderIndex=" + module.getOrderIndex() + "]"
-        );
+        if(ObjectUtils.isEmpty(module.getExistingModuleId())) {
+            validateSequence(
+                    module.getTopics(),
+                    TopicCreationRequest::getOrderIndex,
+                    "topics in Module[orderIndex=" + module.getOrderIndex() + "]"
+            );
+        }
     }
 
     private <T> void validateSequence(

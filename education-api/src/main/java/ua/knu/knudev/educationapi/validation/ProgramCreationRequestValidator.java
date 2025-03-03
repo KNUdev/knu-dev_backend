@@ -6,6 +6,8 @@ import jakarta.validation.ConstraintValidatorContext;
 import org.apache.commons.lang3.ObjectUtils;
 import ua.knu.knudev.educationapi.request.EducationProgramCreationRequest;
 
+import java.util.UUID;
+
 public class ProgramCreationRequestValidator implements ConstraintValidator<ValidCreationRequest, EducationProgramCreationRequest> {
 
     @Override

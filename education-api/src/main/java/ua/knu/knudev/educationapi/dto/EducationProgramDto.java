@@ -11,7 +11,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-//todo tests
 @Getter
 @Setter
 @NoArgsConstructor
@@ -22,8 +21,7 @@ public class EducationProgramDto {
     private MultiLanguageFieldDto description;
     private Expertise expertise;
     private boolean isPublished;
-    private int version;
     private String finalTaskUrl;
+    private String finalTaskFilename;
     private List<ProgramSectionDto> sections = new ArrayList<>();
-
 }

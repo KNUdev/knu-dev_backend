@@ -5,6 +5,7 @@ import jakarta.validation.ConstraintValidatorContext;
 import org.apache.commons.lang3.ObjectUtils;
 import ua.knu.knudev.educationapi.request.ModuleCreationRequest;
 
+//todo refactor
 public class ModuleCreationRequestValidator implements ConstraintValidator<ValidCreationRequest, ModuleCreationRequest> {
 
     @Override
@@ -18,8 +19,7 @@ public class ModuleCreationRequestValidator implements ConstraintValidator<Valid
                 request.getName(),
                 request.getDescription(),
 //                request.getTopics(),
-                request.getFinalTask(),
-                request.getTestId()
+                request.getFinalTask()
         );
 
         if (hasExistingId) {
@@ -27,8 +27,7 @@ public class ModuleCreationRequestValidator implements ConstraintValidator<Valid
                     request.getName(),
                     request.getDescription(),
 //                    request.getTopics(),
-                    request.getFinalTask(),
-                    request.getTestId()
+                    request.getFinalTask()
             );
 
             if (!onlyExistingAndOrder) {

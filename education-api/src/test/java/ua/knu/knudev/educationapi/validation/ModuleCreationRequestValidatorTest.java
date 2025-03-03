@@ -63,7 +63,6 @@ public class ModuleCreationRequestValidatorTest {
                         "content".getBytes()
                 ))
                 .orderIndex(1)
-                .testId(UUID.randomUUID())
                 .build();
 
         Set<ConstraintViolation<ModuleCreationRequest>> violations = validator.validate(request);

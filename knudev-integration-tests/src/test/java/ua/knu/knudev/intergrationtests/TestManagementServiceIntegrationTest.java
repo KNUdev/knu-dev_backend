@@ -11,7 +11,7 @@ import ua.knu.knudev.assessmentmanager.domain.TestQuestion;
 import ua.knu.knudev.assessmentmanager.repository.QuestionAnswerVariantRepository;
 import ua.knu.knudev.assessmentmanager.repository.TestQuestionRepository;
 import ua.knu.knudev.assessmentmanager.repository.TestRepository;
-import ua.knu.knudev.assessmentmanager.service.TestManagementService;
+import ua.knu.knudev.assessmentmanager.service.TestService;
 import ua.knu.knudev.assessmentmanagerapi.dto.FullTestDto;
 import ua.knu.knudev.assessmentmanagerapi.dto.QuestionAnswerVariantDto;
 import ua.knu.knudev.assessmentmanagerapi.dto.TestQuestionDto;
@@ -47,7 +47,7 @@ public class TestManagementServiceIntegrationTest {
     private static final String TEST_EN_NAME = "Test Name";
 
     @Autowired
-    private TestManagementService testManagementService;
+    private TestService testManagementService;
     @Autowired
     private TestRepository testRepository;
     @Autowired

@@ -53,7 +53,7 @@ public class TopicCreationRequestValidatorTest {
         TopicCreationRequest request = TopicCreationRequest.builder()
                 .name(new MultiLanguageFieldDto())
                 .description(new MultiLanguageFieldDto())
-                .task(new MockMultipartFile(
+                .finalTask(new MockMultipartFile(
                         "file",
                         "filename.txt",
                         "text/plain",
@@ -61,7 +61,7 @@ public class TopicCreationRequestValidatorTest {
                 ))
                 .learningMaterials(Collections.singleton("Material"))
                 .orderIndex(1)
-                .testIds(Collections.singleton(UUID.randomUUID()))
+                .testId(UUID.randomUUID())
                 .build();
 
         var violations = validator.validate(request);

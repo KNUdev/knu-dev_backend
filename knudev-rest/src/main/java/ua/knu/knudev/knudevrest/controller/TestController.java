@@ -38,9 +38,4 @@ public class TestController {
         return "Перевірка нашого українського алфавіту!";
     }
 
-    @GetMapping("/image")
-    public String getImageUrl() {
-        return educationProgramApi.getTest();
-    }
-
 }
