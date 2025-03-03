@@ -14,9 +14,10 @@ import ua.knu.knudev.assessmentmanager.mapper.TestQuestionMapper;
 import ua.knu.knudev.assessmentmanager.repository.QuestionAnswerVariantRepository;
 import ua.knu.knudev.assessmentmanager.repository.TestQuestionRepository;
 import ua.knu.knudev.assessmentmanager.repository.TestRepository;
-import ua.knu.knudev.assessmentmanagerapi.api.TestManagementApi;
+import ua.knu.knudev.assessmentmanagerapi.api.TestApi;
 import ua.knu.knudev.assessmentmanagerapi.dto.FullTestDto;
 import ua.knu.knudev.assessmentmanagerapi.dto.QuestionAnswerVariantDto;
+import ua.knu.knudev.assessmentmanagerapi.dto.ShortTestDto;
 import ua.knu.knudev.assessmentmanagerapi.dto.TestQuestionDto;
 import ua.knu.knudev.assessmentmanagerapi.exception.TestException;
 import ua.knu.knudev.assessmentmanagerapi.request.TestCreationRequest;
@@ -30,7 +31,7 @@ import java.util.UUID;
 @Service
 @Slf4j
 @RequiredArgsConstructor
-public class TestManagementService implements TestManagementApi {
+public class TestService implements TestApi {
 
     private final TestMapper testMapper;
     private final TestQuestionMapper testQuestionMapper;
@@ -64,6 +65,21 @@ public class TestManagementService implements TestManagementApi {
     public FullTestDto getById(UUID testId) {
         TestDomain testDomain = getTestById(testId);
         return testMapper.toDto(testDomain);
+    }
+
+    @Override
+    public boolean existsById(UUID testId) {
+        return testRepository.existsById(testId);
+    }
+
+    @Override
+    public List<ShortTestDto> getAll() {
+        return testRepository.findAll().stream()
+                .map(test -> ShortTestDto.builder()
+                        .id(test.getId())
+                        .enName(test.getEnName())
+                        .build())
+                .toList();
     }
 
     @Override

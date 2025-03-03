@@ -17,18 +17,20 @@ public class TopicCreationRequestValidator implements ConstraintValidator<ValidC
         boolean hasAllFields = ObjectUtils.allNotNull(
                 request.getName(),
                 request.getDescription(),
-                request.getTask(),
+                request.getFinalTask(),
                 request.getLearningMaterials(),
-                request.getTestIds()
+                request.getTestId(),
+                request.getDifficulty()
         );
 
         if (hasExistingId) {
             boolean onlyExistingAndOrder = ObjectUtils.allNull(
                     request.getName(),
                     request.getDescription(),
-                    request.getTask(),
+                    request.getFinalTask(),
                     request.getLearningMaterials(),
-                    request.getTestIds()
+                    request.getTestId(),
+                    request.getDifficulty()
             );
 
             if (!onlyExistingAndOrder) {

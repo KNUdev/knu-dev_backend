@@ -26,11 +26,6 @@ databaseChangeLog:
                   constraints:
                     nullable: false
               - column:
-                  name: banner
-                  type: varchar(255)
-                  constraints:
-                    nullable: false
-              - column:
                   name: en_description
                   type: varchar(255)
                   constraints:
@@ -53,29 +48,15 @@ databaseChangeLog:
                   name: expertise
                   type: varchar(50)
               - column:
-                  name: version
-                  type: int
-                  defaultValueNumeric: 1
-                  constraints:
-                    nullable: false
-              - column:
                   name: is_published
                   type: boolean
                   constraints:
                     nullable: false
               - column:
-                  name: final_task_id
-                  type: uuid
+                  name: final_task_filename
+                  type: varchar(255)
                   constraints:
                     nullable: false
-        - addForeignKeyConstraint:
-            baseTableSchemaName: education
-            baseTableName: program
-            baseColumnNames: final_task_id
-            constraintName: fk_program_final_task
-            referencedTableName: education_program_task
-            referencedColumnNames: id
-            referencedTableSchemaName: assessment_management
 
         #todo test
         - createTable:
@@ -118,19 +99,11 @@ databaseChangeLog:
                   name: last_modified_date
                   type: timestamp
               - column:
-                  name: task_id
-                  type: uuid
+                  name: final_task_filename
+                  type: varchar(255)
                   constraints:
-                    nullable: true
-        - addForeignKeyConstraint:
-            baseTableSchemaName: education
-            baseTableName: section
-            baseColumnNames: task_id
-            constraintName: fk_section_task
-            referencedTableName: education_program_task
-            referencedColumnNames: id
-            referencedTableSchemaName: assessment_management
-#todo test
+                    nullable: false
+
         - createTable:
             tableName: module
             schemaName: education
@@ -171,18 +144,10 @@ databaseChangeLog:
                   name: last_modified_date
                   type: timestamp
               - column:
-                  name: task_id
-                  type: uuid
+                  name: final_task_filename
+                  type: varchar(255)
                   constraints:
                     nullable: false
-        - addForeignKeyConstraint:
-            baseTableSchemaName: education
-            baseTableName: module
-            baseColumnNames: task_id
-            constraintName: fk_module_task
-            referencedTableName: education_program_task
-            referencedColumnNames: id
-            referencedTableSchemaName: assessment_management
 
         #todo tests
         - createTable:
@@ -225,19 +190,28 @@ databaseChangeLog:
                   name: last_modified_date
                   type: timestamp
               - column:
-                  name: task_id
+                  name: difficulty
+                  type: int
+                  constraints:
+                    nullable: false
+              - column:
+                  name: final_task_filename
+                  type: varchar(255)
+                  constraints:
+                    nullable: true
+              - column:
+                  name: test_id
                   type: uuid
                   constraints:
                     nullable: true
         - addForeignKeyConstraint:
             baseTableSchemaName: education
             baseTableName: topic
-            baseColumnNames: task_id
-            constraintName: fk_topic_task
-            referencedTableName: education_program_task
+            baseColumnNames: test_id
+            constraintName: fk_topic_test
+            referencedTableName: test
             referencedColumnNames: id
             referencedTableSchemaName: assessment_management
-
 
         # 4a) 'topic_learning_materials' table for collection
         - createTable:
@@ -266,7 +240,7 @@ databaseChangeLog:
             referencedColumnNames: id
             referencedTableSchemaName: education
 
-        # 5) bridging: program_section_mapping
+        # 5) bridging: `program_se`ction_mapping
         - createTable:
             tableName: program_section_mapping
             schemaName: education
@@ -308,16 +282,16 @@ databaseChangeLog:
             referencedTableName: section
             referencedColumnNames: id
             referencedTableSchemaName: education
-        - addUniqueConstraint:
-            tableName: program_section_mapping
-            schemaName: education
-            columnNames: "program_id, section_id"
-            constraintName: uq_psm_program_section_pair
-        - addUniqueConstraint:
-            tableName: program_section_mapping
-            schemaName: education
-            columnNames: "program_id, order_index"
-            constraintName: uq_psm_program_order
+#        - addUniqueConstraint:
+#            tableName: program_section_mapping
+#            schemaName: education
+#            columnNames: "program_id, section_id"
+#            constraintName: uq_psm_program_section_pair
+#        - addUniqueConstraint:
+#            tableName: program_section_mapping
+#            schemaName: education
+#            columnNames: "program_id, order_index"
+#            constraintName: uq_psm_program_order
 
         # Create indexes for bridging:
         # foreign key columns
@@ -389,16 +363,16 @@ databaseChangeLog:
             referencedTableName: module
             referencedColumnNames: id
             referencedTableSchemaName: education
-        - addUniqueConstraint:
-            tableName: section_module_mapping
-            schemaName: education
-            columnNames: "section_id, module_id"
-            constraintName: uq_smm_section_module_pair
-        - addUniqueConstraint:
-            tableName: section_module_mapping
-            schemaName: education
-            columnNames: "section_id, order_index"
-            constraintName: uq_smm_section_order
+#        - addUniqueConstraint:
+#            tableName: section_module_mapping
+#            schemaName: education
+#            columnNames: "section_id, module_id"
+#            constraintName: uq_smm_section_module_pair
+#        - addUniqueConstraint:
+#            tableName: section_module_mapping
+#            schemaName: education
+#            columnNames: "section_id, order_index"
+#            constraintName: uq_smm_section_order
 
         # Create indexes for bridging:
         - createIndex:
@@ -467,16 +441,16 @@ databaseChangeLog:
             referencedTableName: topic
             referencedColumnNames: id
             referencedTableSchemaName: education
-        - addUniqueConstraint:
-            tableName: module_topic_mapping
-            schemaName: education
-            columnNames: "module_id, topic_id"
-            constraintName: uq_mtm_module_topic_pair
-        - addUniqueConstraint:
-            tableName: module_topic_mapping
-            schemaName: education
-            columnNames: "module_id, order_index"
-            constraintName: uq_mtm_module_order
+#        - addUniqueConstraint:
+#            tableName: module_topic_mapping
+#            schemaName: education
+#            columnNames: "module_id, topic_id"
+#            constraintName: uq_mtm_module_topic_pair
+#        - addUniqueConstraint:
+#            tableName: module_topic_mapping
+#            schemaName: education
+#            columnNames: "module_id, order_index"
+#            constraintName: uq_mtm_module_order
 
         # Create indexes for bridging:
         - createIndex:

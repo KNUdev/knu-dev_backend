@@ -5,6 +5,7 @@ import jakarta.validation.ConstraintValidatorContext;
 import org.apache.commons.lang3.ObjectUtils;
 import ua.knu.knudev.educationapi.request.SectionCreationRequest;
 
+//todo refactor
 public class SectionCreationRequestValidator
         implements ConstraintValidator<ValidCreationRequest, SectionCreationRequest> {
 
@@ -19,8 +20,7 @@ public class SectionCreationRequestValidator
                 request.getName(),
                 request.getDescription(),
 //                request.getModules(),
-                request.getFinalTask(),
-                request.getFinalTestId()
+                request.getFinalTask()
         );
 
         if (hasExistingId) {
@@ -28,8 +28,7 @@ public class SectionCreationRequestValidator
                     request.getName(),
                     request.getDescription(),
 //                    request.getModules(),
-                    request.getFinalTask(),
-                    request.getFinalTestId()
+                    request.getFinalTask()
             );
 
             if (!onlyExistingAndOrder) {

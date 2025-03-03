@@ -54,7 +54,6 @@ public class SectionCreationRequestValidatorTest {
                         "text/plain",
                         "content".getBytes()
                 ))
-                .finalTestId(UUID.randomUUID())
                 .build();
 
         Set<ConstraintViolation<SectionCreationRequest>> violations = validator.validate(request);
@@ -77,7 +76,6 @@ public class SectionCreationRequestValidatorTest {
                         "content".getBytes()
                 ))
                 .orderIndex(2)
-                .finalTestId(UUID.randomUUID())
                 .build();
 
         Set<ConstraintViolation<SectionCreationRequest>> violations = validator.validate(request);

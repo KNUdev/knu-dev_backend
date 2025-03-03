@@ -34,11 +34,12 @@ class EducationEducationProgramRequestCoherenceValidatorTest {
 
     private EducationProgramCreationRequest createProgram(List<SectionCreationRequest> sections) {
         return new EducationProgramCreationRequest(
+                getDummyText("Prog"),
+                getDummyText("desc"),
                 null,
-                getDummyText("Prog"), getDummyText("desc"),
+                null,
                 sections,
-                Expertise.BACKEND,
-                null
+                Expertise.BACKEND
         );
     }
 
@@ -46,12 +47,12 @@ class EducationEducationProgramRequestCoherenceValidatorTest {
         String nameAndDesc = "Section" + orderIndex;
 
         return new SectionCreationRequest(
+                getDummyText(nameAndDesc),
+                getDummyText(nameAndDesc),
                 null,
-                getDummyText(nameAndDesc), getDummyText(nameAndDesc),
+                null,
                 modules,
-                null,
-                orderIndex,
-                null
+                orderIndex
         );
     }
 
@@ -59,25 +60,41 @@ class EducationEducationProgramRequestCoherenceValidatorTest {
         String nameAndDesc = "Module" + orderIndex;
 
         return new ModuleCreationRequest(
+                getDummyText(nameAndDesc),
+                getDummyText(nameAndDesc),
                 null,
-                getDummyText(nameAndDesc), getDummyText(nameAndDesc),
+                null,
                 topics,
-                null,
-                orderIndex,
-                null
+                orderIndex
         );
     }
 
     private TopicCreationRequest createTopic(String nameAndDesc, int orderIndex) {
-        return new TopicCreationRequest(null, getDummyText(nameAndDesc), getDummyText(nameAndDesc),
-                null, Set.of(), orderIndex, Set.of());
+        return new TopicCreationRequest(
+                getDummyText(nameAndDesc),
+                getDummyText(nameAndDesc),
+                null,
+                null,
+                null,
+                orderIndex,
+                null,
+                10
+        );
     }
 
     private TopicCreationRequest createTopic(int orderIndex) {
         String nameAndDesc = "Topic" + orderIndex;
 
-        return new TopicCreationRequest(null, getDummyText(nameAndDesc), getDummyText(nameAndDesc),
-                null, Set.of(), orderIndex, Set.of());
+        return new TopicCreationRequest(
+                getDummyText(nameAndDesc),
+                getDummyText(nameAndDesc),
+                null,
+                null,
+                null,
+                orderIndex,
+                null,
+                10
+        );
     }
 
     private MultiLanguageFieldDto getDummyText(String text) {
