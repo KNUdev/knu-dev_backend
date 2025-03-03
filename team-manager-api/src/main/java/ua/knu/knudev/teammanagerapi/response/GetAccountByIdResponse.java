@@ -15,6 +15,7 @@ import java.util.List;
 @Builder
 public record GetAccountByIdResponse(
         String fullName,
+        String githubAccountUsername,
         String email,
         Expertise expertise,
         ShortDepartmentDto department,

@@ -66,10 +66,10 @@ public class AccountProfileService implements AccountProfileApi {
     public AccountRegistrationResponse register(@Valid AccountCreationRequest request) {
         validateEmailNotExists(request.email());
         departmentService.validateAcademicUnitExistence(request.departmentId(), request.specialtyCodename());
-//        boolean validGithubUsername = gitHubManagementApi.existsByUsername(request.githubUsername());
-//        if (!validGithubUsername) {
-//            throw new AccountException("Git Hub Username is not valid", HttpStatus.BAD_REQUEST);
-//        }
+        boolean validGithubUsername = gitHubManagementApi.existsByUsername(request.githubAccountUsername());
+        if (!validGithubUsername) {
+            throw new AccountException("Github account username is not valid", HttpStatus.UNAUTHORIZED);
+        }
 
         AuthAccountCreationResponse createdAuthAccount = accountAuthServiceApi.createAccount(request);
         String uploadedAvatarFilename = uploadAccountImage(request.avatarFile(), ImageSubfolder.ACCOUNT_AVATARS);
@@ -118,6 +118,7 @@ public class AccountProfileService implements AccountProfileApi {
                 " " + accountProfile.getMiddleName();
         return GetAccountByIdResponse.builder()
                 .fullName(fullName)
+                .githubAccountUsername(accountProfile.getGithubAccountUsername())
                 .email(accountProfile.getEmail())
                 .technicalRole(accountProfile.getTechnicalRole())
                 .expertise(accountProfile.getExpertise())
@@ -215,6 +216,7 @@ public class AccountProfileService implements AccountProfileApi {
                                 accountProfile.getLastName(),
                                 accountProfile.getMiddleName())
                         )
+                        .githubAccountUsername(accountProfile.getGithubAccountUsername())
                         .avatarFilename(accountProfile.getAvatarFilename())
                         .accountTechnicalRole(accountProfile.getTechnicalRole())
                         .build()
@@ -281,7 +283,7 @@ public class AccountProfileService implements AccountProfileApi {
 
     @Override
     public AccountProfileDto getByGithubUsername(String githubUsername) {
-        AccountProfile accountProfile = accountProfileRepository.findAccountProfileByGithubAccountNickname(githubUsername)
+        AccountProfile accountProfile = accountProfileRepository.findAccountProfileByGithubAccountUsername(githubUsername)
                 .orElseThrow(() -> new AccountException("Account with githubUsername " + githubUsername + " not found!"));
         return accountProfileMapper.toDto(accountProfile);
     }
@@ -327,6 +329,7 @@ public class AccountProfileService implements AccountProfileApi {
                 .firstName(request.firstName())
                 .lastName(request.lastName())
                 .middleName(request.middleName())
+                .githubAccountUsername(request.githubAccountUsername())
                 .avatarFilename(uploadedAvatarFilename)
                 .bannerFilename(uploadedBannerFilename)
                 .department(department)
@@ -357,6 +360,7 @@ public class AccountProfileService implements AccountProfileApi {
                         .lastName(savedAccount.getLastName())
                         .middleName(savedAccount.getMiddleName())
                         .build())
+                .githubAccountUsername(savedAccount.getGithubAccountUsername())
                 .avatarFilename(savedAccount.getAvatarFilename())
                 .bannerFilename(savedAccount.getBannerFilename())
                 .email(savedAccount.getEmail())
