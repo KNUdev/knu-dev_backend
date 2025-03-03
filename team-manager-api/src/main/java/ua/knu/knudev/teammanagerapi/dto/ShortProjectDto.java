@@ -6,6 +6,7 @@ import ua.knu.knudev.knudevcommon.constant.ProjectStatus;
 import ua.knu.knudev.knudevcommon.constant.ProjectTag;
 import ua.knu.knudev.knudevcommon.dto.MultiLanguageFieldDto;
 
+import java.time.LocalDateTime;
 import java.util.Set;
 
 @Getter
@@ -18,7 +19,7 @@ import java.util.Set;
 public class ShortProjectDto {
 
     @Schema(description = "Project name (multi-language field)", implementation = MultiLanguageFieldDto.class)
-    private MultiLanguageFieldDto name;
+    private String name;
 
     @Schema(description = "Project description (multi-language field)", implementation = MultiLanguageFieldDto.class)
     private MultiLanguageFieldDto description;
@@ -27,8 +28,11 @@ public class ShortProjectDto {
     private ProjectStatus status;
 
     @Schema(description = "Filename of the project's avatar", example = "project-avatar.png")
-    private String avatarFilename;
+    private String banner;
 
     @Schema(description = "Tags associated with the project", implementation = ProjectTag.class)
     private Set<ProjectTag> tags;
+
+    @Schema(description = "Project`s last update date")
+    private LocalDateTime lastUpdate;
 }

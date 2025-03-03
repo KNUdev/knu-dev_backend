@@ -30,12 +30,8 @@ public class Project {
     @Column(updatable = false, nullable = false)
     private UUID id;
 
-    @Embedded
-    @AttributeOverrides({
-            @AttributeOverride(name = "en", column = @Column(name = "name_en")),
-            @AttributeOverride(name = "uk", column = @Column(name = "name_uk"))
-    })
-    private MultiLanguageField name;
+    @Column(nullable = false)
+    private String name;
 
     @Embedded
     @AttributeOverrides({
@@ -65,7 +61,7 @@ public class Project {
     private Set<ProjectTag> tags = new HashSet<>();
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "architect_account_id", referencedColumnName = "id", nullable = false, updatable = false)
+    @JoinColumn(name = "architect_account_id", referencedColumnName = "id", updatable = false)
     private AccountProfile architect;
 
     @ManyToOne(fetch = FetchType.LAZY)

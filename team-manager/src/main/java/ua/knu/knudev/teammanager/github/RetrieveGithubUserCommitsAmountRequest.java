@@ -8,7 +8,7 @@ import java.time.LocalDate;
 public record RetrieveGithubUserCommitsAmountRequest(
         LocalDate firstCommitDate,
         LocalDate lastCommitDate,
-        String gitHubUsername,
+        String githubUsername,
         Boolean isUndated
 ) {
 }

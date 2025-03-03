@@ -31,6 +31,8 @@ public interface AccountProfileRepository extends JpaRepository<AccountProfile, 
 
     Optional<AccountProfile> findByEmail(String email);
 
+    Optional<AccountProfile> findAccountProfileByGithubAccountNickname(String githubAccountNickname);
+
     List<AccountProfile> findAllByEmail(String email);
 
     Page<AccountProfile> findAllByUnit(KNUdevUnit unit, Pageable pageable);

@@ -13,13 +13,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.multipart.MultipartFile;
-import ua.knu.knudev.educationapi.dto.EducationProgramSummaryDto;
 import ua.knu.knudev.fileserviceapi.api.ImageServiceApi;
 import ua.knu.knudev.fileserviceapi.subfolder.ImageSubfolder;
-import ua.knu.knudev.knudevcommon.constant.Expertise;
 import ua.knu.knudev.knudevcommon.constant.KNUdevUnit;
-import ua.knu.knudev.knudevcommon.constant.ProjectStatus;
-import ua.knu.knudev.knudevcommon.dto.MultiLanguageFieldDto;
 import ua.knu.knudev.knudevcommon.utils.AcademicUnitsIds;
 import ua.knu.knudev.knudevcommon.utils.FullName;
 import ua.knu.knudev.knudevsecurityapi.api.AccountAuthServiceApi;
@@ -33,12 +29,12 @@ import ua.knu.knudev.teammanager.mapper.MultiLanguageFieldMapper;
 import ua.knu.knudev.teammanager.mapper.ShortDepartmentMapper;
 import ua.knu.knudev.teammanager.mapper.SpecialtyMapper;
 import ua.knu.knudev.teammanager.repository.AccountProfileRepository;
+import ua.knu.knudev.teammanager.service.api.GithubManagementApi;
 import ua.knu.knudev.teammanagerapi.api.AccountProfileApi;
 import ua.knu.knudev.teammanagerapi.constant.AccountsCriteriaFilterOption;
 import ua.knu.knudev.teammanagerapi.dto.AccountProfileDto;
 import ua.knu.knudev.teammanagerapi.dto.AccountSearchCriteria;
 import ua.knu.knudev.teammanagerapi.dto.ShortAccountProfileDto;
-import ua.knu.knudev.teammanagerapi.dto.ShortProjectDto;
 import ua.knu.knudev.teammanagerapi.exception.AccountException;
 import ua.knu.knudev.teammanagerapi.response.AccountRegistrationResponse;
 import ua.knu.knudev.teammanagerapi.response.GetAccountByIdResponse;
@@ -60,15 +56,20 @@ public class AccountProfileService implements AccountProfileApi {
     private final ImageServiceApi imageServiceApi;
     private final DepartmentService departmentService;
     private final AccountProfileMapper accountProfileMapper;
-    private final MultiLanguageFieldMapper multiLangFieldMapper;
+    private final MultiLanguageFieldMapper multiLanguageFieldMapper;
     private final ShortDepartmentMapper shortDepartmentMapper;
     private final SpecialtyMapper specialtyMapper;
+    private final GithubManagementApi gitHubManagementApi;
 
     @Override
     @Transactional
     public AccountRegistrationResponse register(@Valid AccountCreationRequest request) {
         validateEmailNotExists(request.email());
         departmentService.validateAcademicUnitExistence(request.departmentId(), request.specialtyCodename());
+//        boolean validGithubUsername = gitHubManagementApi.existsByUsername(request.githubUsername());
+//        if (!validGithubUsername) {
+//            throw new AccountException("Git Hub Username is not valid", HttpStatus.BAD_REQUEST);
+//        }
 
         AuthAccountCreationResponse createdAuthAccount = accountAuthServiceApi.createAccount(request);
         String uploadedAvatarFilename = uploadAccountImage(request.avatarFile(), ImageSubfolder.ACCOUNT_AVATARS);
@@ -104,9 +105,9 @@ public class AccountProfileService implements AccountProfileApi {
         AccountProfile accountProfile = getDomainById(accountId);
         String avatarPath = StringUtils.isNotEmpty(accountProfile.getAvatarFilename())
                 ? (imageServiceApi.getPathByFilename(
-                        accountProfile.getAvatarFilename(),
-                        ImageSubfolder.ACCOUNT_AVATARS)
-                ) : null;
+                accountProfile.getAvatarFilename(),
+                ImageSubfolder.ACCOUNT_AVATARS)
+        ) : null;
         String bannerPath = StringUtils.isNotEmpty(accountProfile.getBannerFilename())
                 ? (imageServiceApi.getPathByFilename(
                 accountProfile.getBannerFilename(),
@@ -167,7 +168,6 @@ public class AccountProfileService implements AccountProfileApi {
                 ))
                 .build();
     }
-
 
 
     @Override
@@ -277,6 +277,13 @@ public class AccountProfileService implements AccountProfileApi {
         imageServiceApi.removeByFilename(bannerFilename, ImageSubfolder.ACCOUNT_BANNERS);
         account.setBannerFilename(null);
         accountProfileRepository.save(account);
+    }
+
+    @Override
+    public AccountProfileDto getByGithubUsername(String githubUsername) {
+        AccountProfile accountProfile = accountProfileRepository.findAccountProfileByGithubAccountNickname(githubUsername)
+                .orElseThrow(() -> new AccountException("Account with githubUsername " + githubUsername + " not found!"));
+        return accountProfileMapper.toDto(accountProfile);
     }
 
     public AccountProfile getDomainById(UUID id) {

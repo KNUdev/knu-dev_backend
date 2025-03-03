@@ -37,4 +37,6 @@ public interface AccountProfileApi {
     String updateBanner(UUID accountProfileId, MultipartFile newBanner);
 
     void removeBanner(UUID accountProfileId);
+
+    AccountProfileDto getByGithubUsername(String githubUsername);
 }
