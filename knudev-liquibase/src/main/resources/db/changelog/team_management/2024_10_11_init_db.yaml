@@ -209,8 +209,8 @@ databaseChangeLog:
               - column:
                   name: github_account_username
                   type: varchar(255)
-        #                  constraints:
-        #                    nullable: false
+                  constraints:
+                    nullable: false
         - addForeignKeyConstraint:
             referencedTableSchemaName: team_management
             baseTableSchemaName: team_management

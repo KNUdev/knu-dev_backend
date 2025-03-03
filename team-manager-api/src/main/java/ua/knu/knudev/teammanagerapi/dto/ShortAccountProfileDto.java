@@ -13,6 +13,9 @@ public record ShortAccountProfileDto(
                 implementation = FullName.class)
         FullName name,
 
+        @Schema(description = "Github account username", example = "DenysLnk", requiredMode = Schema.RequiredMode.REQUIRED)
+        String githubAccountUsername,
+
         @Schema(description = "Technical role of the team member", requiredMode = Schema.RequiredMode.REQUIRED,
                 implementation = AccountTechnicalRole.class)
         AccountTechnicalRole accountTechnicalRole,

@@ -95,11 +95,11 @@ public record AccountCreationRequest(
         @Schema(description = "University study year on registration", requiredMode = Schema.RequiredMode.REQUIRED)
         @Min(1) @Max(11)
         @NotNull
-        Integer yearOfStudy
+        Integer yearOfStudy,
 
-//        @Schema(description = "GitHub account username", requiredMode = Schema.RequiredMode.REQUIRED)
-//        @NotNull
-//        String githubAccountUsername
+        @Schema(description = "Github account username", example = "DenysLnk", requiredMode = Schema.RequiredMode.REQUIRED)
+        @NotBlank(message = "Github username can not be blank")
+        String githubAccountUsername
 
 ) {
 }
