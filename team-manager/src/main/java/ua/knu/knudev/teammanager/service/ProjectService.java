@@ -130,6 +130,26 @@ public class ProjectService implements ProjectApi {
         return subprojectMapper.toDto(subproject);
     }
 
+    @Override
+    public List<ShortProjectDto> getAllByAccountId(UUID accountId) {
+        if (Objects.isNull(accountId)) {
+            throw new ProjectException("Account id cannot be null!");
+        }
+        List<Subproject> subprojects = subprojectRepository.retrieveAllSubprojectsByDeveloperIn(accountId);
+
+        return subprojects.stream()
+                .map(Subproject::getProject)
+                .map(project -> ShortProjectDto.builder()
+                        .name(project.getName())
+                        .description(multiLanguageFieldMapper.toDto(project.getDescription()))
+                        .status(project.getStatus())
+                        .banner(project.getBanner())
+                        .tags(project.getTags())
+                        .lastUpdate(project.getLastUpdatedAt())
+                        .build())
+                .collect(Collectors.toList());
+    }
+
     private void processRepository(GithubRepoDataDto repo, Set<Project> projectsToCreate) {
         String resourceUrl = repo.resourceUrl();
         List<String> contributors = repo.contributors();

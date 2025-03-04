@@ -7,6 +7,7 @@ import ua.knu.knudev.teammanagerapi.dto.SubprojectDto;
 import ua.knu.knudev.teammanagerapi.request.ProjectUpdateRequest;
 import ua.knu.knudev.teammanagerapi.request.SubprojectUpdateRequest;
 
+import java.util.List;
 import java.util.UUID;
 
 public interface ProjectApi {
@@ -19,4 +20,5 @@ public interface ProjectApi {
 
     Page<ShortProjectDto> getAll(Integer pageNumber, Integer pageSize);
 
+    List<ShortProjectDto> getAllByAccountId(UUID accountId);
 }
