@@ -1,33 +1,25 @@
 package ua.knu.knudev.education.repository.bridge;
 
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Modifying;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
-import ua.knu.knudev.education.domain.EducationProgram;
 import ua.knu.knudev.education.domain.bridge.ProgramSectionMapping;
-import ua.knu.knudev.education.domain.program.ProgramSection;
+import ua.knu.knudev.education.domain.bridge.QProgramSectionMapping;
 
 import java.util.List;
 import java.util.UUID;
 
+import static ua.knu.knudev.knudevcommon.config.QEntityManagerUtil.getQueryFactory;
+
 public interface ProgramSectionMappingRepository extends JpaRepository<ProgramSectionMapping, UUID> {
+    QProgramSectionMapping qPSM = QProgramSectionMapping.programSectionMapping;
+
     List<ProgramSectionMapping> findByEducationProgramId(UUID educationProgramId);
 
-    ProgramSectionMapping findByEducationProgramAndSection(EducationProgram educationProgram, ProgramSection section);
-    List<ProgramSectionMapping> findByEducationProgramAndOrderIndexBetween(EducationProgram program, int start, int end);
-
-    @Modifying
-    @Query("update ProgramSectionMapping psm set psm.orderIndex = psm.orderIndex + 1 " +
-            "where psm.educationProgram = :program and psm.orderIndex between :start and :end")
-    int incrementOrderIndexes(@Param("program") EducationProgram program,
-                              @Param("start") int start,
-                              @Param("end") int end);
-
-    @Modifying
-    @Query("update ProgramSectionMapping psm set psm.orderIndex = psm.orderIndex - 1 " +
-            "where psm.educationProgram = :program and psm.orderIndex between :start and :end")
-    int decrementOrderIndexes(@Param("program") EducationProgram program,
-                              @Param("start") int start,
-                              @Param("end") int end);
+    default void removeProgramSectionMapping(UUID programId, UUID sectionId) {
+        getQueryFactory().delete(qPSM)
+                .where(
+                        qPSM.educationProgram.id.eq(programId),
+                        qPSM.section.id.eq(sectionId)
+                )
+                .execute();
+    }
 }

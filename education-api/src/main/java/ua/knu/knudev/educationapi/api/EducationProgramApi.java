@@ -3,27 +3,29 @@ package ua.knu.knudev.educationapi.api;
 import jakarta.validation.Valid;
 import org.springframework.validation.annotation.Validated;
 import ua.knu.knudev.educationapi.dto.*;
-import ua.knu.knudev.educationapi.request.EducationProgramCreationRequest;
-import ua.knu.knudev.educationapi.request.ModuleCreationRequest;
-import ua.knu.knudev.educationapi.request.SectionCreationRequest;
-import ua.knu.knudev.educationapi.request.TopicCreationRequest;
+import ua.knu.knudev.educationapi.request.ProgramSaveRequest;
+import ua.knu.knudev.educationapi.request.ModuleSaveRequest;
+import ua.knu.knudev.educationapi.request.SectionSaveRequest;
+import ua.knu.knudev.educationapi.request.TopicSaveRequest;
 
 import java.util.List;
 import java.util.UUID;
 
 @Validated
 public interface EducationProgramApi {
-    EducationProgramDto save(@Valid EducationProgramCreationRequest programCreationRequest);
+    EducationProgramDto save(@Valid ProgramSaveRequest programCreationRequest);
 
     EducationProgramDto getById(UUID programId);
 
-    EducationProgramDto updateProgramMeta(UUID programId, EducationProgramCreationRequest programCreationRequest);
+    EducationProgramDto publish(UUID programId);
 
-    ProgramSectionDto updateSectionMeta(UUID sectionId, SectionCreationRequest sectionCreationRequest);
+    EducationProgramDto updateProgramMeta(UUID programId, ProgramSaveRequest programCreationRequest);
 
-    ProgramModuleDto updateModuleMeta(UUID moduleId, ModuleCreationRequest moduleCreationRequest);
+    ProgramSectionDto updateSectionMeta(UUID sectionId, SectionSaveRequest sectionSaveRequest);
 
-    ModuleTopicDto updateTopicMeta(UUID topicId, TopicCreationRequest moduleCreationRequest);
+    ProgramModuleDto updateModuleMeta(UUID moduleId, ModuleSaveRequest moduleSaveRequest);
+
+    ProgramTopicDto updateTopicMeta(UUID topicId, TopicSaveRequest moduleCreationRequest);
 
     List<ProgramSummaryDto> getAll();
 

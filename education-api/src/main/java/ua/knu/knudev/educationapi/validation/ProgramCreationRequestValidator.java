@@ -4,14 +4,12 @@ package ua.knu.knudev.educationapi.validation;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 import org.apache.commons.lang3.ObjectUtils;
-import ua.knu.knudev.educationapi.request.EducationProgramCreationRequest;
+import ua.knu.knudev.educationapi.request.ProgramSaveRequest;
 
-import java.util.UUID;
-
-public class ProgramCreationRequestValidator implements ConstraintValidator<ValidCreationRequest, EducationProgramCreationRequest> {
+public class ProgramCreationRequestValidator implements ConstraintValidator<ValidCreationRequest, ProgramSaveRequest> {
 
     @Override
-    public boolean isValid(EducationProgramCreationRequest request, ConstraintValidatorContext context) {
+    public boolean isValid(ProgramSaveRequest request, ConstraintValidatorContext context) {
         if (request == null) {
             return false;
         }

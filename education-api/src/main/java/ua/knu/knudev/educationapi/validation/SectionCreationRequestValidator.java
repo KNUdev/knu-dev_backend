@@ -3,14 +3,14 @@ package ua.knu.knudev.educationapi.validation;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 import org.apache.commons.lang3.ObjectUtils;
-import ua.knu.knudev.educationapi.request.SectionCreationRequest;
+import ua.knu.knudev.educationapi.request.SectionSaveRequest;
 
 //todo refactor
 public class SectionCreationRequestValidator
-        implements ConstraintValidator<ValidCreationRequest, SectionCreationRequest> {
+        implements ConstraintValidator<ValidCreationRequest, SectionSaveRequest> {
 
     @Override
-    public boolean isValid(SectionCreationRequest request, ConstraintValidatorContext context) {
+    public boolean isValid(SectionSaveRequest request, ConstraintValidatorContext context) {
         if (request == null) {
             return false;
         }

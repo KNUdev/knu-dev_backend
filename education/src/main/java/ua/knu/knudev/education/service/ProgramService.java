@@ -1,17 +1,16 @@
 package ua.knu.knudev.education.service;
 
 import com.querydsl.core.Tuple;
-import com.querydsl.jpa.JPAExpressions;
-import com.querydsl.jpa.impl.JPAQueryFactory;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.ObjectUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import ua.knu.knudev.assessmentmanagerapi.api.TestApi;
 import ua.knu.knudev.education.domain.EducationProgram;
-import ua.knu.knudev.education.domain.QEducationProgram;
 import ua.knu.knudev.education.domain.bridge.*;
 import ua.knu.knudev.education.domain.program.BaseLearningUnit;
 import ua.knu.knudev.education.domain.program.ProgramModule;
@@ -27,22 +26,20 @@ import ua.knu.knudev.education.repository.bridge.ProgramSectionMappingRepository
 import ua.knu.knudev.education.repository.bridge.SectionModuleMappingRepository;
 import ua.knu.knudev.educationapi.api.EducationProgramApi;
 import ua.knu.knudev.educationapi.dto.*;
+import ua.knu.knudev.educationapi.exception.ProgramException;
 import ua.knu.knudev.educationapi.request.*;
 import ua.knu.knudev.fileserviceapi.api.PDFServiceApi;
 import ua.knu.knudev.fileserviceapi.subfolder.PdfSubfolder;
 import ua.knu.knudev.knudevcommon.constant.LearningUnit;
-import ua.knu.knudev.knudevcommon.dto.MultiLanguageFieldDto;
 
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
-
-import static ua.knu.knudev.knudevcommon.config.QEntityManagerUtil.getQueryFactory;
+import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
-//todo fix update on order indexes
-public class EducationProgramCreationService implements EducationProgramApi {
+public class ProgramService implements EducationProgramApi {
 
     private final EducationProgramRepository programRepository;
     private final SectionRepository sectionRepository;
@@ -55,103 +52,95 @@ public class EducationProgramCreationService implements EducationProgramApi {
     private final EducationMultiLanguageFieldMapper multiLangFieldMapper;
     private final PDFServiceApi pdfServiceApi;
     private final TestApi testApi;
+    private final ProgramOrderIndexesUpdater programOrderIndexesUpdater;
 
     private final ProgramMapper programMapper;
     private final SectionMapper sectionMapper;
     private final ModuleMapper moduleMapper;
     private final TopicMapper topicMapper;
 
-    private final QEducationProgram qProgram = QEducationProgram.educationProgram;
-    private final QProgramSectionMapping qPSM = QProgramSectionMapping.programSectionMapping;
-    private final QSectionModuleMapping qSMM = QSectionModuleMapping.sectionModuleMapping;
-    private final QModuleTopicMapping qMTM = QModuleTopicMapping.moduleTopicMapping;
-
-    private final TestDeletionS testDeletionS;
+    private final ProgramMapperDtoHelper mapperDtoHelper;
 
     @Transactional
     public EducationProgramDto getById(UUID programId) {
-        // 1. Load the program entity.
-        EducationProgram program = programRepository.findById(programId)
-                .orElseThrow(() -> new IllegalArgumentException("Program not found for ID: " + programId));
+        EducationProgram program = getProgramById(programId);
+        EducationProgramDto programDto = mapperDtoHelper.toProgramDto(program);
 
-        // 2. Build the EducationProgramDto manually.
-        EducationProgramDto programDto = new EducationProgramDto();
-        programDto.setId(program.getId());
-        programDto.setName(new MultiLanguageFieldDto(program.getName().getEn(), program.getName().getUk()));
-        programDto.setDescription(new MultiLanguageFieldDto(program.getDescription().getEn(), program.getDescription().getUk()));
-        programDto.setExpertise(program.getExpertise()); // or use proper conversion if enum
-        programDto.setPublished(program.isPublished());
-
-        programDto.setFinalTaskFilename(program.getFinalTaskFilename());
-        programDto.setFinalTaskUrl(pdfServiceApi.getPathByFilename(
-                program.getFinalTaskFilename(), PdfSubfolder.EDUCATION_PROGRAM_PROGRAM_TASKS
-        ));
-        // 3. Load all section mappings for the given program.
-        List<ProgramSectionMapping> sectionMappings = programSectionMappingRepository.findByEducationProgramId(program.getId());
+        List<ProgramSectionMapping> sectionMappings = programSectionMappingRepository
+                .findByEducationProgramId(program.getId());
         sectionMappings.sort(Comparator.comparingInt(ProgramSectionMapping::getOrderIndex));
 
-        // 4. For each section mapping, build a ProgramSectionDto.
-        List<ProgramSectionDto> sectionDtos = new ArrayList<>();
-        for (ProgramSectionMapping sectionMapping : sectionMappings) {
-            ProgramSection section = sectionMapping.getSection();
-            ProgramSectionDto sectionDto = new ProgramSectionDto();
-            sectionDto.setId(section.getId());
-            sectionDto.setName(new MultiLanguageFieldDto(section.getName().getEn(), section.getName().getUk()));
-            sectionDto.setDescription(new MultiLanguageFieldDto(section.getDescription().getEn(), section.getDescription().getUk()));
-//            sectionDto.setFinalTaskUrl(section.getSectionFinalTask() != null ? section.getSectionFinalTask().getFilename() : null);
-            sectionDto.setFinalTaskFilename(section.getFinalTaskFilename());
-            sectionDto.setFinalTaskUrl(pdfServiceApi.getPathByFilename(
-                    section.getFinalTaskFilename(), PdfSubfolder.EDUCATION_PROGRAM_SECTION_TASKS
-            ));
+        List<UUID> sectionIds = sectionMappings.stream()
+                .map(mapping -> mapping.getSection().getId())
+                .collect(Collectors.toList());
+        List<SectionModuleMapping> moduleMappings = sectionModuleMappingRepository.findBySectionIdIn(sectionIds);
+        Map<UUID, List<SectionModuleMapping>> modulesBySection = moduleMappings.stream()
+                .sorted(Comparator.comparingInt(SectionModuleMapping::getOrderIndex))
+                .collect(Collectors.groupingBy(mapping -> mapping.getSection().getId()));
 
-            // 5. Load modules for this section using SectionModuleMappingRepository.
-            List<SectionModuleMapping> moduleMappings = sectionModuleMappingRepository.findBySectionId(section.getId());
-            moduleMappings.sort(Comparator.comparingInt(SectionModuleMapping::getOrderIndex));
-            List<ProgramModuleDto> moduleDtos = new ArrayList<>();
-            for (SectionModuleMapping moduleMapping : moduleMappings) {
-                ProgramModule module = moduleMapping.getModule();
-                ProgramModuleDto moduleDto = new ProgramModuleDto();
-                moduleDto.setId(module.getId());
-                moduleDto.setName(new MultiLanguageFieldDto(module.getName().getEn(), module.getName().getUk()));
-                moduleDto.setDescription(new MultiLanguageFieldDto(module.getDescription().getEn(), module.getDescription().getUk()));
-                moduleDto.setFinalTaskFilename(module.getFinalTaskFilename());
-                moduleDto.setFinalTaskUrl(pdfServiceApi.getPathByFilename(
-                        module.getFinalTaskFilename(), PdfSubfolder.EDUCATION_PROGRAM_MODULE_TASKS
-                ));
+        List<UUID> moduleIds = moduleMappings.stream()
+                .map(mapping -> mapping.getModule().getId())
+                .distinct()
+                .collect(Collectors.toList());
+        List<ModuleTopicMapping> topicMappings = moduleTopicMappingRepository.findByModuleIdIn(moduleIds);
+        Map<UUID, List<ModuleTopicMapping>> topicsByModule = topicMappings.stream()
+                .sorted(Comparator.comparingInt(ModuleTopicMapping::getOrderIndex))
+                .collect(Collectors.groupingBy(mapping -> mapping.getModule().getId()));
 
-                // 6. Load topics for this module using ModuleTopicMappingRepository.
-                List<ModuleTopicMapping> topicMappings = moduleTopicMappingRepository.findByModuleId(module.getId());
-                topicMappings.sort(Comparator.comparingInt(ModuleTopicMapping::getOrderIndex));
-                List<ModuleTopicDto> topicDtos = new ArrayList<>();
-                for (ModuleTopicMapping topicMapping : topicMappings) {
-                    ProgramTopic topic = topicMapping.getTopic();
-                    ModuleTopicDto topicDto = new ModuleTopicDto();
-                    topicDto.setId(topic.getId());
-                    topicDto.setName(new MultiLanguageFieldDto(topic.getName().getEn(), topic.getName().getUk()));
-                    topicDto.setDescription(new MultiLanguageFieldDto(topic.getDescription().getEn(), topic.getDescription().getUk()));
-                    topicDto.setDifficulty(topic.getDifficulty());
+        List<ProgramSectionDto> sectionDtos = sectionMappings.stream()
+                .map(sectionMapping -> {
+                    ProgramSection section = sectionMapping.getSection();
+                    ProgramSectionDto sectionDto = mapperDtoHelper.toSectionDto(section, sectionMapping);
 
-                    topicDto.setTestId(topic.getTestId());
-                    topicDto.setFinalTaskFilename(topic.getFinalTaskFilename());
-                    topicDto.setFinalTaskUrl(pdfServiceApi.getPathByFilename(
-                            topic.getFinalTaskFilename(), PdfSubfolder.EDUCATION_PROGRAM_TOPIC_TASKS
-                    ));
-//                    topicDto.setLearningResources(topic.getLearningResources());
-                    topicDtos.add(topicDto);
-                }
-                moduleDto.setTopics(topicDtos);
-                moduleDtos.add(moduleDto);
-            }
-            sectionDto.setModules(moduleDtos);
-            sectionDtos.add(sectionDto);
-        }
+                    List<SectionModuleMapping> modulesForSection = modulesBySection.getOrDefault(
+                            section.getId(), Collections.emptyList()
+                    );
+                    List<ProgramModuleDto> moduleDtos = modulesForSection.stream()
+                            .map(moduleMapping -> {
+                                ProgramModule module = moduleMapping.getModule();
+                                ProgramModuleDto moduleDto = mapperDtoHelper.toModuleDto(module, moduleMapping);
+
+                                List<ModuleTopicMapping> topicsForModule = topicsByModule.getOrDefault(
+                                        module.getId(), Collections.emptyList()
+                                );
+                                List<ProgramTopicDto> topicDtos = topicsForModule.stream()
+                                        .map(topicMapping -> {
+                                            ProgramTopic topic = topicMapping.getTopic();
+                                            return mapperDtoHelper.toTopicDto(topic, topicMapping);
+                                        })
+                                        .collect(Collectors.toList());
+
+                                moduleDto.setTopics(topicDtos);
+                                return moduleDto;
+                            })
+                            .collect(Collectors.toList());
+
+                    sectionDto.setModules(moduleDtos);
+                    return sectionDto;
+                })
+                .collect(Collectors.toList());
+
         programDto.setSections(sectionDtos);
-
         return programDto;
     }
 
     @Override
-    public EducationProgramDto updateProgramMeta(UUID programId, EducationProgramCreationRequest programReq) {
+    @Transactional
+    public EducationProgramDto publish(UUID programId) {
+        EducationProgram program = getProgramById(programId);
+        if (program.isPublished()) {
+            throw new ProgramException(
+                    "Program with id: " + programId + " is already published",
+                    HttpStatus.BAD_REQUEST
+            );
+        }
+        program.setPublished(true);
+        programRepository.save(program);
+        return getById(programId);
+    }
+
+    @Override
+    public EducationProgramDto updateProgramMeta(UUID programId, ProgramSaveRequest programReq) {
         //todo block
         EducationProgram program = getProgramById(programId);
 
@@ -165,7 +154,7 @@ public class EducationProgramCreationService implements EducationProgramApi {
     }
 
     @Override
-    public ProgramSectionDto updateSectionMeta(UUID sectionId, SectionCreationRequest sectionReq) {
+    public ProgramSectionDto updateSectionMeta(UUID sectionId, SectionSaveRequest sectionReq) {
         //todo block update if this section is in ANY of active SPRINTS
         ProgramSection section = getSectionById(sectionId);
 
@@ -176,7 +165,7 @@ public class EducationProgramCreationService implements EducationProgramApi {
     }
 
     @Override
-    public ProgramModuleDto updateModuleMeta(UUID moduleId, ModuleCreationRequest moduleReq) {
+    public ProgramModuleDto updateModuleMeta(UUID moduleId, ModuleSaveRequest moduleReq) {
         //todo block
         ProgramModule module = getModuleById(moduleId);
 
@@ -187,7 +176,7 @@ public class EducationProgramCreationService implements EducationProgramApi {
     }
 
     @Override
-    public ModuleTopicDto updateTopicMeta(UUID topicId, TopicCreationRequest topicReq) {
+    public ProgramTopicDto updateTopicMeta(UUID topicId, TopicSaveRequest topicReq) {
         ProgramTopic topic = getTopicById(topicId);
         updateGenericFields(topic, topicReq, PdfSubfolder.EDUCATION_PROGRAM_TOPIC_TASKS);
 
@@ -202,44 +191,24 @@ public class EducationProgramCreationService implements EducationProgramApi {
             topic.setDifficulty(topicReq.getDifficulty());
         }
 
+        if (CollectionUtils.isNotEmpty(topicReq.getLearningResources())) {
+            Set<String> newLearningResources = topicReq.getLearningResources().stream()
+                    .filter(StringUtils::isNotEmpty)
+                    .collect(Collectors.toSet());
+            topic.setLearningResources(newLearningResources);
+        }
+
         ProgramTopic savedTopic = topicRepository.save(topic);
         return topicMapper.toDto(savedTopic);
     }
 
     public List<ProgramSummaryDto> getAll() {
-        // Q-Types for QueryDSL:
-        QEducationProgram ep = QEducationProgram.educationProgram;
         QProgramSectionMapping psm = QProgramSectionMapping.programSectionMapping;
         QSectionModuleMapping smm = QSectionModuleMapping.sectionModuleMapping;
         QModuleTopicMapping mtm = QModuleTopicMapping.moduleTopicMapping;
 
-        // 1) Fetch the domain objects (no grouping).
-        List<EducationProgram> programs = getQueryFactory()
-                .selectFrom(ep)
-                .fetch();
-
-        // 2) In a separate query, do a group-by to get distinct counts.
-        //    This returns a list of Tuples: (programId, totalSections, totalModules, totalTopics).
-        List<Tuple> aggregator = getQueryFactory()
-                .select(
-                        ep.id,                             // program ID
-                        psm.section.id.countDistinct(),    // distinct sections
-                        smm.module.id.countDistinct(),     // distinct modules
-                        mtm.topic.id.countDistinct()       // distinct topics
-                )
-                .from(ep)
-                // left joins on bridging tables
-                .leftJoin(psm).on(psm.educationProgram.id.eq(ep.id))
-                .leftJoin(smm).on(smm.section.id.eq(psm.section.id))
-                .leftJoin(mtm).on(mtm.module.id.eq(smm.module.id))
-                .groupBy(ep.id) // group by program
-                .fetch();
-
-        Map<UUID, Tuple> countMap = aggregator.stream()
-                .collect(Collectors.toMap(
-                        tuple -> tuple.get(ep.id),
-                        tuple -> tuple
-                ));
+        List<EducationProgram> programs = programRepository.findAll();
+        Map<UUID, Tuple> countMap = programRepository.fetchProgramSummariesIdCountMap();
 
         return programs.stream()
                 .map(program -> {
@@ -248,79 +217,41 @@ public class EducationProgramCreationService implements EducationProgramApi {
                     long modulesCount = (t == null) ? 0L : t.get(smm.module.id.countDistinct());
                     long topicsCount = (t == null) ? 0L : t.get(mtm.topic.id.countDistinct());
 
-                    return new ProgramSummaryDto(
-                            program.getId(),
-                            new MultiLanguageFieldDto(
-                                    program.getName().getEn(),
-                                    program.getName().getUk()
-                            ),
-                            (int) sectionsCount,
-                            (int) modulesCount,
-                            (int) topicsCount,
-                            program.getExpertise(),            // from domain
-                            program.getCreatedDate(),           // from BaseLearningUnit
-                            program.getLastModifiedDate(),      // from BaseLearningUnit
-                            program.isPublished(),              // from domain
-                            0  // totalActiveSessions is temp => set 0 for now
-                    );
+                    return ProgramSummaryDto.builder()
+                            .id(program.getId())
+                            .name(multiLangFieldMapper.toDto(program.getName()))
+                            .createdAt(program.getCreatedDate())
+                            .lastUpdatedAt(program.getLastModifiedDate())
+                            .totalSections((int) sectionsCount)
+                            .totalModules((int) modulesCount)
+                            .totalTopics((int) topicsCount)
+                            .expertise(program.getExpertise())
+                            .isPublished(program.isPublished())
+                            //todo 0 for now. In future change
+                            .totalActiveSessions(0)
+                            .build();
                 })
                 .collect(Collectors.toList());
     }
 
     @Transactional
     public void deleteProgramById(UUID programId) {
-        getQueryFactory().delete(qPSM)
-                .where(qPSM.educationProgram.id.eq(programId))
-                .execute();
-
-        getQueryFactory().delete(qProgram)
-                .where(qProgram.id.eq(programId))
-                .execute();
+        programRepository.deleteById(programId);
     }
 
     @Transactional
     public void removeProgramSectionMapping(UUID programId, UUID sectionId) {
-        getQueryFactory().delete(qPSM)
-                .where(
-                        qPSM.educationProgram.id.eq(programId),
-                        qPSM.section.id.eq(sectionId)
-                )
-                .execute();
+        programSectionMappingRepository.removeProgramSectionMapping(programId, sectionId);
     }
 
     @Transactional
     public void removeSectionModuleMapping(UUID programId, UUID sectionId, UUID moduleId) {
-        getQueryFactory().delete(qSMM)
-                .where(
-                        qSMM.section.id.eq(sectionId),
-                        qSMM.module.id.eq(moduleId),
-                        qSMM.section.id.in(
-                                JPAExpressions.select(qPSM.section.id)
-                                        .from(qPSM)
-                                        .where(qPSM.educationProgram.id.eq(programId))
-                        )
-                )
-                .execute();
+        sectionModuleMappingRepository.removeSectionModuleMapping(programId, sectionId, moduleId);
     }
 
     @Transactional
     public void removeModuleTopicMapping(UUID programId, UUID sectionId, UUID moduleId, UUID topicId) {
-        JPAQueryFactory queryFactory = getQueryFactory();
-        queryFactory.delete(qMTM)
-                .where(
-                        qMTM.module.id.eq(moduleId),
-                        qMTM.topic.id.eq(topicId),
-                        qMTM.module.id.in(
-                                JPAExpressions.select(qSMM.module.id)
-                                        .from(qSMM)
-                                        .join(qPSM).on(qPSM.section.id.eq(qSMM.section.id))
-                                        .where(
-                                                qSMM.section.id.eq(sectionId),
-                                                qPSM.educationProgram.id.eq(programId)
-                                        )
-                        )
-                )
-                .execute();
+        moduleTopicMappingRepository.removeModuleTopicMapping(programId, sectionId, moduleId, topicId);
     }
 
     private <T extends BaseLearningUnit, V extends BaseLearningUnitSaveRequest> T updateGenericFields(
@@ -352,7 +283,7 @@ public class EducationProgramCreationService implements EducationProgramApi {
     }
 
     @Transactional
-    public EducationProgramDto save(EducationProgramCreationRequest programSaveReq) {
+    public EducationProgramDto save(ProgramSaveRequest programSaveReq) {
         inputReqCoherenceValidator.validateProgramOrderSequence(programSaveReq);
 
         Map<LearningUnit, Map<Integer, MultipartFile>> tasksToUpload = buildEducationProgramAllTasksMap(programSaveReq);
@@ -363,34 +294,35 @@ public class EducationProgramCreationService implements EducationProgramApi {
         EducationProgramDto programDto = programMapper.toDto(program);
         programDto.setFinalTaskUrl(program.getFinalTaskFilename());
 
-        boolean isOrderIndexesUpdateReq = isOrderIndex(programSaveReq);
-        if(isOrderIndexesUpdateReq) {
-            testDeletionS.updateOrderIndexes(programSaveReq);
+        boolean isOrderIndexesUpdateReq = isOrderIndexRequest(programSaveReq);
+        if (isOrderIndexesUpdateReq) {
+            programOrderIndexesUpdater.updateOrderIndexes(programSaveReq);
+            return getById(programSaveReq.getExistingProgramId());
         } else {
             Optional.ofNullable(programSaveReq.getSections())
                     .orElse(Collections.emptyList())
                     .forEach(sectionRequest -> {
                         ProgramSection section = buildAndSaveSection(sectionRequest, filenamesMap, program);
-                        ProgramSectionDto sectionDto = sectionMapper.toDto(section);
+                        ProgramSectionDto sectionDto = mapperDtoHelper.toSectionDto(section);
+
                         programDto.getSections().add(sectionDto);
-                        //todo put separate url and file for this and for rest LU`s.
-                        sectionDto.setFinalTaskUrl(section.getFinalTaskFilename());
 
                         Optional.ofNullable(sectionRequest.getModules())
                                 .orElse(Collections.emptyList())
                                 .forEach(moduleRequest -> {
-                                    ProgramModule module = buildAndSaveModule(moduleRequest, filenamesMap, section);
-                                    ProgramModuleDto moduleDto = moduleMapper.toDto(module);
-                                    moduleDto.setFinalTaskUrl(module.getFinalTaskFilename());
+                                    ProgramModule module = buildAndSaveModule(
+                                            moduleRequest, filenamesMap, section, program
+                                    );
+                                    ProgramModuleDto moduleDto = mapperDtoHelper.toModuleDto(module);
                                     sectionDto.getModules().add(moduleDto);
 
                                     Optional.ofNullable(moduleRequest.getTopics())
                                             .orElse(Collections.emptyList())
                                             .forEach(topicRequest -> {
-                                                ProgramTopic topic = buildAndSaveTopic(topicRequest, filenamesMap, module);
-                                                ModuleTopicDto topicDto = topicMapper.toDto(topic);
-                                                topicDto.setFinalTaskUrl(topic.getFinalTaskFilename());
-                                                topicDto.setLearningResources(topic.getLearningResources());
+                                                ProgramTopic topic = buildAndSaveTopic(
+                                                        topicRequest, filenamesMap, program, section, module
+                                                );
+                                                ProgramTopicDto topicDto = mapperDtoHelper.toTopicDto(topic);
 
                                                 moduleDto.getTopics().add(topicDto);
                                             });
@@ -401,18 +333,43 @@ public class EducationProgramCreationService implements EducationProgramApi {
         return programDto;
     }
 
-    private boolean isOrderIndex(EducationProgramCreationRequest programSaveReq) {
-//        boolean b = !programSaveReq.getSections().stream().map(SectionCreationRequest::getOrderIndex).toList().isEmpty();
-//
-//        ObjectUtils.allNotNull(
-//                programSaveReq.getExistingProgramId(),
-//        );
+    public boolean isOrderIndexRequest(ProgramSaveRequest req) {
+        if (CollectionUtils.isNotEmpty(req.getSections())) {
+            boolean allValid = req.getSections().stream()
+                    .allMatch(section -> isIndexValid(section.getExistingSectionId(), section.getOrderIndex()))
+                    &&
+                    req.getSections().stream()
+                            .flatMap(section -> section.getModules() == null ? Stream.empty() : section.getModules().stream())
+                            .allMatch(module -> isIndexValid(module.getExistingModuleId(), module.getOrderIndex()))
+                    &&
+                    req.getSections().stream()
+                            .flatMap(section -> section.getModules() == null ? Stream.empty() : section.getModules().stream())
+                            .flatMap(module -> module.getTopics() == null ? Stream.empty() : module.getTopics().stream())
+                            .allMatch(topic -> isIndexValid(topic.getExistingTopicId(), topic.getOrderIndex()));
+
+            boolean anyOrderIndex = req.getSections().stream()
+                    .anyMatch(section -> section.getExistingSectionId() != null)
+                    ||
+                    req.getSections().stream()
+                            .flatMap(section -> section.getModules() == null ? Stream.empty() : section.getModules().stream())
+                            .anyMatch(module -> module.getExistingModuleId() != null)
+                    ||
+                    req.getSections().stream()
+                            .flatMap(section -> section.getModules() == null ? Stream.empty() : section.getModules().stream())
+                            .flatMap(module -> module.getTopics() == null ? Stream.empty() : module.getTopics().stream())
+                            .anyMatch(topic -> topic.getExistingTopicId() != null);
+
+            return allValid && anyOrderIndex;
+        }
         return false;
     }
 
+    private boolean isIndexValid(Object existingId, Object orderIndex) {
+        return (existingId == null && orderIndex == null) || (existingId != null && orderIndex != null);
+    }
 
     private Map<LearningUnit, Map<Integer, MultipartFile>> buildEducationProgramAllTasksMap(
-            EducationProgramCreationRequest request
+            ProgramSaveRequest request
     ) {
         Map<LearningUnit, Map<Integer, MultipartFile>> tasksMap = new HashMap<>();
 
@@ -458,7 +415,7 @@ public class EducationProgramCreationService implements EducationProgramApi {
     }
 
     private EducationProgram buildAndSaveProgram(
-            EducationProgramCreationRequest programCreationReq,
+            ProgramSaveRequest programCreationReq,
             Map<LearningUnit, Map<Integer, String>> filenamesMap
     ) {
         boolean programExists = ObjectUtils.isNotEmpty(programCreationReq.getExistingProgramId());
@@ -484,7 +441,7 @@ public class EducationProgramCreationService implements EducationProgramApi {
     }
 
     private ProgramSection buildAndSaveSection(
-            SectionCreationRequest sectionReq,
+            SectionSaveRequest sectionReq,
             Map<LearningUnit, Map<Integer, String>> filenamesMap,
             EducationProgram program
     ) {
@@ -520,11 +477,11 @@ public class EducationProgramCreationService implements EducationProgramApi {
         return section;
     }
 
-
     private ProgramModule buildAndSaveModule(
-            ModuleCreationRequest moduleRequest,
+            ModuleSaveRequest moduleRequest,
             Map<LearningUnit, Map<Integer, String>> filenamesMap,
-            ProgramSection section
+            ProgramSection section,
+            EducationProgram program
     ) {
         boolean moduleExists = ObjectUtils.isNotEmpty(moduleRequest.getExistingModuleId());
         ProgramModule module;
@@ -548,6 +505,7 @@ public class EducationProgramCreationService implements EducationProgramApi {
 
             sectionModuleMappingRepository.save(
                     SectionModuleMapping.builder()
+                            .educationProgram(program)
                             .section(section)
                             .module(module)
                             .orderIndex(moduleRequest.getOrderIndex())
@@ -559,8 +517,10 @@ public class EducationProgramCreationService implements EducationProgramApi {
     }
 
     private ProgramTopic buildAndSaveTopic(
-            TopicCreationRequest topicRequest,
+            TopicSaveRequest topicRequest,
             Map<LearningUnit, Map<Integer, String>> filenamesMap,
+            EducationProgram program,
+            ProgramSection section,
             ProgramModule module
     ) {
         boolean topicExists = ObjectUtils.isNotEmpty(topicRequest.getExistingTopicId());
@@ -579,7 +539,11 @@ public class EducationProgramCreationService implements EducationProgramApi {
                     .name(multiLangFieldMapper.toDomain(topicRequest.getName()))
                     .description(multiLangFieldMapper.toDomain(topicRequest.getDescription()))
                     .finalTaskFilename(taskFilename)
-                    .learningResources(topicRequest.getLearningMaterials())
+                    .learningResources(
+                            CollectionUtils.isNotEmpty(topicRequest.getLearningResources()) ?
+                                    new HashSet<>(topicRequest.getLearningResources())
+                                    : Collections.emptySet()
+                    )
                     .lastModifiedDate(LocalDateTime.now())
                     .difficulty(topicRequest.getDifficulty())
                     .build();
@@ -594,6 +558,8 @@ public class EducationProgramCreationService implements EducationProgramApi {
 
             moduleTopicMappingRepository.save(
                     ModuleTopicMapping.builder()
+                            .program(program)
+                            .section(section)
                             .module(module)
                             .topic(topic)
                             .orderIndex(topicRequest.getOrderIndex())

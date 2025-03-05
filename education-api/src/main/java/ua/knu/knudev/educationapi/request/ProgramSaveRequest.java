@@ -12,13 +12,13 @@ import java.util.UUID;
 @Getter
 @Setter
 @ValidCreationRequest
-public class EducationProgramCreationRequest extends BaseLearningUnitSaveRequest{
+public class ProgramSaveRequest extends BaseLearningUnitSaveRequest{
     private UUID existingProgramId;
-    private List<SectionCreationRequest> sections;
+    private List<SectionSaveRequest> sections;
     private Expertise expertise;
 
     @Builder(toBuilder = true)
-    public EducationProgramCreationRequest(MultiLanguageFieldDto name, MultiLanguageFieldDto description, MultipartFile finalTask, UUID existingProgramId, List<SectionCreationRequest> sections, Expertise expertise) {
+    public ProgramSaveRequest(MultiLanguageFieldDto name, MultiLanguageFieldDto description, MultipartFile finalTask, UUID existingProgramId, List<SectionSaveRequest> sections, Expertise expertise) {
         super(name, description, finalTask);
         this.existingProgramId = existingProgramId;
         this.sections = sections;

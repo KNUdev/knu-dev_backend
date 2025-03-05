@@ -1,12 +1,14 @@
 package ua.knu.knudev.educationapi.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import lombok.Builder;
 import ua.knu.knudev.knudevcommon.constant.Expertise;
 import ua.knu.knudev.knudevcommon.dto.MultiLanguageFieldDto;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
 
+@Builder
 public record ProgramSummaryDto(
         UUID id,
         MultiLanguageFieldDto name,

@@ -13,7 +13,7 @@ import java.util.UUID;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class ModuleTopicDto {
+public class ProgramTopicDto {
     private UUID id;
     private MultiLanguageFieldDto name;
     private MultiLanguageFieldDto description;

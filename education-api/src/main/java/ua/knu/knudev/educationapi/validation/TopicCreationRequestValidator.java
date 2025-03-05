@@ -3,12 +3,12 @@ package ua.knu.knudev.educationapi.validation;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 import org.apache.commons.lang3.ObjectUtils;
-import ua.knu.knudev.educationapi.request.TopicCreationRequest;
+import ua.knu.knudev.educationapi.request.TopicSaveRequest;
 
-public class TopicCreationRequestValidator implements ConstraintValidator<ValidCreationRequest, TopicCreationRequest> {
+public class TopicCreationRequestValidator implements ConstraintValidator<ValidCreationRequest, TopicSaveRequest> {
 
     @Override
-    public boolean isValid(TopicCreationRequest request, ConstraintValidatorContext context) {
+    public boolean isValid(TopicSaveRequest request, ConstraintValidatorContext context) {
         if (request == null) {
             return false;
         }
@@ -18,7 +18,7 @@ public class TopicCreationRequestValidator implements ConstraintValidator<ValidC
                 request.getName(),
                 request.getDescription(),
                 request.getFinalTask(),
-                request.getLearningMaterials(),
+                request.getLearningResources(),
                 request.getTestId(),
                 request.getDifficulty()
         );
@@ -28,7 +28,7 @@ public class TopicCreationRequestValidator implements ConstraintValidator<ValidC
                     request.getName(),
                     request.getDescription(),
                     request.getFinalTask(),
-                    request.getLearningMaterials(),
+                    request.getLearningResources(),
                     request.getTestId(),
                     request.getDifficulty()
             );

@@ -3,13 +3,13 @@ package ua.knu.knudev.educationapi.validation;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 import org.apache.commons.lang3.ObjectUtils;
-import ua.knu.knudev.educationapi.request.ModuleCreationRequest;
+import ua.knu.knudev.educationapi.request.ModuleSaveRequest;
 
 //todo refactor
-public class ModuleCreationRequestValidator implements ConstraintValidator<ValidCreationRequest, ModuleCreationRequest> {
+public class ModuleCreationRequestValidator implements ConstraintValidator<ValidCreationRequest, ModuleSaveRequest> {
 
     @Override
-    public boolean isValid(ModuleCreationRequest request, ConstraintValidatorContext context) {
+    public boolean isValid(ModuleSaveRequest request, ConstraintValidatorContext context) {
         if (request == null) {
             return false;
         }

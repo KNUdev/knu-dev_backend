@@ -7,7 +7,7 @@ import jakarta.validation.ValidatorFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.mock.web.MockMultipartFile;
-import ua.knu.knudev.educationapi.request.SectionCreationRequest;
+import ua.knu.knudev.educationapi.request.SectionSaveRequest;
 import ua.knu.knudev.knudevcommon.dto.MultiLanguageFieldDto;
 
 import java.util.Collections;
@@ -16,7 +16,7 @@ import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class SectionCreationRequestValidatorTest {
+public class SectionSaveRequestValidatorTest {
 
     private Validator validator;
 
@@ -28,12 +28,12 @@ public class SectionCreationRequestValidatorTest {
 
     @Test
     public void should_ValidateSuccessfully_When_ExistingSectionIdAndOrderIndexAreProvided() {
-        SectionCreationRequest request = SectionCreationRequest.builder()
+        SectionSaveRequest request = SectionSaveRequest.builder()
                 .existingSectionId(UUID.randomUUID())
                 .orderIndex(1)
                 .build();
 
-        Set<ConstraintViolation<SectionCreationRequest>> violations = validator.validate(request);
+        Set<ConstraintViolation<SectionSaveRequest>> violations = validator.validate(request);
         assertTrue(
                 violations.isEmpty(),
                 "Expected no validation errors when existingSectionId and orderIndex are provided alone."
@@ -42,7 +42,7 @@ public class SectionCreationRequestValidatorTest {
 
     @Test
     public void should_NotValidate_When_ExistingSectionIdAndOtherFieldsAreProvided() {
-        SectionCreationRequest request = SectionCreationRequest.builder()
+        SectionSaveRequest request = SectionSaveRequest.builder()
                 .existingSectionId(UUID.randomUUID())
                 .orderIndex(1)
                 .name(new MultiLanguageFieldDto())
@@ -56,7 +56,7 @@ public class SectionCreationRequestValidatorTest {
                 ))
                 .build();
 
-        Set<ConstraintViolation<SectionCreationRequest>> violations = validator.validate(request);
+        Set<ConstraintViolation<SectionSaveRequest>> violations = validator.validate(request);
         assertFalse(
                 violations.isEmpty(),
                 "Expected validation errors when existingSectionId is provided along with other fields."
@@ -65,7 +65,7 @@ public class SectionCreationRequestValidatorTest {
 
     @Test
     public void should_ValidateSuccessfully_When_AllFieldsExceptExistingSectionIdAreProvided() {
-        SectionCreationRequest request = SectionCreationRequest.builder()
+        SectionSaveRequest request = SectionSaveRequest.builder()
                 .name(new MultiLanguageFieldDto())
                 .description(new MultiLanguageFieldDto())
                 .modules(Collections.emptyList())
@@ -78,7 +78,7 @@ public class SectionCreationRequestValidatorTest {
                 .orderIndex(2)
                 .build();
 
-        Set<ConstraintViolation<SectionCreationRequest>> violations = validator.validate(request);
+        Set<ConstraintViolation<SectionSaveRequest>> violations = validator.validate(request);
         assertTrue(
                 violations.isEmpty(),
                 "Expected no validation errors when all required fields are provided without existingSectionId."
@@ -87,12 +87,12 @@ public class SectionCreationRequestValidatorTest {
 
     @Test
     public void should_NotValidate_When_NoExistingIdOrAllOtherFieldsAreProvided() {
-        SectionCreationRequest request = SectionCreationRequest.builder()
+        SectionSaveRequest request = SectionSaveRequest.builder()
                 .name(new MultiLanguageFieldDto())
                 .orderIndex(3)
                 .build();
 
-        Set<ConstraintViolation<SectionCreationRequest>> violations = validator.validate(request);
+        Set<ConstraintViolation<SectionSaveRequest>> violations = validator.validate(request);
         assertFalse(
                 violations.isEmpty(),
                 "Expected validation errors when required fields are missing without existingSectionId."

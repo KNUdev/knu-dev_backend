@@ -1,20 +1,38 @@
 package ua.knu.knudev.education.repository.bridge;
 
+import com.querydsl.jpa.JPAExpressions;
 import org.springframework.data.jpa.repository.JpaRepository;
+import ua.knu.knudev.education.domain.bridge.QProgramSectionMapping;
+import ua.knu.knudev.education.domain.bridge.QSectionModuleMapping;
 import ua.knu.knudev.education.domain.bridge.SectionModuleMapping;
-import ua.knu.knudev.education.domain.program.ProgramModule;
-import ua.knu.knudev.education.domain.program.ProgramSection;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
 
+import static ua.knu.knudev.knudevcommon.config.QEntityManagerUtil.getQueryFactory;
+
 public interface SectionModuleMappingRepository extends JpaRepository<SectionModuleMapping, UUID> {
-    List<SectionModuleMapping> findBySectionId(UUID sectionId);
+    QProgramSectionMapping psm = QProgramSectionMapping.programSectionMapping;
+    QSectionModuleMapping smm = QSectionModuleMapping.sectionModuleMapping;
 
-    SectionModuleMapping findBySectionAndModule(ProgramSection section, ProgramModule module);
+    List<SectionModuleMapping> findBySectionIdIn(List<UUID> sectionIds);
 
+    List<SectionModuleMapping> findByEducationProgram_IdAndSection_IdAndModule_Id(
+            UUID programId, UUID sectionId, UUID moduleId
+    );
 
-    // Optionally, to load modules for multiple sections at once:
-    List<SectionModuleMapping> findBySectionIdIn(Collection<UUID> sectionIds);
+    default void removeSectionModuleMapping(UUID programId, UUID sectionId, UUID moduleId) {
+        getQueryFactory().delete(smm)
+                .where(
+                        smm.section.id.eq(sectionId),
+                        smm.module.id.eq(moduleId),
+                        smm.section.id.in(
+                                JPAExpressions.select(psm.section.id)
+                                        .from(psm)
+                                        .where(psm.educationProgram.id.eq(programId))
+                        )
+                )
+                .execute();
+    }
+
 }

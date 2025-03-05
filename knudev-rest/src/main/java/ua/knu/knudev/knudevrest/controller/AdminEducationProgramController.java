@@ -5,13 +5,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import ua.knu.knudev.educationapi.api.EducationProgramApi;
-import ua.knu.knudev.educationapi.dto.EducationProgramDto;
-import ua.knu.knudev.educationapi.dto.ProgramSectionDto;
-import ua.knu.knudev.educationapi.dto.ProgramSummaryDto;
-import ua.knu.knudev.educationapi.request.EducationProgramCreationRequest;
-import ua.knu.knudev.educationapi.request.ModuleCreationRequest;
-import ua.knu.knudev.educationapi.request.SectionCreationRequest;
-import ua.knu.knudev.educationapi.request.TopicCreationRequest;
+import ua.knu.knudev.educationapi.dto.*;
+import ua.knu.knudev.educationapi.request.ProgramSaveRequest;
+import ua.knu.knudev.educationapi.request.ModuleSaveRequest;
+import ua.knu.knudev.educationapi.request.SectionSaveRequest;
+import ua.knu.knudev.educationapi.request.TopicSaveRequest;
 
 import java.util.List;
 import java.util.UUID;
@@ -24,29 +22,29 @@ public class AdminEducationProgramController {
     private final EducationProgramApi educationProgramApi;
 
     @PostMapping(value = "/program/save", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public EducationProgramDto saveProgram(@ModelAttribute EducationProgramCreationRequest creationRequest) {
+    public EducationProgramDto saveProgram(@ModelAttribute ProgramSaveRequest creationRequest) {
         return educationProgramApi.save(creationRequest);
     }
 
     @PatchMapping(value = "/topic/{topicId}/update", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public void updateTopic(@PathVariable UUID topicId, @ModelAttribute TopicCreationRequest topicCreationRequest) {
-        educationProgramApi.updateTopicMeta(topicId, topicCreationRequest);
+    public ProgramTopicDto updateTopic(@PathVariable UUID topicId, @ModelAttribute TopicSaveRequest topicSaveRequest) {
+        return educationProgramApi.updateTopicMeta(topicId, topicSaveRequest);
     }
 
     @PatchMapping(value = "/module/{moduleId}/update", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public void updateModule(@PathVariable UUID moduleId, @ModelAttribute ModuleCreationRequest moduleCreationRequest) {
-        educationProgramApi.updateModuleMeta(moduleId, moduleCreationRequest);
+    public ProgramModuleDto updateModule(@PathVariable UUID moduleId, @ModelAttribute ModuleSaveRequest moduleSaveRequest) {
+        return educationProgramApi.updateModuleMeta(moduleId, moduleSaveRequest);
     }
 
     @PatchMapping(value = "/section/{sectionId}/update", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ProgramSectionDto updateSection(@PathVariable UUID sectionId,
-                                           @ModelAttribute SectionCreationRequest sectionCreationRequest) {
-        return educationProgramApi.updateSectionMeta(sectionId, sectionCreationRequest);
+                                           @ModelAttribute SectionSaveRequest sectionSaveRequest) {
+        return educationProgramApi.updateSectionMeta(sectionId, sectionSaveRequest);
     }
 
     @PatchMapping(value = "/program/{programId}/update", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public void updateProgram(@PathVariable UUID programId,
-                              @ModelAttribute EducationProgramCreationRequest programCreationRequest) {
+                              @ModelAttribute ProgramSaveRequest programCreationRequest) {
         educationProgramApi.updateProgramMeta(programId, programCreationRequest);
     }
 
@@ -90,10 +88,9 @@ public class AdminEducationProgramController {
         educationProgramApi.removeModuleTopicMapping(programId, sectionId, moduleId, topicId);
     }
 
-    @PatchMapping("/publish")
-    public void publish(@RequestBody UUID programId) {
-        //todo
-//        educationProgramApi.publish(programId);
+    @PatchMapping("/program/{programId}/publish")
+    public EducationProgramDto publish(@PathVariable UUID programId) {
+        return educationProgramApi.publish(programId);
     }
 
 }

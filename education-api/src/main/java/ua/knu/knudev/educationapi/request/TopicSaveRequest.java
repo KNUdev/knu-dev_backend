@@ -6,21 +6,20 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import lombok.experimental.SuperBuilder;
 import org.springframework.web.multipart.MultipartFile;
 import ua.knu.knudev.educationapi.validation.ValidCreationRequest;
 import ua.knu.knudev.knudevcommon.dto.MultiLanguageFieldDto;
 
-import java.util.Set;
+import java.util.List;
 import java.util.UUID;
 
 @NoArgsConstructor
 @Getter
 @Setter
 @ValidCreationRequest
-public class TopicCreationRequest extends BaseLearningUnitSaveRequest {
+public class TopicSaveRequest extends BaseLearningUnitSaveRequest {
     private UUID existingTopicId;
-    private Set<String> learningMaterials;
+    private List<String> learningResources;
     private Integer orderIndex;
     private UUID testId;
 
@@ -29,10 +28,10 @@ public class TopicCreationRequest extends BaseLearningUnitSaveRequest {
     private Integer difficulty;
 
     @Builder(toBuilder = true)
-    public TopicCreationRequest(MultiLanguageFieldDto name, MultiLanguageFieldDto description, MultipartFile finalTask, UUID existingTopicId, Set<String> learningMaterials, Integer orderIndex, UUID testId, Integer difficulty) {
+    public TopicSaveRequest(MultiLanguageFieldDto name, MultiLanguageFieldDto description, MultipartFile finalTask, UUID existingTopicId, List<String> learningResources, Integer orderIndex, UUID testId, Integer difficulty) {
         super(name, description, finalTask);
         this.existingTopicId = existingTopicId;
-        this.learningMaterials = learningMaterials;
+        this.learningResources = learningResources;
         this.orderIndex = orderIndex;
         this.testId = testId;
         this.difficulty = difficulty;

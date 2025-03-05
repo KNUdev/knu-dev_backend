@@ -4,11 +4,11 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
-import ua.knu.knudev.educationapi.exception.EducationProgramException;
-import ua.knu.knudev.educationapi.request.EducationProgramCreationRequest;
-import ua.knu.knudev.educationapi.request.ModuleCreationRequest;
-import ua.knu.knudev.educationapi.request.SectionCreationRequest;
-import ua.knu.knudev.educationapi.request.TopicCreationRequest;
+import ua.knu.knudev.educationapi.exception.ProgramException;
+import ua.knu.knudev.educationapi.request.ProgramSaveRequest;
+import ua.knu.knudev.educationapi.request.ModuleSaveRequest;
+import ua.knu.knudev.educationapi.request.SectionSaveRequest;
+import ua.knu.knudev.educationapi.request.TopicSaveRequest;
 
 import java.util.Collections;
 import java.util.HashSet;
@@ -19,13 +19,13 @@ import java.util.function.ToIntFunction;
 @Component
 public class EducationProgramRequestCoherenceValidator {
 
-    public void validateProgramOrderSequence(EducationProgramCreationRequest program) {
+    public void validateProgramOrderSequence(ProgramSaveRequest program) {
         if(ObjectUtils.isEmpty(program.getExistingProgramId())) {
-            List<SectionCreationRequest> sections = program.getSections();
+            List<SectionSaveRequest> sections = program.getSections();
 
             validateSequence(
                     sections,
-                    SectionCreationRequest::getOrderIndex,
+                    SectionSaveRequest::getOrderIndex,
                     "sections in Program"
             );
             if(CollectionUtils.isNotEmpty(sections)) {
@@ -34,13 +34,13 @@ public class EducationProgramRequestCoherenceValidator {
         }
     }
 
-    private void validateSection(SectionCreationRequest section) {
+    private void validateSection(SectionSaveRequest section) {
         if(ObjectUtils.isEmpty(section.getExistingSectionId())) {
-            List<ModuleCreationRequest> modules = section.getModules();
+            List<ModuleSaveRequest> modules = section.getModules();
 
             validateSequence(
                     modules,
-                    ModuleCreationRequest::getOrderIndex,
+                    ModuleSaveRequest::getOrderIndex,
                     "modules in Section[orderIndex=" + section.getOrderIndex() + "]"
             );
 
@@ -50,11 +50,11 @@ public class EducationProgramRequestCoherenceValidator {
         }
     }
 
-    private void validateModule(ModuleCreationRequest module) {
+    private void validateModule(ModuleSaveRequest module) {
         if(ObjectUtils.isEmpty(module.getExistingModuleId())) {
             validateSequence(
                     module.getTopics(),
-                    TopicCreationRequest::getOrderIndex,
+                    TopicSaveRequest::getOrderIndex,
                     "topics in Module[orderIndex=" + module.getOrderIndex() + "]"
             );
         }
@@ -96,7 +96,7 @@ public class EducationProgramRequestCoherenceValidator {
     }
 
     private void throwEducationProgramException(String errorMsg) {
-        throw new EducationProgramException(errorMsg, HttpStatus.BAD_REQUEST);
+        throw new ProgramException(errorMsg, HttpStatus.BAD_REQUEST);
     }
 
 }
