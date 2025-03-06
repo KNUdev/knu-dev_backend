@@ -35,7 +35,6 @@ import ua.knu.knudev.knudevcommon.constant.LearningUnit;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
@@ -234,6 +233,24 @@ public class ProgramService implements EducationProgramApi {
                 .collect(Collectors.toList());
     }
 
+    @Override
+    public List<ProgramSectionDto> getSections() {
+        List<ProgramSection> sections = sectionRepository.findAll();
+        return sectionMapper.toDtos(sections);
+    }
+
+    @Override
+    public List<ProgramModuleDto> getModules() {
+        List<ProgramModule> modules = moduleRepository.findAll();
+        return moduleMapper.toDtos(modules);
+    }
+
+    @Override
+    public List<ProgramTopicDto> getTopics() {
+        List<ProgramTopic> topics = topicRepository.findAll();
+        return topicMapper.toDtos(topics);
+    }
+
     @Transactional
     public void deleteProgramById(UUID programId) {
         programRepository.deleteById(programId);
@@ -294,7 +311,7 @@ public class ProgramService implements EducationProgramApi {
         EducationProgramDto programDto = programMapper.toDto(program);
         programDto.setFinalTaskUrl(program.getFinalTaskFilename());
 
-        boolean isOrderIndexesUpdateReq = isOrderIndexRequest(programSaveReq);
+        boolean isOrderIndexesUpdateReq = programOrderIndexesUpdater.isOrderIndexRequest(programSaveReq);
         if (isOrderIndexesUpdateReq) {
             programOrderIndexesUpdater.updateOrderIndexes(programSaveReq);
             return getById(programSaveReq.getExistingProgramId());
@@ -302,7 +319,9 @@ public class ProgramService implements EducationProgramApi {
             Optional.ofNullable(programSaveReq.getSections())
                     .orElse(Collections.emptyList())
                     .forEach(sectionRequest -> {
-                        ProgramSection section = buildAndSaveSection(sectionRequest, filenamesMap, program);
+                        ProgramSection section = buildAndSaveSection(
+                                programSaveReq, sectionRequest, filenamesMap, program
+                        );
                         ProgramSectionDto sectionDto = mapperDtoHelper.toSectionDto(section);
 
                         programDto.getSections().add(sectionDto);
@@ -311,7 +330,7 @@ public class ProgramService implements EducationProgramApi {
                                 .orElse(Collections.emptyList())
                                 .forEach(moduleRequest -> {
                                     ProgramModule module = buildAndSaveModule(
-                                            moduleRequest, filenamesMap, section, program
+                                            sectionRequest, moduleRequest, filenamesMap, section, program
                                     );
                                     ProgramModuleDto moduleDto = mapperDtoHelper.toModuleDto(module);
                                     sectionDto.getModules().add(moduleDto);
@@ -320,7 +339,7 @@ public class ProgramService implements EducationProgramApi {
                                             .orElse(Collections.emptyList())
                                             .forEach(topicRequest -> {
                                                 ProgramTopic topic = buildAndSaveTopic(
-                                                        topicRequest, filenamesMap, program, section, module
+                                                        moduleRequest, topicRequest, filenamesMap, program, section, module
                                                 );
                                                 ProgramTopicDto topicDto = mapperDtoHelper.toTopicDto(topic);
 
@@ -331,41 +350,6 @@ public class ProgramService implements EducationProgramApi {
         }
 
         return programDto;
-    }
-
-    public boolean isOrderIndexRequest(ProgramSaveRequest req) {
-        if (CollectionUtils.isNotEmpty(req.getSections())) {
-            boolean allValid = req.getSections().stream()
-                    .allMatch(section -> isIndexValid(section.getExistingSectionId(), section.getOrderIndex()))
-                    &&
-                    req.getSections().stream()
-                            .flatMap(section -> section.getModules() == null ? Stream.empty() : section.getModules().stream())
-                            .allMatch(module -> isIndexValid(module.getExistingModuleId(), module.getOrderIndex()))
-                    &&
-                    req.getSections().stream()
-                            .flatMap(section -> section.getModules() == null ? Stream.empty() : section.getModules().stream())
-                            .flatMap(module -> module.getTopics() == null ? Stream.empty() : module.getTopics().stream())
-                            .allMatch(topic -> isIndexValid(topic.getExistingTopicId(), topic.getOrderIndex()));
-
-            boolean anyOrderIndex = req.getSections().stream()
-                    .anyMatch(section -> section.getExistingSectionId() != null)
-                    ||
-                    req.getSections().stream()
-                            .flatMap(section -> section.getModules() == null ? Stream.empty() : section.getModules().stream())
-                            .anyMatch(module -> module.getExistingModuleId() != null)
-                    ||
-                    req.getSections().stream()
-                            .flatMap(section -> section.getModules() == null ? Stream.empty() : section.getModules().stream())
-                            .flatMap(module -> module.getTopics() == null ? Stream.empty() : module.getTopics().stream())
-                            .anyMatch(topic -> topic.getExistingTopicId() != null);
-
-            return allValid && anyOrderIndex;
-        }
-        return false;
-    }
-
-    private boolean isIndexValid(Object existingId, Object orderIndex) {
-        return (existingId == null && orderIndex == null) || (existingId != null && orderIndex != null);
     }
 
     private Map<LearningUnit, Map<Integer, MultipartFile>> buildEducationProgramAllTasksMap(
@@ -441,6 +425,7 @@ public class ProgramService implements EducationProgramApi {
     }
 
     private ProgramSection buildAndSaveSection(
+            ProgramSaveRequest programSaveReq,
             SectionSaveRequest sectionReq,
             Map<LearningUnit, Map<Integer, String>> filenamesMap,
             EducationProgram program
@@ -450,6 +435,20 @@ public class ProgramService implements EducationProgramApi {
 
         if (sectionExists) {
             section = getSectionById(sectionReq.getExistingSectionId());
+            boolean mappingExists = programSectionMappingRepository.existsByEducationProgram_IdAndSection_Id(
+                    program.getId(), section.getId()
+            );
+            if (!mappingExists) {
+                int orderIndex = programSaveReq.getSections().indexOf(sectionReq) + 1;
+
+                programSectionMappingRepository.save(
+                        ProgramSectionMapping.builder()
+                                .educationProgram(program)
+                                .section(section)
+                                .orderIndex(orderIndex)
+                                .build()
+                );
+            }
         } else {
             String taskFilename = getFilenameForOrderIndex(
                     LearningUnit.SECTION,
@@ -478,6 +477,7 @@ public class ProgramService implements EducationProgramApi {
     }
 
     private ProgramModule buildAndSaveModule(
+            SectionSaveRequest sectionSaveReq,
             ModuleSaveRequest moduleRequest,
             Map<LearningUnit, Map<Integer, String>> filenamesMap,
             ProgramSection section,
@@ -488,6 +488,21 @@ public class ProgramService implements EducationProgramApi {
 
         if (moduleExists) {
             module = getModuleById(moduleRequest.getExistingModuleId());
+            boolean mappingExists = sectionModuleMappingRepository.existsByEducationProgram_IdAndSection_IdAndModule_Id(
+                    program.getId(), section.getId(), module.getId()
+            );
+            if (!mappingExists) {
+                int orderIndex = sectionSaveReq.getModules().indexOf(moduleRequest) + 1;
+
+                sectionModuleMappingRepository.save(
+                        SectionModuleMapping.builder()
+                                .educationProgram(program)
+                                .section(section)
+                                .module(module)
+                                .orderIndex(orderIndex)
+                                .build()
+                );
+            }
         } else {
             String taskFilename = getFilenameForOrderIndex(
                     LearningUnit.MODULE,
@@ -517,6 +532,7 @@ public class ProgramService implements EducationProgramApi {
     }
 
     private ProgramTopic buildAndSaveTopic(
+            ModuleSaveRequest moduleSaveRequest,
             TopicSaveRequest topicRequest,
             Map<LearningUnit, Map<Integer, String>> filenamesMap,
             EducationProgram program,
@@ -528,6 +544,23 @@ public class ProgramService implements EducationProgramApi {
 
         if (topicExists) {
             topic = getTopicById(topicRequest.getExistingTopicId());
+
+            boolean mappingExists = moduleTopicMappingRepository.existsByProgram_IdAndSection_IdAndModule_IdAndTopic_Id(
+                    program.getId(), section.getId(), module.getId(), topic.getId()
+            );
+            if (!mappingExists) {
+                int orderIndex = moduleSaveRequest.getTopics().indexOf(topicRequest) + 1;
+
+                moduleTopicMappingRepository.save(
+                        ModuleTopicMapping.builder()
+                                .program(program)
+                                .section(section)
+                                .module(module)
+                                .topic(topic)
+                                .orderIndex(orderIndex)
+                                .build()
+                );
+            }
         } else {
             String taskFilename = getFilenameForOrderIndex(
                     LearningUnit.TOPIC,
@@ -593,7 +626,7 @@ public class ProgramService implements EducationProgramApi {
                                         Map.Entry::getKey,
                                         innerEntry -> {
                                             MultipartFile fileToUpload = innerEntry.getValue();
-                                            //todo maybe custom filename
+                                            //todo custom filename
                                             return pdfServiceApi.uploadFile(
                                                     fileToUpload,
                                                     PdfSubfolder.getFromLearningUnit(entry.getKey())

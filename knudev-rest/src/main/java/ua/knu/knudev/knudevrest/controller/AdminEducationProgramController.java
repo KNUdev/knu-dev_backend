@@ -6,8 +6,8 @@ import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import ua.knu.knudev.educationapi.api.EducationProgramApi;
 import ua.knu.knudev.educationapi.dto.*;
-import ua.knu.knudev.educationapi.request.ProgramSaveRequest;
 import ua.knu.knudev.educationapi.request.ModuleSaveRequest;
+import ua.knu.knudev.educationapi.request.ProgramSaveRequest;
 import ua.knu.knudev.educationapi.request.SectionSaveRequest;
 import ua.knu.knudev.educationapi.request.TopicSaveRequest;
 
@@ -43,14 +43,29 @@ public class AdminEducationProgramController {
     }
 
     @PatchMapping(value = "/program/{programId}/update", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public void updateProgram(@PathVariable UUID programId,
+    public EducationProgramDto updateProgram(@PathVariable UUID programId,
                               @ModelAttribute ProgramSaveRequest programCreationRequest) {
-        educationProgramApi.updateProgramMeta(programId, programCreationRequest);
+        return educationProgramApi.updateProgramMeta(programId, programCreationRequest);
     }
 
     @GetMapping("/program")
     public EducationProgramDto getById(@RequestParam("id") UUID id) {
         return educationProgramApi.getById(id);
+    }
+
+    @GetMapping("/sections")
+    public List<ProgramSectionDto> getAllSections() {
+        return educationProgramApi.getSections();
+    }
+
+    @GetMapping("/modules")
+    public List<ProgramModuleDto> getAllModules() {
+        return educationProgramApi.getModules();
+    }
+
+    @GetMapping("/topics")
+    public List<ProgramTopicDto> getAllTopics() {
+        return educationProgramApi.getTopics();
     }
 
     @GetMapping("/programs")
@@ -67,24 +82,24 @@ public class AdminEducationProgramController {
     @DeleteMapping("/mapping/program/{programId}/section/{sectionId}/delete")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void removeProgramSectionMapping(@PathVariable UUID programId,
-                                         @PathVariable UUID sectionId) {
+                                            @PathVariable UUID sectionId) {
         educationProgramApi.removeProgramSectionMapping(programId, sectionId);
     }
 
     @DeleteMapping("/mapping/program/{programId}/section/{sectionId}/module/{moduleId}/delete")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void removeSectionModuleMapping(@PathVariable UUID programId,
-                                        @PathVariable UUID sectionId,
-                                        @PathVariable UUID moduleId) {
+                                           @PathVariable UUID sectionId,
+                                           @PathVariable UUID moduleId) {
         educationProgramApi.removeSectionModuleMapping(programId, sectionId, moduleId);
     }
 
     @DeleteMapping("/mapping/program/{programId}/section/{sectionId}/module/{moduleId}/topic/{topicId}/delete")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void removeModuleTopicMapping(@PathVariable UUID programId,
-                                      @PathVariable UUID sectionId,
-                                      @PathVariable UUID moduleId,
-                                      @PathVariable UUID topicId) {
+                                         @PathVariable UUID sectionId,
+                                         @PathVariable UUID moduleId,
+                                         @PathVariable UUID topicId) {
         educationProgramApi.removeModuleTopicMapping(programId, sectionId, moduleId, topicId);
     }
 

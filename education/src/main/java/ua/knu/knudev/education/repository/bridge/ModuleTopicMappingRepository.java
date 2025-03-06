@@ -19,6 +19,10 @@ public interface ModuleTopicMappingRepository extends JpaRepository<ModuleTopicM
 
     List<ModuleTopicMapping> findByModuleIdIn(List<UUID> moduleIds);
 
+    boolean existsByProgram_IdAndSection_IdAndModule_IdAndTopic_Id(
+            UUID educationProgramId, UUID sectionId, UUID moduleId, UUID topicId
+    );
+
     List<ModuleTopicMapping> findByProgram_IdAndSection_IdAndModule_IdAndTopic_Id(
             UUID programId, UUID sectionId, UUID moduleId, UUID topicId
     );

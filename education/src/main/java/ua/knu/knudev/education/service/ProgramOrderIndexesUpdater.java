@@ -10,8 +10,8 @@ import ua.knu.knudev.education.domain.bridge.SectionModuleMapping;
 import ua.knu.knudev.education.repository.bridge.ModuleTopicMappingRepository;
 import ua.knu.knudev.education.repository.bridge.ProgramSectionMappingRepository;
 import ua.knu.knudev.education.repository.bridge.SectionModuleMappingRepository;
-import ua.knu.knudev.educationapi.request.ProgramSaveRequest;
 import ua.knu.knudev.educationapi.request.ModuleSaveRequest;
+import ua.knu.knudev.educationapi.request.ProgramSaveRequest;
 import ua.knu.knudev.educationapi.request.SectionSaveRequest;
 import ua.knu.knudev.educationapi.request.TopicSaveRequest;
 
@@ -30,9 +30,16 @@ public class ProgramOrderIndexesUpdater {
     private final ModuleTopicMappingRepository moduleTopicMappingRepository;
 
     public void updateOrderIndexes(ProgramSaveRequest programSaveReq) {
-        updateSectionsOrderIndexes(programSaveReq);
-        updateModulesOrderIndexes(programSaveReq);
-        updateTopicOrderIndexes(programSaveReq);
+        if(isSectionsIndexUpdate(programSaveReq)) {
+            updateSectionsOrderIndexes(programSaveReq);
+        }
+        if(isModulesIndexUpdate(programSaveReq)) {
+            updateModulesOrderIndexes(programSaveReq);
+        }
+        if(isTopicsIndexUpdate(programSaveReq)) {
+            updateTopicOrderIndexes(programSaveReq);
+
+        }
     }
 
     private void updateSectionsOrderIndexes(ProgramSaveRequest programSaveReq) {
@@ -108,7 +115,6 @@ public class ProgramOrderIndexesUpdater {
                 section.getModules().forEach(module -> {
                     if (CollectionUtils.isNotEmpty(module.getTopics())) {
                         module.getTopics().forEach(topic -> {
-
                             List<ModuleTopicMapping> MTM = moduleTopicMappingRepository
                                     .findByProgram_IdAndSection_IdAndModule_IdAndTopic_Id(
                                             programSaveReq.getExistingProgramId(),
@@ -125,8 +131,12 @@ public class ProgramOrderIndexesUpdater {
                             List<ModuleTopicMapping> MTMsToSave = MTM.stream()
                                     .peek(moduleTopicMapping -> {
                                         TopicSaveRequest existingTopic = programSaveReq.getSections().stream()
-                                                .flatMap(s -> s.getModules().stream())
-                                                .flatMap(m -> m.getTopics().stream())
+                                                .flatMap(s -> CollectionUtils.isEmpty(s.getModules())
+                                                        ? Stream.empty()
+                                                        : s.getModules().stream())
+                                                .flatMap(m -> CollectionUtils.isEmpty(m.getTopics())
+                                                        ? Stream.empty()
+                                                        : m.getTopics().stream())
                                                 .filter(topicSaveReq -> topicSaveReq.getExistingTopicId()
                                                         .equals(moduleTopicMapping.getModule().getId()))
                                                 .findFirst()
@@ -145,5 +155,45 @@ public class ProgramOrderIndexesUpdater {
         });
     }
 
+    public boolean isOrderIndexRequest(ProgramSaveRequest req) {
+        if (CollectionUtils.isNotEmpty(req.getSections())) {
+            return isSectionsIndexUpdate(req) || isModulesIndexUpdate(req) || isTopicsIndexUpdate(req);
+        }
+        return false;
+    }
 
+    private boolean isSectionsIndexUpdate(ProgramSaveRequest req) {
+        boolean sectionsIndexChange = req.getSections().stream()
+                .allMatch(section -> isIndexValid(section.getExistingSectionId(), section.getOrderIndex()));
+        boolean sectionsIdsAreValid = req.getSections().stream()
+                .anyMatch(section -> section.getExistingSectionId() != null);
+        return sectionsIndexChange && sectionsIdsAreValid;
+    }
+
+    private boolean isModulesIndexUpdate(ProgramSaveRequest req) {
+        boolean modulesIdsAreValid = req.getSections().stream()
+                .flatMap(section -> section.getModules() == null ? Stream.empty() : section.getModules().stream())
+                .anyMatch(module -> module.getExistingModuleId() != null);
+        boolean modulesIndexChange = req.getSections().stream()
+                .flatMap(section -> section.getModules() == null ? Stream.empty() : section.getModules().stream())
+                .allMatch(module -> isIndexValid(module.getExistingModuleId(), module.getOrderIndex()));
+        return modulesIndexChange && modulesIdsAreValid;
+    }
+
+    private boolean isTopicsIndexUpdate(ProgramSaveRequest req) {
+        boolean topicsIndexChange = req.getSections().stream()
+                .flatMap(section -> section.getModules() == null ? Stream.empty() : section.getModules().stream())
+                .flatMap(module -> module.getTopics() == null ? Stream.empty() : module.getTopics().stream())
+                .allMatch(topic -> isIndexValid(topic.getExistingTopicId(), topic.getOrderIndex()));
+        boolean topicsIdsAreValid = req.getSections().stream()
+                .flatMap(section -> section.getModules() == null ? Stream.empty() : section.getModules().stream())
+                .flatMap(module -> module.getTopics() == null ? Stream.empty() : module.getTopics().stream())
+                .anyMatch(topic -> topic.getExistingTopicId() != null);
+        return topicsIndexChange && topicsIdsAreValid;
+    }
+
+    private boolean isIndexValid(Object existingId, Object orderIndex) {
+        return (existingId == null && orderIndex == null) || (existingId != null && orderIndex != null);
+    }
 }
+

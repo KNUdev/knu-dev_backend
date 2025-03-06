@@ -14,6 +14,8 @@ public interface ProgramSectionMappingRepository extends JpaRepository<ProgramSe
 
     List<ProgramSectionMapping> findByEducationProgramId(UUID educationProgramId);
 
+    boolean existsByEducationProgram_IdAndSection_Id(UUID programId, UUID sectionId);
+
     default void removeProgramSectionMapping(UUID programId, UUID sectionId) {
         getQueryFactory().delete(qPSM)
                 .where(

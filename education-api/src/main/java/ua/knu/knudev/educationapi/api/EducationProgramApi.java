@@ -3,8 +3,8 @@ package ua.knu.knudev.educationapi.api;
 import jakarta.validation.Valid;
 import org.springframework.validation.annotation.Validated;
 import ua.knu.knudev.educationapi.dto.*;
-import ua.knu.knudev.educationapi.request.ProgramSaveRequest;
 import ua.knu.knudev.educationapi.request.ModuleSaveRequest;
+import ua.knu.knudev.educationapi.request.ProgramSaveRequest;
 import ua.knu.knudev.educationapi.request.SectionSaveRequest;
 import ua.knu.knudev.educationapi.request.TopicSaveRequest;
 
@@ -28,6 +28,12 @@ public interface EducationProgramApi {
     ProgramTopicDto updateTopicMeta(UUID topicId, TopicSaveRequest moduleCreationRequest);
 
     List<ProgramSummaryDto> getAll();
+
+    List<ProgramSectionDto> getSections();
+
+    List<ProgramModuleDto> getModules();
+
+    List<ProgramTopicDto> getTopics();
 
     void deleteProgramById(UUID programId);
 

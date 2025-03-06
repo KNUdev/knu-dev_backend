@@ -17,6 +17,8 @@ public interface SectionModuleMappingRepository extends JpaRepository<SectionMod
 
     List<SectionModuleMapping> findBySectionIdIn(List<UUID> sectionIds);
 
+    boolean existsByEducationProgram_IdAndSection_IdAndModule_Id(UUID educationProgramId, UUID sectionId, UUID moduleId);
+
     List<SectionModuleMapping> findByEducationProgram_IdAndSection_IdAndModule_Id(
             UUID programId, UUID sectionId, UUID moduleId
     );
