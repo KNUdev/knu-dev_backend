@@ -52,12 +52,10 @@ public class ProgramService implements EducationProgramApi {
     private final PDFServiceApi pdfServiceApi;
     private final TestApi testApi;
     private final ProgramOrderIndexesUpdater programOrderIndexesUpdater;
-
     private final ProgramMapper programMapper;
     private final SectionMapper sectionMapper;
     private final ModuleMapper moduleMapper;
     private final TopicMapper topicMapper;
-
     private final ProgramMapperDtoHelper mapperDtoHelper;
 
     @Transactional
