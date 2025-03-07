@@ -1,5 +1,7 @@
 server:
   port: ${APPLICATION_PORT:5000}
+  tomcat:
+    max-swallow-size: -1
 #TODO WHEN ACTUATOR DEPENDENCY WILL BE ADDED
 #management:
 #  endpoints:

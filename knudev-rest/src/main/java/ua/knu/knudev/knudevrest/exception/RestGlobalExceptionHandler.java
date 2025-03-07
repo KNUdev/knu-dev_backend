@@ -11,6 +11,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import ua.knu.knudev.assessmentmanagerapi.exception.TaskAssignmentException;
 import ua.knu.knudev.assessmentmanagerapi.exception.TaskException;
 import ua.knu.knudev.knudevcommon.constant.Expertise;
@@ -90,6 +91,11 @@ public class RestGlobalExceptionHandler {
         return errors;
     }
 
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public String handleMaxUploadSizeExceededException(MaxUploadSizeExceededException ex) {
+        return ex.getMessage();
+    }
 
     @ExceptionHandler
     public String handleRecruitmentException(RecruitmentException recruitmentException) {
