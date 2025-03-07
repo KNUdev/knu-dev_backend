@@ -28,7 +28,14 @@ public class TopicSaveRequest extends BaseLearningUnitSaveRequest {
     private Integer difficulty;
 
     @Builder(toBuilder = true)
-    public TopicSaveRequest(MultiLanguageFieldDto name, MultiLanguageFieldDto description, MultipartFile finalTask, UUID existingTopicId, List<String> learningResources, Integer orderIndex, UUID testId, Integer difficulty) {
+    public TopicSaveRequest(MultiLanguageFieldDto name,
+                            MultiLanguageFieldDto description,
+                            MultipartFile finalTask,
+                            UUID existingTopicId,
+                            List<String> learningResources,
+                            Integer orderIndex,
+                            UUID testId,
+                            Integer difficulty) {
         super(name, description, finalTask);
         this.existingTopicId = existingTopicId;
         this.learningResources = learningResources;

@@ -12,6 +12,7 @@ import ua.knu.knudev.knudevcommon.dto.MultiLanguageFieldDto;
 @AllArgsConstructor
 @Getter
 @Setter
+@Valid
 public class BaseLearningUnitSaveRequest {
     @Valid
     protected MultiLanguageFieldDto name;

@@ -1,5 +1,6 @@
 package ua.knu.knudev.knudevrest.exception;
 
+import jakarta.validation.ConstraintViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -45,6 +46,12 @@ public class RestGlobalExceptionHandler {
     @ExceptionHandler
     public ResponseEntity<String> handleTaskException(TaskException ex) {
         return new ResponseEntity<>(ex.getMessage(), ex.getStatusCode());
+    }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public String handleConstraintViolationException(ConstraintViolationException ex) {
+        return ex.getMessage();
     }
 
     @ExceptionHandler

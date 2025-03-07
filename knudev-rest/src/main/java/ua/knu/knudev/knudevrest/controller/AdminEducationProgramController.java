@@ -1,5 +1,6 @@
 package ua.knu.knudev.knudevrest.controller;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -22,7 +23,7 @@ public class AdminEducationProgramController {
     private final EducationProgramApi educationProgramApi;
 
     @PostMapping(value = "/program/save", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public EducationProgramDto saveProgram(@ModelAttribute ProgramSaveRequest creationRequest) {
+    public EducationProgramDto saveProgram(@Valid @ModelAttribute ProgramSaveRequest creationRequest) {
         return educationProgramApi.save(creationRequest);
     }
 

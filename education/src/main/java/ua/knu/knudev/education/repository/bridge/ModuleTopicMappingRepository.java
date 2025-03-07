@@ -44,4 +44,33 @@ public interface ModuleTopicMappingRepository extends JpaRepository<ModuleTopicM
                 )
                 .execute();
     }
+
+    default void adjustOrderIndexes(UUID programId, UUID sectionId, UUID moduleId) {
+        List<ModuleTopicMapping> mappings = getQueryFactory()
+                .selectFrom(mtm)
+                .where(
+                        mtm.module.id.eq(moduleId),
+                        mtm.module.id.in(
+                                JPAExpressions.select(smm.module.id)
+                                        .from(smm)
+                                        .join(psm).on(psm.section.id.eq(psm.section.id))
+                                        .where(
+                                                smm.section.id.eq(sectionId),
+                                                psm.educationProgram.id.eq(programId)
+                                        )
+                        )
+                )
+                .orderBy(mtm.orderIndex.asc())
+                .fetch();
+
+        int newIndex = 1;
+        for (ModuleTopicMapping mapping : mappings) {
+            getQueryFactory().update(mtm)
+                    .where(mtm.id.eq(mapping.getId()))
+                    .set(mtm.orderIndex, newIndex)
+                    .execute();
+            newIndex++;
+        }
+    }
+
 }

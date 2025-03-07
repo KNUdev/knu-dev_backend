@@ -24,4 +24,22 @@ public interface ProgramSectionMappingRepository extends JpaRepository<ProgramSe
                 )
                 .execute();
     }
+
+    default void adjustOrderIndexes(UUID programId) {
+        List<ProgramSectionMapping> mappings = getQueryFactory()
+                .selectFrom(qPSM)
+                .where(qPSM.educationProgram.id.eq(programId))
+                .orderBy(qPSM.orderIndex.asc())
+                .fetch();
+
+        int newOrder = 1;
+        for (ProgramSectionMapping mapping : mappings) {
+            getQueryFactory().update(qPSM)
+                    .where(qPSM.id.eq(mapping.getId()))
+                    .set(qPSM.orderIndex, newOrder)
+                    .execute();
+            newOrder++;
+        }
+    }
+
 }

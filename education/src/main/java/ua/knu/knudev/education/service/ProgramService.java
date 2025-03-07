@@ -257,16 +257,22 @@ public class ProgramService implements EducationProgramApi {
     @Transactional
     public void removeProgramSectionMapping(UUID programId, UUID sectionId) {
         programSectionMappingRepository.removeProgramSectionMapping(programId, sectionId);
+        programSectionMappingRepository.flush();
+        programSectionMappingRepository.adjustOrderIndexes(programId);
     }
 
     @Transactional
     public void removeSectionModuleMapping(UUID programId, UUID sectionId, UUID moduleId) {
         sectionModuleMappingRepository.removeSectionModuleMapping(programId, sectionId, moduleId);
+        sectionModuleMappingRepository.flush();
+        sectionModuleMappingRepository.adjustOrderIndexes(programId, sectionId);
     }
 
     @Transactional
     public void removeModuleTopicMapping(UUID programId, UUID sectionId, UUID moduleId, UUID topicId) {
         moduleTopicMappingRepository.removeModuleTopicMapping(programId, sectionId, moduleId, topicId);
+        moduleTopicMappingRepository.flush();
+        moduleTopicMappingRepository.adjustOrderIndexes(programId, sectionId, moduleId);
     }
 
     private <T extends BaseLearningUnit, V extends BaseLearningUnitSaveRequest> T updateGenericFields(

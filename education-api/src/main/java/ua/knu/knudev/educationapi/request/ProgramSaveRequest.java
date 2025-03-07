@@ -1,6 +1,9 @@
 package ua.knu.knudev.educationapi.request;
 
-import lombok.*;
+import jakarta.validation.Valid;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.Setter;
 import org.springframework.web.multipart.MultipartFile;
 import ua.knu.knudev.educationapi.validation.ValidCreationRequest;
 import ua.knu.knudev.knudevcommon.constant.Expertise;
@@ -12,13 +15,18 @@ import java.util.UUID;
 @Getter
 @Setter
 @ValidCreationRequest
-public class ProgramSaveRequest extends BaseLearningUnitSaveRequest{
+public class ProgramSaveRequest extends BaseLearningUnitSaveRequest {
     private UUID existingProgramId;
-    private List<SectionSaveRequest> sections;
+    private List<@Valid SectionSaveRequest> sections;
     private Expertise expertise;
 
     @Builder(toBuilder = true)
-    public ProgramSaveRequest(MultiLanguageFieldDto name, MultiLanguageFieldDto description, MultipartFile finalTask, UUID existingProgramId, List<SectionSaveRequest> sections, Expertise expertise) {
+    public ProgramSaveRequest(MultiLanguageFieldDto name,
+                              MultiLanguageFieldDto description,
+                              MultipartFile finalTask,
+                              UUID existingProgramId,
+                              List<SectionSaveRequest> sections,
+                              Expertise expertise) {
         super(name, description, finalTask);
         this.existingProgramId = existingProgramId;
         this.sections = sections;

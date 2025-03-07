@@ -18,7 +18,6 @@ public class ProgramCreationRequestValidator implements ConstraintValidator<Vali
         boolean hasAllFields = ObjectUtils.allNotNull(
                 request.getName(),
                 request.getDescription(),
-//                request.getSections(),
                 request.getExpertise(),
                 request.getFinalTask()
         );
@@ -27,7 +26,6 @@ public class ProgramCreationRequestValidator implements ConstraintValidator<Vali
             boolean onlyExistingAndOrder = ObjectUtils.allNull(
                     request.getName(),
                     request.getDescription(),
-//                    request.getSections(),
                     request.getExpertise(),
                     request.getFinalTask()
             );

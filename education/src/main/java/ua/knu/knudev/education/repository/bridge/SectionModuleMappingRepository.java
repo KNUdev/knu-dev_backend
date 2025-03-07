@@ -37,4 +37,29 @@ public interface SectionModuleMappingRepository extends JpaRepository<SectionMod
                 .execute();
     }
 
+    default void adjustOrderIndexes(UUID programId, UUID sectionId) {
+        List<SectionModuleMapping> mappings = getQueryFactory()
+                .selectFrom(smm)
+                .where(
+                        smm.section.id.eq(sectionId),
+                        // Use the same subquery as in your delete method to ensure the section belongs to the program.
+                        smm.section.id.in(
+                                JPAExpressions.select(psm.section.id)
+                                        .from(psm)
+                                        .where(psm.educationProgram.id.eq(programId))
+                        )
+                )
+                .orderBy(smm.orderIndex.asc())
+                .fetch();
+
+        int newIndex = 1;
+        for (SectionModuleMapping mapping : mappings) {
+            getQueryFactory().update(smm)
+                    .where(smm.id.eq(mapping.getId()))
+                    .set(smm.orderIndex, newIndex)
+                    .execute();
+            newIndex++;
+        }
+    }
+
 }

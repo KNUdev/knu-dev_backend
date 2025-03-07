@@ -5,7 +5,6 @@ import jakarta.validation.ConstraintValidatorContext;
 import org.apache.commons.lang3.ObjectUtils;
 import ua.knu.knudev.educationapi.request.ModuleSaveRequest;
 
-//todo refactor
 public class ModuleCreationRequestValidator implements ConstraintValidator<ValidCreationRequest, ModuleSaveRequest> {
 
     @Override
@@ -18,7 +17,6 @@ public class ModuleCreationRequestValidator implements ConstraintValidator<Valid
         boolean hasAllFields = ObjectUtils.allNotNull(
                 request.getName(),
                 request.getDescription(),
-//                request.getTopics(),
                 request.getFinalTask()
         );
 
@@ -26,7 +24,6 @@ public class ModuleCreationRequestValidator implements ConstraintValidator<Valid
             boolean onlyExistingAndOrder = ObjectUtils.allNull(
                     request.getName(),
                     request.getDescription(),
-//                    request.getTopics(),
                     request.getFinalTask()
             );
 
