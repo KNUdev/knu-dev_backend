@@ -42,4 +42,10 @@ public interface ProgramSectionMappingRepository extends JpaRepository<ProgramSe
         }
     }
 
+    default void removeAllByProgramId(UUID programId) {
+        getQueryFactory().delete(qPSM)
+                .where(qPSM.educationProgram.id.eq(programId))
+                .execute();
+    }
+
 }

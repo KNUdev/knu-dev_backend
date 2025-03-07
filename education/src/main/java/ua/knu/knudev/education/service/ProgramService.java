@@ -251,26 +251,47 @@ public class ProgramService implements EducationProgramApi {
 
     @Transactional
     public void deleteProgramById(UUID programId) {
+        //todo block deletion
+
+        moduleTopicMappingRepository.removeAllByProgramId(programId);
+        sectionModuleMappingRepository.removeAllByProgramId(programId);
+        programSectionMappingRepository.removeAllByProgramId(programId);
+
+        programSectionMappingRepository.flush();
+        sectionModuleMappingRepository.flush();
+        moduleTopicMappingRepository.flush();
+
         programRepository.deleteById(programId);
     }
 
     @Transactional
     public void removeProgramSectionMapping(UUID programId, UUID sectionId) {
+        //todo block deletion
+
         programSectionMappingRepository.removeProgramSectionMapping(programId, sectionId);
+        sectionModuleMappingRepository.removeSectionModuleMappingsBySectionId(programId, sectionId);
+        moduleTopicMappingRepository.removeModuleTopicMappingsBySectionId(programId, sectionId);
+
         programSectionMappingRepository.flush();
         programSectionMappingRepository.adjustOrderIndexes(programId);
     }
 
     @Transactional
     public void removeSectionModuleMapping(UUID programId, UUID sectionId, UUID moduleId) {
+        //todo block deletion
+
         sectionModuleMappingRepository.removeSectionModuleMapping(programId, sectionId, moduleId);
+        moduleTopicMappingRepository.removeModuleTopicMappingsByModuleId(programId, sectionId, moduleId);
+
         sectionModuleMappingRepository.flush();
         sectionModuleMappingRepository.adjustOrderIndexes(programId, sectionId);
     }
 
     @Transactional
     public void removeModuleTopicMapping(UUID programId, UUID sectionId, UUID moduleId, UUID topicId) {
+        //todo block deletion
         moduleTopicMappingRepository.removeModuleTopicMapping(programId, sectionId, moduleId, topicId);
+
         moduleTopicMappingRepository.flush();
         moduleTopicMappingRepository.adjustOrderIndexes(programId, sectionId, moduleId);
     }

@@ -42,7 +42,6 @@ public interface SectionModuleMappingRepository extends JpaRepository<SectionMod
                 .selectFrom(smm)
                 .where(
                         smm.section.id.eq(sectionId),
-                        // Use the same subquery as in your delete method to ensure the section belongs to the program.
                         smm.section.id.in(
                                 JPAExpressions.select(psm.section.id)
                                         .from(psm)
@@ -60,6 +59,25 @@ public interface SectionModuleMappingRepository extends JpaRepository<SectionMod
                     .execute();
             newIndex++;
         }
+    }
+
+    default void removeSectionModuleMappingsBySectionId(UUID programId, UUID sectionId) {
+        getQueryFactory().delete(smm)
+                .where(
+                        smm.section.id.eq(sectionId),
+                        smm.section.id.in(
+                                JPAExpressions.select(psm.section.id)
+                                        .from(psm)
+                                        .where(psm.educationProgram.id.eq(programId))
+                        )
+                )
+                .execute();
+    }
+
+    default void removeAllByProgramId(UUID programId) {
+        getQueryFactory().delete(smm)
+                .where(smm.educationProgram.id.eq(programId))
+                .execute();
     }
 
 }

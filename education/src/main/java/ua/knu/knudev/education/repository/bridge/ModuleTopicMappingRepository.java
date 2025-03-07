@@ -73,4 +73,47 @@ public interface ModuleTopicMappingRepository extends JpaRepository<ModuleTopicM
         }
     }
 
+    default void removeModuleTopicMappingsBySectionId(UUID programId, UUID sectionId) {
+        getQueryFactory().delete(mtm)
+                .where(
+                        mtm.module.id.in(
+                                JPAExpressions.select(smm.module.id)
+                                        .from(smm)
+                                        .where(smm.section.id.eq(sectionId))
+                        ),
+                        mtm.module.id.in(
+                                JPAExpressions.select(smm.module.id)
+                                        .from(smm)
+                                        .join(QProgramSectionMapping.programSectionMapping)
+                                        .where(QProgramSectionMapping.programSectionMapping.educationProgram.id.eq(programId))
+                        )
+                )
+                .execute();
+    }
+
+    default void removeModuleTopicMappingsByModuleId(UUID programId, UUID sectionId, UUID moduleId) {
+        getQueryFactory().delete(mtm)
+                .where(
+                        mtm.module.id.eq(moduleId),
+                        mtm.module.id.in(
+                                JPAExpressions.select(smm.module.id)
+                                        .from(smm)
+                                        .where(smm.section.id.eq(sectionId))
+                        ),
+                        mtm.module.id.in(
+                                JPAExpressions.select(smm.module.id)
+                                        .from(smm)
+                                        .join(QProgramSectionMapping.programSectionMapping)
+                                        .where(QProgramSectionMapping.programSectionMapping.educationProgram.id.eq(programId))
+                        )
+                )
+                .execute();
+    }
+
+    default void removeAllByProgramId(UUID programId) {
+        getQueryFactory().delete(mtm)
+                .where(mtm.program.id.eq(programId))
+                .execute();
+    }
+
 }
