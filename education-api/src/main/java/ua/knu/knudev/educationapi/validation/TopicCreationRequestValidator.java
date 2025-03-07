@@ -14,12 +14,11 @@ public class TopicCreationRequestValidator implements ConstraintValidator<ValidC
         }
 
         boolean hasExistingId = request.getExistingTopicId() != null;
-        boolean hasAllFields = ObjectUtils.allNotNull(
+        boolean hasAllFields = ObjectUtils.anyNotNull(
                 request.getName(),
                 request.getDescription(),
                 request.getFinalTask(),
                 request.getLearningResources(),
-                request.getTestId(),
                 request.getDifficulty()
         );
 

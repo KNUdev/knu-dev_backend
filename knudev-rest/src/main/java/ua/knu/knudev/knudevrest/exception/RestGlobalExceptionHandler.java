@@ -77,13 +77,19 @@ public class RestGlobalExceptionHandler {
         ex.getBindingResult().getFieldErrors().forEach(fieldError -> {
             String fieldKey = fieldError.getField() + "Errors";
             String errorMessage = buildErrorMessage(fieldError);
+            errors.computeIfAbsent(fieldKey, k -> new ArrayList<>()).add(errorMessage);
+        });
 
-            List<String> fieldErrorList = errors.computeIfAbsent(fieldKey, k -> new ArrayList<>());
-            fieldErrorList.add(errorMessage);
+        ex.getBindingResult().getGlobalErrors().forEach(objectError -> {
+            String objectKey = objectError.getObjectName() + "Errors";
+            String errorMessage = objectError.getDefaultMessage();
+
+            errors.computeIfAbsent(objectKey, k -> new ArrayList<>()).add(errorMessage);
         });
 
         return errors;
     }
+
 
     @ExceptionHandler
     public String handleRecruitmentException(RecruitmentException recruitmentException) {

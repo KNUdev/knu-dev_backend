@@ -15,7 +15,7 @@ public class ProgramCreationRequestValidator implements ConstraintValidator<Vali
         }
 
         boolean hasExistingId = request.getExistingProgramId() != null;
-        boolean hasAllFields = ObjectUtils.allNotNull(
+        boolean hasAllFields = ObjectUtils.anyNotNull(
                 request.getName(),
                 request.getDescription(),
                 request.getExpertise(),

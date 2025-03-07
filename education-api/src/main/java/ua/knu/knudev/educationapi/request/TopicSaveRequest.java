@@ -2,6 +2,8 @@ package ua.knu.knudev.educationapi.request;
 
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -19,7 +21,12 @@ import java.util.UUID;
 @ValidCreationRequest
 public class TopicSaveRequest extends BaseLearningUnitSaveRequest {
     private UUID existingTopicId;
-    private List<String> learningResources;
+    @Size(min = 1, message = "At least one resource is required")
+    private List<
+            @Pattern(
+                    regexp = "^https://(?!.*\\.ru).*",
+                    message = "Each resource must start with 'https://' and must not contain '.ru'"
+            ) String> learningResources;
     private Integer orderIndex;
     private UUID testId;
 

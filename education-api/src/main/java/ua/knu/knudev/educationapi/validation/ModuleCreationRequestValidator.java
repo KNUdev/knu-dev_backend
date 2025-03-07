@@ -14,7 +14,7 @@ public class ModuleCreationRequestValidator implements ConstraintValidator<Valid
         }
 
         boolean hasExistingId = request.getExistingModuleId() != null;
-        boolean hasAllFields = ObjectUtils.allNotNull(
+        boolean hasAllFields = ObjectUtils.anyNotNull(
                 request.getName(),
                 request.getDescription(),
                 request.getFinalTask()

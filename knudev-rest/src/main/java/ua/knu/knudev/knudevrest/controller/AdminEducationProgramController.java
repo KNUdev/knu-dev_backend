@@ -28,24 +28,26 @@ public class AdminEducationProgramController {
     }
 
     @PatchMapping(value = "/topic/{topicId}/update", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ProgramTopicDto updateTopic(@PathVariable UUID topicId, @ModelAttribute TopicSaveRequest topicSaveRequest) {
+    public ProgramTopicDto updateTopic(@PathVariable UUID topicId,
+                                       @Valid @ModelAttribute TopicSaveRequest topicSaveRequest) {
         return educationProgramApi.updateTopicMeta(topicId, topicSaveRequest);
     }
 
     @PatchMapping(value = "/module/{moduleId}/update", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ProgramModuleDto updateModule(@PathVariable UUID moduleId, @ModelAttribute ModuleSaveRequest moduleSaveRequest) {
+    public ProgramModuleDto updateModule(@PathVariable UUID moduleId,
+                                         @Valid @ModelAttribute ModuleSaveRequest moduleSaveRequest) {
         return educationProgramApi.updateModuleMeta(moduleId, moduleSaveRequest);
     }
 
     @PatchMapping(value = "/section/{sectionId}/update", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ProgramSectionDto updateSection(@PathVariable UUID sectionId,
-                                           @ModelAttribute SectionSaveRequest sectionSaveRequest) {
+                                           @Valid @ModelAttribute SectionSaveRequest sectionSaveRequest) {
         return educationProgramApi.updateSectionMeta(sectionId, sectionSaveRequest);
     }
 
     @PatchMapping(value = "/program/{programId}/update", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public EducationProgramDto updateProgram(@PathVariable UUID programId,
-                              @ModelAttribute ProgramSaveRequest programCreationRequest) {
+                              @Valid @ModelAttribute ProgramSaveRequest programCreationRequest) {
         return educationProgramApi.updateProgramMeta(programId, programCreationRequest);
     }
 

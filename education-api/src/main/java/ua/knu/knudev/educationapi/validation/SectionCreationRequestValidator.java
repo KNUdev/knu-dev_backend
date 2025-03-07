@@ -5,7 +5,6 @@ import jakarta.validation.ConstraintValidatorContext;
 import org.apache.commons.lang3.ObjectUtils;
 import ua.knu.knudev.educationapi.request.SectionSaveRequest;
 
-//todo refactor
 public class SectionCreationRequestValidator
         implements ConstraintValidator<ValidCreationRequest, SectionSaveRequest> {
 
@@ -16,7 +15,7 @@ public class SectionCreationRequestValidator
         }
 
         boolean hasExistingId = request.getExistingSectionId() != null;
-        boolean hasAllFields = ObjectUtils.allNotNull(
+        boolean hasAllFields = ObjectUtils.anyNotNull(
                 request.getName(),
                 request.getDescription(),
                 request.getFinalTask()
