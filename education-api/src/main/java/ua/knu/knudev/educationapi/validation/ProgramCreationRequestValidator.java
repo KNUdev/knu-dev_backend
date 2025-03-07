@@ -4,21 +4,20 @@ package ua.knu.knudev.educationapi.validation;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 import org.apache.commons.lang3.ObjectUtils;
-import ua.knu.knudev.educationapi.request.EducationProgramCreationRequest;
+import ua.knu.knudev.educationapi.request.ProgramSaveRequest;
 
-public class ProgramCreationRequestValidator implements ConstraintValidator<ValidCreationRequest, EducationProgramCreationRequest> {
+public class ProgramCreationRequestValidator implements ConstraintValidator<ValidCreationRequest, ProgramSaveRequest> {
 
     @Override
-    public boolean isValid(EducationProgramCreationRequest request, ConstraintValidatorContext context) {
+    public boolean isValid(ProgramSaveRequest request, ConstraintValidatorContext context) {
         if (request == null) {
             return false;
         }
 
         boolean hasExistingId = request.getExistingProgramId() != null;
-        boolean hasAllFields = ObjectUtils.allNotNull(
+        boolean hasAllFields = ObjectUtils.anyNotNull(
                 request.getName(),
                 request.getDescription(),
-//                request.getSections(),
                 request.getExpertise(),
                 request.getFinalTask()
         );
@@ -27,7 +26,6 @@ public class ProgramCreationRequestValidator implements ConstraintValidator<Vali
             boolean onlyExistingAndOrder = ObjectUtils.allNull(
                     request.getName(),
                     request.getDescription(),
-//                    request.getSections(),
                     request.getExpertise(),
                     request.getFinalTask()
             );

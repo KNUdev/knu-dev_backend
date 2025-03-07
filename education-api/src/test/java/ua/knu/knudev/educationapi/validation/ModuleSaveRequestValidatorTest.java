@@ -7,7 +7,7 @@ import jakarta.validation.ValidatorFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.mock.web.MockMultipartFile;
-import ua.knu.knudev.educationapi.request.ModuleCreationRequest;
+import ua.knu.knudev.educationapi.request.ModuleSaveRequest;
 import ua.knu.knudev.knudevcommon.dto.MultiLanguageFieldDto;
 
 import java.util.Collections;
@@ -17,7 +17,7 @@ import java.util.UUID;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class ModuleCreationRequestValidatorTest {
+public class ModuleSaveRequestValidatorTest {
 
     private Validator validator;
 
@@ -29,30 +29,30 @@ public class ModuleCreationRequestValidatorTest {
 
     @Test
     public void should_ValidateSuccessfully_When_ExistingModuleIdAndOrderIndexAreProvided() {
-        ModuleCreationRequest request = ModuleCreationRequest.builder()
+        ModuleSaveRequest request = ModuleSaveRequest.builder()
                 .existingModuleId(UUID.randomUUID())
                 .orderIndex(1)
                 .build();
 
-        Set<ConstraintViolation<ModuleCreationRequest>> violations = validator.validate(request);
+        Set<ConstraintViolation<ModuleSaveRequest>> violations = validator.validate(request);
         assertTrue(violations.isEmpty(), "Expected no validation errors");
     }
 
     @Test
     public void should_NotValidate_When_ExistingModuleIdAndOtherFieldsAreProvided() {
-        ModuleCreationRequest request = ModuleCreationRequest.builder()
+        ModuleSaveRequest request = ModuleSaveRequest.builder()
                 .existingModuleId(UUID.randomUUID())
                 .orderIndex(1)
                 .name(new MultiLanguageFieldDto())
                 .build();
 
-        Set<ConstraintViolation<ModuleCreationRequest>> violations = validator.validate(request);
+        Set<ConstraintViolation<ModuleSaveRequest>> violations = validator.validate(request);
         assertFalse(violations.isEmpty(), "Expected validation errors");
     }
 
     @Test
     public void should_ValidateSuccessfully_When_AllFieldsExceptExistingModuleIdAreProvided() {
-        ModuleCreationRequest request = ModuleCreationRequest.builder()
+        ModuleSaveRequest request = ModuleSaveRequest.builder()
                 .name(new MultiLanguageFieldDto())
                 .description(new MultiLanguageFieldDto())
                 .topics(Collections.emptyList())
@@ -63,21 +63,20 @@ public class ModuleCreationRequestValidatorTest {
                         "content".getBytes()
                 ))
                 .orderIndex(1)
-                .testId(UUID.randomUUID())
                 .build();
 
-        Set<ConstraintViolation<ModuleCreationRequest>> violations = validator.validate(request);
+        Set<ConstraintViolation<ModuleSaveRequest>> violations = validator.validate(request);
         assertTrue(violations.isEmpty(), "Expected no validation errors");
     }
 
     @Test
     public void should_NotValidate_When_NoExistingIdOrAllOtherFieldsAreProvided() {
-        ModuleCreationRequest request = ModuleCreationRequest.builder()
+        ModuleSaveRequest request = ModuleSaveRequest.builder()
                 .name(new MultiLanguageFieldDto())
                 .orderIndex(1)
                 .build();
 
-        Set<ConstraintViolation<ModuleCreationRequest>> violations = validator.validate(request);
+        Set<ConstraintViolation<ModuleSaveRequest>> violations = validator.validate(request);
         assertFalse(violations.isEmpty(), "Expected validation errors");
     }
 }

@@ -13,8 +13,10 @@ public class MinioConfig {
 
     @Bean
     public MinioClient minioClient() {
+        String clientEndpoint = minioProperties.isUseProxy() ? minioProperties.getInternalUrl()
+                : minioProperties.getExternalUrl();
         return MinioClient.builder()
-                .endpoint(minioProperties.getInternalUrl())
+                .endpoint(clientEndpoint)
                 .credentials(minioProperties.getAccessKey(), minioProperties.getSecretKey())
                 .build();
     }

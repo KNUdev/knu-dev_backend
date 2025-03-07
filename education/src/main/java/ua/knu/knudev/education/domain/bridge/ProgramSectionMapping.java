@@ -25,11 +25,11 @@ public class ProgramSectionMapping {
     @UuidGenerator
     private UUID id;
 
-    @ManyToOne(optional = false)
+    @ManyToOne(optional = false, fetch = FetchType.LAZY)
     @JoinColumn(name = "program_id", referencedColumnName = "id")
     private EducationProgram educationProgram;
 
-    @ManyToOne(optional = false)
+    @ManyToOne(optional = false, fetch = FetchType.LAZY)
     @JoinColumn(name = "section_id", referencedColumnName = "id")
     private ProgramSection section;
 

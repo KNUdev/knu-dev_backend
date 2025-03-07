@@ -14,16 +14,16 @@ import lombok.*;
 @NoArgsConstructor
 public class MultiLanguageFieldDto {
     @Schema(description = "The field in English.", example = "Historical")
-    @NotEmpty(message = "Field 'en' cannot be blank or empty.")
+    @NotEmpty(message = "English field cannot be blank or empty.")
     @Pattern(regexp = "^[A-Za-z\\s-]+$",
-            message = "Field 'en' can contains only english-alphabet letters"
+            message = "English field contains only english-alphabet letters"
     )
     private String en;
 
     @Schema(description = "The field in Ukrainian.", example = "Історичний")
-    @NotBlank(message = "Field 'uk' cannot be blank or empty.")
+    @NotBlank(message = "Ukrainian field cannot be blank or empty.")
     @Pattern(regexp = "^[А-Яа-яЇїІіЄєҐґ\\s-]+$",
-            message = "Field 'uk' may contains only ukrainian-alphabet letters"
+            message = "Ukrainian field contains only ukrainian-alphabet letters"
     )
     private String uk;
 }

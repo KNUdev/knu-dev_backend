@@ -1,5 +1,6 @@
 package ua.knu.knudev.knudevrest.exception;
 
+import jakarta.validation.ConstraintViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -10,6 +11,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import ua.knu.knudev.assessmentmanagerapi.exception.TaskAssignmentException;
 import ua.knu.knudev.assessmentmanagerapi.exception.TaskException;
 import ua.knu.knudev.knudevcommon.constant.Expertise;
@@ -48,6 +50,12 @@ public class RestGlobalExceptionHandler {
     }
 
     @ExceptionHandler
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public String handleConstraintViolationException(ConstraintViolationException ex) {
+        return ex.getMessage();
+    }
+
+    @ExceptionHandler
     public ResponseEntity<String> handleTokenException(TokenException ex) {
         return new ResponseEntity<>(ex.getMessage(), ex.getStatusCode());
     }
@@ -70,12 +78,23 @@ public class RestGlobalExceptionHandler {
         ex.getBindingResult().getFieldErrors().forEach(fieldError -> {
             String fieldKey = fieldError.getField() + "Errors";
             String errorMessage = buildErrorMessage(fieldError);
+            errors.computeIfAbsent(fieldKey, k -> new ArrayList<>()).add(errorMessage);
+        });
 
-            List<String> fieldErrorList = errors.computeIfAbsent(fieldKey, k -> new ArrayList<>());
-            fieldErrorList.add(errorMessage);
+        ex.getBindingResult().getGlobalErrors().forEach(objectError -> {
+            String objectKey = objectError.getObjectName() + "Errors";
+            String errorMessage = objectError.getDefaultMessage();
+
+            errors.computeIfAbsent(objectKey, k -> new ArrayList<>()).add(errorMessage);
         });
 
         return errors;
+    }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public String handleMaxUploadSizeExceededException(MaxUploadSizeExceededException ex) {
+        return ex.getMessage();
     }
 
     @ExceptionHandler

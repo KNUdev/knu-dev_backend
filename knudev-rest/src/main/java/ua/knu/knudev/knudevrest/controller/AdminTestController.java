@@ -13,13 +13,15 @@ import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
-import ua.knu.knudev.assessmentmanagerapi.api.TestManagementApi;
+import ua.knu.knudev.assessmentmanagerapi.api.TestApi;
 import ua.knu.knudev.assessmentmanagerapi.dto.FullTestDto;
 import ua.knu.knudev.assessmentmanagerapi.dto.QuestionAnswerVariantDto;
+import ua.knu.knudev.assessmentmanagerapi.dto.ShortTestDto;
 import ua.knu.knudev.assessmentmanagerapi.dto.TestQuestionDto;
 import ua.knu.knudev.assessmentmanagerapi.request.TestCreationRequest;
 import ua.knu.knudev.knudevsecurityapi.response.ErrorResponse;
 
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -27,7 +29,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class AdminTestController {
 
-    private final TestManagementApi testManagementApi;
+    private final TestApi testApi;
 
     @Operation(
             summary = "Create a new test",
@@ -60,7 +62,7 @@ public class AdminTestController {
             required = true,
             schema = @Schema(implementation = FullTestDto.class)
     ) TestCreationRequest testCreationRequest) {
-        return testManagementApi.create(testCreationRequest);
+        return testApi.create(testCreationRequest);
     }
 
     @Operation(
@@ -93,7 +95,12 @@ public class AdminTestController {
             required = true,
             example = "550e8400-e29b-41d4-a716-446655440000"
     ) UUID testId) {
-        return testManagementApi.getById(testId);
+        return testApi.getById(testId);
+    }
+
+    @GetMapping("/all")
+    public List<ShortTestDto> getAllShort() {
+        return testApi.getAll();
     }
 
     @Operation(
@@ -126,7 +133,7 @@ public class AdminTestController {
             required = true,
             example = "550e8400-e29b-41d4-a716-446655440000"
     ) UUID testId) {
-        testManagementApi.deleteTestById(testId);
+        testApi.deleteTestById(testId);
     }
 
     @Operation(
@@ -169,7 +176,7 @@ public class AdminTestController {
     })
     @PatchMapping("/{testId}/change/name")
     public void changeTestName(@PathVariable UUID testId, @RequestParam String newEnName) {
-        testManagementApi.changeTestEnName(testId, newEnName);
+        testApi.changeTestEnName(testId, newEnName);
     }
 
     @Operation(
@@ -213,7 +220,7 @@ public class AdminTestController {
     @PatchMapping("/{testId}/question/add")
     public void addQuestion(@PathVariable UUID testId,
                             @Valid @NotNull @RequestParam TestQuestionDto question) {
-        testManagementApi.addTestQuestion(testId, question);
+        testApi.addTestQuestion(testId, question);
     }
 
     @Operation(
@@ -256,7 +263,7 @@ public class AdminTestController {
     })
     @DeleteMapping("/{testId}/question/delete/{questionId}")
     public void deleteQuestion(@PathVariable UUID testId, @PathVariable UUID questionId) {
-        testManagementApi.deleteTestQuestion(testId, questionId);
+        testApi.deleteTestQuestion(testId, questionId);
     }
 
     @Operation(
@@ -299,7 +306,7 @@ public class AdminTestController {
     })
     @PatchMapping("/question/{questionId}/change/body")
     public void changeQuestionBody(@PathVariable UUID questionId, @RequestParam String newEnBody) {
-        testManagementApi.changeTestQuestionEnBody(questionId, newEnBody);
+        testApi.changeTestQuestionEnBody(questionId, newEnBody);
     }
 
     @Operation(
@@ -343,7 +350,7 @@ public class AdminTestController {
     @PatchMapping("/question/{questionId}/add/answer-variant")
     public void addQuestionAnswer(@PathVariable UUID questionId,
                                   @Valid @NotNull @RequestParam QuestionAnswerVariantDto answerVariant) {
-        testManagementApi.addQuestionAnswerVariant(questionId, answerVariant);
+        testApi.addQuestionAnswerVariant(questionId, answerVariant);
     }
 
     @Operation(
@@ -386,7 +393,7 @@ public class AdminTestController {
     })
     @DeleteMapping("/question/{questionId}/delete/answer-variant/{answerVariantId}")
     public void deleteQuestionAnswer(@PathVariable UUID questionId, @PathVariable UUID answerVariantId) {
-        testManagementApi.deleteQuestionAnswerVariant(questionId, answerVariantId);
+        testApi.deleteQuestionAnswerVariant(questionId, answerVariantId);
     }
 
     @Operation(
@@ -429,7 +436,7 @@ public class AdminTestController {
     })
     @PatchMapping("/question-answer-variant/{questionAnswerVariantId}/change/body")
     public void changeQuestionAnswerBody(@PathVariable UUID questionAnswerVariantId, @RequestParam String newEnBody) {
-        testManagementApi.changeQuestionAnswerVariantEnBody(questionAnswerVariantId, newEnBody);
+        testApi.changeQuestionAnswerVariantEnBody(questionAnswerVariantId, newEnBody);
     }
 
     @Operation(
@@ -472,6 +479,6 @@ public class AdminTestController {
     })
     @PatchMapping("/question-answer-variant/{questionAnswerVariantId}/change/correctness")
     public void changeQuestionAnswerCorrectness(@PathVariable UUID questionAnswerVariantId, @RequestParam Boolean correctness) {
-        testManagementApi.changeQuestionAnswerVariantCorrectness(questionAnswerVariantId, correctness);
+        testApi.changeQuestionAnswerVariantCorrectness(questionAnswerVariantId, correctness);
     }
 }

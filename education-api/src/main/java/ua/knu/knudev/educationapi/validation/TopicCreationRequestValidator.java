@@ -3,32 +3,33 @@ package ua.knu.knudev.educationapi.validation;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 import org.apache.commons.lang3.ObjectUtils;
-import ua.knu.knudev.educationapi.request.TopicCreationRequest;
+import ua.knu.knudev.educationapi.request.TopicSaveRequest;
 
-public class TopicCreationRequestValidator implements ConstraintValidator<ValidCreationRequest, TopicCreationRequest> {
+public class TopicCreationRequestValidator implements ConstraintValidator<ValidCreationRequest, TopicSaveRequest> {
 
     @Override
-    public boolean isValid(TopicCreationRequest request, ConstraintValidatorContext context) {
+    public boolean isValid(TopicSaveRequest request, ConstraintValidatorContext context) {
         if (request == null) {
             return false;
         }
 
         boolean hasExistingId = request.getExistingTopicId() != null;
-        boolean hasAllFields = ObjectUtils.allNotNull(
+        boolean hasAllFields = ObjectUtils.anyNotNull(
                 request.getName(),
                 request.getDescription(),
-                request.getTask(),
-                request.getLearningMaterials(),
-                request.getTestIds()
+                request.getFinalTask(),
+                request.getLearningResources(),
+                request.getDifficulty()
         );
 
         if (hasExistingId) {
             boolean onlyExistingAndOrder = ObjectUtils.allNull(
                     request.getName(),
                     request.getDescription(),
-                    request.getTask(),
-                    request.getLearningMaterials(),
-                    request.getTestIds()
+                    request.getFinalTask(),
+                    request.getLearningResources(),
+                    request.getTestId(),
+                    request.getDifficulty()
             );
 
             if (!onlyExistingAndOrder) {

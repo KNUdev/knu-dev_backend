@@ -18,5 +18,9 @@ public class ProgramTopicDto {
     private MultiLanguageFieldDto name;
     private MultiLanguageFieldDto description;
     private Set<String> learningResources;
-    private String taskUrl;
+    private String finalTaskUrl;
+    private String finalTaskFilename;
+    private int difficulty;
+    private UUID testId;
+    private Integer orderIndex;
 }

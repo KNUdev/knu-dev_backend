@@ -8,10 +8,10 @@ import org.springframework.http.HttpStatus;
 @Getter
 @Setter
 @AllArgsConstructor
-public class EducationProgramException extends RuntimeException {
+public class ProgramException extends RuntimeException {
     private HttpStatus statusCode;
 
-    public EducationProgramException(String message, HttpStatus statusCode) {
+    public ProgramException(String message, HttpStatus statusCode) {
         super(message);
         this.statusCode = statusCode;
     }

@@ -2,13 +2,15 @@ package ua.knu.knudev.education.domain.program;
 
 import jakarta.persistence.*;
 import lombok.*;
+import lombok.experimental.SuperBuilder;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UuidGenerator;
 import ua.knu.knudev.education.domain.MultiLanguageField;
-import ua.knu.knudev.education.domain.EducationTaskProxy;
 
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.UUID;
 
 @Getter
 @Setter
@@ -16,47 +18,20 @@ import java.util.*;
 @AllArgsConstructor
 @Entity
 @Table(name = "topic", schema = "education")
-@Builder
-public class ProgramTopic {
-
-    @Id
-    @UuidGenerator
-    private UUID id;
-
-    @Embedded
-    @AttributeOverrides({
-            @AttributeOverride(name = "en", column = @Column(name = "en_name")),
-            @AttributeOverride(name = "uk", column = @Column(name = "uk_name"))
-    })
-    private MultiLanguageField name;
-
-    @Embedded
-    @AttributeOverrides({
-            @AttributeOverride(name = "en", column = @Column(name = "en_description")),
-            @AttributeOverride(name = "uk", column = @Column(name = "uk_description"))
-    })
-    private MultiLanguageField description;
-
-    @CreationTimestamp
-    private LocalDateTime createdDate;
-    private LocalDateTime lastModifiedDate;
+@SuperBuilder
+public class ProgramTopic extends BaseLearningUnit{
 
     @ElementCollection
     @CollectionTable(
+            schema = "education",
             name = "topic_learning_resources",
             joinColumns = @JoinColumn(name = "topic_id")
     )
-    @Column(name = "learning_resources", nullable = false)
+    @Column(name = "learning_resource", nullable = false)
     private Set<String> learningResources = new HashSet<>();
 
-    @OneToOne(optional = false, fetch = FetchType.LAZY)
-    @JoinColumn(name = "task_id", referencedColumnName = "id")
-    private EducationTaskProxy task;
+    private UUID testId;
 
-    //TODO TESTS
-
-    @PreUpdate
-    public void onUpdate() {
-        this.lastModifiedDate = LocalDateTime.now();
-    }
+    @Column(nullable = false)
+    private Integer difficulty;
 }

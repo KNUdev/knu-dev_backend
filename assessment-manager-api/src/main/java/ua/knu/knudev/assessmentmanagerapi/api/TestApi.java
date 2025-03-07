@@ -2,15 +2,21 @@ package ua.knu.knudev.assessmentmanagerapi.api;
 
 import ua.knu.knudev.assessmentmanagerapi.dto.FullTestDto;
 import ua.knu.knudev.assessmentmanagerapi.dto.QuestionAnswerVariantDto;
+import ua.knu.knudev.assessmentmanagerapi.dto.ShortTestDto;
 import ua.knu.knudev.assessmentmanagerapi.dto.TestQuestionDto;
 import ua.knu.knudev.assessmentmanagerapi.request.TestCreationRequest;
 
+import java.util.List;
 import java.util.UUID;
 
-public interface TestManagementApi {
+public interface TestApi {
     FullTestDto create(TestCreationRequest testCreationRequest);
 
     FullTestDto getById(UUID testId);
+
+    boolean existsById(UUID testId);
+
+    List<ShortTestDto> getAll();
 
     void deleteTestById(UUID testId);
 
