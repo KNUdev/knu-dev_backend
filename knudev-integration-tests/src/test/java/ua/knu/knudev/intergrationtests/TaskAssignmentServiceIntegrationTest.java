@@ -121,6 +121,7 @@ public class TaskAssignmentServiceIntegrationTest {
                 .specialtyCodename(testSpecialty.getCodeName())
                 .avatarFile(getMockMultipartFile())
                 .yearOfStudy(2)
+                .githubAccountUsername("test")
                 .build();
     }
 
