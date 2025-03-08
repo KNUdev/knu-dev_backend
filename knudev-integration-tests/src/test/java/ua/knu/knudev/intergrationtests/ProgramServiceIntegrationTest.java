@@ -355,8 +355,8 @@ class ProgramServiceIntegrationTest {
     void testCreateProgram_withTopicLearningResources() {
         TopicSaveRequest topic = TopicSaveRequest.builder()
                 .orderIndex(1)
-                .name(multiLang("Topic LR EN", "Тема LR УК"))
-                .description(multiLang("Desc LR EN", "Опис LR УК"))
+                .name(multiLang("Topic LR EN", "Тема УК"))
+                .description(multiLang("Desc LR EN", "Опис УК"))
                 .finalTask(mockPdfFile("TopicTask"))
                 .learningResources(List.of("https://res1.com", "https://res2.com"))
                 .testId(UUID.randomUUID())
@@ -364,23 +364,23 @@ class ProgramServiceIntegrationTest {
 
         ModuleSaveRequest module = ModuleSaveRequest.builder()
                 .orderIndex(1)
-                .name(multiLang("Module LR EN", "Модуль LR УК"))
-                .description(multiLang("Desc LR EN", "Опис LR УК"))
+                .name(multiLang("Module LR EN", "Модуль УК"))
+                .description(multiLang("Desc LR EN", "Опис УК"))
                 .finalTask(mockPdfFile("ModuleFinal"))
                 .topics(List.of(topic))
                 .build();
 
         SectionSaveRequest section = SectionSaveRequest.builder()
                 .orderIndex(1)
-                .name(multiLang("Section LR EN", "Секція LR УК"))
-                .description(multiLang("SecDesc LR EN", "Опис Секції LR УК"))
+                .name(multiLang("Section LR EN", "СекціяУК"))
+                .description(multiLang("SecDesc LR EN", "Опис Секції УК"))
                 .finalTask(mockPdfFile("SectionFinal"))
                 .modules(List.of(module))
                 .build();
 
         ProgramSaveRequest request = ProgramSaveRequest.builder()
-                .name(multiLang("Prog LR EN", "Програма LR УК"))
-                .description(multiLang("Desc LR EN", "Опис LR УК"))
+                .name(multiLang("Prog LR EN", "Програма УК"))
+                .description(multiLang("Desc LR EN", "Опис УК"))
                 .expertise(Expertise.BACKEND)
                 .finalTask(mockPdfFile("ProgramFinal"))
                 .sections(List.of(section))

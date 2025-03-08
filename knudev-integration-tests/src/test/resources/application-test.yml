@@ -23,9 +23,11 @@ spring:
 
 application:
   minio:
-    access-key: minioadmin
-    secret-key: minioadmin
-    url: http://localhost:9000
+    internal-url: ${MINIO_INTERNAL_URL:http://minio:9000}
+    external-url: ${MINIO_EXTERNAL_URL:http://localhost:9000}
+    access-key: ${MINIO_ACCESS_KEY:minioadmin}
+    secret-key: ${MINIO_SECRET_KEY:minioadmin}
+    use-proxy: ${MINIO_USE_PROXY:false}
   jwt:
     issuer: KNUdev
     expiration: 600000 #10 minutes

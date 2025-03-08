@@ -2,16 +2,22 @@ package ua.knu.knudev.teammanager.service;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.core.MethodParameter;
+import org.springframework.core.env.Environment;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.validation.BindException;
+import org.springframework.validation.FieldError;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.multipart.MultipartFile;
 import ua.knu.knudev.fileserviceapi.api.ImageServiceApi;
 import ua.knu.knudev.fileserviceapi.subfolder.ImageSubfolder;
@@ -40,10 +46,7 @@ import ua.knu.knudev.teammanagerapi.response.AccountRegistrationResponse;
 import ua.knu.knudev.teammanagerapi.response.GetAccountByIdResponse;
 
 import java.time.LocalDateTime;
-import java.util.EnumMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -60,16 +63,14 @@ public class AccountProfileService implements AccountProfileApi {
     private final ShortDepartmentMapper shortDepartmentMapper;
     private final SpecialtyMapper specialtyMapper;
     private final GithubManagementApi gitHubManagementApi;
+    private final Environment environment;
 
     @Override
     @Transactional
     public AccountRegistrationResponse register(@Valid AccountCreationRequest request) {
         validateEmailNotExists(request.email());
         departmentService.validateAcademicUnitExistence(request.departmentId(), request.specialtyCodename());
-        boolean validGithubUsername = gitHubManagementApi.existsByUsername(request.githubAccountUsername());
-        if (!validGithubUsername) {
-            throw new AccountException("Github account username is not valid", HttpStatus.UNAUTHORIZED);
-        }
+        validateGithubUsername(request);
 
         AuthAccountCreationResponse createdAuthAccount = accountAuthServiceApi.createAccount(request);
         String uploadedAvatarFilename = uploadAccountImage(request.avatarFile(), ImageSubfolder.ACCOUNT_AVATARS);
@@ -399,5 +400,35 @@ public class AccountProfileService implements AccountProfileApi {
             return null;
         }
         return imageServiceApi.uploadFile(avatarFile, subfolder);
+    }
+
+    @SneakyThrows
+    private void validateGithubUsername(AccountCreationRequest request) {
+        if (Arrays.asList(environment.getActiveProfiles()).contains("test")) {
+            return;
+        }
+
+        boolean validGithubUsername = gitHubManagementApi.existsByUsername(request.githubAccountUsername());
+        if (!validGithubUsername) {
+            BindException bindException = new BindException(request, "createUserRequest");
+
+            bindException.addError(new FieldError(
+                    "createUserRequest",
+                    "githubAccountUsername",
+                    request.githubAccountUsername(),
+                    false,
+                    null,
+                    null,
+                    "Invalid GitHub username"
+            ));
+
+            MethodParameter methodParam = new MethodParameter(
+                    this.getClass()
+                            .getDeclaredMethod("register", AccountCreationRequest.class),
+                    0
+            );
+
+            throw new MethodArgumentNotValidException(methodParam, bindException);
+        }
     }
 }

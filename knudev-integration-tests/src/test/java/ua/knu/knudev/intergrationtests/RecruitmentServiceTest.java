@@ -93,6 +93,7 @@ class RecruitmentServiceTest {
                 .technicalRole(AccountTechnicalRole.INTERN)
                 .yearOfStudyOnRegistration(2)
                 .registrationDate(LocalDateTime.now())
+                .githubAccountUsername("test")
                 .build();
         return accountProfileRepository.save(account);
     }
