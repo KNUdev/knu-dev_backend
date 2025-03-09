@@ -10,7 +10,8 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.*;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -20,7 +21,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import ua.knu.knudev.knudevsecurity.domain.AccountAuth;
 import ua.knu.knudev.knudevsecurityapi.dto.Tokens;
-import ua.knu.knudev.knudevsecurityapi.exception.AccountAuthException;
+import ua.knu.knudev.knudevsecurityapi.exception.LoginException;
 import ua.knu.knudev.knudevsecurityapi.exception.TokenException;
 import ua.knu.knudev.knudevsecurityapi.request.AuthenticationRequest;
 import ua.knu.knudev.knudevsecurityapi.response.AuthenticationResponse;
@@ -97,9 +98,8 @@ public class AuthenticationServiceTest {
         when(accountService.getDomainByEmail(TEST_EMAIL)).thenReturn(Optional.empty());
 
         // Act & Assert
-        AccountAuthException ex = assertThrows(AccountAuthException.class,
+        assertThrows(LoginException.class,
                 () -> authenticationService.authenticate(authReq));
-        assertEquals("Invalid email or password", ex.getMessage());
         verify(accountService).getDomainByEmail(TEST_EMAIL);
         verifyNoMoreInteractions(authenticationManager, jwtService);
     }
@@ -314,10 +314,12 @@ public class AuthenticationServiceTest {
             public void write(int b) {
                 baos.write(b);
             }
+
             @Override
             public boolean isReady() {
                 return true;
             }
+
             @Override
             public void setWriteListener(WriteListener writeListener) {
             }

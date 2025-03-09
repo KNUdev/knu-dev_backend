@@ -15,8 +15,10 @@ import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import ua.knu.knudev.assessmentmanagerapi.exception.TaskAssignmentException;
 import ua.knu.knudev.assessmentmanagerapi.exception.TaskException;
 import ua.knu.knudev.knudevcommon.constant.Expertise;
+import ua.knu.knudev.knudevcommon.dto.MultiLanguageFieldDto;
 import ua.knu.knudev.knudevcommon.exception.FileException;
 import ua.knu.knudev.knudevsecurityapi.exception.AccountAuthException;
+import ua.knu.knudev.knudevsecurityapi.exception.LoginException;
 import ua.knu.knudev.knudevsecurityapi.exception.TokenException;
 import ua.knu.knudev.teammanagerapi.exception.AccountException;
 import ua.knu.knudev.teammanagerapi.exception.DepartmentException;
@@ -56,6 +58,15 @@ public class RestGlobalExceptionHandler {
     }
 
     @ExceptionHandler
+    public ResponseEntity<MultiLanguageFieldDto> handleLoginException(LoginException ex) {
+        MultiLanguageFieldDto errorMessage = MultiLanguageFieldDto.builder()
+                .en("Invalid email or password")
+                .uk("Неправильний імейл або пароль")
+                .build();
+        return new ResponseEntity<>(errorMessage, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler
     public ResponseEntity<String> handleTokenException(TokenException ex) {
         return new ResponseEntity<>(ex.getMessage(), ex.getStatusCode());
     }
@@ -72,24 +83,32 @@ public class RestGlobalExceptionHandler {
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public Map<String, List<String>> handleValidationExceptions(MethodArgumentNotValidException ex) {
-        Map<String, List<String>> errors = new HashMap<>();
+    public Map<String, List<Object>> handleValidationExceptions(MethodArgumentNotValidException ex) {
+        Map<String, List<Object>> errors = new HashMap<>();
 
-        ex.getBindingResult().getFieldErrors().forEach(fieldError -> {
+        for (FieldError fieldError : ex.getBindingResult().getFieldErrors()) {
             String fieldKey = fieldError.getField() + "Errors";
-            String errorMessage = buildErrorMessage(fieldError);
-            errors.computeIfAbsent(fieldKey, k -> new ArrayList<>()).add(errorMessage);
-        });
+
+            Object multiLangError = fieldError.getRejectedValue();
+            if (multiLangError instanceof MultiLanguageFieldDto) {
+                errors.computeIfAbsent(fieldKey, k -> new ArrayList<>()).add(multiLangError);
+            } else {
+                String errorMessage = buildErrorMessage(fieldError);
+                errors.computeIfAbsent(fieldKey, k -> new ArrayList<>()).add(errorMessage);
+            }
+        }
 
         ex.getBindingResult().getGlobalErrors().forEach(objectError -> {
             String objectKey = objectError.getObjectName() + "Errors";
             String errorMessage = objectError.getDefaultMessage();
 
-            errors.computeIfAbsent(objectKey, k -> new ArrayList<>()).add(errorMessage);
+            errors.computeIfAbsent(objectKey, k -> new ArrayList<>())
+                    .add(errorMessage);
         });
 
         return errors;
     }
+
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.BAD_REQUEST)

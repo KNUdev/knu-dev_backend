@@ -15,7 +15,7 @@ import org.springframework.stereotype.Service;
 import ua.knu.knudev.knudevsecurity.domain.AccountAuth;
 import ua.knu.knudev.knudevsecurityapi.api.AuthServiceApi;
 import ua.knu.knudev.knudevsecurityapi.dto.Tokens;
-import ua.knu.knudev.knudevsecurityapi.exception.AccountAuthException;
+import ua.knu.knudev.knudevsecurityapi.exception.LoginException;
 import ua.knu.knudev.knudevsecurityapi.exception.TokenException;
 import ua.knu.knudev.knudevsecurityapi.request.AuthenticationRequest;
 import ua.knu.knudev.knudevsecurityapi.response.AuthenticationResponse;
@@ -40,7 +40,7 @@ public class AuthenticationService implements AuthServiceApi {
                     new UsernamePasswordAuthenticationToken(authReq.email(), authReq.password())
             );
         } catch (BadCredentialsException e) {
-            throw new AccountAuthException("Invalid email or password", HttpStatus.UNAUTHORIZED);
+            throw new LoginException();
         }
 
         Tokens tokens = jwtService.generateTokens(account.get());
@@ -97,7 +97,7 @@ public class AuthenticationService implements AuthServiceApi {
 
     private void checkAccountValidity(Optional<AccountAuth> optionalAccount) throws AuthenticationException {
         if (optionalAccount.isEmpty()) {
-            throw new AccountAuthException("Invalid email or password", HttpStatus.UNAUTHORIZED);
+            throw new LoginException();
         }
         AccountAuth account = optionalAccount.get();
 
