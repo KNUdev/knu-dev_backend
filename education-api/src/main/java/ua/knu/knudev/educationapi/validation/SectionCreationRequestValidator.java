@@ -3,33 +3,29 @@ package ua.knu.knudev.educationapi.validation;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 import org.apache.commons.lang3.ObjectUtils;
-import ua.knu.knudev.educationapi.request.SectionCreationRequest;
+import ua.knu.knudev.educationapi.request.SectionSaveRequest;
 
 public class SectionCreationRequestValidator
-        implements ConstraintValidator<ValidCreationRequest, SectionCreationRequest> {
+        implements ConstraintValidator<ValidCreationRequest, SectionSaveRequest> {
 
     @Override
-    public boolean isValid(SectionCreationRequest request, ConstraintValidatorContext context) {
+    public boolean isValid(SectionSaveRequest request, ConstraintValidatorContext context) {
         if (request == null) {
             return false;
         }
 
         boolean hasExistingId = request.getExistingSectionId() != null;
-        boolean hasAllFields = ObjectUtils.allNotNull(
+        boolean hasAllFields = ObjectUtils.anyNotNull(
                 request.getName(),
                 request.getDescription(),
-//                request.getModules(),
-                request.getFinalTask(),
-                request.getFinalTestId()
+                request.getFinalTask()
         );
 
         if (hasExistingId) {
             boolean onlyExistingAndOrder = ObjectUtils.allNull(
                     request.getName(),
                     request.getDescription(),
-//                    request.getModules(),
-                    request.getFinalTask(),
-                    request.getFinalTestId()
+                    request.getFinalTask()
             );
 
             if (!onlyExistingAndOrder) {

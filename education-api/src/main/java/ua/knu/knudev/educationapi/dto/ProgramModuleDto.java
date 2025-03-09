@@ -19,5 +19,7 @@ public class ProgramModuleDto {
     private MultiLanguageFieldDto name;
     private MultiLanguageFieldDto description;
     private String finalTaskUrl;
+    private String finalTaskFilename;
     private List<ProgramTopicDto> topics = new ArrayList<>();
+    private Integer orderIndex;
 }

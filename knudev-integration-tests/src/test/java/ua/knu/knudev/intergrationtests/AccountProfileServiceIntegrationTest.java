@@ -102,6 +102,7 @@ public class AccountProfileServiceIntegrationTest {
                 .yearOfStudy(2)
                 .specialtyCodename(testSpecialty.getCodeName())
                 .avatarFile(getMockMultipartFile())
+                .githubAccountUsername("test")
                 .build();
     }
 
@@ -174,6 +175,7 @@ public class AccountProfileServiceIntegrationTest {
                 .technicalRole(AccountTechnicalRole.INTERN)
                 .registrationDate(LocalDateTime.now())
                 .yearOfStudyOnRegistration(2)
+                .githubAccountUsername("test")
                 .build();
 
         accountProfileRepository.save(existingAccount);

@@ -1,25 +1,24 @@
 package ua.knu.knudev.teammanagerapi.api;
 
 import org.springframework.data.domain.Page;
-import ua.knu.knudev.knudevcommon.constant.ProjectStatus;
 import ua.knu.knudev.teammanagerapi.dto.FullProjectDto;
 import ua.knu.knudev.teammanagerapi.dto.ShortProjectDto;
-import ua.knu.knudev.teammanagerapi.request.AddProjectDeveloperRequest;
-import ua.knu.knudev.teammanagerapi.request.ProjectCreationRequest;
+import ua.knu.knudev.teammanagerapi.dto.SubprojectDto;
+import ua.knu.knudev.teammanagerapi.request.ProjectUpdateRequest;
+import ua.knu.knudev.teammanagerapi.request.SubprojectUpdateRequest;
 
+import java.util.List;
 import java.util.UUID;
 
 public interface ProjectApi {
 
-    FullProjectDto create(ProjectCreationRequest projectCreationRequest);
+    FullProjectDto updateProject(ProjectUpdateRequest projectUpdateRequest);
 
-    FullProjectDto addDeveloper(AddProjectDeveloperRequest addProjectDeveloperRequest);
-
-    FullProjectDto updateStatus(UUID projectId, ProjectStatus newProjectStatus);
+    SubprojectDto updateSubproject(SubprojectUpdateRequest subprojectUpdateRequest);
 
     FullProjectDto getById(UUID projectId);
 
     Page<ShortProjectDto> getAll(Integer pageNumber, Integer pageSize);
 
-    FullProjectDto release(UUID projectId, String projectDomain);
+    List<ShortProjectDto> getAllByAccountId(UUID accountId);
 }

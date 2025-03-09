@@ -12,7 +12,7 @@ import java.util.UUID;
 @Builder(toBuilder = true)
 public record AccountCreationRequest(
 
-        @Schema(description = "User`s email address", example = "john@knu.ua",requiredMode = Schema.RequiredMode.REQUIRED)
+        @Schema(description = "User`s email address", example = "john@knu.ua", requiredMode = Schema.RequiredMode.REQUIRED)
         @NotBlank(message = "Email cannot be blank")
         @Email(message = "Invalid email format")
         @Pattern(
@@ -95,6 +95,11 @@ public record AccountCreationRequest(
         @Schema(description = "University study year on registration", requiredMode = Schema.RequiredMode.REQUIRED)
         @Min(1) @Max(11)
         @NotNull
-        Integer yearOfStudy
+        Integer yearOfStudy,
+
+        @Schema(description = "Github account username", example = "DenysLnk", requiredMode = Schema.RequiredMode.REQUIRED)
+        @NotBlank(message = "Github username can not be blank")
+        String githubAccountUsername
+
 ) {
 }

@@ -2,24 +2,26 @@ package ua.knu.knudev.teammanager.service;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.core.MethodParameter;
+import org.springframework.core.env.Environment;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.validation.BindException;
+import org.springframework.validation.FieldError;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.multipart.MultipartFile;
-import ua.knu.knudev.educationapi.dto.EducationProgramSummaryDto;
 import ua.knu.knudev.fileserviceapi.api.ImageServiceApi;
 import ua.knu.knudev.fileserviceapi.subfolder.ImageSubfolder;
-import ua.knu.knudev.knudevcommon.constant.Expertise;
 import ua.knu.knudev.knudevcommon.constant.KNUdevUnit;
-import ua.knu.knudev.knudevcommon.constant.ProjectStatus;
-import ua.knu.knudev.knudevcommon.dto.MultiLanguageFieldDto;
 import ua.knu.knudev.knudevcommon.utils.AcademicUnitsIds;
 import ua.knu.knudev.knudevcommon.utils.FullName;
 import ua.knu.knudev.knudevsecurityapi.api.AccountAuthServiceApi;
@@ -33,21 +35,18 @@ import ua.knu.knudev.teammanager.mapper.MultiLanguageFieldMapper;
 import ua.knu.knudev.teammanager.mapper.ShortDepartmentMapper;
 import ua.knu.knudev.teammanager.mapper.SpecialtyMapper;
 import ua.knu.knudev.teammanager.repository.AccountProfileRepository;
+import ua.knu.knudev.teammanager.service.api.GithubManagementApi;
 import ua.knu.knudev.teammanagerapi.api.AccountProfileApi;
 import ua.knu.knudev.teammanagerapi.constant.AccountsCriteriaFilterOption;
 import ua.knu.knudev.teammanagerapi.dto.AccountProfileDto;
 import ua.knu.knudev.teammanagerapi.dto.AccountSearchCriteria;
 import ua.knu.knudev.teammanagerapi.dto.ShortAccountProfileDto;
-import ua.knu.knudev.teammanagerapi.dto.ShortProjectDto;
 import ua.knu.knudev.teammanagerapi.exception.AccountException;
 import ua.knu.knudev.teammanagerapi.response.AccountRegistrationResponse;
 import ua.knu.knudev.teammanagerapi.response.GetAccountByIdResponse;
 
 import java.time.LocalDateTime;
-import java.util.EnumMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -60,15 +59,18 @@ public class AccountProfileService implements AccountProfileApi {
     private final ImageServiceApi imageServiceApi;
     private final DepartmentService departmentService;
     private final AccountProfileMapper accountProfileMapper;
-    private final MultiLanguageFieldMapper multiLangFieldMapper;
+    private final MultiLanguageFieldMapper multiLanguageFieldMapper;
     private final ShortDepartmentMapper shortDepartmentMapper;
     private final SpecialtyMapper specialtyMapper;
+    private final GithubManagementApi gitHubManagementApi;
+    private final Environment environment;
 
     @Override
     @Transactional
     public AccountRegistrationResponse register(@Valid AccountCreationRequest request) {
         validateEmailNotExists(request.email());
         departmentService.validateAcademicUnitExistence(request.departmentId(), request.specialtyCodename());
+        validateGithubUsername(request);
 
         AuthAccountCreationResponse createdAuthAccount = accountAuthServiceApi.createAccount(request);
         String uploadedAvatarFilename = uploadAccountImage(request.avatarFile(), ImageSubfolder.ACCOUNT_AVATARS);
@@ -104,9 +106,9 @@ public class AccountProfileService implements AccountProfileApi {
         AccountProfile accountProfile = getDomainById(accountId);
         String avatarPath = StringUtils.isNotEmpty(accountProfile.getAvatarFilename())
                 ? (imageServiceApi.getPathByFilename(
-                        accountProfile.getAvatarFilename(),
-                        ImageSubfolder.ACCOUNT_AVATARS)
-                ) : null;
+                accountProfile.getAvatarFilename(),
+                ImageSubfolder.ACCOUNT_AVATARS)
+        ) : null;
         String bannerPath = StringUtils.isNotEmpty(accountProfile.getBannerFilename())
                 ? (imageServiceApi.getPathByFilename(
                 accountProfile.getBannerFilename(),
@@ -117,6 +119,7 @@ public class AccountProfileService implements AccountProfileApi {
                 " " + accountProfile.getMiddleName();
         return GetAccountByIdResponse.builder()
                 .fullName(fullName)
+                .githubAccountUsername(accountProfile.getGithubAccountUsername())
                 .email(accountProfile.getEmail())
                 .technicalRole(accountProfile.getTechnicalRole())
                 .expertise(accountProfile.getExpertise())
@@ -169,7 +172,6 @@ public class AccountProfileService implements AccountProfileApi {
     }
 
 
-
     @Override
     public AccountProfileDto getByEmail(String email) {
         AccountProfile account = accountProfileRepository.findByEmail(email)
@@ -215,6 +217,7 @@ public class AccountProfileService implements AccountProfileApi {
                                 accountProfile.getLastName(),
                                 accountProfile.getMiddleName())
                         )
+                        .githubAccountUsername(accountProfile.getGithubAccountUsername())
                         .avatarFilename(accountProfile.getAvatarFilename())
                         .accountTechnicalRole(accountProfile.getTechnicalRole())
                         .build()
@@ -279,6 +282,13 @@ public class AccountProfileService implements AccountProfileApi {
         accountProfileRepository.save(account);
     }
 
+    @Override
+    public AccountProfileDto getByGithubUsername(String githubUsername) {
+        AccountProfile accountProfile = accountProfileRepository.findAccountProfileByGithubAccountUsername(githubUsername)
+                .orElseThrow(() -> new AccountException("Account with githubUsername " + githubUsername + " not found!"));
+        return accountProfileMapper.toDto(accountProfile);
+    }
+
     public AccountProfile getDomainById(UUID id) {
         return accountProfileRepository.findById(id)
                 .orElseThrow(() -> new AccountException(
@@ -320,6 +330,7 @@ public class AccountProfileService implements AccountProfileApi {
                 .firstName(request.firstName())
                 .lastName(request.lastName())
                 .middleName(request.middleName())
+                .githubAccountUsername(request.githubAccountUsername())
                 .avatarFilename(uploadedAvatarFilename)
                 .bannerFilename(uploadedBannerFilename)
                 .department(department)
@@ -350,6 +361,7 @@ public class AccountProfileService implements AccountProfileApi {
                         .lastName(savedAccount.getLastName())
                         .middleName(savedAccount.getMiddleName())
                         .build())
+                .githubAccountUsername(savedAccount.getGithubAccountUsername())
                 .avatarFilename(savedAccount.getAvatarFilename())
                 .bannerFilename(savedAccount.getBannerFilename())
                 .email(savedAccount.getEmail())
@@ -388,5 +400,35 @@ public class AccountProfileService implements AccountProfileApi {
             return null;
         }
         return imageServiceApi.uploadFile(avatarFile, subfolder);
+    }
+
+    @SneakyThrows
+    private void validateGithubUsername(AccountCreationRequest request) {
+        if (Arrays.asList(environment.getActiveProfiles()).contains("test")) {
+            return;
+        }
+
+        boolean validGithubUsername = gitHubManagementApi.existsByUsername(request.githubAccountUsername());
+        if (!validGithubUsername) {
+            BindException bindException = new BindException(request, "createUserRequest");
+
+            bindException.addError(new FieldError(
+                    "createUserRequest",
+                    "githubAccountUsername",
+                    request.githubAccountUsername(),
+                    false,
+                    null,
+                    null,
+                    "Invalid GitHub username"
+            ));
+
+            MethodParameter methodParam = new MethodParameter(
+                    this.getClass()
+                            .getDeclaredMethod("register", AccountCreationRequest.class),
+                    0
+            );
+
+            throw new MethodArgumentNotValidException(methodParam, bindException);
+        }
     }
 }

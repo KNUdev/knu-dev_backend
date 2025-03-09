@@ -9,7 +9,8 @@ import ua.knu.knudev.knudevcommon.mapper.BaseMapper;
 @Mapper(componentModel = "spring")
 public interface ProgramMapper extends BaseMapper<EducationProgram, EducationProgramDto> {
 
-//    @Mapping(target = "finalTaskUrl", source = "finalTask")
+    @Mapping(target = "createdDate", source = "createdDate")
+    @Mapping(target = "lastModifiedDate", source = "lastModifiedDate")
     @Mapping(target = "sections", ignore = true)
     EducationProgramDto toDto(EducationProgram domain);
 }

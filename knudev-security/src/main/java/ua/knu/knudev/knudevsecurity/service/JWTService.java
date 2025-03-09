@@ -113,6 +113,7 @@ public class JWTService {
         extraClaimsMap.put("isacct", isAccessToken);
 
         Set<String> accountRoles = userDetails.getRoles().stream()
+                .filter(Objects::nonNull)
                 .map(AccountRole::name)
                 .collect(Collectors.toSet());
         extraClaimsMap.put("roles", accountRoles);

@@ -19,5 +19,7 @@ public class ProgramSectionDto {
     private MultiLanguageFieldDto name;
     private MultiLanguageFieldDto description;
     private String finalTaskUrl;
+    private String finalTaskFilename;
     private List<ProgramModuleDto> modules = new ArrayList<>();
+    private Integer orderIndex;
 }

@@ -3,6 +3,7 @@ package ua.knu.knudev.teammanager.domain;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.UuidGenerator;
+import ua.knu.knudev.knudevcommon.constant.SubprojectType;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -19,6 +20,7 @@ public class Subproject {
 
     @Id
     @UuidGenerator
+    @Column(updatable = false, nullable = false)
     private UUID id;
 
     @ManyToOne(fetch = FetchType.LAZY)
