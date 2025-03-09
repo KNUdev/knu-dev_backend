@@ -22,6 +22,7 @@ import org.springframework.web.multipart.MultipartFile;
 import ua.knu.knudev.fileserviceapi.api.ImageServiceApi;
 import ua.knu.knudev.fileserviceapi.subfolder.ImageSubfolder;
 import ua.knu.knudev.knudevcommon.constant.KNUdevUnit;
+import ua.knu.knudev.knudevcommon.dto.MultiLanguageFieldDto;
 import ua.knu.knudev.knudevcommon.utils.AcademicUnitsIds;
 import ua.knu.knudev.knudevcommon.utils.FullName;
 import ua.knu.knudev.knudevsecurityapi.api.AccountAuthServiceApi;
@@ -68,9 +69,12 @@ public class AccountProfileService implements AccountProfileApi {
     @Override
     @Transactional
     public AccountRegistrationResponse register(@Valid AccountCreationRequest request) {
-        validateEmailNotExists(request.email());
+        BindException bindException = new BindException(request, "createUserRequest");
+
+        validateEmailNotExists(bindException, request.email());
         departmentService.validateAcademicUnitExistence(request.departmentId(), request.specialtyCodename());
-        validateGithubUsername(request);
+        validateGithubUsername(bindException, request);
+        throwValidationExceptionIfExists(bindException);
 
         AuthAccountCreationResponse createdAuthAccount = accountAuthServiceApi.createAccount(request);
         String uploadedAvatarFilename = uploadAccountImage(request.avatarFile(), ImageSubfolder.ACCOUNT_AVATARS);
@@ -90,6 +94,24 @@ public class AccountProfileService implements AccountProfileApi {
     public AccountProfileDto getById(UUID id) {
         AccountProfile account = getDomainById(id);
         return accountProfileMapper.toDto(account);
+    }
+
+    @SneakyThrows
+    private void throwValidationExceptionIfExists(BindException bindException) {
+        if (bindException.hasErrors()) {
+
+            MethodParameter methodParam;
+            try {
+                methodParam = new MethodParameter(
+                        this.getClass().getDeclaredMethod("register", AccountCreationRequest.class),
+                        0
+                );
+            } catch (NoSuchMethodException e) {
+                throw new RuntimeException(e);
+            }
+
+            throw new MethodArgumentNotValidException(methodParam, bindException);
+        }
     }
 
     @Override
@@ -186,15 +208,17 @@ public class AccountProfileService implements AccountProfileApi {
         return accountProfileRepository.existsByEmail(email);
     }
 
-    @Override
-    public void assertEmailExists(String email) throws AccountException {
+    private boolean assertEmailExists(BindException bindException, String email)  {
         boolean emailExists = existsByEmail(email);
         if (emailExists) {
-            throw new AccountException(
-                    String.format("Account with email %s already exists", email),
-                    HttpStatus.BAD_REQUEST
-            );
+            MultiLanguageFieldDto error = MultiLanguageFieldDto.builder()
+                    .en(String.format("Account with email %s already exists", email))
+                    .uk(String.format("Аккаунт з імейлом %s вже існує", email))
+                    .build();
+            addValidationError(bindException, "email", error);
+            return true;
         }
+        return false;
     }
 
     @Override
@@ -297,8 +321,12 @@ public class AccountProfileService implements AccountProfileApi {
                 ));
     }
 
-    private void validateEmailNotExists(String email) {
-        assertEmailExists(email);
+    @SneakyThrows
+    private void validateEmailNotExists(BindException bindException, String email) {
+        boolean accountProfileExists = assertEmailExists(bindException, email);
+        if(accountProfileExists) {
+            return;
+        }
 
         boolean accountAuthExists = accountAuthServiceApi.existsByEmail(email);
         if (accountAuthExists) {
@@ -403,32 +431,37 @@ public class AccountProfileService implements AccountProfileApi {
     }
 
     @SneakyThrows
-    private void validateGithubUsername(AccountCreationRequest request) {
+    private void validateGithubUsername(BindException bindException, AccountCreationRequest request) {
         if (Arrays.asList(environment.getActiveProfiles()).contains("test")) {
             return;
         }
 
         boolean validGithubUsername = gitHubManagementApi.existsByUsername(request.githubAccountUsername());
         if (!validGithubUsername) {
-            BindException bindException = new BindException(request, "createUserRequest");
-
-            bindException.addError(new FieldError(
-                    "createUserRequest",
-                    "githubAccountUsername",
-                    request.githubAccountUsername(),
-                    false,
-                    null,
-                    null,
-                    "Invalid GitHub username"
-            ));
-
-            MethodParameter methodParam = new MethodParameter(
-                    this.getClass()
-                            .getDeclaredMethod("register", AccountCreationRequest.class),
-                    0
-            );
-
-            throw new MethodArgumentNotValidException(methodParam, bindException);
+            MultiLanguageFieldDto multiLangError = MultiLanguageFieldDto.builder()
+                    .en(String.format("There is no Github account with %s username", request.githubAccountUsername()))
+                    .uk(String.format(
+                            "Github профілю з іменем користувача %s не існує",
+                            request.githubAccountUsername())
+                    )
+                    .build();
+            addValidationError(bindException, "githubAccountUsername", multiLangError);
         }
     }
+
+    private void addValidationError(BindException bindException,
+                                    String fieldName,
+                                    MultiLanguageFieldDto multiLangError) {
+
+        bindException.addError(new FieldError(
+                "createUserRequest",
+                fieldName,
+                multiLangError,
+                false,
+                null,
+                null,
+                multiLangError.getEn()
+        ));
+    }
+
 }

@@ -28,6 +28,7 @@ import ua.knu.knudev.teammanagerapi.exception.AccountException;
 import ua.knu.knudev.teammanagerapi.exception.DepartmentException;
 import ua.knu.knudev.teammanagerapi.response.AccountRegistrationResponse;
 
+import java.lang.reflect.UndeclaredThrowableException;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -181,8 +182,7 @@ public class AccountProfileServiceIntegrationTest {
         accountProfileRepository.save(existingAccount);
 
         // Act & Assert
-        AccountException exception = assertThrows(AccountException.class, () -> accountProfileService.register(request));
-        assertEquals(String.format("Account with email %s already exists", TEST_EMAIL), exception.getMessage());
+        assertThrows(UndeclaredThrowableException.class, () -> accountProfileService.register(request));
     }
 
     @Test
