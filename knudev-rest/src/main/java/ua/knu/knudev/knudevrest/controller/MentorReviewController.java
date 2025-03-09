@@ -2,8 +2,7 @@ package ua.knu.knudev.knudevrest.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
-import ua.knu.knudev.educationapi.dto.SprintAttemptDto;
-import ua.knu.knudev.knudevrest.config.ReviewRequestDto;
+import ua.knu.knudev.educationapi.dto.session.SprintAttemptDto;
 
 import java.util.List;
 import java.util.UUID;

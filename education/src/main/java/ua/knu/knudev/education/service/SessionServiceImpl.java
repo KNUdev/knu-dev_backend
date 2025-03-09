@@ -2,6 +2,18 @@ package ua.knu.knudev.education.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import ua.knu.knudev.education.domain.EducationProgram;
+import ua.knu.knudev.education.domain.session.EducationSession;
+import ua.knu.knudev.education.domain.session.Sprint;
+import ua.knu.knudev.education.repository.EducationSessionRepository;
+import ua.knu.knudev.education.repository.SprintRepository;
+import ua.knu.knudev.educationapi.api.SessionApi;
+import ua.knu.knudev.educationapi.dto.session.SessionFullDto;
+import ua.knu.knudev.educationapi.dto.session.SessionSprintPlanDto;
+import ua.knu.knudev.educationapi.dto.session.SprintAdjustmentDto;
+import ua.knu.knudev.educationapi.dto.session.SprintDto;
+import ua.knu.knudev.educationapi.enums.SessionStatus;
+import ua.knu.knudev.educationapi.request.CreateSessionRequestDto;
 
 import java.time.LocalDateTime;
 import java.util.*;

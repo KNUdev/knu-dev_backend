@@ -1,5 +1,6 @@
 package ua.knu.knudev.educationapi.api;
 
+import ua.knu.knudev.educationapi.dto.session.SessionFullDto;
 import ua.knu.knudev.educationapi.request.CreateSessionRequestDto;
 import ua.knu.knudev.educationapi.request.SessionCreationRequest;
 

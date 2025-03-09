@@ -1,7 +1,9 @@
 package ua.knu.knudev.educationapi.request;
 
 import lombok.Data;
+import ua.knu.knudev.educationapi.dto.session.SprintAdjustmentDto;
 
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
