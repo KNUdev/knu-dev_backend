@@ -6,9 +6,8 @@ import org.hibernate.annotations.UuidGenerator;
 import ua.knu.knudev.education.domain.program.ProgramTopic;
 import ua.knu.knudev.education.domain.program.ProgramModule;
 import ua.knu.knudev.education.domain.program.ProgramSection;
-import ua.knu.knudev.educationapi.dto.SprintStatus;
-import ua.knu.knudev.educationapi.dto.SprintType;
-//import ua.knu.knudev.education.domain.EducationTestProxy; // Proxy defined in assessment manager
+import ua.knu.knudev.educationapi.enums.SprintStatus;
+import ua.knu.knudev.educationapi.enums.SprintType;
 
 import java.time.LocalDateTime;
 import java.util.UUID;

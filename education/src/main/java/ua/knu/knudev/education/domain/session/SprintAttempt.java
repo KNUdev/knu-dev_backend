@@ -3,7 +3,7 @@ package ua.knu.knudev.education.domain.session;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.UuidGenerator;
-import ua.knu.knudev.educationapi.dto.AttemptStatus;
+import ua.knu.knudev.educationapi.enums.AttemptStatus;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
