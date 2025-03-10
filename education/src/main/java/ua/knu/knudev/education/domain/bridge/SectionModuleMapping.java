@@ -38,7 +38,6 @@ public class SectionModuleMapping {
     @JoinColumn(name = "module_id", referencedColumnName = "id")
     private ProgramModule module;
 
-
     @Column(nullable = false)
     private int orderIndex;
 

@@ -1,6 +1,7 @@
 package ua.knu.knudev.educationapi.dto.session;
 
 import lombok.Data;
+import ua.knu.knudev.educationapi.dto.TestMetadataDto;
 import ua.knu.knudev.educationapi.dto.session.SprintAttemptDto;
 
 import java.time.LocalDateTime;

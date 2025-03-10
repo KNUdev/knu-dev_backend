@@ -1,6 +1,7 @@
 package ua.knu.knudev.education.service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.cglib.core.Local;
 import org.springframework.stereotype.Service;
 import ua.knu.knudev.education.domain.EducationProgram;
 import ua.knu.knudev.education.domain.session.EducationSession;
@@ -10,75 +11,80 @@ import ua.knu.knudev.education.repository.SprintRepository;
 import ua.knu.knudev.educationapi.api.SessionApi;
 import ua.knu.knudev.educationapi.dto.session.SessionFullDto;
 import ua.knu.knudev.educationapi.dto.session.SessionSprintPlanDto;
-import ua.knu.knudev.educationapi.dto.session.SprintAdjustmentDto;
 import ua.knu.knudev.educationapi.dto.session.SprintDto;
 import ua.knu.knudev.educationapi.enums.SessionStatus;
-import ua.knu.knudev.educationapi.request.CreateSessionRequestDto;
+import ua.knu.knudev.educationapi.request.SessionCreationRequest;
 
 import java.time.LocalDateTime;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
-public class SessionServiceImpl implements SessionApi {
+public class SessionService implements SessionApi {
 
-    private final ProgramService educationProgramService;
-    private final SprintServiceImpl sprintService; // has generateSessionSprintPlan(UUID programId)
+    private final ProgramService programService;
+    private final SprintService sprintService; // has generateSessionSprintPlan(UUID programId)
     private final EducationSessionRepository sessionRepository;
     private final SprintRepository sprintRepository;
 //    private final SessionMapper sessionMapper; // for mapping to SessionFullDto
 
-    /**
-     * Creates a new session based on the program and the adjusted sprint plan.
-     */
     @Override
-    public SessionFullDto createSession(CreateSessionRequestDto request) {
-        // 1. Retrieve the program.
-        EducationProgram program = educationProgramService.getProgramById(request.getProgramId());
+    public SessionFullDto createSession(SessionCreationRequest request) {
+        EducationProgram program = programService.getProgramById(request.programId());
 
         // 2. Generate the sprint plan (preview) based on the program.
-        SessionSprintPlanDto planDto = sprintService.generateSessionSprintPlan(request.getProgramId());
+        List<Sprint> sprints = sprintService.generateSessionSprintPlan(program);
 
         // 3. Map sprint adjustments from request into a lookup map.
-        Map<UUID, Integer> adjustments = request.getSprintAdjustments().stream()
-                .collect(Collectors.toMap(SprintAdjustmentDto::getSprintId, SprintAdjustmentDto::getDurationDays));
+//        Map<UUID, Integer> adjustments = request.getSprintAdjustments().stream()
+//                .collect(Collectors.toMap(SprintAdjustmentDto::getSprintId, SprintAdjustmentDto::getDurationDays));
 
-        // 4. Apply adjustments to the preview plan.
-        applySprintAdjustments(planDto, adjustments);
-
-        // 5. Convert the plan DTO into a flat list of Sprint domain objects.
-        List<Sprint> sprintDomains = flattenPlanDtoToDomain(planDto);
+//        // 4. Apply adjustments to the preview plan.
+//        applySprintAdjustments(planDto, adjustments);
+//
+//        // 5. Convert the plan DTO into a flat list of Sprint domain objects.
+//        List<Sprint> sprintDomains = flattenPlanDtoToDomain(planDto);
 
         // 6. Compute start dates for sprints.
-        LocalDateTime sessionStart = LocalDateTime.now(); // session start date
-        sprintDomains.sort(Comparator.comparingInt(Sprint::getOrderIndex));
-        LocalDateTime currentStart = sessionStart;
-        for (Sprint sprint : sprintDomains) {
-            sprint.setStartDate(currentStart);
-            currentStart = currentStart.plusDays(sprint.getDurationDays());
-        }
-        LocalDateTime sessionEnd = currentStart;
+        LocalDateTime sessionStart = LocalDateTime.now();
 
-        // 7. Build the EducationSession domain object.
+
+        LocalDateTime sessionEstimateEndDate = getSessionEstimateEndDate(sprints);
         EducationSession session = EducationSession.builder()
                 .educationProgram(program)
-                .mentorIds(request.getMentorIds())
-                .sessionStartDate(sessionStart)
-                .sessionEndDate(sessionEnd)
+//                .mentorIds(request.getMentorIds())
+                .estimatedEndDate(sessionEstimateEndDate)
+                .startDate(sessionStart)
                 .status(SessionStatus.CREATED)
                 .build();
-
-        // 8. Associate sprints with the session.
-        sprintDomains.forEach(sprint -> sprint.setEducationSession(session));
+        setSprintStartDates(sprints, session);
 
         // 9. Persist the session and sprints.
         sessionRepository.save(session);
-        sprintRepository.saveAll(sprintDomains);
+        sprintRepository.saveAll(sprints);
 
         // 10. Return the full session DTO (including sprint details).
 //        return sessionMapper.toSessionFullDto(session);
         return null;
+    }
+
+    private LocalDateTime getSessionEstimateEndDate(List<Sprint> sprints) {
+        Sprint lastSprint = sprints.get(sprints.size() - 1);
+        //todo think
+        return LocalDateTime.now();
+//        return lastSprint.getS
+    }
+
+    private LocalDateTime setSprintStartDates(List<Sprint> sprints, EducationSession session) {
+        LocalDateTime sessionStart = LocalDateTime.now();
+        sprints.sort(Comparator.comparingInt(Sprint::getOrderIndex));
+        LocalDateTime currentStart = sessionStart;
+        for (Sprint sprint : sprints) {
+            session.addSprint(sprint);
+//            sprint.setStartDate(currentStart);
+            currentStart = currentStart.plusDays(sprint.getDurationDays());
+        }
+        return currentStart;
     }
 
     /**

@@ -29,11 +29,11 @@ public class MentorReviewController {
      * Mentor reviews a specific submission attempt.
      * POST /api/sprints/submissions/{attemptId}/review?mentorId={mentorId}
      */
-    @PostMapping("/sprints/submissions/{attemptId}/review")
-    public SprintAttemptDto reviewSubmission(@PathVariable UUID attemptId,
-                                             @RequestParam UUID mentorId,
-                                             @RequestBody ReviewRequestDto reviewRequest) {
-//        return reviewService.reviewSubmission(attemptId, mentorId, reviewRequest);
-        return null;
-    }
+//    @PostMapping("/sprints/submissions/{attemptId}/review")
+//    public SprintAttemptDto reviewSubmission(@PathVariable UUID attemptId,
+//                                             @RequestParam UUID mentorId,
+//                                             @RequestBody ReviewRequestDto reviewRequest) {
+////        return reviewService.reviewSubmission(attemptId, mentorId, reviewRequest);
+//        return null;
+//    }
 }
