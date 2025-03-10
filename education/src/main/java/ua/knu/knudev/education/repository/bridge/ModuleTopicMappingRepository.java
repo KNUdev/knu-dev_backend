@@ -7,6 +7,7 @@ import ua.knu.knudev.education.domain.bridge.QModuleTopicMapping;
 import ua.knu.knudev.education.domain.bridge.QProgramSectionMapping;
 import ua.knu.knudev.education.domain.bridge.QSectionModuleMapping;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
 
@@ -17,7 +18,7 @@ public interface ModuleTopicMappingRepository extends JpaRepository<ModuleTopicM
     QSectionModuleMapping smm = QSectionModuleMapping.sectionModuleMapping;
     QModuleTopicMapping mtm = QModuleTopicMapping.moduleTopicMapping;
 
-    List<ModuleTopicMapping> findByModuleIdIn(List<UUID> moduleIds);
+    List<ModuleTopicMapping> findByModuleIdIn(Collection<UUID> moduleIds);
 
     boolean existsByProgram_IdAndSection_IdAndModule_IdAndTopic_Id(
             UUID educationProgramId, UUID sectionId, UUID moduleId, UUID topicId
