@@ -1,11 +1,17 @@
 package ua.knu.knudev.knudevrest.exception;
 
 import jakarta.validation.ConstraintViolationException;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.context.MessageSource;
+import org.springframework.context.NoSuchMessageException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.validation.FieldError;
+import org.springframework.validation.ObjectError;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -14,7 +20,6 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import ua.knu.knudev.assessmentmanagerapi.exception.TaskAssignmentException;
 import ua.knu.knudev.assessmentmanagerapi.exception.TaskException;
-import ua.knu.knudev.knudevcommon.constant.Expertise;
 import ua.knu.knudev.knudevcommon.dto.MultiLanguageFieldDto;
 import ua.knu.knudev.knudevcommon.exception.FileException;
 import ua.knu.knudev.knudevsecurityapi.exception.AccountAuthException;
@@ -28,7 +33,11 @@ import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 @RestControllerAdvice
+@RequiredArgsConstructor
+@Slf4j
 public class RestGlobalExceptionHandler {
+
+    private final MessageSource messageSource;
 
     @ExceptionHandler
     public ResponseEntity<String> handleAccountException(AccountException exception) {
@@ -81,7 +90,7 @@ public class RestGlobalExceptionHandler {
         return exception.getMessage();
     }
 
-    @ExceptionHandler(MethodArgumentNotValidException.class)
+    @ExceptionHandler({MethodArgumentNotValidException.class})
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public Map<String, List<Object>> handleValidationExceptions(MethodArgumentNotValidException ex) {
         Map<String, List<Object>> errors = new HashMap<>();
@@ -89,26 +98,23 @@ public class RestGlobalExceptionHandler {
         for (FieldError fieldError : ex.getBindingResult().getFieldErrors()) {
             String fieldKey = fieldError.getField() + "Errors";
 
-            Object multiLangError = fieldError.getRejectedValue();
-            if (multiLangError instanceof MultiLanguageFieldDto) {
-                errors.computeIfAbsent(fieldKey, k -> new ArrayList<>()).add(multiLangError);
+            Object rejectedValue = fieldError.getRejectedValue();
+            if (rejectedValue instanceof MultiLanguageFieldDto) {
+                errors.computeIfAbsent(fieldKey, k -> new ArrayList<>()).add(rejectedValue);
             } else {
-                String errorMessage = buildErrorMessage(fieldError);
-                errors.computeIfAbsent(fieldKey, k -> new ArrayList<>()).add(errorMessage);
+                Object multiLangError = buildMultiLanguageError(fieldError);
+                errors.computeIfAbsent(fieldKey, k -> new ArrayList<>()).add(multiLangError);
             }
         }
 
-        ex.getBindingResult().getGlobalErrors().forEach(objectError -> {
-            String objectKey = objectError.getObjectName() + "Errors";
-            String errorMessage = objectError.getDefaultMessage();
-
-            errors.computeIfAbsent(objectKey, k -> new ArrayList<>())
-                    .add(errorMessage);
-        });
+        for (ObjectError globalError : ex.getBindingResult().getGlobalErrors()) {
+            String objectKey = globalError.getObjectName() + "Errors";
+            Object multiLangError = buildMultiLanguageError(globalError);
+            errors.computeIfAbsent(objectKey, k -> new ArrayList<>()).add(multiLangError);
+        }
 
         return errors;
     }
-
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.BAD_REQUEST)
@@ -143,12 +149,45 @@ public class RestGlobalExceptionHandler {
         return exception.getMessage();
     }
 
-    private String buildErrorMessage(FieldError fieldError) {
-        if ("expertise".equals(fieldError.getField())
-                && "typeMismatch".equals(fieldError.getCode())) {
-            return "Invalid Expertise value. Possible values are: " + Arrays.toString(Expertise.values());
+    private Object buildMultiLanguageError(ObjectError error) {
+        Locale ukrainianLocale = new Locale("uk", "UA");
+        Locale englishLocale = Locale.ENGLISH;
+        String messageUk;
+        String messageEn;
+        String defaultMessage = error.getDefaultMessage();
+
+        if (error instanceof FieldError fieldError) {
+            boolean isExpertiseFieldError = "expertise".equals(fieldError.getField())
+                    && "typeMismatch".equals(fieldError.getCode());
+            if (isExpertiseFieldError) {
+                return buildExpertiseError(ukrainianLocale, englishLocale);
+            }
         }
-        return fieldError.getDefaultMessage();
+
+        if (StringUtils.isNotEmpty(defaultMessage)) {
+            try {
+                messageEn = messageSource.getMessage(defaultMessage, null, Locale.ENGLISH);
+                messageUk = messageSource.getMessage(defaultMessage, null, ukrainianLocale);
+            } catch (NoSuchMessageException ex) {
+                return defaultMessage;
+            }
+        } else {
+            throw new RuntimeException("Error message is empty");
+        }
+
+        return MultiLanguageFieldDto.builder()
+                .en(messageEn)
+                .uk(messageUk)
+                .build();
+    }
+
+    private Object buildExpertiseError(Locale ukLocale, Locale enLocale) {
+        String errorMessageCode = "registration.validation.expertise.allowedValues";
+
+        return MultiLanguageFieldDto.builder()
+                .en(messageSource.getMessage(errorMessageCode, null, enLocale))
+                .uk(messageSource.getMessage(errorMessageCode, null, ukLocale))
+                .build();
     }
 
 }
