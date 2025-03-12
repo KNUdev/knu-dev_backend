@@ -2,6 +2,7 @@ package ua.knu.knudev.teammanager.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.stereotype.Service;
@@ -30,7 +31,6 @@ import java.util.Collections;
 import java.util.UUID;
 
 @Service
-@RequiredArgsConstructor
 @Slf4j
 public class RecruitmentService implements RecruitmentApi {
 
@@ -40,6 +40,20 @@ public class RecruitmentService implements RecruitmentApi {
     private final TaskScheduler taskScheduler;
     private final RecruitmentCloseService recruitmentCloseService;
     private final RecruitmentMapper recruitmentMapper;
+
+    public RecruitmentService(TransactionTemplate transactionTemplate,
+                              ActiveRecruitmentRepository activeRecruitmentRepository,
+                              AccountProfileService accountProfileService,
+                              @Qualifier(value = "closeRecruitmentTaskScheduler") TaskScheduler taskScheduler,
+                              RecruitmentCloseService recruitmentCloseService,
+                              RecruitmentMapper recruitmentMapper) {
+        this.transactionTemplate = transactionTemplate;
+        this.activeRecruitmentRepository = activeRecruitmentRepository;
+        this.accountProfileService = accountProfileService;
+        this.taskScheduler = taskScheduler;
+        this.recruitmentCloseService = recruitmentCloseService;
+        this.recruitmentMapper = recruitmentMapper;
+    }
 
     @Override
     public ActiveRecruitmentDto openRecruitment(RecruitmentOpenRequest openRequest) {

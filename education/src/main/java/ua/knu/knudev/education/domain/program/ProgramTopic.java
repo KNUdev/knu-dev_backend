@@ -3,6 +3,7 @@ package ua.knu.knudev.education.domain.program;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
+import org.hibernate.annotations.BatchSize;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UuidGenerator;
 import ua.knu.knudev.education.domain.MultiLanguageField;
@@ -19,6 +20,7 @@ import java.util.UUID;
 @Entity
 @Table(name = "topic", schema = "education")
 @SuperBuilder
+@BatchSize(size = 100)
 public class ProgramTopic extends BaseLearningUnit{
 
     @ElementCollection

@@ -662,7 +662,7 @@ public class ProgramService implements EducationProgramApi {
                 ));
     }
 
-    private EducationProgram getProgramById(UUID id) {
+    public EducationProgram getProgramById(UUID id) {
         return programRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Program not found for ID: " + id));
     }
