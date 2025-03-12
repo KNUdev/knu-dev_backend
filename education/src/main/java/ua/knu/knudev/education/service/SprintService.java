@@ -1,6 +1,8 @@
 package ua.knu.knudev.education.service;
 
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.lang3.ObjectUtils;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import ua.knu.knudev.education.domain.EducationProgram;
 import ua.knu.knudev.education.domain.bridge.ModuleTopicMapping;
@@ -14,27 +16,33 @@ import ua.knu.knudev.education.repository.SprintRepository;
 import ua.knu.knudev.education.repository.bridge.ModuleTopicMappingRepository;
 import ua.knu.knudev.education.repository.bridge.ProgramSectionMappingRepository;
 import ua.knu.knudev.education.repository.bridge.SectionModuleMappingRepository;
-import ua.knu.knudev.educationapi.dto.session.SessionSprintPlanDto;
-import ua.knu.knudev.educationapi.dto.session.SprintDto;
 import ua.knu.knudev.educationapi.enums.SprintStatus;
 import ua.knu.knudev.educationapi.enums.SprintType;
+import ua.knu.knudev.educationapi.request.SprintAdjustmentRequest;
 
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
 public class SprintService {
 
-    private static final int sprintDuration = 3;
     private final ProgramService programService;
     private final ProgramSectionMappingRepository programSectionMappingRepository;
     private final SectionModuleMappingRepository sectionModuleMappingRepository;
     private final ModuleTopicMappingRepository moduleTopicMappingRepository;
     private final SprintRepository sprintRepository;
 
+    @Value("${application.session.sprints.defaultDurationInDays}")
+    private Integer defaultSprintDuration;
+
+    @Value("${application.session.sprints.moduleEndStateTimeInDays}")
+    private Integer moduleEndStaleTimeInDays;
+
+    @Value("${application.session.sprints.sectionEndStaleTimeInDays}")
+    private Integer sectionEndStaleTimeInDays;
 
     public List<Sprint> generateSessionSprintPlan(EducationProgram program) {
         List<ProgramSectionMapping> sectionMappings =
@@ -78,9 +86,9 @@ public class SprintService {
                 for (ModuleTopicMapping topicMapping : topicsForModule) {
                     ProgramTopic topic = topicMapping.getTopic();
                     Sprint topicSprint = Sprint.builder()
-                            .durationDays(sprintDuration)
-                            .sprintType(SprintType.TOPIC)
-                            .sprintStatus(SprintStatus.FUTURE)
+                            .durationInDays(defaultSprintDuration)
+                            .type(SprintType.TOPIC)
+                            .status(SprintStatus.FUTURE)
                             .orderIndex(orderCounter.getAndIncrement())
                             .program(program)
                             .programSection(section)
@@ -92,9 +100,9 @@ public class SprintService {
                 }
 
                 Sprint moduleFinalSprint = Sprint.builder()
-                        .durationDays(sprintDuration)
-                        .sprintType(SprintType.MODULE_FINAL)
-                        .sprintStatus(SprintStatus.FUTURE)
+                        .durationInDays(defaultSprintDuration)
+                        .type(SprintType.MODULE_FINAL)
+                        .status(SprintStatus.FUTURE)
                         .orderIndex(orderCounter.getAndIncrement())
                         .program(program)
                         .programSection(section)
@@ -105,9 +113,9 @@ public class SprintService {
             }
 
             Sprint sectionFinalSprint = Sprint.builder()
-                    .durationDays(sprintDuration)
-                    .sprintType(SprintType.SECTION_FINAL)
-                    .sprintStatus(SprintStatus.FUTURE)
+                    .durationInDays(defaultSprintDuration)
+                    .type(SprintType.SECTION_FINAL)
+                    .status(SprintStatus.FUTURE)
                     .orderIndex(orderCounter.getAndIncrement())
                     .program(program)
                     .programSection(section)
@@ -117,17 +125,75 @@ public class SprintService {
         }
 
         Sprint programSprint = Sprint.builder()
-                .durationDays(sprintDuration)
-                .sprintType(SprintType.PROGRAM_FINAL)
-                .sprintStatus(SprintStatus.FUTURE)
+                .durationInDays(defaultSprintDuration)
+                .type(SprintType.PROGRAM_FINAL)
+                .status(SprintStatus.FUTURE)
                 .orderIndex(orderCounter.getAndIncrement())
                 .program(program)
                 .build();
         sprintsToSave.add(programSprint);
 
+        updateSprintsStartDates(sprintsToSave);
         return sprintsToSave;
     }
 
+    public List<Sprint> adjustSprintsDurations(List<SprintAdjustmentRequest> adjustments, UUID sessionId) {
+        List<Sprint> foundSprints = sprintRepository.findAllBySession_Id(sessionId);
+        List<Sprint> adjustedSprintsDurationInDays = foundSprints.stream()
+                .peek(sprint -> {
+                    SprintAdjustmentRequest adjustment = adjustments.stream()
+                            .filter(adj -> adj.getNewDurationInDays() != null)
+                            .filter(adj -> adj.getSprintId()!= null)
+                            .filter(adj -> sprint.getId().equals(adj.getSprintId()))
+                            .findFirst()
+                            //todo better exc
+                            .orElse(null);
+                    if(ObjectUtils.isNotEmpty(adjustment)) {
+                        sprint.setDurationInDays(adjustment.getNewDurationInDays());
+                    }
+                })
+                .collect(Collectors.toList());
+
+        List<Sprint> sprintsToSave = updateSprintsStartDates(adjustedSprintsDurationInDays);
+        sortSprintByOrderIndex(sprintsToSave);
+
+        return sprintRepository.saveAll(sprintsToSave);
+    }
+
+//    public Sprint get(UUID sprintId, int orderIndex) {
+//        return sprintRepository.findBySession_IdAndOrderIndex(sprintId, orderIndex)
+//                //todo better exc
+//                .orElseThrow(() -> new RuntimeException("Sprint not found"));
+//    }
+//
+//    public Sprint get(UUID sprintId) {
+//        return sprintRepository.findById(sprintId)
+//                //todo better exc
+//                .orElseThrow(() -> new RuntimeException("Sprint not found"));
+//    }
+
+    private List<Sprint> updateSprintsStartDates(List<Sprint> sprints) {
+        //todo get from request
+        LocalDateTime sessionStart = LocalDateTime.now();
+        sortSprintByOrderIndex(sprints);
+
+        LocalDateTime currentStart = sessionStart;
+        for (Sprint sprint : sprints) {
+            sprint.setStartDate(currentStart);
+            currentStart = currentStart.plusDays(sprint.getDurationInDays());
+            if(sprint.getType() == SprintType.MODULE_FINAL) {
+                currentStart = currentStart.plusDays(moduleEndStaleTimeInDays);
+            }
+            if(sprint.getType() == SprintType.SECTION_FINAL) {
+                currentStart = currentStart.plusDays(sectionEndStaleTimeInDays);
+            }
+        }
+        return sprints;
+    }
+
+    private void sortSprintByOrderIndex(List<Sprint> sprints) {
+        sprints.sort(Comparator.comparingInt(Sprint::getOrderIndex));
+    }
 
 }
 

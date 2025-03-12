@@ -1,7 +1,7 @@
 package ua.knu.knudev.educationapi.enums;
 
 public enum SessionStatus {
-    CREATED,
+    SCHEDULED,
     ONGOING,
     COMPLETED,
     CANCELLED

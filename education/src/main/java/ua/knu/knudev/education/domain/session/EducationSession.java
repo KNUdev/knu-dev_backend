@@ -65,4 +65,13 @@ public class EducationSession {
         sprints.add(sprint);
         sprint.setSession(this);
     }
+
+    public void addSAllSprints(List<Sprint> sprintList) {
+        if(CollectionUtils.isEmpty(sprints)) {
+            sprints = new ArrayList<>();
+        }
+        for(Sprint innerSprint : sprintList) {
+            addSprint(innerSprint);
+        }
+    }
 }

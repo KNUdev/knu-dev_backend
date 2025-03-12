@@ -4,8 +4,8 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 public record SessionCreationRequest(
-        UUID programId
-//        LocalDateTime startDate
+        UUID programId,
+        LocalDateTime startDate
 ) {
 
 }
