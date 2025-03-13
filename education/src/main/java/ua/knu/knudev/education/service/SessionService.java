@@ -3,6 +3,7 @@ package ua.knu.knudev.education.service;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.http.HttpStatus;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.stereotype.Service;
 import ua.knu.knudev.education.domain.EducationProgram;
@@ -15,6 +16,7 @@ import ua.knu.knudev.educationapi.api.SessionApi;
 import ua.knu.knudev.educationapi.dto.session.SessionSprintPlanDto;
 import ua.knu.knudev.educationapi.dto.session.SprintSummaryDto;
 import ua.knu.knudev.educationapi.enums.SessionStatus;
+import ua.knu.knudev.educationapi.exception.EducationSessionException;
 import ua.knu.knudev.educationapi.request.SessionCreationRequest;
 import ua.knu.knudev.educationapi.request.SprintAdjustmentRequest;
 
@@ -88,11 +90,24 @@ public class SessionService implements SessionApi {
         boolean sessionExists = sessionRepository.existsById(sessionId);
         if (!sessionExists) {
             //todo session exception
-            throw new RuntimeException("Session with id " + sessionId + " does not exist");
+            throw new EducationSessionException(
+                    "Session with id " + sessionId + " does not exist",
+                    HttpStatus.BAD_REQUEST
+            );
         }
+
+
         List<Sprint> sprints = sprintService.adjustSprintsDurations(adjustments, sessionId);
         LocalDateTime sessionEstimateEndDate = getSessionEstimateEndDate(sprints);
         sessionRepository.updateEstimatedEndDateById(sessionId, sessionEstimateEndDate);
+    }
+
+    @Transactional
+    @Override
+    public void extendCurrentSprintDuration(UUID sprintId, Integer extensionDays) {
+        //todo validate extension days
+        //todo do checks if the sprint is future +
+        sprintChainService.extendCurrentSprintDuration(sprintId, extensionDays);
     }
 
     private void startSession(UUID scheduledSessionId) {

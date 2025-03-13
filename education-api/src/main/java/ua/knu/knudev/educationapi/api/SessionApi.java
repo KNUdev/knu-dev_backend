@@ -13,4 +13,5 @@ public interface SessionApi {
 //    List<SprintDto> generateSprintsForProgram(UUID programId);
     SessionSprintPlanDto createSession(SessionCreationRequest request);
     void adjustSprintsDurations(List<SprintAdjustmentRequest> adjustments, UUID sessionId);
+    void extendCurrentSprintDuration(UUID sprintId, Integer extensionDays);
 }

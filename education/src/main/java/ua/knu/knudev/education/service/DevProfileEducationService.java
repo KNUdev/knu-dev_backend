@@ -1,8 +1,6 @@
 package ua.knu.knudev.education.service;
 
 import lombok.RequiredArgsConstructor;
-import org.apache.commons.fileupload.disk.DiskFileItem;
-import org.h2.util.IOUtils;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 import org.springframework.util.FileCopyUtils;

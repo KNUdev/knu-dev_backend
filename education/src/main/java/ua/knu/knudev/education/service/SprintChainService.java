@@ -55,7 +55,6 @@ public class SprintChainService {
         UUID sessionId = currentSprint.getSession().getId();
         int nextOrderIndex = currentSprint.getOrderIndex() + 1;
         Sprint nextSprint = sprintRepository.findBySession_IdAndOrderIndex(sessionId, nextOrderIndex);
-        //todo update the start of each next sprint
 
         if (nextSprint != null) {
             LocalDateTime newNextStartDate = currentSprint.getStartDate().plusDays(newDuration);
@@ -76,7 +75,7 @@ public class SprintChainService {
     }
 
     private void scheduleSprint(Sprint sprint) {
-        Instant startInstant = LocalDateTime.now().plusSeconds(30)
+        Instant startInstant = LocalDateTime.now().plusSeconds(60)
                 .atZone(ZoneId.systemDefault())
                 .toInstant();
 //        Instant startInstant = sprint.getStartDate()

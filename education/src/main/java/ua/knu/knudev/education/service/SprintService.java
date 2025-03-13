@@ -64,7 +64,6 @@ public class SprintService {
         topicMappings.sort(Comparator.comparingInt(ModuleTopicMapping::getOrderIndex));
 
         AtomicInteger orderCounter = new AtomicInteger(1);
-
         List<Sprint> sprintsToSave = new ArrayList<>();
 
         for (ProgramSectionMapping sectionMapping : sectionMappings) {
@@ -138,6 +137,9 @@ public class SprintService {
     }
 
     public List<Sprint> adjustSprintsDurations(List<SprintAdjustmentRequest> adjustments, UUID sessionId) {
+        //todo do check if session hasnt started yet
+        //
+
         List<Sprint> foundSprints = sprintRepository.findAllBySession_Id(sessionId);
         List<Sprint> adjustedSprintsDurationInDays = foundSprints.stream()
                 .peek(sprint -> {

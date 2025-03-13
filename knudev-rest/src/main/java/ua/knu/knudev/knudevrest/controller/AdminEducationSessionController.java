@@ -32,5 +32,12 @@ public class AdminEducationSessionController {
         sessionApi.adjustSprintsDurations(sprintsAdjustments, sessionId);
     }
 
+    @PatchMapping("/sprints/{sprintId}/extend")
+    public void extendSprintDeadline(@PathVariable UUID sprintId,
+                                     @RequestBody Integer extensionDays) {
+
+
+    }
+
 
 }

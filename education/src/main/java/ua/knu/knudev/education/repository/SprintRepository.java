@@ -29,6 +29,7 @@ public interface SprintRepository extends JpaRepository<Sprint, UUID> {
 
         getQueryFactory().update(sprint)
                 .set(sprint.startDate, newStartDate)
+                .where(sprint.session.id.eq(sessionId))
                 .where(sprint.orderIndex.gt(orderIndexParam))
                 .execute();
     }
