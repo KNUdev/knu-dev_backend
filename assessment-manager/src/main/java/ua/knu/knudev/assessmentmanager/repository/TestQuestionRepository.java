@@ -14,4 +14,6 @@ public interface TestQuestionRepository extends JpaRepository<TestQuestion, UUID
     boolean existsTestQuestionByEnQuestionBody(String enQuestionBody);
 
     List<TestQuestion> findAllByEnQuestionBody(String enQuestionBody);
+
+    List<TestQuestion> findAllByIdIn(List<UUID> ids);
 }

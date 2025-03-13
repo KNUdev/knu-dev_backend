@@ -10,6 +10,7 @@ import java.util.UUID;
 public class TestSubmissionRequest {
     private List<SubmittedAnswerDto> answers;
     private UUID submitterAccountId;
+    private UUID submittedTestId;
     private TestSubmissionStatus status;
     private long timeTakenInSeconds;
 }
