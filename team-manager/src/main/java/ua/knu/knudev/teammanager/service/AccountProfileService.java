@@ -222,11 +222,27 @@ public class AccountProfileService implements AccountProfileApi {
     }
 
     @Override
+    //todo refactor two N + 1 problems (department id and specialty id)
     public Page<AccountProfileDto> findAllBySearchQuery(AccountSearchCriteria accountSearchCriteria, Integer pageNumber, Integer pageSize) {
         Pageable paging = PageRequest.of(pageNumber, pageSize);
         Map<AccountsCriteriaFilterOption, Object> filtersMap = buildAccountsFiltersMap(accountSearchCriteria);
         Page<AccountProfile> searchedAccountsPage = accountProfileRepository.findAllAccountsByFilters(filtersMap, paging);
-        return searchedAccountsPage.map(accountProfileMapper::toDto);
+        return searchedAccountsPage.map(accountProfile -> AccountProfileDto.builder()
+                .fullName(new FullName(
+                        accountProfile.getFirstName(),
+                        accountProfile.getLastName(),
+                        accountProfile.getMiddleName())
+                )
+                .email(accountProfile.getEmail())
+                .technicalRole(accountProfile.getTechnicalRole())
+                .avatarFilename(accountProfile.getAvatarFilename())
+                .academicUnitsIds(AcademicUnitsIds.builder()
+                        .departmentId(accountProfile.getDepartment().getId())
+                        .specialtyCodename(accountProfile.getSpecialty().getCodeName())
+                        .build())
+                .githubAccountUsername(accountProfile.getGithubAccountUsername())
+                .bannerFilename(accountProfile.getBannerFilename())
+                .build());
     }
 
     @Override
