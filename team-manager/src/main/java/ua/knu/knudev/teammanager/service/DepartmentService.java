@@ -15,6 +15,7 @@ import ua.knu.knudev.teammanager.mapper.ShortDepartmentMapper;
 import ua.knu.knudev.teammanager.repository.DepartmentRepository;
 import ua.knu.knudev.teammanager.repository.SpecialtyRepository;
 import ua.knu.knudev.teammanagerapi.api.DepartmentApi;
+import ua.knu.knudev.teammanagerapi.dto.DepartmentWithSpecialtiesDto;
 import ua.knu.knudev.teammanagerapi.dto.ShortDepartmentDto;
 import ua.knu.knudev.teammanagerapi.dto.ShortSpecialtyDto;
 import ua.knu.knudev.teammanagerapi.dto.SpecialtyCreationDto;
@@ -71,6 +72,11 @@ public class DepartmentService implements DepartmentApi {
     public Set<ShortDepartmentDto> getShortDepartments() {
         Set<Department> departments = new HashSet<>(departmentRepository.findAll());
         return shortDepartmentMapper.toDtos(departments);
+    }
+
+    public Set<DepartmentWithSpecialtiesDto> getFullDepartments() {
+        Set<Department> departments = new HashSet<>(departmentRepository.findAll());
+        return departmentWithSpecialtiesMapper.toDtos(departments);
     }
 
     @Override

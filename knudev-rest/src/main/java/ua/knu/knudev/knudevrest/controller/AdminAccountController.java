@@ -65,7 +65,7 @@ public class AdminAccountController {
             @Parameter(name = "specialtyCodeName", description = "Filter accounts by specialty code name.", example = "123.0"),
             @Parameter(name = "universityStudyYear", description = "Filter accounts by university study year.", example = "3"),
             @Parameter(name = "recruitmentId", description = "Filter accounts by recruitment id.", example = "f47ac10b-58cc-4372-a567-0e02b2c3d479"),
-            @Parameter(name = "technicalRole", description = "Filter accounts by their technical role.", example = "BACKEND", schema = @Schema(implementation = AccountTechnicalRole.class)),
+            @Parameter(name = "technicalRole", description = "Filter accounts by their technical role.", example = "INTERN", schema = @Schema(implementation = AccountTechnicalRole.class)),
             @Parameter(name = "pageNumber", description = "Page number for pagination (0-indexed).", example = "0"),
             @Parameter(name = "pageSize", description = "Number of accounts to retrieve per page.", example = "10")
     })
