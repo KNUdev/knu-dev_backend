@@ -16,7 +16,11 @@ import ua.knu.knudev.education.repository.TopicRepository;
 import ua.knu.knudev.education.repository.bridge.ModuleTopicMappingRepository;
 import ua.knu.knudev.education.repository.bridge.ProgramSectionMappingRepository;
 import ua.knu.knudev.education.repository.bridge.SectionModuleMappingRepository;
+<<<<<<<< HEAD:knudev-integration-tests/src/test/java/ua/knu/knudev/intergrationtests/EducationProgramServiceIntegrationTest.java
+import ua.knu.knudev.education.service.EducationProgramService;
+========
 import ua.knu.knudev.education.service.ProgramService;
+>>>>>>>> master:knudev-integration-tests/src/test/java/ua/knu/knudev/intergrationtests/ProgramServiceIntegrationTest.java
 import ua.knu.knudev.educationapi.dto.EducationProgramDto;
 import ua.knu.knudev.educationapi.dto.ProgramSectionDto;
 import ua.knu.knudev.educationapi.dto.ProgramTopicDto;
@@ -37,10 +41,17 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 //todo fix and write more test
 @SpringBootTest(classes = IntegrationTestsConfig.class)
 @ActiveProfiles("test")
+<<<<<<<< HEAD:knudev-integration-tests/src/test/java/ua/knu/knudev/intergrationtests/EducationProgramServiceIntegrationTest.java
+class EducationProgramServiceIntegrationTest {
+
+    @Autowired
+    private EducationProgramService creationService;
+========
 class ProgramServiceIntegrationTest {
 
     @Autowired
     private ProgramService creationService;
+>>>>>>>> master:knudev-integration-tests/src/test/java/ua/knu/knudev/intergrationtests/ProgramServiceIntegrationTest.java
 
     @Autowired
     private EducationProgramRepository programRepository;
