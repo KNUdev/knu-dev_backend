@@ -31,6 +31,21 @@ public record TestCreationRequest(
                 requiredMode = Schema.RequiredMode.REQUIRED,
                 implementation = TestQuestionDto.class
         )
-        List<@Valid TestQuestionDto> questions
+        List<@Valid TestQuestionDto> questions,
+
+        @NotEmpty(message = "TimeUnitPerTextCharacter can not be 0")
+        @Schema(
+                description = "Constant. Time unit for text(question and answer) in seconds",
+                requiredMode = Schema.RequiredMode.REQUIRED
+        )
+        int timeUnitPerTextCharacter,
+
+        @NotEmpty(message = "ExtraTimePerCorrectAnswer can not be 0")
+        @Schema(
+                description = "Constant. Extra time added for each correct answer in seconds",
+                requiredMode = Schema.RequiredMode.REQUIRED
+        )
+        int extraTimePerCorrectAnswer
+
 ) {
 }

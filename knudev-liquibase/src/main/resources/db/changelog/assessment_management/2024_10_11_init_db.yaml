@@ -139,6 +139,21 @@ databaseChangeLog:
                   defaultValueComputed: CURRENT_TIMESTAMP
                   constraints:
                     nullable: false
+              - column:
+                  name: test_duration_in_minutes
+                  type: int
+                  constraints:
+                    nullable: false
+              - column:
+                  name: time_unit_per_text_character
+                  type: int
+                  constraints:
+                    nullable: false
+              - column:
+                  name: extra_time_per_correct_answer
+                  type: int
+                  constraints:
+                    nullable: false
 
   - changeSet:
       id: create_test_question_table
