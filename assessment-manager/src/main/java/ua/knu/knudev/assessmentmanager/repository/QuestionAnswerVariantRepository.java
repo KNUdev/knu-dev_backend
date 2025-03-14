@@ -3,6 +3,7 @@ package ua.knu.knudev.assessmentmanager.repository;
 import org.springframework.data.jpa.repository.JpaRepository;
 import ua.knu.knudev.assessmentmanager.domain.QuestionAnswerVariant;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
 
@@ -11,5 +12,5 @@ public interface QuestionAnswerVariantRepository extends JpaRepository<QuestionA
 
     boolean existsQuestionAnswerVariantByEnVariantBody(String enVariantBody);
 
-    List<QuestionAnswerVariant> findAllByIdIn(List<UUID> ids);
+    List<QuestionAnswerVariant> findAllByIdIn(Collection<UUID> ids);
 }

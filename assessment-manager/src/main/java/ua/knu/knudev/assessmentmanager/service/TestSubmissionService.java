@@ -35,38 +35,40 @@ public class TestSubmissionService implements TestSubmissionApi {
     @Override
     public TestSubmissionResultsDto submit(TestSubmissionRequest submissionRequest) {
         TestSubmissionStatus testSubmissionStatus = submissionRequest.getStatus();
-        checkTestSubmissionStatusOnFailed(testSubmissionStatus);
 
         UUID submittedTestId = submissionRequest.getSubmittedTestId();
         List<SubmittedAnswerDto> answers = submissionRequest.getAnswers();
         TestDomain testDomain = getTestDomainById(submittedTestId);
+        if (submissionRequest.getStatus().equals(TestSubmissionStatus.CANCELED)) {
+            return buildCancelledTest(testDomain, submissionRequest);
+        }
 
         List<UUID> questionIds = answers.stream().map(SubmittedAnswerDto::getQuestionId).toList();
 
-        List<UUID> chosenVariantIds = answers.stream().flatMap(
-                answer -> answer.getChosenVariantIds().stream()).toList();
+        List<UUID> chosenVariantIds = answers.stream()
+                .flatMap(answer -> answer.getChosenVariantIds().stream())
+                .toList();
 
         List<TestQuestion> testQuestions = testQuestionRepository.findAllByIdIn(questionIds);
         List<QuestionAnswerVariant> chosenVariants = questionAnswerVariantRepository.findAllByIdIn(chosenVariantIds);
 
         Map<TestQuestion, List<QuestionAnswerVariant>> question2AnswerVariants = buildQuestion2AnswerVariantsMap(chosenVariants, testQuestions);
 
-        Map<Double, Double> rawToPercentageScore = calculateTestScore(question2AnswerVariants, testDomain.getMaxRawScore());
+        TestScore rawToPercentageScore = calculateTestScore(question2AnswerVariants, testDomain.getMaxRawScore());
 
-        Map.Entry<Double, Double> rowToPercentageScoreEntry = rawToPercentageScore.entrySet().stream().findFirst()
-                .orElseThrow(() -> new TestException("Row score not calculated!"));
+        TestSubmission testSubmission = buildTestSubmission(submissionRequest, testDomain, rawToPercentageScore.getRawScore(),
+                rawToPercentageScore.getPercentageScore());
+        Set<TestSubmissionAnswer> testSubmissionAnswers = buildTestSubmissionAnswers(question2AnswerVariants, testSubmission);
+        testSubmission.addAnswers(testSubmissionAnswers);
 
-        TestSubmission testSubmission = getTestSubmission(submissionRequest, testDomain, rowToPercentageScoreEntry.getKey(), rowToPercentageScoreEntry.getValue());
-        Set<TestSubmissionAnswer> testSubmissionAnswers = getTestSubmissionAnswers(question2AnswerVariants, testSubmission);
-        testSubmission.getAnswers().addAll(testSubmissionAnswers);
+        testSubmissionRepository.save(testSubmission);
 
         return getTestSubmissionResultsDto(testSubmission, testQuestions, chosenVariantIds);
     }
 
     @Override
     public TestSubmissionResultsDto getSubmissionResults(UUID submissionId, UUID submitterAccountId) {
-        TestSubmission testSubmission = testSubmissionRepository.findById(submissionId)
-                .orElseThrow(() -> new TestException("Submission with ID:" + submissionId + " not found!"));
+        TestSubmission testSubmission = getById(submissionId);
 
         if (!testSubmission.getSubmitterAccountId().equals(submitterAccountId)) {
             throw new TestException(("There are no submitter accounts associated with this id:" + submitterAccountId));
@@ -86,9 +88,8 @@ public class TestSubmissionService implements TestSubmissionApi {
         return getTestSubmissionResultsDto(testSubmission, testQuestions, chosenAnswersIds);
     }
 
-    private HashMap<Double, Double> calculateTestScore(Map<TestQuestion, List<QuestionAnswerVariant>> questionsToAnswerVariants,
-                                                       Integer maxRowScore) {
-        HashMap<Double, Double> rawToPercentageScore = new HashMap<>();
+    private TestScore calculateTestScore(Map<TestQuestion, List<QuestionAnswerVariant>> questionsToAnswerVariants,
+                                         Integer maxRowScore) {
         double percentageScore = 0.0;
         double rawScore;
 
@@ -106,9 +107,10 @@ public class TestSubmissionService implements TestSubmissionApi {
                 .setScale(1, RoundingMode.HALF_UP)
                 .doubleValue();
 
-        rawToPercentageScore.put(rawScore, percentageScore);
-
-        return rawToPercentageScore;
+        return TestScore.builder()
+                .rawScore(rawScore)
+                .percentageScore(percentageScore)
+                .build();
     }
 
     private List<Double> calculatePercentageScoresPerAllQuestions(Map<TestQuestion, List<QuestionAnswerVariant>> questionsToAnswerVariants) {
@@ -130,8 +132,8 @@ public class TestSubmissionService implements TestSubmissionApi {
         return percentageScoresToAllQuestions;
     }
 
-    private Set<TestSubmissionAnswer> getTestSubmissionAnswers(Map<TestQuestion, List<QuestionAnswerVariant>> questionsToAnswerVariants,
-                                                               TestSubmission testSubmission) {
+    private Set<TestSubmissionAnswer> buildTestSubmissionAnswers(Map<TestQuestion, List<QuestionAnswerVariant>> questionsToAnswerVariants,
+                                                                 TestSubmission testSubmission) {
         return questionsToAnswerVariants.entrySet().stream()
                 .map(entry -> TestSubmissionAnswer.builder()
                         .testSubmission(testSubmission)
@@ -141,10 +143,10 @@ public class TestSubmissionService implements TestSubmissionApi {
                 .collect(Collectors.toSet());
     }
 
-    private void checkTestSubmissionStatusOnFailed(TestSubmissionStatus testSubmissionStatus) {
-        if (testSubmissionStatus.equals(TestSubmissionStatus.FAILED)) {
-            throw new TestException("Test submission failed");
-        }
+    private TestSubmissionResultsDto buildCancelledTest(TestDomain testDomain, TestSubmissionRequest submissionRequest) {
+        TestSubmission testSubmission = buildTestSubmission(submissionRequest, testDomain, 0.0, 0.0);
+        testSubmissionRepository.save(testSubmission);
+        return getTestSubmissionResultsDto(testSubmission, null, null);
     }
 
     private TestDomain getTestDomainById(UUID id) {
@@ -169,12 +171,13 @@ public class TestSubmissionService implements TestSubmissionApi {
                 ));
     }
 
-    private TestSubmission getTestSubmission(TestSubmissionRequest submissionRequest, TestDomain testDomain,
-                                             Double rawScore, Double percentageScore) {
+    private TestSubmission buildTestSubmission(TestSubmissionRequest submissionRequest, TestDomain testDomain,
+                                               Double rawScore, Double percentageScore) {
         return TestSubmission.builder()
                 .submitterAccountId(submissionRequest.getSubmitterAccountId())
                 .testDomain(testDomain)
-                .timeTakenInSeconds(submissionRequest.getTimeTakenInSeconds())
+                .timeTakenInSeconds(submissionRequest.getStatus() != TestSubmissionStatus.CANCELED ?
+                        submissionRequest.getTimeTakenInSeconds() : 0)
                 .submittedAt(LocalDateTime.now())
                 .submissionStatus(submissionRequest.getStatus())
                 .rawScore(rawScore)
@@ -183,7 +186,7 @@ public class TestSubmissionService implements TestSubmissionApi {
                 .build();
     }
 
-    private List<TestQuestionResultDto> getTestQuestionResultDto(List<TestQuestion> testQuestions, List<UUID> chosenVariantIds) {
+    private List<TestQuestionResultDto> buildTestResultsResponse(List<TestQuestion> testQuestions, List<UUID> chosenVariantIds) {
         return testQuestions.stream()
                 .map(question -> {
                     List<AnswerVariantResultDto> answerVariants = question.getAnswerVariants().stream()
@@ -211,16 +214,21 @@ public class TestSubmissionService implements TestSubmissionApi {
 
     private TestSubmissionResultsDto getTestSubmissionResultsDto(TestSubmission submission, List<TestQuestion> testQuestions,
                                                                  List<UUID> chosenVariantIds) {
-        List<TestQuestionResultDto> questions = getTestQuestionResultDto(testQuestions, chosenVariantIds);
+        List<TestQuestionResultDto> questions = buildTestResultsResponse(testQuestions, chosenVariantIds);
 
         return TestSubmissionResultsDto.builder()
                 .submissionId(submission.getId())
                 .userId(submission.getSubmitterAccountId())
                 .testName(submission.getTestDomain().getEnName())
                 .score(getTestScore(submission))
-                .status(submission.getSubmissionStatus().name())
+                .status(submission.getSubmissionStatus())
                 .timeTakenInSeconds(submission.getTimeTakenInSeconds())
                 .questions(questions)
                 .build();
+    }
+
+    private TestSubmission getById(UUID submissionId) {
+        return testSubmissionRepository.findById(submissionId)
+                .orElseThrow(() -> new TestException("Submission with ID:" + submissionId + " not found!"));
     }
 }
