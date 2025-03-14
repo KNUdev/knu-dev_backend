@@ -28,6 +28,9 @@ public class TestDomain {
     @Column(nullable = false)
     private LocalDate createdAt;
 
+    @Column(nullable = false)
+    private Integer maxRawScore;
+
     @OneToMany(mappedBy = "testDomain", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<TestQuestion> testQuestions = new HashSet<>();
 
@@ -38,6 +41,20 @@ public class TestDomain {
         questions.forEach(testQuestion -> testQuestion
                 .getAnswerVariants()
                 .forEach(variant -> variant.setTestQuestion(testQuestion))
+        );
+    }
+
+    public void updateMaxRawScore() {
+        this.maxRawScore = calculateMaxRawScore();
+    }
+
+    private int calculateMaxRawScore() {
+        return Math.toIntExact(
+                this.testQuestions.stream()
+                        .map(TestQuestion::getAnswerVariants)
+                        .flatMap(Set::stream)
+                        .filter(QuestionAnswerVariant::getIsCorrectAnswer)
+                        .count()
         );
     }
 

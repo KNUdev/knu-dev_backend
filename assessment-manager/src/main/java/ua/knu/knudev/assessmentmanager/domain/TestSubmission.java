@@ -7,9 +7,7 @@ import ua.knu.knudev.assessmentmanagerapi.constant.TestSubmissionStatus;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 @Getter
 @Setter
@@ -53,6 +51,12 @@ public class TestSubmission {
     public void addAnswer(TestSubmissionAnswer answer) {
         answer.setTestSubmission(this);
         this.answers.add(answer);
+    }
+
+    public void addAnswers(Collection<TestSubmissionAnswer> answers) {
+        for (TestSubmissionAnswer answer : answers) {
+            addAnswer(answer);
+        }
     }
 
     @Transient
