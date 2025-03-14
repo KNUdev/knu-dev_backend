@@ -10,13 +10,12 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import ua.knu.knudev.knudevsecurityapi.response.ErrorResponse;
 import ua.knu.knudev.teammanagerapi.api.RecruitmentApi;
+import ua.knu.knudev.teammanagerapi.dto.FullClosedRecruitmentDto;
 import ua.knu.knudev.teammanagerapi.request.RecruitmentJoinRequest;
+import ua.knu.knudev.teammanagerapi.request.RecruitmentReceivingRequest;
 
 @RestController
 @RequiredArgsConstructor
@@ -61,6 +60,12 @@ public class RecruitmentController {
         recruitmentApi.joinActiveRecruitment(joinRequest);
     }
 
+    @GetMapping("/closed")
+    public FullClosedRecruitmentDto getAllClosedRecruitment(
+            @RequestParam RecruitmentReceivingRequest recruitmentReceivingRequest
+    ) {
+        return;
+    }
     //todo close, open recruitment. On close manually to service pass MANUAL_CLOSE
 
 
