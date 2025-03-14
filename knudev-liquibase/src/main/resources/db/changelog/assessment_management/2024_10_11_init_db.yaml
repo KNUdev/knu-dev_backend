@@ -140,7 +140,7 @@ databaseChangeLog:
                   constraints:
                     nullable: false
               - column:
-                  name: max_row_score
+                  name: max_raw_score
                   type: int
                   constraints:
                     nullable: false

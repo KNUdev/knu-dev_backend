@@ -29,7 +29,7 @@ public class TestDomain {
     private LocalDate createdAt;
 
     @Column(nullable = false)
-    private Integer maxRowScore;
+    private Integer maxRawScore;
 
     @OneToMany(mappedBy = "testDomain", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<TestQuestion> testQuestions = new HashSet<>();
@@ -44,11 +44,11 @@ public class TestDomain {
         );
     }
 
-    public void updateMaxRowScore() {
-        this.maxRowScore = calculateMaxRowScore();
+    public void updateMaxRawScore() {
+        this.maxRawScore = calculateMaxRawScore();
     }
 
-    private int calculateMaxRowScore() {
+    private int calculateMaxRawScore() {
         return Math.toIntExact(
                 this.testQuestions.stream()
                         .map(TestQuestion::getAnswerVariants)

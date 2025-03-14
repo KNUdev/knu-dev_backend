@@ -51,9 +51,9 @@ public class TestSubmissionService implements TestSubmissionApi {
 
         Map<TestQuestion, List<QuestionAnswerVariant>> question2AnswerVariants = buildQuestion2AnswerVariantsMap(chosenVariants, testQuestions);
 
-        Map<Double, Double> rowToPercentageScore = calculateTestScore(question2AnswerVariants, testDomain.getMaxRowScore());
+        Map<Double, Double> rawToPercentageScore = calculateTestScore(question2AnswerVariants, testDomain.getMaxRawScore());
 
-        Map.Entry<Double, Double> rowToPercentageScoreEntry = rowToPercentageScore.entrySet().stream().findFirst()
+        Map.Entry<Double, Double> rowToPercentageScoreEntry = rawToPercentageScore.entrySet().stream().findFirst()
                 .orElseThrow(() -> new TestException("Row score not calculated!"));
 
         TestSubmission testSubmission = getTestSubmission(submissionRequest, testDomain, rowToPercentageScoreEntry.getKey(), rowToPercentageScoreEntry.getValue());
@@ -88,9 +88,9 @@ public class TestSubmissionService implements TestSubmissionApi {
 
     private HashMap<Double, Double> calculateTestScore(Map<TestQuestion, List<QuestionAnswerVariant>> questionsToAnswerVariants,
                                                        Integer maxRowScore) {
-        HashMap<Double, Double> rowToPercentageScore = new HashMap<>();
+        HashMap<Double, Double> rawToPercentageScore = new HashMap<>();
         double percentageScore = 0.0;
-        double rowScore;
+        double rawScore;
 
         List<Double> percentageScoresToAllQuestions = calculatePercentageScoresPerAllQuestions(questionsToAnswerVariants);
 
@@ -102,13 +102,13 @@ public class TestSubmissionService implements TestSubmissionApi {
                 .setScale(1, RoundingMode.HALF_UP)
                 .doubleValue();
 
-        rowScore = BigDecimal.valueOf((maxRowScore * percentageScore) / 100)
+        rawScore = BigDecimal.valueOf((maxRowScore * percentageScore) / 100)
                 .setScale(1, RoundingMode.HALF_UP)
                 .doubleValue();
 
-        rowToPercentageScore.put(rowScore, percentageScore);
+        rawToPercentageScore.put(rawScore, percentageScore);
 
-        return rowToPercentageScore;
+        return rawToPercentageScore;
     }
 
     private List<Double> calculatePercentageScoresPerAllQuestions(Map<TestQuestion, List<QuestionAnswerVariant>> questionsToAnswerVariants) {
