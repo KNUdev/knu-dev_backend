@@ -12,6 +12,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
+import ua.knu.knudev.knudevcommon.constant.Expertise;
 import ua.knu.knudev.knudevsecurityapi.response.ErrorResponse;
 import ua.knu.knudev.teammanagerapi.api.RecruitmentApi;
 import ua.knu.knudev.teammanagerapi.dto.FullActiveRecruitmentDto;
@@ -93,11 +94,18 @@ public class RecruitmentController {
     })
     @GetMapping("/closed")
     public List<FullClosedRecruitmentDto> getAllClosedRecruitments(
-            @RequestParam(required = false) ClosedRecruitmentReceivingRequest closedRecruitmentReceivingRequest,
+            @RequestParam(defaultValue = "") String name,
+            @RequestParam(defaultValue = "") Expertise expertise,
             @RequestParam(defaultValue = "0") Integer pageNumber,
             @RequestParam(defaultValue = "9") Integer pageSize
     ) {
-        return recruitmentApi.getClosedRecruitments(closedRecruitmentReceivingRequest, pageNumber, pageSize);
+        ClosedRecruitmentReceivingRequest getClosedRecruitmentsReq = ClosedRecruitmentReceivingRequest.builder()
+                .name(name)
+                .expertise(expertise)
+                .pageNumber(pageNumber)
+                .pageSize(pageSize)
+                .build();
+        return recruitmentApi.getClosedRecruitments(getClosedRecruitmentsReq);
     }
 
     @Operation(
@@ -123,8 +131,5 @@ public class RecruitmentController {
     public List<FullActiveRecruitmentDto> getAllActiveRecruitments() {
         return recruitmentApi.getAllActiveRecruitments();
     }
-
-    //todo close, open recruitment. On close manually to service pass MANUAL_CLOSE
-
 
 }

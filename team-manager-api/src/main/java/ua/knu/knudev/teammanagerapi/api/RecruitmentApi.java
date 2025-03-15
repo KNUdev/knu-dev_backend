@@ -19,7 +19,7 @@ public interface RecruitmentApi {
 
     void joinActiveRecruitment(RecruitmentJoinRequest joinRequest);
 
-    List<FullClosedRecruitmentDto> getClosedRecruitments(ClosedRecruitmentReceivingRequest closeRequest, Integer pageNumber, Integer pageSize);
+    List<FullClosedRecruitmentDto> getClosedRecruitments(ClosedRecruitmentReceivingRequest getClosedRecruitmentsReq);
 
     List<FullActiveRecruitmentDto> getAllActiveRecruitments();
 }

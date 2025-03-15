@@ -12,7 +12,10 @@ import ua.knu.knudev.teammanager.domain.ActiveRecruitment;
 import ua.knu.knudev.teammanagerapi.constant.RecruitmentCloseCause;
 import ua.knu.knudev.teammanagerapi.devprofile.DevProfileTeamManagerApi;
 import ua.knu.knudev.teammanagerapi.dto.*;
-import ua.knu.knudev.teammanagerapi.request.*;
+import ua.knu.knudev.teammanagerapi.request.DepartmentCreationRequest;
+import ua.knu.knudev.teammanagerapi.request.RecruitmentCloseRequest;
+import ua.knu.knudev.teammanagerapi.request.RecruitmentJoinRequest;
+import ua.knu.knudev.teammanagerapi.request.RecruitmentOpenRequest;
 
 import java.time.LocalDateTime;
 import java.util.*;
@@ -144,26 +147,24 @@ public class DevProfileTeamManagerService implements DevProfileTeamManagerApi {
     }
 
     @Override
-    public List<ActiveRecruitmentDto> createActiveRecruitments(Integer amount) {
-        if (ObjectUtils.isEmpty(amount) || amount <= 0) {
-            throw new RuntimeException("Invalid amount provided. Must be > 0");
-        }
-
+    public List<ActiveRecruitmentDto> createActiveRecruitments() {
         List<ActiveRecruitmentDto> out = new ArrayList<>();
-        for (int i = 0; i < amount; i++) {
-            RecruitmentOpenRequest recruitmentOpenRequest = RecruitmentOpenRequest.builder()
-                    .recruitmentName("Recruitment " + i)
-                    .expertise(getRandomExpertise())
-                    .unit(getRandomKNUdevUnit())
-                    .autoCloseConditions(
-                            RecruitmentAutoCloseConditionsDto.builder()
-                                    .deadlineDate(LocalDateTime.now().plusMonths(i))
-                                    .maxCandidates(10 + i)
-                                    .build())
-                    .build();
+        for (KNUdevUnit unit : KNUdevUnit.values()) {
+            for (Expertise expertise : Expertise.values()) {
+                RecruitmentOpenRequest recruitmentOpenRequest = RecruitmentOpenRequest.builder()
+                        .recruitmentName("Recruitment " + unit + expertise)
+                        .expertise(expertise)
+                        .unit(unit)
+                        .autoCloseConditions(
+                                RecruitmentAutoCloseConditionsDto.builder()
+                                        .deadlineDate(LocalDateTime.now().plusDays(getRandomValueInRange(3, 10)))
+                                        .maxCandidates(getRandomValueInRange(10, 100))
+                                        .build())
+                        .build();
 
-            ActiveRecruitmentDto activeRecruitmentDto = recruitmentService.openRecruitment(recruitmentOpenRequest);
-            out.add(activeRecruitmentDto);
+                ActiveRecruitmentDto activeRecruitmentDto = recruitmentService.openRecruitment(recruitmentOpenRequest);
+                out.add(activeRecruitmentDto);
+            }
         }
 
         return out;
@@ -180,11 +181,6 @@ public class DevProfileTeamManagerService implements DevProfileTeamManagerApi {
     }
 
     @Override
-    public List<FullActiveRecruitmentDto> getFullActiveRecruitments() {
-        return recruitmentService.getAllActiveRecruitments();
-    }
-
-    @Override
     public List<ClosedRecruitmentDto> createClosedRecruitments() {
         List<ActiveRecruitment> activeRecruitments = recruitmentService.getAll();
         List<ClosedRecruitmentDto> out = new ArrayList<>();
@@ -198,19 +194,8 @@ public class DevProfileTeamManagerService implements DevProfileTeamManagerApi {
         return out;
     }
 
-    @Override
-    public List<FullClosedRecruitmentDto> getFullClosedRecruitments(String title, Expertise expertise) {
-        ClosedRecruitmentReceivingRequest closedRecruitmentReceivingRequest = new ClosedRecruitmentReceivingRequest(title, expertise);
-        return recruitmentService.getClosedRecruitments(closedRecruitmentReceivingRequest, 0, 9);
-    }
-
     private Expertise getRandomExpertise() {
         Expertise[] values = Expertise.values();
-        return values[RANDOM.nextInt(values.length)];
-    }
-
-    private KNUdevUnit getRandomKNUdevUnit() {
-        KNUdevUnit[] values = KNUdevUnit.values();
         return values[RANDOM.nextInt(values.length)];
     }
 
@@ -223,9 +208,7 @@ public class DevProfileTeamManagerService implements DevProfileTeamManagerApi {
             throw new IllegalArgumentException("n must be less than or equal to k");
         }
         Random random = new Random();
-        // nextInt(k - n + 1) generates a number between 0 and (k - n) inclusive.
         return n + random.nextInt(k - n + 1);
     }
-
 
 }

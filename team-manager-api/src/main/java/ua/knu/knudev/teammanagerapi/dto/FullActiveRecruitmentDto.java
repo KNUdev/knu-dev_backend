@@ -1,5 +1,6 @@
 package ua.knu.knudev.teammanagerapi.dto;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.v3.oas.annotations.media.Schema;
 import ua.knu.knudev.knudevcommon.constant.Expertise;
 
@@ -11,9 +12,19 @@ public record FullActiveRecruitmentDto(
         String name,
 
         @Schema(description = "Start date of the recruitment")
+        @JsonFormat(
+                shape = JsonFormat.Shape.STRING,
+                pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'",
+                timezone = "UTC"
+        )
         LocalDateTime startedAt,
 
         @Schema(description = "Finish date of the recruitment")
+        @JsonFormat(
+                shape = JsonFormat.Shape.STRING,
+                pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'",
+                timezone = "UTC"
+        )
         LocalDateTime deadlineDate,
 
         @Schema(description = "Required expertise level for the recruitment")

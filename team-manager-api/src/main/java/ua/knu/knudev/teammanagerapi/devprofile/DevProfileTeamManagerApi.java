@@ -1,8 +1,10 @@
 package ua.knu.knudev.teammanagerapi.devprofile;
 
 import org.springframework.context.annotation.Profile;
-import ua.knu.knudev.knudevcommon.constant.Expertise;
-import ua.knu.knudev.teammanagerapi.dto.*;
+import ua.knu.knudev.teammanagerapi.dto.ActiveRecruitmentDto;
+import ua.knu.knudev.teammanagerapi.dto.ClosedRecruitmentDto;
+import ua.knu.knudev.teammanagerapi.dto.DepartmentWithSpecialtiesDto;
+import ua.knu.knudev.teammanagerapi.dto.ShortAccountProfileDto;
 
 import java.util.List;
 
@@ -14,11 +16,8 @@ public interface DevProfileTeamManagerApi {
 
     List<ClosedRecruitmentDto> createClosedRecruitments();
 
-    List<ActiveRecruitmentDto> createActiveRecruitments(Integer amount);
+    List<ActiveRecruitmentDto> createActiveRecruitments();
 
     void joinActiveRecruitment();
 
-    List<FullActiveRecruitmentDto> getFullActiveRecruitments();
-
-    List<FullClosedRecruitmentDto> getFullClosedRecruitments(String title, Expertise expertise);
 }
