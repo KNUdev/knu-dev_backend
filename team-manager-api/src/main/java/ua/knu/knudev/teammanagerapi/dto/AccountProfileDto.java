@@ -6,9 +6,15 @@ import ua.knu.knudev.knudevcommon.constant.AccountTechnicalRole;
 import ua.knu.knudev.knudevcommon.utils.AcademicUnitsIds;
 import ua.knu.knudev.knudevcommon.utils.FullName;
 
+import java.util.UUID;
+
 @Schema(description = "DTO representing the account profile")
 @Builder
 public record AccountProfileDto(
+
+        @Schema(description = "UUID format account id", example = "fda846b1-948c-473c-bc61-7a31c3937aed",
+                requiredMode = Schema.RequiredMode.REQUIRED)
+        UUID id,
 
         @Schema(description = "User's email address", example = "ivan@knu.ua",
                 requiredMode = Schema.RequiredMode.REQUIRED)

@@ -228,6 +228,7 @@ public class AccountProfileService implements AccountProfileApi {
         Map<AccountsCriteriaFilterOption, Object> filtersMap = buildAccountsFiltersMap(accountSearchCriteria);
         Page<AccountProfile> searchedAccountsPage = accountProfileRepository.findAllAccountsByFilters(filtersMap, paging);
         return searchedAccountsPage.map(accountProfile -> AccountProfileDto.builder()
+                .id(accountProfile.getId())
                 .fullName(new FullName(
                         accountProfile.getFirstName(),
                         accountProfile.getLastName(),
