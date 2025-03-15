@@ -2,6 +2,9 @@ package ua.knu.knudev.teammanager.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.stereotype.Service;
@@ -10,15 +13,18 @@ import ua.knu.knudev.knudevcommon.constant.Expertise;
 import ua.knu.knudev.knudevcommon.constant.KNUdevUnit;
 import ua.knu.knudev.teammanager.domain.AccountProfile;
 import ua.knu.knudev.teammanager.domain.ActiveRecruitment;
+import ua.knu.knudev.teammanager.domain.ClosedRecruitment;
 import ua.knu.knudev.teammanager.domain.embeddable.RecruitmentAutoCloseConditions;
+import ua.knu.knudev.teammanager.mapper.ActiveRecruitmentMapper;
+import ua.knu.knudev.teammanager.mapper.ClosedRecruitmentMapper;
 import ua.knu.knudev.teammanager.mapper.RecruitmentMapper;
 import ua.knu.knudev.teammanager.repository.ActiveRecruitmentRepository;
+import ua.knu.knudev.teammanager.repository.ClosedRecruitmentRepository;
 import ua.knu.knudev.teammanagerapi.api.RecruitmentApi;
 import ua.knu.knudev.teammanagerapi.constant.RecruitmentCloseCause;
-import ua.knu.knudev.teammanagerapi.dto.ActiveRecruitmentDto;
-import ua.knu.knudev.teammanagerapi.dto.ClosedRecruitmentDto;
-import ua.knu.knudev.teammanagerapi.dto.RecruitmentAutoCloseConditionsDto;
+import ua.knu.knudev.teammanagerapi.dto.*;
 import ua.knu.knudev.teammanagerapi.exception.RecruitmentException;
+import ua.knu.knudev.teammanagerapi.request.ClosedRecruitmentReceivingRequest;
 import ua.knu.knudev.teammanagerapi.request.RecruitmentCloseRequest;
 import ua.knu.knudev.teammanagerapi.request.RecruitmentJoinRequest;
 import ua.knu.knudev.teammanagerapi.request.RecruitmentOpenRequest;
@@ -27,6 +33,7 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Collections;
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -36,10 +43,13 @@ public class RecruitmentService implements RecruitmentApi {
 
     private final TransactionTemplate transactionTemplate;
     private final ActiveRecruitmentRepository activeRecruitmentRepository;
+    private final ClosedRecruitmentRepository closedRecruitmentRepository;
     private final AccountProfileService accountProfileService;
     private final TaskScheduler taskScheduler;
     private final RecruitmentCloseService recruitmentCloseService;
     private final RecruitmentMapper recruitmentMapper;
+    private final ActiveRecruitmentMapper activeRecruitmentMapper;
+    private final ClosedRecruitmentMapper closedRecruitmentMapper;
 
     @Override
     public ActiveRecruitmentDto openRecruitment(RecruitmentOpenRequest openRequest) {
@@ -73,6 +83,7 @@ public class RecruitmentService implements RecruitmentApi {
         return recruitmentMapper.toDto(savedRecruitment);
     }
 
+//    todo add here analytics build
     @Override
     public ClosedRecruitmentDto closeRecruitment(RecruitmentCloseRequest closeRequest) {
         ActiveRecruitment activeRecruitment = getActiveRecruitmentDomainById(closeRequest.activeRecruitmentId());
@@ -104,6 +115,23 @@ public class RecruitmentService implements RecruitmentApi {
                 }
             }
         }
+    }
+
+    @Override
+    public List<FullClosedRecruitmentDto> getClosedRecruitments(ClosedRecruitmentReceivingRequest req) {
+        Pageable paging = PageRequest.of(req.pageNumber(), req.pageSize());
+        Page<ClosedRecruitment> closedRecruitmentsPage = closedRecruitmentRepository.getAllClosedRecruitmentsByFilter(
+                paging, req.name(), req.expertise()
+        );
+
+        List<ClosedRecruitment> closedRecruitments = closedRecruitmentsPage.getContent();
+        return closedRecruitmentMapper.toDtos(closedRecruitments);
+    }
+
+    @Override
+    public List<FullActiveRecruitmentDto> getAllActiveRecruitments() {
+        List<ActiveRecruitment> activeRecruitments = activeRecruitmentRepository.findAll();
+        return activeRecruitmentMapper.toDtos(activeRecruitments);
     }
 
     public ActiveRecruitmentDto getById(UUID id) {
@@ -185,4 +213,7 @@ public class RecruitmentService implements RecruitmentApi {
                 activeRecruitmentId, deadlineDate);
     }
 
+    public List<ActiveRecruitment> getAll() {
+        return activeRecruitmentRepository.findAll();
+    }
 }

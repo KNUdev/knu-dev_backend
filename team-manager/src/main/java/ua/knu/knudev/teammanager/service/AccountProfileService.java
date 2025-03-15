@@ -480,4 +480,8 @@ public class AccountProfileService implements AccountProfileApi {
         ));
     }
 
+    public List<AccountProfile> getAllAccountProfiles() {
+        return accountProfileRepository.findAll();
+    }
+
 }
