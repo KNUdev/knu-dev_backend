@@ -227,23 +227,39 @@ public class AccountProfileService implements AccountProfileApi {
         Pageable paging = PageRequest.of(pageNumber, pageSize);
         Map<AccountsCriteriaFilterOption, Object> filtersMap = buildAccountsFiltersMap(accountSearchCriteria);
         Page<AccountProfile> searchedAccountsPage = accountProfileRepository.findAllAccountsByFilters(filtersMap, paging);
-        return searchedAccountsPage.map(accountProfile -> AccountProfileDto.builder()
-                .id(accountProfile.getId())
-                .fullName(new FullName(
-                        accountProfile.getFirstName(),
-                        accountProfile.getLastName(),
-                        accountProfile.getMiddleName())
-                )
-                .email(accountProfile.getEmail())
-                .technicalRole(accountProfile.getTechnicalRole())
-                .avatarFilename(accountProfile.getAvatarFilename())
-                .academicUnitsIds(AcademicUnitsIds.builder()
-                        .departmentId(accountProfile.getDepartment().getId())
-                        .specialtyCodename(accountProfile.getSpecialty().getCodeName())
-                        .build())
-                .githubAccountUsername(accountProfile.getGithubAccountUsername())
-                .bannerFilename(accountProfile.getBannerFilename())
-                .build());
+        return searchedAccountsPage.map(accountProfile -> {
+            String avatarFilename = accountProfile.getAvatarFilename();
+            String avatarUrl = StringUtils.isNotEmpty(avatarFilename) ? imageServiceApi.getPathByFilename(
+                    avatarFilename, ImageSubfolder.ACCOUNT_AVATARS
+            ) : null;
+
+            String bannerFilename = accountProfile.getBannerFilename();
+            String bannerUrl = StringUtils.isNotEmpty(bannerFilename) ? imageServiceApi.getPathByFilename(
+                    avatarFilename, ImageSubfolder.ACCOUNT_BANNERS
+            ) : null;
+            return AccountProfileDto.builder()
+                    .id(accountProfile.getId())
+                    .fullName(new FullName(
+                            accountProfile.getFirstName(),
+                            accountProfile.getLastName(),
+                            accountProfile.getMiddleName())
+                    )
+                    .email(accountProfile.getEmail())
+                    .technicalRole(accountProfile.getTechnicalRole())
+                    .avatarFilename(avatarUrl)
+                    .bannerFilename(bannerUrl)
+                    .academicUnitsIds(AcademicUnitsIds.builder()
+                            .departmentId(accountProfile.getDepartment().getId())
+                            .specialtyCodename(accountProfile.getSpecialty().getCodeName())
+                            .build())
+                    .githubAccountUsername(accountProfile.getGithubAccountUsername())
+                    .bannerFilename(accountProfile.getBannerFilename())
+                    .expertise(accountProfile.getExpertise())
+                    .yearOfStudyOnRegistration(accountProfile.getYearOfStudyOnRegistration())
+                    .lastRoleUpdateDate(accountProfile.getLastRoleUpdateDate())
+                    .registeredAt(accountProfile.getRegistrationDate())
+                    .build();
+        });
     }
 
     @Override
