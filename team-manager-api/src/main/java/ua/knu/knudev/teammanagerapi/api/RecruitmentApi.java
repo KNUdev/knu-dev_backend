@@ -2,7 +2,9 @@ package ua.knu.knudev.teammanagerapi.api;
 
 import ua.knu.knudev.teammanagerapi.dto.ActiveRecruitmentDto;
 import ua.knu.knudev.teammanagerapi.dto.ClosedRecruitmentDto;
+import ua.knu.knudev.teammanagerapi.dto.FullActiveRecruitmentDto;
 import ua.knu.knudev.teammanagerapi.dto.FullClosedRecruitmentDto;
+import ua.knu.knudev.teammanagerapi.request.ClosedRecruitmentReceivingRequest;
 import ua.knu.knudev.teammanagerapi.request.RecruitmentCloseRequest;
 import ua.knu.knudev.teammanagerapi.request.RecruitmentJoinRequest;
 import ua.knu.knudev.teammanagerapi.request.RecruitmentOpenRequest;
@@ -17,5 +19,7 @@ public interface RecruitmentApi {
 
     void joinActiveRecruitment(RecruitmentJoinRequest joinRequest);
 
-    List<FullClosedRecruitmentDto> getClosedRecruitments(RecruitmentCloseRequest closeRequest);
+    List<FullClosedRecruitmentDto> getClosedRecruitments(ClosedRecruitmentReceivingRequest closeRequest, Integer pageNumber, Integer pageSize);
+
+    List<FullActiveRecruitmentDto> getAllActiveRecruitments();
 }

@@ -3,6 +3,7 @@ package ua.knu.knudev.knudevrest.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.Parameters;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -13,9 +14,12 @@ import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import ua.knu.knudev.knudevsecurityapi.response.ErrorResponse;
 import ua.knu.knudev.teammanagerapi.api.RecruitmentApi;
+import ua.knu.knudev.teammanagerapi.dto.FullActiveRecruitmentDto;
 import ua.knu.knudev.teammanagerapi.dto.FullClosedRecruitmentDto;
+import ua.knu.knudev.teammanagerapi.request.ClosedRecruitmentReceivingRequest;
 import ua.knu.knudev.teammanagerapi.request.RecruitmentJoinRequest;
-import ua.knu.knudev.teammanagerapi.request.RecruitmentReceivingRequest;
+
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -60,12 +64,66 @@ public class RecruitmentController {
         recruitmentApi.joinActiveRecruitment(joinRequest);
     }
 
+    @Operation(
+            summary = "Retrieve all closed recruitments by filter value",
+            description = "Fetches information about a recruitments on the provided filter."
+    )
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Recruitments was successfully retrieved.",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = FullClosedRecruitmentDto.class)
+                    ))
+    })
+    @Parameters({
+            @Parameter(
+                    name = "ClosedRecruitmentReceivingRequest",
+                    schema = @Schema(implementation = ClosedRecruitmentReceivingRequest.class,
+                            requiredMode = Schema.RequiredMode.REQUIRED),
+                    in = ParameterIn.HEADER
+            ),
+            @Parameter(
+                    name = "FullClosedRecruitmentDto",
+                    schema = @Schema(implementation = FullClosedRecruitmentDto.class,
+                            requiredMode = Schema.RequiredMode.REQUIRED),
+                    in = ParameterIn.HEADER
+            )
+    })
     @GetMapping("/closed")
-    public FullClosedRecruitmentDto getAllClosedRecruitment(
-            @RequestParam RecruitmentReceivingRequest recruitmentReceivingRequest
+    public List<FullClosedRecruitmentDto> getAllClosedRecruitments(
+            @RequestParam(required = false) ClosedRecruitmentReceivingRequest closedRecruitmentReceivingRequest,
+            @RequestParam(defaultValue = "0") Integer pageNumber,
+            @RequestParam(defaultValue = "9") Integer pageSize
     ) {
-        return;
+        return recruitmentApi.getClosedRecruitments(closedRecruitmentReceivingRequest, pageNumber, pageSize);
     }
+
+    @Operation(
+            summary = "Retrieve all active recruitments",
+            description = "Fetches information about a recruitments on the provided filter."
+    )
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Recruitments was successfully retrieved.",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = FullActiveRecruitmentDto.class)
+                    ))
+    })
+    @Parameter(
+            name = "FullActiveRecruitmentDto",
+            schema = @Schema(implementation = FullActiveRecruitmentDto.class,
+                    requiredMode = Schema.RequiredMode.REQUIRED),
+            in = ParameterIn.HEADER
+    )
+    @GetMapping("/active")
+    public List<FullActiveRecruitmentDto> getAllActiveRecruitments() {
+        return recruitmentApi.getAllActiveRecruitments();
+    }
+
     //todo close, open recruitment. On close manually to service pass MANUAL_CLOSE
 
 

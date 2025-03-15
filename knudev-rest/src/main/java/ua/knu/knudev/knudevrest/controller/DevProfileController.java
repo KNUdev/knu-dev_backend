@@ -2,13 +2,10 @@ package ua.knu.knudev.knudevrest.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Profile;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import ua.knu.knudev.knudevcommon.constant.Expertise;
 import ua.knu.knudev.teammanagerapi.devprofile.DevProfileTeamManagerApi;
-import ua.knu.knudev.teammanagerapi.dto.DepartmentWithSpecialtiesDto;
-import ua.knu.knudev.teammanagerapi.dto.ShortAccountProfileDto;
+import ua.knu.knudev.teammanagerapi.dto.*;
 
 import java.util.List;
 
@@ -27,6 +24,32 @@ public class DevProfileController {
     @PostMapping("/accounts/create")
     public List<ShortAccountProfileDto> createTestAccounts(@RequestBody Integer amount) {
         return devProfileTeamManagerApi.createTestAccounts(amount);
+    }
+
+    @PostMapping("/recruitments/create/active")
+    public List<ActiveRecruitmentDto> createActiveRecruitments(@RequestBody Integer amount) {
+        return devProfileTeamManagerApi.createActiveRecruitments(amount);
+    }
+
+    @PostMapping("/recruitment/join")
+    public void joinActiveRecruitment() {
+        devProfileTeamManagerApi.joinActiveRecruitment();
+    }
+
+    @PostMapping("/recruitments/create/closed")
+    public List<ClosedRecruitmentDto> createClosedRecruitments() {
+        return devProfileTeamManagerApi.createClosedRecruitments();
+    }
+
+    @PostMapping("/recruitments/get/active")
+    public List<FullActiveRecruitmentDto> getActiveRecruitments() {
+        return devProfileTeamManagerApi.getFullActiveRecruitments();
+    }
+
+    @PostMapping("/recruitments/get/closed")
+    public List<FullClosedRecruitmentDto> getClosedRecruitments(@RequestParam String title,
+                                                                @RequestParam Expertise expertise) {
+        return devProfileTeamManagerApi.getFullClosedRecruitments(title, expertise);
     }
 
 }
