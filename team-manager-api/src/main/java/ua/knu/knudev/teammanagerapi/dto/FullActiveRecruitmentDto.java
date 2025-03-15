@@ -5,9 +5,13 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import ua.knu.knudev.knudevcommon.constant.Expertise;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Schema(description = "DTO for active recruitment")
 public record FullActiveRecruitmentDto(
+        @Schema(description = "UUID recruitment id")
+        UUID id,
+
         @Schema(description = "Title of the recruitment", example = "Frontend Developer Recruitment")
         String name,
 

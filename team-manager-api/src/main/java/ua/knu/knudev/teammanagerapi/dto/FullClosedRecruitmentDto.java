@@ -6,10 +6,14 @@ import lombok.Builder;
 import ua.knu.knudev.knudevcommon.constant.Expertise;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Builder
 @Schema(description = "DTO for closed recruitment with additional analytics data")
 public record FullClosedRecruitmentDto(
+        @Schema(description = "UUID recruitment id")
+        UUID id,
+
         @Schema(description = "Title of the recruitment", example = "Frontend Developer Recruitment")
         String name,
 
