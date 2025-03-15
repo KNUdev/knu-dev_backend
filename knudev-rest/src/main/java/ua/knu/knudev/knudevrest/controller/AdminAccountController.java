@@ -84,10 +84,11 @@ public class AdminAccountController {
             @RequestParam(name = "pageNumber", defaultValue = "0") Integer pageNumber,
             @RequestParam(name = "pageSize", defaultValue = "9") Integer pageSize) {
 
+
         AccountSearchCriteria accountSearchCriteria = AccountSearchCriteria.builder()
                 .searchQuery(searchQuery)
-                .registeredAt(registeredAt.atStartOfDay())
-                .registeredBefore(registeredBefore.atStartOfDay())
+                .registeredAt(registeredAt != null ? registeredAt.atStartOfDay() : null)
+                .registeredBefore(registeredBefore != null ? registeredBefore.atStartOfDay() : null)
                 .unit(unit)
                 .expertise(expertise)
                 .departmentId(departmentId)
