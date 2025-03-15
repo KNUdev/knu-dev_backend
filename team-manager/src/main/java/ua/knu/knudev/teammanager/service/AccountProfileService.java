@@ -248,6 +248,7 @@ public class AccountProfileService implements AccountProfileApi {
                     .technicalRole(accountProfile.getTechnicalRole())
                     .avatarFilename(avatarUrl)
                     .bannerFilename(bannerUrl)
+                    .unit(accountProfile.getUnit())
                     .academicUnitsIds(AcademicUnitsIds.builder()
                             .departmentId(accountProfile.getDepartment().getId())
                             .specialtyCodename(accountProfile.getSpecialty().getCodeName())

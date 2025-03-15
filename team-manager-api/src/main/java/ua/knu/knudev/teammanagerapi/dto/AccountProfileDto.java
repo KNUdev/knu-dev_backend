@@ -5,6 +5,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
 import ua.knu.knudev.knudevcommon.constant.AccountTechnicalRole;
 import ua.knu.knudev.knudevcommon.constant.Expertise;
+import ua.knu.knudev.knudevcommon.constant.KNUdevUnit;
 import ua.knu.knudev.knudevcommon.utils.AcademicUnitsIds;
 import ua.knu.knudev.knudevcommon.utils.FullName;
 
@@ -64,8 +65,10 @@ public record AccountProfileDto(
         )
         @Schema(description = "Date, when technical role was last updated", example = "2025-15-03T11:50:23.223Z",
                 implementation = LocalDateTime.class)
-        LocalDateTime lastRoleUpdateDate
+        LocalDateTime lastRoleUpdateDate,
 
+        @Schema(description = "KNUdev unit", example = "CAMPUS")
+        KNUdevUnit unit
 ) {
 }
 
