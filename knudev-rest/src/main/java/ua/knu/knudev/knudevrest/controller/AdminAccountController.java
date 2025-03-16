@@ -17,11 +17,11 @@ import ua.knu.knudev.knudevcommon.constant.Expertise;
 import ua.knu.knudev.knudevcommon.constant.KNUdevUnit;
 import ua.knu.knudev.knudevsecurityapi.response.ErrorResponse;
 import ua.knu.knudev.teammanagerapi.api.AccountProfileApi;
-import ua.knu.knudev.teammanagerapi.dto.AccountSearchCriteria;
 import ua.knu.knudev.teammanagerapi.dto.AccountProfileDto;
 import ua.knu.knudev.teammanagerapi.request.AccountUpdateRequest;
+import ua.knu.knudev.teammanagerapi.dto.AccountSearchCriteria;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.util.UUID;
 
 @RestController
@@ -72,8 +72,8 @@ public class AdminAccountController {
     @GetMapping
     public Page<AccountProfileDto> getAccountsByFilter(
             @RequestParam(name = "searchQuery", required = false) String searchQuery,
-            @RequestParam(name = "registeredAt", required = false) LocalDateTime registeredAt,
-            @RequestParam(name = "registeredBefore", required = false) LocalDateTime registeredBefore,
+            @RequestParam(name = "registeredAt", required = false) LocalDate registeredAt,
+            @RequestParam(name = "registeredBefore", required = false) LocalDate registeredBefore,
             @RequestParam(name = "unit", required = false) KNUdevUnit unit,
             @RequestParam(name = "expertise", required = false) Expertise expertise,
             @RequestParam(name = "departmentId", required = false) String departmentId,
@@ -86,8 +86,8 @@ public class AdminAccountController {
 
         AccountSearchCriteria accountSearchCriteria = AccountSearchCriteria.builder()
                 .searchQuery(searchQuery)
-                .registeredAt(registeredAt)
-                .registeredBefore(registeredBefore)
+                .registeredAt(registeredAt != null ? registeredAt.atStartOfDay() : null)
+                .registeredBefore(registeredBefore != null ? registeredBefore.atStartOfDay() : null)
                 .unit(unit)
                 .expertise(expertise)
                 .departmentId(departmentId)

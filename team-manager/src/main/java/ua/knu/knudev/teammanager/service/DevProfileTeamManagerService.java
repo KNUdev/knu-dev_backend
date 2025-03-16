@@ -5,11 +5,19 @@ import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 import ua.knu.knudev.knudevcommon.constant.Expertise;
+import ua.knu.knudev.knudevcommon.constant.KNUdevUnit;
 import ua.knu.knudev.knudevsecurityapi.request.AccountCreationRequest;
+import ua.knu.knudev.teammanager.domain.AccountProfile;
+import ua.knu.knudev.teammanager.domain.ActiveRecruitment;
+import ua.knu.knudev.teammanagerapi.constant.RecruitmentCloseCause;
 import ua.knu.knudev.teammanagerapi.devprofile.DevProfileTeamManagerApi;
 import ua.knu.knudev.teammanagerapi.dto.*;
 import ua.knu.knudev.teammanagerapi.request.DepartmentCreationRequest;
+import ua.knu.knudev.teammanagerapi.request.RecruitmentCloseRequest;
+import ua.knu.knudev.teammanagerapi.request.RecruitmentJoinRequest;
+import ua.knu.knudev.teammanagerapi.request.RecruitmentOpenRequest;
 
+import java.time.LocalDateTime;
 import java.util.*;
 
 @Profile("dev")
@@ -19,6 +27,7 @@ public class DevProfileTeamManagerService implements DevProfileTeamManagerApi {
     private static final Random RANDOM = new Random();
     private final DepartmentService departmentService;
     private final AccountProfileService accountProfileService;
+    private final RecruitmentService recruitmentService;
 
     private static String generateRandomName(int minLength, int maxLength) {
         if (minLength < 1) {
@@ -137,6 +146,54 @@ public class DevProfileTeamManagerService implements DevProfileTeamManagerApi {
         return out;
     }
 
+    @Override
+    public List<ActiveRecruitmentDto> createActiveRecruitments() {
+        List<ActiveRecruitmentDto> out = new ArrayList<>();
+        for (KNUdevUnit unit : KNUdevUnit.values()) {
+            for (Expertise expertise : Expertise.values()) {
+                RecruitmentOpenRequest recruitmentOpenRequest = RecruitmentOpenRequest.builder()
+                        .recruitmentName("Recruitment " + unit + expertise)
+                        .expertise(expertise)
+                        .unit(unit)
+                        .autoCloseConditions(
+                                RecruitmentAutoCloseConditionsDto.builder()
+                                        .deadlineDate(LocalDateTime.now().plusDays(getRandomValueInRange(3, 10)))
+                                        .maxCandidates(getRandomValueInRange(10, 100))
+                                        .build())
+                        .build();
+
+                ActiveRecruitmentDto activeRecruitmentDto = recruitmentService.openRecruitment(recruitmentOpenRequest);
+                out.add(activeRecruitmentDto);
+            }
+        }
+
+        return out;
+    }
+
+    @Override
+    public void joinActiveRecruitment() {
+        List<ActiveRecruitment> activeRecruitments = recruitmentService.getAll();
+        List<AccountProfile> accounts = accountProfileService.getAllAccountProfiles();
+        for (int i = 0; i < activeRecruitments.size(); i++) {
+            RecruitmentJoinRequest recruitmentJoinRequest = new RecruitmentJoinRequest(accounts.get(i).getId(), activeRecruitments.get(i).getId());
+            recruitmentService.joinActiveRecruitment(recruitmentJoinRequest);
+        }
+    }
+
+    @Override
+    public List<ClosedRecruitmentDto> createClosedRecruitments() {
+        List<ActiveRecruitment> activeRecruitments = recruitmentService.getAll();
+        List<ClosedRecruitmentDto> out = new ArrayList<>();
+
+        for (int i = 0; i < activeRecruitments.size() / 2; i++) {
+            RecruitmentCloseRequest recruitmentCloseRequest = new RecruitmentCloseRequest(activeRecruitments.get(i).getId(), RecruitmentCloseCause.MANUAL_CLOSE);
+            ClosedRecruitmentDto closedRecruitmentDto = recruitmentService.closeRecruitment(recruitmentCloseRequest);
+            out.add(closedRecruitmentDto);
+        }
+
+        return out;
+    }
+
     private Expertise getRandomExpertise() {
         Expertise[] values = Expertise.values();
         return values[RANDOM.nextInt(values.length)];
@@ -151,9 +208,7 @@ public class DevProfileTeamManagerService implements DevProfileTeamManagerApi {
             throw new IllegalArgumentException("n must be less than or equal to k");
         }
         Random random = new Random();
-        // nextInt(k - n + 1) generates a number between 0 and (k - n) inclusive.
         return n + random.nextInt(k - n + 1);
     }
-
 
 }
