@@ -10,10 +10,8 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.MediaType;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.*;
 import ua.knu.knudev.knudevcommon.constant.AccountTechnicalRole;
 import ua.knu.knudev.knudevcommon.constant.Expertise;
 import ua.knu.knudev.knudevcommon.constant.KNUdevUnit;
@@ -21,6 +19,7 @@ import ua.knu.knudev.knudevsecurityapi.response.ErrorResponse;
 import ua.knu.knudev.teammanagerapi.api.AccountProfileApi;
 import ua.knu.knudev.teammanagerapi.dto.AccountSearchCriteria;
 import ua.knu.knudev.teammanagerapi.dto.AccountProfileDto;
+import ua.knu.knudev.teammanagerapi.request.AccountUpdateRequest;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -28,6 +27,7 @@ import java.util.UUID;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/admin/accounts")
+@Validated
 public class AdminAccountController {
 
     private final AccountProfileApi accountProfileApi;
@@ -100,4 +100,61 @@ public class AdminAccountController {
         return accountProfileApi.findAllBySearchQuery(accountSearchCriteria, pageNumber, pageSize);
     }
 
+    @Operation(
+            summary = "Update an account",
+            description = "Allows updating user account details, including email, GitHub username, department, and other fields.",
+            responses = {
+                    @ApiResponse(responseCode = "200",
+                            description = "Account successfully updated",
+                            content = @Content(schema =
+                            @Schema(implementation = AccountProfileDto.class))),
+                    @ApiResponse(responseCode = "404", description = "Account not found",
+                            content = @Content(
+                                    mediaType = MediaType.APPLICATION_JSON_VALUE,
+                                    schema = @Schema(implementation = ErrorResponse.class)
+                            ))
+            })
+    @Parameters({
+            @Parameter(name = "accountId", description = "UUID of the account to update", required = true),
+            @Parameter(name = "firstName", description = "User's first name"),
+            @Parameter(name = "lastName", description = "User's last name"),
+            @Parameter(name = "middleName", description = "User's middle name"),
+            @Parameter(name = "email", description = "User's email address", example = "user@knu.ua"),
+            @Parameter(name = "technicalRole", description = "User's technical role"),
+            @Parameter(name = "yearsOfStudyOnRegistration", description = "Years of study at the time of registration"),
+            @Parameter(name = "unit", description = "User's unit"),
+            @Parameter(name = "gitHubAccountUsername", description = "GitHub account username"),
+            @Parameter(name = "specialtyCodeName", description = "Specialty code"),
+            @Parameter(name = "departmentId", description = "Department ID")
+    })
+    @PostMapping("/{accountId}/update")
+    public AccountProfileDto updateAccount(
+            @PathVariable UUID accountId,
+            @RequestParam(name = "firstName", required = false) String firstName,
+            @RequestParam(name = "lastName", required = false) String lastName,
+            @RequestParam(name = "middleName", required = false) String middleName,
+            @RequestParam(name = "email", required = false) String email,
+            @RequestParam(name = "technicalRole", required = false) AccountTechnicalRole technicalRole,
+            @RequestParam(name = "yearsOfStudyOnRegistration", required = false) Integer yearsOfStudyOnRegistration,
+            @RequestParam(name = "unit", required = false) KNUdevUnit unit,
+            @RequestParam(name = "gitHubAccountUsername", required = false) String gitHubAccountUsername,
+            @RequestParam(name = "specialtyCodeName", required = false) Double specialtyCodeName,
+            @RequestParam(name = "departmentId", required = false) UUID departmentId
+    ) {
+        AccountUpdateRequest accountUpdateRequest = AccountUpdateRequest.builder()
+                .accountId(accountId)
+                .firstName(firstName)
+                .lastName(lastName)
+                .middleName(middleName)
+                .email(email)
+                .technicalRole(technicalRole)
+                .unit(unit)
+                .yearOfStudyOnRegistration(yearsOfStudyOnRegistration)
+                .gitHubAccountUsername(gitHubAccountUsername)
+                .specialtyCodeName(specialtyCodeName)
+                .departmentId(departmentId)
+                .build();
+
+        return accountProfileApi.update(accountUpdateRequest);
+    }
 }

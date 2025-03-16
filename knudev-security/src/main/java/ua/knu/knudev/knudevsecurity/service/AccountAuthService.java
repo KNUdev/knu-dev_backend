@@ -10,10 +10,13 @@ import ua.knu.knudev.knudevsecurity.mapper.AccountAuthMapper;
 import ua.knu.knudev.knudevsecurity.repository.AccountAuthRepository;
 import ua.knu.knudev.knudevsecurityapi.api.AccountAuthServiceApi;
 import ua.knu.knudev.knudevsecurityapi.exception.AccountAuthException;
+import ua.knu.knudev.knudevsecurityapi.request.AccountAuthUpdateRequest;
 import ua.knu.knudev.knudevsecurityapi.request.AccountCreationRequest;
 import ua.knu.knudev.knudevsecurityapi.response.AuthAccountCreationResponse;
 
 import java.util.Optional;
+import java.util.UUID;
+import java.util.function.Consumer;
 
 @Service
 @RequiredArgsConstructor
@@ -42,6 +45,25 @@ public class AccountAuthService implements AccountAuthServiceApi {
     @Override
     public boolean existsByEmail(String email) {
         return accountAuthRepository.existsByEmail(email);
+    }
+
+    @Override
+    public void update(AccountAuthUpdateRequest request) {
+        AccountAuth account = getDomainById(request.accountId());
+
+        updateField(request.email(), account::setEmail);
+        updateField(request.technicalRole(), account::setTechnicalRole);
+
+        accountAuthRepository.save(account);
+    }
+
+    private <T> void updateField(T newValue, Consumer<T> setter) {
+        Optional.ofNullable(newValue).ifPresent(setter);
+    }
+
+    private AccountAuth getDomainById(UUID id) {
+        return accountAuthRepository.findById(id)
+                .orElseThrow(() -> new AccountAuthException("Account with id " + id + " not found"));
     }
 
     public AccountAuthDto getByEmail(String email) {

@@ -26,6 +26,7 @@ import ua.knu.knudev.knudevcommon.dto.MultiLanguageFieldDto;
 import ua.knu.knudev.knudevcommon.utils.AcademicUnitsIds;
 import ua.knu.knudev.knudevcommon.utils.FullName;
 import ua.knu.knudev.knudevsecurityapi.api.AccountAuthServiceApi;
+import ua.knu.knudev.knudevsecurityapi.request.AccountAuthUpdateRequest;
 import ua.knu.knudev.knudevsecurityapi.request.AccountCreationRequest;
 import ua.knu.knudev.knudevsecurityapi.response.AuthAccountCreationResponse;
 import ua.knu.knudev.teammanager.domain.AccountProfile;
@@ -36,6 +37,7 @@ import ua.knu.knudev.teammanager.mapper.MultiLanguageFieldMapper;
 import ua.knu.knudev.teammanager.mapper.ShortDepartmentMapper;
 import ua.knu.knudev.teammanager.mapper.SpecialtyMapper;
 import ua.knu.knudev.teammanager.repository.AccountProfileRepository;
+import ua.knu.knudev.teammanager.repository.SpecialtyRepository;
 import ua.knu.knudev.teammanager.service.api.GithubManagementApi;
 import ua.knu.knudev.teammanagerapi.api.AccountProfileApi;
 import ua.knu.knudev.teammanagerapi.constant.AccountsCriteriaFilterOption;
@@ -43,11 +45,13 @@ import ua.knu.knudev.teammanagerapi.dto.AccountProfileDto;
 import ua.knu.knudev.teammanagerapi.dto.AccountSearchCriteria;
 import ua.knu.knudev.teammanagerapi.dto.ShortAccountProfileDto;
 import ua.knu.knudev.teammanagerapi.exception.AccountException;
+import ua.knu.knudev.teammanagerapi.request.AccountUpdateRequest;
 import ua.knu.knudev.teammanagerapi.response.AccountRegistrationResponse;
 import ua.knu.knudev.teammanagerapi.response.GetAccountByIdResponse;
 
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.function.Consumer;
 
 @Service
 @RequiredArgsConstructor
@@ -56,6 +60,7 @@ import java.util.*;
 public class AccountProfileService implements AccountProfileApi {
 
     private final AccountProfileRepository accountProfileRepository;
+    private final SpecialtyRepository specialtyRepository;
     private final AccountAuthServiceApi accountAuthServiceApi;
     private final ImageServiceApi imageServiceApi;
     private final DepartmentService departmentService;
@@ -208,7 +213,7 @@ public class AccountProfileService implements AccountProfileApi {
         return accountProfileRepository.existsByEmail(email);
     }
 
-    private boolean assertEmailExists(BindException bindException, String email)  {
+    private boolean assertEmailExists(BindException bindException, String email) {
         boolean emailExists = existsByEmail(email);
         if (emailExists) {
             MultiLanguageFieldDto error = MultiLanguageFieldDto.builder()
@@ -329,6 +334,56 @@ public class AccountProfileService implements AccountProfileApi {
         return accountProfileMapper.toDto(accountProfile);
     }
 
+    @Override
+    @Transactional
+    public AccountProfileDto update(@Valid AccountUpdateRequest request) {
+        AccountProfile accountProfile = getDomainById(request.accountId());
+
+        validateEmail(request.email());
+        validateGitHubUsername(request.gitHubAccountUsername());
+
+        Optional.ofNullable(request.specialtyCodeName())
+                .flatMap(specialtyRepository::findById)
+                .ifPresent(accountProfile::setSpecialty);
+
+        Optional.ofNullable(request.departmentId())
+                .map(departmentService::getById)
+                .ifPresent(accountProfile::setDepartment);
+
+        updateField(request.firstName(), accountProfile::setFirstName);
+        updateField(request.lastName(), accountProfile::setLastName);
+        updateField(request.middleName(), accountProfile::setMiddleName);
+        updateField(request.technicalRole(), accountProfile::setTechnicalRole);
+        updateField(request.email(), accountProfile::setEmail);
+        updateField(request.yearOfStudyOnRegistration(), accountProfile::setYearOfStudyOnRegistration);
+        updateField(request.unit(), accountProfile::setUnit);
+        updateField(request.gitHubAccountUsername(), accountProfile::setGithubAccountUsername);
+
+        accountAuthServiceApi.update(new AccountAuthUpdateRequest(request.accountId(),
+                request.email(),
+                request.technicalRole()
+        ));
+
+        accountProfileRepository.save(accountProfile);
+        return accountProfileMapper.toDto(accountProfile);
+    }
+
+    private void validateEmail(String email) {
+        Optional.ofNullable(email)
+                .filter(e -> e.matches("^[\\w.-]+@knu\\.ua$"))
+                .orElseThrow(() -> new AccountException("Invalid email address: " + email));
+    }
+
+    private void validateGitHubUsername(String username) {
+        Optional.ofNullable(username)
+                .filter(gitHubManagementApi::existsByUsername)
+                .orElseThrow(() -> new AccountException("Invalid GitHub account username: " + username));
+    }
+
+    private <T> void updateField(T newValue, Consumer<T> setter) {
+        Optional.ofNullable(newValue).ifPresent(setter);
+    }
+
     public AccountProfile getDomainById(UUID id) {
         return accountProfileRepository.findById(id)
                 .orElseThrow(() -> new AccountException(
@@ -340,7 +395,7 @@ public class AccountProfileService implements AccountProfileApi {
     @SneakyThrows
     private void validateEmailNotExists(BindException bindException, String email) {
         boolean accountProfileExists = assertEmailExists(bindException, email);
-        if(accountProfileExists) {
+        if (accountProfileExists) {
             return;
         }
 
