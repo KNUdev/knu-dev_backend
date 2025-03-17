@@ -102,11 +102,15 @@ public interface AccountProfileRepository extends JpaRepository<AccountProfile, 
     default BooleanExpression getYearOfStudyCondition(Integer universityStudyYears) {
         NumberExpression<Integer> calculatedYearOfStudy =
                 Expressions.numberTemplate(Integer.class,
-                        "{0} + (CASE WHEN extract(month from {1}) > 6 " +
+                        "{0} + (CASE " +
+                                "WHEN extract(month from {1}) > 6 " +
                                 "THEN extract(year from current_date) - extract(year from {1}) " +
-                                "ELSE extract(year from current_date) - extract(year from {1}) - 1 END)",
+                                "WHEN extract(month from current_date) > 6 " +
+                                "THEN extract(year from current_date) - extract(year from {1}) - 1 " +
+                                "ELSE extract(year from current_date) - extract(year from {1}) END)",
                         accountProfile.yearOfStudyOnRegistration, accountProfile.registrationDate);
 
         return calculatedYearOfStudy.eq(universityStudyYears);
     }
+
 }
