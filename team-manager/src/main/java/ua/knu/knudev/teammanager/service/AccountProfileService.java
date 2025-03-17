@@ -442,6 +442,8 @@ public class AccountProfileService implements AccountProfileApi {
                         accountProfile.getSpecialty().getCodeName()))
                 .avatarFilename(accountProfile.getAvatarFilename())
                 .bannerFilename(accountProfile.getBannerFilename())
+                .githubAccountUsername(accountProfile.getGithubAccountUsername())
+                .expertise(accountProfile.getExpertise())
                 .registeredAt(accountProfile.getRegistrationDate())
                 .yearOfStudyOnRegistration(accountProfile.getYearOfStudyOnRegistration())
                 .lastRoleUpdateDate(accountProfile.getLastRoleUpdateDate())
