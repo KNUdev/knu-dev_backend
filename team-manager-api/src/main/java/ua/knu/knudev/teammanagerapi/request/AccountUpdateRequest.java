@@ -45,8 +45,8 @@ public class AccountUpdateRequest {
         @Schema(description = "Specialty code", example = "121.0")
         private Double specialtyCodeName;
 
-        @Schema(description = "Department name", implementation = MultiLanguageFieldDto.class)
-        private MultiLanguageFieldDto departmentName;
+        @Schema(description = "Department id", example = "550e8400-e29b-41d4-a716-446655440000")
+        private UUID departmentId;
 
         @Schema(description = "Is need to delete avatar", example = "true")
         private Boolean deleteAvatar;

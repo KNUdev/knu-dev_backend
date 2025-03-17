@@ -65,6 +65,7 @@ public class AccountProfileService implements AccountProfileApi {
     private final DepartmentService departmentService;
     private final SpecialtyService specialtyService;
     private final ShortDepartmentMapper shortDepartmentMapper;
+    private final MultiLanguageFieldMapper multiLanguageFieldMapper;
     private final SpecialtyMapper specialtyMapper;
     private final GithubManagementApi gitHubManagementApi;
     private final Environment environment;
@@ -367,7 +368,7 @@ public class AccountProfileService implements AccountProfileApi {
             accountProfile.setBannerFilename(null);
         }
 
-        updateSpecialtyAndDepartmentIfItsValid(request.getSpecialtyCodeName(), request.getDepartmentName(), accountProfile);
+        updateSpecialtyAndDepartmentIfItsValid(request.getSpecialtyCodeName(), request.getDepartmentId(), accountProfile);
         updateField(request.getFirstName(), accountProfile::setFirstName);
         updateField(request.getLastName(), accountProfile::setLastName);
         updateField(request.getMiddleName(), accountProfile::setMiddleName);
@@ -404,12 +405,11 @@ public class AccountProfileService implements AccountProfileApi {
         }
     }
 
-    private void updateSpecialtyAndDepartmentIfItsValid(Double specialtyCodeName, MultiLanguageFieldDto departmentName,
-                                                        AccountProfile accountProfile) {
+    private void updateSpecialtyAndDepartmentIfItsValid(Double specialtyCodeName, UUID departmentId, AccountProfile accountProfile) {
         boolean isSpecialtyUpdated = false;
-        if (departmentName != null) {
-            Department department = departmentService.getDepartmentByName(departmentName.getEn(), departmentName.getUk());
-            departmentService.validateAcademicUnitExistence(department.getId(),
+        if (departmentId != null) {
+            Department department = departmentService.getById(departmentId);
+            departmentService.validateAcademicUnitExistence(departmentId,
                     specialtyCodeName != null ? specialtyCodeName : accountProfile.getSpecialty().getCodeName());
 
             if (specialtyCodeName != null) {
@@ -430,6 +430,9 @@ public class AccountProfileService implements AccountProfileApi {
     }
 
     private AccountProfileDto mapAccountProfileToDto(AccountProfile accountProfile) {
+        MultiLanguageFieldDto departmentName = multiLanguageFieldMapper.toDto(accountProfile.getDepartment().getName());
+        MultiLanguageFieldDto specialtyName = multiLanguageFieldMapper.toDto(accountProfile.getSpecialty().getName());
+
         return AccountProfileDto.builder()
                 .id(accountProfile.getId())
                 .email(accountProfile.getEmail())
@@ -448,6 +451,8 @@ public class AccountProfileService implements AccountProfileApi {
                 .registeredAt(accountProfile.getRegistrationDate())
                 .yearOfStudyOnRegistration(accountProfile.getYearOfStudyOnRegistration())
                 .lastRoleUpdateDate(accountProfile.getLastRoleUpdateDate())
+                .departmentName(departmentName)
+                .specialtyName(specialtyName)
                 .unit(accountProfile.getUnit())
                 .build();
     }

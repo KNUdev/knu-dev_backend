@@ -80,7 +80,7 @@ public class DevProfileTeamManagerService implements DevProfileTeamManagerApi {
                 )
         );
         SpecialtyCreationDto s111 = new SpecialtyCreationDto(121.0, "Software Engineering", "Інженерія Програмного Забезпечення");
-        SpecialtyCreationDto s222 = new SpecialtyCreationDto(126.0, "Information systems and technologies", "Інформаційні системи та технології");
+        SpecialtyCreationDto s222 = new SpecialtyCreationDto(126.0, "Інформаційні системи та технології", "Information systems and technologies");
         SpecialtyCreationDto s333 = new SpecialtyCreationDto(138.1127, "Super Omega Giga Faculty", "Гіпер мега бляха факультет");
 
         DepartmentCreationRequest dcr3 = new DepartmentCreationRequest(
