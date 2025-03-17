@@ -354,48 +354,42 @@ public class AccountProfileService implements AccountProfileApi {
 
     @Override
     @Transactional
-    public AccountProfileDto update(@Valid AccountUpdateRequest request) {
-        AccountProfile accountProfile = getDomainById(request.accountId());
+    public AccountProfileDto update(AccountUpdateRequest request) {
+        AccountProfile accountProfile = getDomainById(request.getAccountId());
+        String email = request.getEmail();
+        String gitHubAccountUsername = request.getGitHubAccountUsername();
 
-        validateEmail(request.email());
-        validateGitHubUsername(request.gitHubAccountUsername());
+        if (email != null && !email.matches("^[\\w.-]+@knu\\.ua$")) {
+            throw new AccountException("Invalid email address:" + email);
+        }
+        if (gitHubAccountUsername != null && !gitHubManagementApi.existsByUsername(gitHubAccountUsername)) {
+            throw new AccountException("Invalid git username :" + gitHubAccountUsername);
+        }
 
-        Optional.ofNullable(request.specialtyCodeName())
+        Optional.ofNullable(request.getSpecialtyCodeName())
                 .flatMap(specialtyRepository::findById)
                 .ifPresent(accountProfile::setSpecialty);
 
-        Optional.ofNullable(request.departmentId())
+        Optional.ofNullable(request.getDepartmentId())
                 .map(departmentService::getById)
                 .ifPresent(accountProfile::setDepartment);
 
-        updateField(request.firstName(), accountProfile::setFirstName);
-        updateField(request.lastName(), accountProfile::setLastName);
-        updateField(request.middleName(), accountProfile::setMiddleName);
-        updateField(request.technicalRole(), accountProfile::setTechnicalRole);
-        updateField(request.email(), accountProfile::setEmail);
-        updateField(request.yearOfStudyOnRegistration(), accountProfile::setYearOfStudyOnRegistration);
-        updateField(request.unit(), accountProfile::setUnit);
-        updateField(request.gitHubAccountUsername(), accountProfile::setGithubAccountUsername);
+        updateField(request.getFirstName(), accountProfile::setFirstName);
+        updateField(request.getLastName(), accountProfile::setLastName);
+        updateField(request.getMiddleName(), accountProfile::setMiddleName);
+        updateField(request.getTechnicalRole(), accountProfile::setTechnicalRole);
+        updateField(email, accountProfile::setEmail);
+        updateField(request.getYearOfStudyOnRegistration(), accountProfile::setYearOfStudyOnRegistration);
+        updateField(request.getUnit(), accountProfile::setUnit);
+        updateField(gitHubAccountUsername, accountProfile::setGithubAccountUsername);
 
-        accountAuthServiceApi.update(new AccountAuthUpdateRequest(request.accountId(),
-                request.email(),
-                request.technicalRole()
+        accountAuthServiceApi.update(new AccountAuthUpdateRequest(request.getAccountId(),
+                email,
+                request.getTechnicalRole()
         ));
 
         accountProfileRepository.save(accountProfile);
         return accountProfileMapper.toDto(accountProfile);
-    }
-
-    private void validateEmail(String email) {
-        Optional.ofNullable(email)
-                .filter(e -> e.matches("^[\\w.-]+@knu\\.ua$"))
-                .orElseThrow(() -> new AccountException("Invalid email address: " + email));
-    }
-
-    private void validateGitHubUsername(String username) {
-        Optional.ofNullable(username)
-                .filter(gitHubManagementApi::existsByUsername)
-                .orElseThrow(() -> new AccountException("Invalid GitHub account username: " + username));
     }
 
     private <T> void updateField(T newValue, Consumer<T> setter) {

@@ -38,5 +38,5 @@ public interface AccountProfileApi {
 
     AccountProfileDto getByGithubUsername(String githubUsername);
 
-    AccountProfileDto update(@Valid AccountUpdateRequest accountUpdateRequest);
+    AccountProfileDto update(AccountUpdateRequest accountUpdateRequest);
 }
