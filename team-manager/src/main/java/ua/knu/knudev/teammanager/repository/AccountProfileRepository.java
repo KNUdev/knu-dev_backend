@@ -2,6 +2,8 @@ package ua.knu.knudev.teammanager.repository;
 
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.core.types.dsl.Expressions;
+import com.querydsl.core.types.dsl.NumberExpression;
 import com.querydsl.jpa.impl.JPAQuery;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -39,7 +41,7 @@ public interface AccountProfileRepository extends JpaRepository<AccountProfile, 
 
     default Page<AccountProfile> findAllAccountsByFilters(Map<AccountsCriteriaFilterOption, Object> filters, Pageable pageable) {
         BooleanBuilder predicate = new BooleanBuilder();
-        Object universityStudyYears = filters.get(AccountsCriteriaFilterOption.UNIVERSITY_STUDY_YEARS);
+        Integer universityStudyYears = (Integer) filters.get(AccountsCriteriaFilterOption.UNIVERSITY_STUDY_YEARS);
 
         filters.forEach((key, value) -> {
             if (value != null) {
@@ -55,14 +57,11 @@ public interface AccountProfileRepository extends JpaRepository<AccountProfile, 
                 .orderBy(accountProfile.registrationDate.asc(), accountProfile.technicalRole.asc());
 
         if (universityStudyYears != null) {
-            List<AccountProfile> filteredAccounts = query.fetch().stream()
-                    .filter(account -> account.getCurrentYearOfStudy().equals(universityStudyYears))
-                    .toList();
-
-            return PageableExecutionUtils.getPage(filteredAccounts, pageable,query::fetchCount);
+            query.where(getYearOfStudyCondition(universityStudyYears));
         }
 
-        return PageableExecutionUtils.getPage(query.fetch(), pageable, query::fetchCount);
+        List<AccountProfile> results = query.fetch();
+        return PageableExecutionUtils.getPage(results, pageable, query::fetchCount);
     }
 
     private static Optional<BooleanExpression> getFilterPredicate(AccountsCriteriaFilterOption key, Object value) {
@@ -98,5 +97,14 @@ public interface AccountProfileRepository extends JpaRepository<AccountProfile, 
 
         return Optional.ofNullable(filterMap.get(key))
                 .map(func -> func.apply(accountProfile, value));
+    }
+
+    default BooleanExpression getYearOfStudyCondition(Integer universityStudyYears) {
+        NumberExpression<Integer> calculatedYearOfStudy =
+                Expressions.numberTemplate(Integer.class,
+                        "{0} + extract(year from current_date) - extract(year from {1})",
+                        accountProfile.yearOfStudyOnRegistration, accountProfile.registrationDate);
+
+        return calculatedYearOfStudy.eq(universityStudyYears);
     }
 }
