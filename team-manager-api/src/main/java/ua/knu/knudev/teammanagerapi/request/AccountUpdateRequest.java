@@ -5,7 +5,6 @@ import lombok.Data;
 import ua.knu.knudev.knudevcommon.constant.AccountTechnicalRole;
 import ua.knu.knudev.knudevcommon.constant.Expertise;
 import ua.knu.knudev.knudevcommon.constant.KNUdevUnit;
-import ua.knu.knudev.knudevcommon.dto.MultiLanguageFieldDto;
 
 import java.util.UUID;
 
@@ -43,7 +42,7 @@ public class AccountUpdateRequest {
         private String gitHubAccountUsername;
 
         @Schema(description = "Specialty code", example = "121.0")
-        private Double specialtyCodeName;
+        private Double specialtyCodename;
 
         @Schema(description = "Department id", example = "550e8400-e29b-41d4-a716-446655440000")
         private UUID departmentId;

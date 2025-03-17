@@ -32,12 +32,10 @@ import ua.knu.knudev.knudevsecurityapi.response.AuthAccountCreationResponse;
 import ua.knu.knudev.teammanager.domain.AccountProfile;
 import ua.knu.knudev.teammanager.domain.Department;
 import ua.knu.knudev.teammanager.domain.Specialty;
-import ua.knu.knudev.teammanager.mapper.AccountProfileMapper;
 import ua.knu.knudev.teammanager.mapper.MultiLanguageFieldMapper;
 import ua.knu.knudev.teammanager.mapper.ShortDepartmentMapper;
 import ua.knu.knudev.teammanager.mapper.SpecialtyMapper;
 import ua.knu.knudev.teammanager.repository.AccountProfileRepository;
-import ua.knu.knudev.teammanager.repository.SpecialtyRepository;
 import ua.knu.knudev.teammanager.service.api.GithubManagementApi;
 import ua.knu.knudev.teammanagerapi.api.AccountProfileApi;
 import ua.knu.knudev.teammanagerapi.constant.AccountsCriteriaFilterOption;
@@ -367,7 +365,7 @@ public class AccountProfileService implements AccountProfileApi {
             accountProfile.setBannerFilename(null);
         }
 
-        updateSpecialtyAndDepartmentIfItsValid(request.getSpecialtyCodeName(), request.getDepartmentId(), accountProfile);
+        updateSpecialtyAndDepartmentIfItsValid(request.getSpecialtyCodename(), request.getDepartmentId(), accountProfile);
         updateField(request.getFirstName(), accountProfile::setFirstName);
         updateField(request.getLastName(), accountProfile::setLastName);
         updateField(request.getMiddleName(), accountProfile::setMiddleName);
@@ -404,15 +402,15 @@ public class AccountProfileService implements AccountProfileApi {
         }
     }
 
-    private void updateSpecialtyAndDepartmentIfItsValid(Double specialtyCodeName, UUID departmentId, AccountProfile accountProfile) {
+    private void updateSpecialtyAndDepartmentIfItsValid(Double specialtyCodename, UUID departmentId, AccountProfile accountProfile) {
         boolean isSpecialtyUpdated = false;
         if (departmentId != null) {
             Department department = departmentService.getById(departmentId);
             departmentService.validateAcademicUnitExistence(departmentId,
-                    specialtyCodeName != null ? specialtyCodeName : accountProfile.getSpecialty().getCodeName());
+                    specialtyCodename != null ? specialtyCodename : accountProfile.getSpecialty().getCodeName());
 
-            if (specialtyCodeName != null) {
-                Specialty specialty = specialtyService.getByCodeName(specialtyCodeName);
+            if (specialtyCodename != null) {
+                Specialty specialty = specialtyService.getByCodeName(specialtyCodename);
                 accountProfile.setSpecialty(specialty);
                 isSpecialtyUpdated = true;
             }
@@ -420,9 +418,9 @@ public class AccountProfileService implements AccountProfileApi {
             accountProfile.setDepartment(department);
         }
 
-        if (!isSpecialtyUpdated && specialtyCodeName != null) {
-            Specialty specialty = specialtyService.getByCodeName(specialtyCodeName);
-            departmentService.validateAcademicUnitExistence(accountProfile.getDepartment().getId(), specialtyCodeName);
+        if (!isSpecialtyUpdated && specialtyCodename != null) {
+            Specialty specialty = specialtyService.getByCodeName(specialtyCodename);
+            departmentService.validateAcademicUnitExistence(accountProfile.getDepartment().getId(), specialtyCodename);
             accountProfile.setSpecialty(specialty);
         }
 
