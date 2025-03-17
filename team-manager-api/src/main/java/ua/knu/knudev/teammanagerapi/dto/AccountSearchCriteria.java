@@ -5,14 +5,14 @@ import ua.knu.knudev.knudevcommon.constant.AccountTechnicalRole;
 import ua.knu.knudev.knudevcommon.constant.Expertise;
 import ua.knu.knudev.knudevcommon.constant.KNUdevUnit;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Builder
 public record AccountSearchCriteria(
         String searchQuery,
-        LocalDate registeredAt,
-        LocalDate registeredBefore,
+        LocalDateTime registeredAt,
+        LocalDateTime registeredBefore,
         KNUdevUnit unit,
         Expertise expertise,
         UUID departmentId,
