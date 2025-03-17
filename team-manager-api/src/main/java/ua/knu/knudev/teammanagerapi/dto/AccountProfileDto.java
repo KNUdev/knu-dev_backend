@@ -63,7 +63,7 @@ public record AccountProfileDto(
         LocalDateTime registeredAt,
 
         @Schema(description = "Account(student) university course when registered", example = "2")
-        int yearOfStudyOnRegistration,
+        int universityStudyYear,
 
         @JsonFormat(
                 shape = JsonFormat.Shape.STRING,
