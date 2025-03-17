@@ -229,16 +229,18 @@ public class AccountProfileService implements AccountProfileApi {
         Pageable paging = PageRequest.of(pageNumber, pageSize);
         Map<AccountsCriteriaFilterOption, Object> filtersMap = buildAccountsFiltersMap(accountSearchCriteria);
         Page<AccountProfile> searchedAccountsPage = accountProfileRepository.findAllAccountsByFilters(filtersMap, paging);
+
         return searchedAccountsPage.map(accountProfile -> {
             String avatarFilename = accountProfile.getAvatarFilename();
+            String bannerFilename = accountProfile.getBannerFilename();
+
             String avatarUrl = StringUtils.isNotEmpty(avatarFilename) ? imageServiceApi.getPathByFilename(
                     avatarFilename, ImageSubfolder.ACCOUNT_AVATARS
             ) : null;
-
-            String bannerFilename = accountProfile.getBannerFilename();
             String bannerUrl = StringUtils.isNotEmpty(bannerFilename) ? imageServiceApi.getPathByFilename(
                     bannerFilename, ImageSubfolder.ACCOUNT_BANNERS
             ) : null;
+
             MultiLanguageFieldDto departmentName = multiLanguageFieldMapper.toDto(accountProfile.getDepartment().getName());
             MultiLanguageFieldDto specialtyName = multiLanguageFieldMapper.toDto(accountProfile.getSpecialty().getName());
             return AccountProfileDto.builder()
@@ -548,14 +550,14 @@ public class AccountProfileService implements AccountProfileApi {
     protected Map<AccountsCriteriaFilterOption, Object> buildAccountsFiltersMap(AccountSearchCriteria accountSearchCriteria) {
 
         Map<AccountsCriteriaFilterOption, Object> filters = new EnumMap<>(AccountsCriteriaFilterOption.class);
-        addFilter2Map(filters, AccountsCriteriaFilterOption.USER_INITIALS_OR_EMAIL, accountSearchCriteria.searchQuery());
+        addFilter2Map(filters, AccountsCriteriaFilterOption.USER_INITIALS_OR_GITHUB_OR_EMAIL, accountSearchCriteria.searchQuery());
         addFilter2Map(filters, AccountsCriteriaFilterOption.REGISTERED_AT, accountSearchCriteria.registeredAt());
         addFilter2Map(filters, AccountsCriteriaFilterOption.REGISTERED_BEFORE, accountSearchCriteria.registeredBefore());
         addFilter2Map(filters, AccountsCriteriaFilterOption.UNIT, accountSearchCriteria.unit());
         addFilter2Map(filters, AccountsCriteriaFilterOption.EXPERTISE, accountSearchCriteria.expertise());
         addFilter2Map(filters, AccountsCriteriaFilterOption.DEPARTMENT, accountSearchCriteria.departmentId());
         addFilter2Map(filters, AccountsCriteriaFilterOption.SPECIALTY, accountSearchCriteria.specialtyCodeName());
-        addFilter2Map(filters, AccountsCriteriaFilterOption.UNIVERSITY_STUDY_YEAR, accountSearchCriteria.universityStudyYear());
+        addFilter2Map(filters, AccountsCriteriaFilterOption.YEAR_OF_STUDY_ON_REGISTRATION, accountSearchCriteria.yearOfStudyOnRegistration());
         addFilter2Map(filters, AccountsCriteriaFilterOption.RECRUITMENT_ORIGIN, accountSearchCriteria.recruitmentId());
         addFilter2Map(filters, AccountsCriteriaFilterOption.TECHNICAL_ROLE, accountSearchCriteria.technicalRole());
 

@@ -15,9 +15,9 @@ public record AccountSearchCriteria(
         LocalDateTime registeredBefore,
         KNUdevUnit unit,
         Expertise expertise,
-        String departmentId,
-        String specialtyCodeName,
-        Integer universityStudyYear,
+        UUID departmentId,
+        Double specialtyCodeName,
+        Integer yearOfStudyOnRegistration,
         UUID recruitmentId,
         AccountTechnicalRole technicalRole
 ) {
