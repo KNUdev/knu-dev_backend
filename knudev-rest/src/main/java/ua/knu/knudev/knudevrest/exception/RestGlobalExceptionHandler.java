@@ -149,6 +149,13 @@ public class RestGlobalExceptionHandler {
         return exception.getMessage();
     }
 
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ResponseEntity<String> handleRuntimeException(RuntimeException e) {
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body("Error: " + e.getMessage());
+    }
+
     private Object buildMultiLanguageError(ObjectError error) {
         Locale ukrainianLocale = new Locale("uk", "UA");
         Locale englishLocale = Locale.ENGLISH;

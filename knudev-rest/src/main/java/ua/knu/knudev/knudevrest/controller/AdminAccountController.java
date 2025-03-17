@@ -11,6 +11,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ua.knu.knudev.knudevcommon.constant.AccountTechnicalRole;
 import ua.knu.knudev.knudevcommon.constant.Expertise;
@@ -114,7 +115,7 @@ public class AdminAccountController {
                             ))
             })
     @PostMapping("/{accountId}/update")
-    public AccountProfileDto updateAccount(
+    public ResponseEntity<?> updateAccount(
             @PathVariable UUID accountId,
             @RequestBody @Parameter(
                     name = "AccountUpdateRequest",
@@ -123,7 +124,8 @@ public class AdminAccountController {
                     in = ParameterIn.HEADER
             ) AccountUpdateRequest request) {
         request.setAccountId(accountId);
-        return accountProfileApi.update(request);
+        accountProfileApi.update(request);
+        return ResponseEntity.ok().build();
     }
 
 }

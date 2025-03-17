@@ -239,6 +239,8 @@ public class AccountProfileService implements AccountProfileApi {
             String bannerUrl = StringUtils.isNotEmpty(bannerFilename) ? imageServiceApi.getPathByFilename(
                     bannerFilename, ImageSubfolder.ACCOUNT_BANNERS
             ) : null;
+            MultiLanguageFieldDto departmentName = multiLanguageFieldMapper.toDto(accountProfile.getDepartment().getName());
+            MultiLanguageFieldDto specialtyName = multiLanguageFieldMapper.toDto(accountProfile.getSpecialty().getName());
             return AccountProfileDto.builder()
                     .id(accountProfile.getId())
                     .fullName(new FullName(
@@ -260,6 +262,8 @@ public class AccountProfileService implements AccountProfileApi {
                     .yearOfStudyOnRegistration(accountProfile.getYearOfStudyOnRegistration())
                     .lastRoleUpdateDate(accountProfile.getLastRoleUpdateDate())
                     .registeredAt(accountProfile.getRegistrationDate())
+                    .departmentName(departmentName)
+                    .specialtyName(specialtyName)
                     .build();
         });
     }
