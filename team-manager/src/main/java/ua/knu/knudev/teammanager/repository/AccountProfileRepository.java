@@ -58,11 +58,12 @@ public interface AccountProfileRepository extends JpaRepository<AccountProfile, 
 
     private static Optional<BooleanExpression> getFilterPredicate(AccountsCriteriaFilterOption key, Object value) {
         Map<AccountsCriteriaFilterOption, BiFunction<QAccountProfile, Object, BooleanExpression>> filterMap = Map.of(
-                AccountsCriteriaFilterOption.USER_INITIALS_OR_EMAIL, (profile, val) -> {
+                AccountsCriteriaFilterOption.USER_INITIALS_OR_GITHUB_OR_EMAIL, (profile, val) -> {
                     String[] parts = val.toString().trim().split("\\s+");
                     BooleanExpression predicate = null;
                     for (String part : parts) {
                         BooleanExpression predicateExpression = profile.email.containsIgnoreCase(part)
+                                .or(profile.githubAccountUsername.containsIgnoreCase(part))
                                 .or(profile.firstName.containsIgnoreCase(part))
                                 .or(profile.lastName.containsIgnoreCase(part))
                                 .or(profile.middleName.containsIgnoreCase(part));
@@ -77,13 +78,15 @@ public interface AccountProfileRepository extends JpaRepository<AccountProfile, 
                 AccountsCriteriaFilterOption.EXPERTISE,
                 (profile, val) -> profile.expertise.eq(Enum.valueOf(Expertise.class, val.toString())),
                 AccountsCriteriaFilterOption.DEPARTMENT,
-                (profile, val) -> profile.department.id.eq(UUID.fromString(val.toString())),
+                (profile, val) -> profile.department.id.eq((UUID) val),
                 AccountsCriteriaFilterOption.SPECIALTY,
-                (profile, val) -> profile.specialty.codeName.eq(Double.valueOf(val.toString())),
+                (profile, val) -> profile.specialty.codeName.eq((Double) val),
                 AccountsCriteriaFilterOption.TECHNICAL_ROLE,
                 (profile, val) -> profile.technicalRole.eq(Enum.valueOf(AccountTechnicalRole.class, val.toString())),
                 AccountsCriteriaFilterOption.UNIT,
-                (profile, val) -> profile.unit.eq(Enum.valueOf(KNUdevUnit.class, val.toString()))
+                (profile, val) -> profile.unit.eq(Enum.valueOf(KNUdevUnit.class, val.toString())),
+                AccountsCriteriaFilterOption.YEAR_OF_STUDY_ON_REGISTRATION,
+                (profile, val) -> profile.yearOfStudyOnRegistration.eq((Integer) val)
         );
 
         return Optional.ofNullable(filterMap.get(key))
