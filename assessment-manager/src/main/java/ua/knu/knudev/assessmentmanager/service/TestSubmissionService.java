@@ -34,11 +34,10 @@ public class TestSubmissionService implements TestSubmissionApi {
 
     @Override
     public TestSubmissionResultsDto submit(TestSubmissionRequest submissionRequest) {
-        TestSubmissionStatus testSubmissionStatus = submissionRequest.getStatus();
-
         UUID submittedTestId = submissionRequest.getSubmittedTestId();
         List<SubmittedAnswerDto> answers = submissionRequest.getAnswers();
         TestDomain testDomain = getTestDomainById(submittedTestId);
+
         if (submissionRequest.getStatus().equals(TestSubmissionStatus.CANCELED)) {
             return buildCancelledTest(testDomain, submissionRequest);
         }
