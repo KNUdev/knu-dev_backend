@@ -359,10 +359,10 @@ public class AccountProfileService implements AccountProfileApi {
         checkIfEmailIsInvalid(email);
 
         if (request.getDeleteAvatar() != null && request.getDeleteAvatar()) {
-            accountProfile.setAvatarFilename(null);
+            removeAvatar(accountProfile.getId());
         }
         if (request.getDeleteBanner() != null && request.getDeleteBanner()) {
-            accountProfile.setBannerFilename(null);
+            removeBanner(accountProfile.getId());
         }
 
         updateSpecialtyAndDepartmentIfItsValid(request.getSpecialtyCodename(), request.getDepartmentId(), accountProfile);
