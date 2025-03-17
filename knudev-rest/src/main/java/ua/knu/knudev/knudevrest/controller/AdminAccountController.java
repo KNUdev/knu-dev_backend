@@ -86,8 +86,8 @@ public class AdminAccountController {
 
         AccountSearchCriteria accountSearchCriteria = AccountSearchCriteria.builder()
                 .searchQuery(searchQuery)
-                .registeredAt(registeredAt != null ? registeredAt.atStartOfDay() : null)
-                .registeredBefore(registeredBefore != null ? registeredBefore.atStartOfDay() : null)
+                .registeredAt(registeredAt)
+                .registeredBefore(registeredBefore)
                 .unit(unit)
                 .expertise(expertise)
                 .departmentId(departmentId)
