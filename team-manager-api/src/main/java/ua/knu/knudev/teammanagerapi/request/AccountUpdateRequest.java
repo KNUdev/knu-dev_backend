@@ -3,6 +3,7 @@ package ua.knu.knudev.teammanagerapi.request;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import ua.knu.knudev.knudevcommon.constant.AccountTechnicalRole;
+import ua.knu.knudev.knudevcommon.constant.Expertise;
 import ua.knu.knudev.knudevcommon.constant.KNUdevUnit;
 import ua.knu.knudev.knudevcommon.dto.MultiLanguageFieldDto;
 
@@ -34,6 +35,9 @@ public class AccountUpdateRequest {
 
         @Schema(description = "KNUdev unit")
         private KNUdevUnit unit;
+
+        @Schema(description = "Account profile expertise")
+        private Expertise expertise;
 
         @Schema(description = "GitHub account username", example = "johndoe")
         private String gitHubAccountUsername;

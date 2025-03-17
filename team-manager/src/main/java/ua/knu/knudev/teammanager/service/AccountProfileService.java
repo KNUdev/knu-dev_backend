@@ -376,6 +376,7 @@ public class AccountProfileService implements AccountProfileApi {
         updateField(request.getUnit(), accountProfile::setUnit);
         updateField(gitHubAccountUsername, accountProfile::setGithubAccountUsername);
         updateField(request.getTechnicalRole(), accountProfile::setTechnicalRole);
+        updateField(request.getExpertise(), accountProfile::setExpertise);
 
         if (request.getTechnicalRole() != null) {
             accountProfile.setLastRoleUpdateDate(LocalDateTime.now());
