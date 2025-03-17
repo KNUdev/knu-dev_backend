@@ -360,10 +360,10 @@ public class AccountProfileService implements AccountProfileApi {
         checkIfGithubUsernameIsInvalid(gitHubAccountUsername);
         checkIfEmailIsInvalid(email);
 
-        if (request.getDeleteAvatar()) {
+        if (request.getDeleteAvatar() != null && request.getDeleteAvatar()) {
             accountProfile.setAvatarFilename(null);
         }
-        if (request.getDeleteBanner()) {
+        if (request.getDeleteBanner() != null && request.getDeleteBanner()) {
             accountProfile.setBannerFilename(null);
         }
 
@@ -420,7 +420,7 @@ public class AccountProfileService implements AccountProfileApi {
             accountProfile.setDepartment(department);
         }
 
-        if (!isSpecialtyUpdated) {
+        if (!isSpecialtyUpdated && specialtyCodeName != null) {
             Specialty specialty = specialtyService.getByCodeName(specialtyCodeName);
             departmentService.validateAcademicUnitExistence(accountProfile.getDepartment().getId(), specialtyCodeName);
             accountProfile.setSpecialty(specialty);
