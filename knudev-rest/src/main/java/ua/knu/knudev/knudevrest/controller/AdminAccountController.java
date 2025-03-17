@@ -124,8 +124,7 @@ public class AdminAccountController {
                     in = ParameterIn.HEADER
             ) AccountUpdateRequest request) {
         request.setAccountId(accountId);
-        accountProfileApi.update(request);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok(accountProfileApi.update(request));
     }
 
 }
