@@ -49,7 +49,7 @@ public class AccountProfile {
     private LocalDateTime registrationDate;
     private LocalDateTime lastRoleUpdateDate;
 
-    @Column(nullable = false, updatable = false)
+    @Column(nullable = false)
     private Integer yearOfStudyOnRegistration;
 
     @Column
