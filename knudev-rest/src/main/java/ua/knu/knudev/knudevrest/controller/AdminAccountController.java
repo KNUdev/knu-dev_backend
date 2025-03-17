@@ -3,6 +3,7 @@ package ua.knu.knudev.knudevrest.controller;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.Parameters;
+import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -115,8 +116,12 @@ public class AdminAccountController {
     @PostMapping("/{accountId}/update")
     public AccountProfileDto updateAccount(
             @PathVariable UUID accountId,
-            @RequestBody AccountUpdateRequest request
-    ) {
+            @RequestBody @Parameter(
+                    name = "AccountUpdateRequest",
+                    description = "Data to update account profile",
+                    schema = @Schema(implementation = AccountProfileDto.class),
+                    in = ParameterIn.HEADER
+            ) AccountUpdateRequest request) {
         request.setAccountId(accountId);
         return accountProfileApi.update(request);
     }

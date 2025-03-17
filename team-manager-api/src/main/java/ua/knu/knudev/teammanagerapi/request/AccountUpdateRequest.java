@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import ua.knu.knudev.knudevcommon.constant.AccountTechnicalRole;
 import ua.knu.knudev.knudevcommon.constant.KNUdevUnit;
+import ua.knu.knudev.knudevcommon.dto.MultiLanguageFieldDto;
 
 import java.util.UUID;
 
@@ -40,6 +41,12 @@ public class AccountUpdateRequest {
         @Schema(description = "Specialty code", example = "121.0")
         private Double specialtyCodeName;
 
-        @Schema(description = "Department identifier", example = "f47ac10b-58cc-4372-a567-0e02b2c3d479")
-        private UUID departmentId;
+        @Schema(description = "Department name", implementation = MultiLanguageFieldDto.class)
+        private MultiLanguageFieldDto departmentName;
+
+        @Schema(description = "Is need to delete avatar", example = "true")
+        private Boolean deleteAvatar;
+
+        @Schema(description = "Is need to delete banner", example = "true")
+        private Boolean deleteBanner;
 }

@@ -89,6 +89,14 @@ public class DepartmentService implements DepartmentApi {
                 .collect(Collectors.toSet());
     }
 
+    public Department getDepartmentByName(String nameEn, String nameUk) {
+        String trimmedEnName = nameEn.trim();
+        String trimmedUkName = nameUk.trim();
+        return departmentRepository.getDepartmentByName_EnAndName_Uk(trimmedEnName, trimmedUkName)
+                .orElseThrow(() -> new DepartmentException(String.format("Department with name name in english: "
+                        + trimmedEnName + " and uk name: " + trimmedUkName + " not found")));
+    }
+
     public Department getById(UUID id) {
         if (ObjectUtils.isEmpty(id)) {
             log.error("Cannot get department by null id");
