@@ -39,6 +39,7 @@ public interface AccountProfileRepository extends JpaRepository<AccountProfile, 
 
     default Page<AccountProfile> findAllAccountsByFilters(Map<AccountsCriteriaFilterOption, Object> filters, Pageable pageable) {
         BooleanBuilder predicate = new BooleanBuilder();
+        Object universityStudyYears = filters.get(AccountsCriteriaFilterOption.UNIVERSITY_STUDY_YEARS);
 
         filters.forEach((key, value) -> {
             if (value != null) {
@@ -52,6 +53,14 @@ public interface AccountProfileRepository extends JpaRepository<AccountProfile, 
                 .offset(pageable.getOffset())
                 .limit(pageable.isUnpaged() ? Integer.MAX_VALUE : pageable.getPageSize())
                 .orderBy(accountProfile.registrationDate.asc(), accountProfile.technicalRole.asc());
+
+        if (universityStudyYears != null) {
+            List<AccountProfile> filteredAccounts = query.fetch().stream()
+                    .filter(account -> account.getCurrentYearOfStudy().equals(universityStudyYears))
+                    .toList();
+
+            return PageableExecutionUtils.getPage(filteredAccounts, pageable,query::fetchCount);
+        }
 
         return PageableExecutionUtils.getPage(query.fetch(), pageable, query::fetchCount);
     }
@@ -84,9 +93,7 @@ public interface AccountProfileRepository extends JpaRepository<AccountProfile, 
                 AccountsCriteriaFilterOption.TECHNICAL_ROLE,
                 (profile, val) -> profile.technicalRole.eq(Enum.valueOf(AccountTechnicalRole.class, val.toString())),
                 AccountsCriteriaFilterOption.UNIT,
-                (profile, val) -> profile.unit.eq(Enum.valueOf(KNUdevUnit.class, val.toString())),
-                AccountsCriteriaFilterOption.YEAR_OF_STUDY_ON_REGISTRATION,
-                (profile, val) -> profile.yearOfStudyOnRegistration.eq((Integer) val)
+                (profile, val) -> profile.unit.eq(Enum.valueOf(KNUdevUnit.class, val.toString()))
         );
 
         return Optional.ofNullable(filterMap.get(key))

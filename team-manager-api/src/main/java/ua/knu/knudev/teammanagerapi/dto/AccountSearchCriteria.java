@@ -17,7 +17,7 @@ public record AccountSearchCriteria(
         Expertise expertise,
         UUID departmentId,
         Double specialtyCodeName,
-        Integer yearOfStudyOnRegistration,
+        Integer universityStudyYear,
         UUID recruitmentId,
         AccountTechnicalRole technicalRole
 ) {
