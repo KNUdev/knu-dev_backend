@@ -93,8 +93,8 @@ public class DepartmentService implements DepartmentApi {
         String trimmedEnName = nameEn.trim();
         String trimmedUkName = nameUk.trim();
         return departmentRepository.getDepartmentByName_EnAndName_Uk(trimmedEnName, trimmedUkName)
-                .orElseThrow(() -> new DepartmentException(String.format("Department with name name in english: "
-                        + trimmedEnName + " and uk name: " + trimmedUkName + " not found")));
+                .orElseThrow(() -> new DepartmentException(String.format("Department with name in english: %s and uk name: %s not found",
+                        trimmedEnName, trimmedUkName)));
     }
 
     public Department getById(UUID id) {
