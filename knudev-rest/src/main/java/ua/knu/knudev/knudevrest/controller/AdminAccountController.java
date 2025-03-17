@@ -3,6 +3,7 @@ package ua.knu.knudev.knudevrest.controller;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.Parameters;
+import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -10,10 +11,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.MediaType;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import ua.knu.knudev.knudevcommon.constant.AccountTechnicalRole;
 import ua.knu.knudev.knudevcommon.constant.Expertise;
 import ua.knu.knudev.knudevcommon.constant.KNUdevUnit;
@@ -21,6 +19,7 @@ import ua.knu.knudev.knudevsecurityapi.response.ErrorResponse;
 import ua.knu.knudev.teammanagerapi.api.AccountProfileApi;
 import ua.knu.knudev.teammanagerapi.dto.AccountProfileDto;
 import ua.knu.knudev.teammanagerapi.dto.AccountSearchCriteria;
+import ua.knu.knudev.teammanagerapi.request.AccountUpdateRequest;
 
 import java.time.LocalDate;
 import java.util.UUID;
@@ -98,6 +97,33 @@ public class AdminAccountController {
                 .build();
 
         return accountProfileApi.findAllBySearchQuery(accountSearchCriteria, pageNumber, pageSize);
+    }
+
+    @Operation(
+            summary = "Update an account",
+            description = "Allows updating user account details, including email, GitHub username, department, and other fields.",
+            responses = {
+                    @ApiResponse(responseCode = "200",
+                            description = "Account successfully updated",
+                            content = @Content(schema =
+                            @Schema(implementation = AccountProfileDto.class))),
+                    @ApiResponse(responseCode = "404", description = "Account not found",
+                            content = @Content(
+                                    mediaType = MediaType.APPLICATION_JSON_VALUE,
+                                    schema = @Schema(implementation = ErrorResponse.class)
+                            ))
+            })
+    @PostMapping("/{accountId}/update")
+    public AccountProfileDto updateAccount(
+            @PathVariable UUID accountId,
+            @RequestBody @Parameter(
+                    name = "AccountUpdateRequest",
+                    description = "Data to update account profile",
+                    schema = @Schema(implementation = AccountProfileDto.class),
+                    in = ParameterIn.HEADER
+            ) AccountUpdateRequest request) {
+        request.setAccountId(accountId);
+        return accountProfileApi.update(request);
     }
 
 }
