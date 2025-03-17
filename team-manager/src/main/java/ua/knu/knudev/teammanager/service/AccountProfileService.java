@@ -237,7 +237,7 @@ public class AccountProfileService implements AccountProfileApi {
 
             String bannerFilename = accountProfile.getBannerFilename();
             String bannerUrl = StringUtils.isNotEmpty(bannerFilename) ? imageServiceApi.getPathByFilename(
-                    avatarFilename, ImageSubfolder.ACCOUNT_BANNERS
+                    bannerFilename, ImageSubfolder.ACCOUNT_BANNERS
             ) : null;
             return AccountProfileDto.builder()
                     .id(accountProfile.getId())
