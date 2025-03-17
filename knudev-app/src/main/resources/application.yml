@@ -2,6 +2,11 @@ server:
   port: ${APPLICATION_PORT:5000}
   tomcat:
     max-swallow-size: -1
+  servlet:
+    encoding:
+      charset: UTF-8
+      force: true
+      force-response: true
 #TODO WHEN ACTUATOR DEPENDENCY WILL BE ADDED
 #management:
 #  endpoints:
@@ -30,11 +35,14 @@ spring:
     change-log: classpath:db/master.yaml
   jackson:
     time-zone: Europe/Kiev
-#  jpa:
-#    show-sql: true
-#    properties:
-#      hibernate:
-#        format_sql: true
+  messages:
+    basename: i18n/messages
+    encoding: UTF-8
+  jpa:
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
 
 logging:
   level:

@@ -32,7 +32,7 @@ public class AccountProfile {
     @Column(nullable = false)
     private String middleName;
 
-    @Column(nullable = false, updatable = false, unique = true)
+    @Column(nullable = false, unique = true)
     private String email;
     private String avatarFilename;
     private String bannerFilename;

@@ -7,6 +7,7 @@ import ua.knu.knudev.knudevsecurityapi.request.AccountCreationRequest;
 import ua.knu.knudev.teammanagerapi.dto.AccountProfileDto;
 import ua.knu.knudev.teammanagerapi.dto.AccountSearchCriteria;
 import ua.knu.knudev.teammanagerapi.dto.ShortAccountProfileDto;
+import ua.knu.knudev.teammanagerapi.request.AccountUpdateRequest;
 import ua.knu.knudev.teammanagerapi.response.AccountRegistrationResponse;
 import ua.knu.knudev.teammanagerapi.response.GetAccountByIdResponse;
 
@@ -36,4 +37,6 @@ public interface AccountProfileApi {
     void removeBanner(UUID accountProfileId);
 
     AccountProfileDto getByGithubUsername(String githubUsername);
+
+    AccountProfileDto update(AccountUpdateRequest accountUpdateRequest);
 }

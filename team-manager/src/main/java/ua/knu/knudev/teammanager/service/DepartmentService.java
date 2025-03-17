@@ -15,6 +15,7 @@ import ua.knu.knudev.teammanager.mapper.ShortDepartmentMapper;
 import ua.knu.knudev.teammanager.repository.DepartmentRepository;
 import ua.knu.knudev.teammanager.repository.SpecialtyRepository;
 import ua.knu.knudev.teammanagerapi.api.DepartmentApi;
+import ua.knu.knudev.teammanagerapi.dto.DepartmentWithSpecialtiesDto;
 import ua.knu.knudev.teammanagerapi.dto.ShortDepartmentDto;
 import ua.knu.knudev.teammanagerapi.dto.ShortSpecialtyDto;
 import ua.knu.knudev.teammanagerapi.dto.SpecialtyCreationDto;
@@ -73,6 +74,11 @@ public class DepartmentService implements DepartmentApi {
         return shortDepartmentMapper.toDtos(departments);
     }
 
+    public Set<DepartmentWithSpecialtiesDto> getFullDepartments() {
+        Set<Department> departments = new HashSet<>(departmentRepository.findAll());
+        return departmentWithSpecialtiesMapper.toDtos(departments);
+    }
+
     @Override
     public Set<ShortSpecialtyDto> getSpecialtiesByDepartmentId(UUID departmentId) {
         return departmentRepository.findSpecialtiesByDepartmentId(departmentId).stream()
@@ -81,6 +87,14 @@ public class DepartmentService implements DepartmentApi {
                         .codeName(specialty.getCodeName())
                         .build())
                 .collect(Collectors.toSet());
+    }
+
+    public Department getDepartmentByName(String nameEn, String nameUk) {
+        String trimmedEnName = nameEn.trim();
+        String trimmedUkName = nameUk.trim();
+        return departmentRepository.getDepartmentByName_EnAndName_Uk(trimmedEnName, trimmedUkName)
+                .orElseThrow(() -> new DepartmentException(String.format("Department with name in english: %s and uk name: %s not found",
+                        trimmedEnName, trimmedUkName)));
     }
 
     public Department getById(UUID id) {
