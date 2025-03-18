@@ -6,6 +6,7 @@ import ua.knu.knudev.education.domain.bridge.QProgramSectionMapping;
 import ua.knu.knudev.education.domain.bridge.QSectionModuleMapping;
 import ua.knu.knudev.education.domain.bridge.SectionModuleMapping;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
 
@@ -15,7 +16,7 @@ public interface SectionModuleMappingRepository extends JpaRepository<SectionMod
     QProgramSectionMapping psm = QProgramSectionMapping.programSectionMapping;
     QSectionModuleMapping smm = QSectionModuleMapping.sectionModuleMapping;
 
-    List<SectionModuleMapping> findBySectionIdIn(List<UUID> sectionIds);
+    List<SectionModuleMapping> findBySectionIdIn(Collection<UUID> sectionIds);
 
     boolean existsByEducationProgram_IdAndSection_IdAndModule_Id(UUID educationProgramId, UUID sectionId, UUID moduleId);
 

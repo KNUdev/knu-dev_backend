@@ -1,7 +1,7 @@
 package ua.knu.knudev.teammanager.service;
 
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -37,7 +37,6 @@ import java.util.List;
 import java.util.UUID;
 
 @Service
-@RequiredArgsConstructor
 @Slf4j
 public class RecruitmentService implements RecruitmentApi {
 
@@ -50,6 +49,26 @@ public class RecruitmentService implements RecruitmentApi {
     private final RecruitmentMapper recruitmentMapper;
     private final ActiveRecruitmentMapper activeRecruitmentMapper;
     private final ClosedRecruitmentMapper closedRecruitmentMapper;
+
+    public RecruitmentService(TransactionTemplate transactionTemplate,
+                              ActiveRecruitmentRepository activeRecruitmentRepository,
+                              ClosedRecruitmentRepository closedRecruitmentRepository,
+                              AccountProfileService accountProfileService,
+                              @Qualifier(value = "closeRecruitmentTaskScheduler") TaskScheduler taskScheduler,
+                              RecruitmentCloseService recruitmentCloseService,
+                              RecruitmentMapper recruitmentMapper,
+                              ActiveRecruitmentMapper activeRecruitmentMapper,
+                              ClosedRecruitmentMapper closedRecruitmentMapper) {
+        this.transactionTemplate = transactionTemplate;
+        this.activeRecruitmentRepository = activeRecruitmentRepository;
+        this.closedRecruitmentRepository = closedRecruitmentRepository;
+        this.accountProfileService = accountProfileService;
+        this.taskScheduler = taskScheduler;
+        this.recruitmentCloseService = recruitmentCloseService;
+        this.recruitmentMapper = recruitmentMapper;
+        this.activeRecruitmentMapper = activeRecruitmentMapper;
+        this.closedRecruitmentMapper = closedRecruitmentMapper;
+    }
 
     @Override
     public ActiveRecruitmentDto openRecruitment(RecruitmentOpenRequest openRequest) {
@@ -83,7 +102,7 @@ public class RecruitmentService implements RecruitmentApi {
         return recruitmentMapper.toDto(savedRecruitment);
     }
 
-//    todo add here analytics build
+    //    todo add here analytics build
     @Override
     public ClosedRecruitmentDto closeRecruitment(RecruitmentCloseRequest closeRequest) {
         ActiveRecruitment activeRecruitment = getActiveRecruitmentDomainById(closeRequest.activeRecruitmentId());

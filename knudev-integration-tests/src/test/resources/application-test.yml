@@ -48,6 +48,11 @@ application:
         maximum-size-in-kilobytes: 2048
   assignments:
     activation-expiry-in-days: 7
+  session:
+    sprints:
+      defaultDurationInDays: 4
+      moduleEndStateTimeInDays: 2
+      sectionEndStaleTimeInDays: 1
 
 github:
   api:
