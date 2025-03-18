@@ -8,9 +8,9 @@ import java.util.List;
 import java.util.UUID;
 
 public interface SessionApi {
-    //    SessionDto create(SessionCreationRequest sessionCreationRequest);
-//    List<SprintDto> generateSprintsForProgram(UUID programId);
     SessionSprintPlanDto createSession(SessionCreationRequest request);
+
     void adjustSprintsDurations(List<SprintAdjustmentRequest> adjustments, UUID sessionId);
+
     void extendSprintDuration(UUID sprintId, Integer extensionDays);
 }

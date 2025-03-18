@@ -167,12 +167,12 @@ public class SprintService {
         for (Sprint sprint : sprints) {
             sprint.setStartDate(currentStart);
             currentStart = currentStart.plusDays(sprint.getDurationInDays());
-            if (sprint.getType() == SprintType.MODULE_FINAL) {
-                currentStart = currentStart.plusDays(moduleEndStaleTimeInDays);
-            }
-            if (sprint.getType() == SprintType.SECTION_FINAL) {
-                currentStart = currentStart.plusDays(sectionEndStaleTimeInDays);
-            }
+            currentStart = switch (sprint.getType()) {
+                case MODULE_FINAL -> currentStart.plusDays(moduleEndStaleTimeInDays);
+                case SECTION_FINAL -> currentStart.plusDays(sectionEndStaleTimeInDays);
+                case TOPIC -> currentStart;
+                case PROGRAM_FINAL -> currentStart;
+            };
         }
         return sprints;
     }

@@ -43,36 +43,36 @@ public class SprintChainService {
 
         boolean statusIsValid = currentSprint.getStatus() == SprintStatus.FUTURE
                 || currentSprint.getStatus() == SprintStatus.ACTIVE;
-        if (statusIsValid) {
-            int newDuration = currentSprint.getDurationInDays() + additionalDays;
-            currentSprint.setDurationInDays(newDuration);
-            sprintRepository.save(currentSprint);
-
-            UUID sessionId = currentSprint.getSession().getId();
-            int nextOrderIndex = currentSprint.getOrderIndex() + 1;
-            Sprint nextSprint = sprintRepository.findBySession_IdAndOrderIndex(sessionId, nextOrderIndex);
-
-            if (nextSprint != null) {
-                LocalDateTime newNextStartDate = currentSprint.getStartDate().plusDays(newDuration);
-                nextSprint.setStartDate(newNextStartDate);
-                sprintRepository.save(nextSprint);
-
-                ScheduledFuture<?> existingTask = scheduledTasks.get(nextSprint.getId());
-                if (existingTask != null && !existingTask.isDone()) {
-                    existingTask.cancel(false);
-                }
-                scheduleSprint(nextSprint);
-            }
-            sprintRepository.updateSprintStartDates(
-                    currentSprint.getSession().getId(),
-                    currentSprint.getOrderIndex(),
-                    additionalDays
-            );
-        } else {
+        if (!statusIsValid) {
             throw new SprintException(
                     "Spring with id: " + currentSprint.getId() + "has status " + currentSprint.getStatus()
             );
         }
+
+        int newDuration = currentSprint.getDurationInDays() + additionalDays;
+        currentSprint.setDurationInDays(newDuration);
+        sprintRepository.save(currentSprint);
+
+        UUID sessionId = currentSprint.getSession().getId();
+        int nextOrderIndex = currentSprint.getOrderIndex() + 1;
+        Sprint nextSprint = sprintRepository.findBySession_IdAndOrderIndex(sessionId, nextOrderIndex);
+
+        if (nextSprint != null) {
+            LocalDateTime newNextStartDate = currentSprint.getStartDate().plusDays(newDuration);
+            nextSprint.setStartDate(newNextStartDate);
+            sprintRepository.save(nextSprint);
+
+            ScheduledFuture<?> existingTask = scheduledTasks.get(nextSprint.getId());
+            if (existingTask != null && !existingTask.isDone()) {
+                existingTask.cancel(false);
+            }
+            scheduleSprint(nextSprint);
+        }
+        sprintRepository.updateSprintStartDates(
+                currentSprint.getSession().getId(),
+                currentSprint.getOrderIndex(),
+                additionalDays
+        );
     }
 
     private void scheduleSprint(Sprint sprint) {

@@ -84,7 +84,7 @@ public class SessionService implements SessionApi {
     @Transactional
     public void adjustSprintsDurations(List<SprintAdjustmentRequest> adjustments, UUID sessionId) {
         EducationSession session = getById(sessionId);
-        if (session.getStatus().equals(SessionStatus.ONGOING)) {
+        if (session.getStatus() == SessionStatus.ONGOING) {
             throw new EducationSessionException(
                     String.format("Session with id %s has already started at %s", sessionId, session.getStartDate()),
                     HttpStatus.BAD_REQUEST
