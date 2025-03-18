@@ -2,6 +2,8 @@ package ua.knu.knudev.teammanager.repository;
 
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.core.types.dsl.Expressions;
+import com.querydsl.core.types.dsl.NumberExpression;
 import com.querydsl.jpa.impl.JPAQuery;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -39,6 +41,7 @@ public interface AccountProfileRepository extends JpaRepository<AccountProfile, 
 
     default Page<AccountProfile> findAllAccountsByFilters(Map<AccountsCriteriaFilterOption, Object> filters, Pageable pageable) {
         BooleanBuilder predicate = new BooleanBuilder();
+        Integer universityStudyYears = (Integer) filters.get(AccountsCriteriaFilterOption.UNIVERSITY_STUDY_YEARS);
 
         filters.forEach((key, value) -> {
             if (value != null) {
@@ -53,16 +56,22 @@ public interface AccountProfileRepository extends JpaRepository<AccountProfile, 
                 .limit(pageable.isUnpaged() ? Integer.MAX_VALUE : pageable.getPageSize())
                 .orderBy(accountProfile.registrationDate.asc(), accountProfile.technicalRole.asc());
 
-        return PageableExecutionUtils.getPage(query.fetch(), pageable, query::fetchCount);
+        if (universityStudyYears != null) {
+            query.where(getYearOfStudyCondition(universityStudyYears));
+        }
+
+        List<AccountProfile> results = query.fetch();
+        return PageableExecutionUtils.getPage(results, pageable, query::fetchCount);
     }
 
     private static Optional<BooleanExpression> getFilterPredicate(AccountsCriteriaFilterOption key, Object value) {
         Map<AccountsCriteriaFilterOption, BiFunction<QAccountProfile, Object, BooleanExpression>> filterMap = Map.of(
-                AccountsCriteriaFilterOption.USER_INITIALS_OR_EMAIL, (profile, val) -> {
+                AccountsCriteriaFilterOption.USER_INITIALS_OR_GITHUB_OR_EMAIL, (profile, val) -> {
                     String[] parts = val.toString().trim().split("\\s+");
                     BooleanExpression predicate = null;
                     for (String part : parts) {
                         BooleanExpression predicateExpression = profile.email.containsIgnoreCase(part)
+                                .or(profile.githubAccountUsername.containsIgnoreCase(part))
                                 .or(profile.firstName.containsIgnoreCase(part))
                                 .or(profile.lastName.containsIgnoreCase(part))
                                 .or(profile.middleName.containsIgnoreCase(part));
@@ -73,13 +82,13 @@ public interface AccountProfileRepository extends JpaRepository<AccountProfile, 
                 AccountsCriteriaFilterOption.REGISTERED_BEFORE,
                 (profile, val) -> profile.registrationDate.before((LocalDateTime) val),
                 AccountsCriteriaFilterOption.REGISTERED_AT,
-                (profile, val) -> profile.registrationDate.eq((LocalDateTime) val),
+                (profile, val) -> profile.registrationDate.after((LocalDateTime) val),
                 AccountsCriteriaFilterOption.EXPERTISE,
                 (profile, val) -> profile.expertise.eq(Enum.valueOf(Expertise.class, val.toString())),
                 AccountsCriteriaFilterOption.DEPARTMENT,
-                (profile, val) -> profile.department.id.eq(UUID.fromString(val.toString())),
+                (profile, val) -> profile.department.id.eq((UUID) val),
                 AccountsCriteriaFilterOption.SPECIALTY,
-                (profile, val) -> profile.specialty.codeName.eq(Double.valueOf(val.toString())),
+                (profile, val) -> profile.specialty.codeName.eq((Double) val),
                 AccountsCriteriaFilterOption.TECHNICAL_ROLE,
                 (profile, val) -> profile.technicalRole.eq(Enum.valueOf(AccountTechnicalRole.class, val.toString())),
                 AccountsCriteriaFilterOption.UNIT,
@@ -89,4 +98,19 @@ public interface AccountProfileRepository extends JpaRepository<AccountProfile, 
         return Optional.ofNullable(filterMap.get(key))
                 .map(func -> func.apply(accountProfile, value));
     }
+
+    default BooleanExpression getYearOfStudyCondition(Integer universityStudyYears) {
+        NumberExpression<Integer> calculatedYearOfStudy =
+                Expressions.numberTemplate(Integer.class,
+                        "{0} + (CASE " +
+                                "WHEN extract(month from {1}) > 6 " +
+                                "THEN extract(year from current_date) - extract(year from {1}) " +
+                                "WHEN extract(month from current_date) > 6 " +
+                                "THEN extract(year from current_date) - extract(year from {1}) - 1 " +
+                                "ELSE extract(year from current_date) - extract(year from {1}) END)",
+                        accountProfile.yearOfStudyOnRegistration, accountProfile.registrationDate);
+
+        return calculatedYearOfStudy.eq(universityStudyYears);
+    }
+
 }

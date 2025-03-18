@@ -6,8 +6,8 @@ LABEL maintainer = "knudev@knu.ua"
 LABEL application.name = "knudev"
 LABEL version = "0.0.1"
 
-#ARG JAR_FILE=knudev-app/target/*.jar
-ARG JAR_FILE=./*.jar
+ARG JAR_FILE=knudev-app/target/*.jar
+#ARG JAR_FILE=./*.jar
 
 COPY ${JAR_FILE} application.jar
 

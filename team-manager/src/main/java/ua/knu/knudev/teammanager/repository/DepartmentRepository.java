@@ -22,4 +22,5 @@ public interface DepartmentRepository extends JpaRepository<Department, UUID> {
     boolean existsByName_En(String enName);
 
     boolean existsByName_Uk(String ukName);
+
 }

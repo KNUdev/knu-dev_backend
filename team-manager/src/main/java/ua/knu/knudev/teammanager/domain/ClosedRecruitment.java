@@ -47,7 +47,7 @@ public class ClosedRecruitment {
     @Embedded
     private RecruitmentAutoCloseConditions recruitmentAutoCloseConditions;
 
-    @OneToOne(mappedBy = "closedRecruitment", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OneToOne(mappedBy = "closedRecruitment", cascade = CascadeType.ALL, orphanRemoval = true)
     private RecruitmentAnalytics recruitmentAnalytics;
 
     public void setRecruitmentAnalytics(RecruitmentAnalytics recruitmentAnalytics) {
