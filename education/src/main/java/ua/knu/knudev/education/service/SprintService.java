@@ -11,6 +11,7 @@ import ua.knu.knudev.education.domain.bridge.SectionModuleMapping;
 import ua.knu.knudev.education.domain.program.ProgramModule;
 import ua.knu.knudev.education.domain.program.ProgramSection;
 import ua.knu.knudev.education.domain.program.ProgramTopic;
+import ua.knu.knudev.education.domain.session.EducationSession;
 import ua.knu.knudev.education.domain.session.Sprint;
 import ua.knu.knudev.education.repository.SprintRepository;
 import ua.knu.knudev.education.repository.bridge.ModuleTopicMappingRepository;
@@ -18,6 +19,7 @@ import ua.knu.knudev.education.repository.bridge.ProgramSectionMappingRepository
 import ua.knu.knudev.education.repository.bridge.SectionModuleMappingRepository;
 import ua.knu.knudev.educationapi.enums.SprintStatus;
 import ua.knu.knudev.educationapi.enums.SprintType;
+import ua.knu.knudev.educationapi.exception.SprintException;
 import ua.knu.knudev.educationapi.request.SprintAdjustmentRequest;
 
 import java.time.LocalDateTime;
@@ -28,8 +30,6 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class SprintService {
-
-    private final ProgramService programService;
     private final ProgramSectionMappingRepository programSectionMappingRepository;
     private final SectionModuleMappingRepository sectionModuleMappingRepository;
     private final ModuleTopicMappingRepository moduleTopicMappingRepository;
@@ -44,7 +44,7 @@ public class SprintService {
     @Value("${application.session.sprints.sectionEndStaleTimeInDays}")
     private Integer sectionEndStaleTimeInDays;
 
-    public List<Sprint> generateSessionSprintPlan(EducationProgram program) {
+    public List<Sprint> generateSessionSprintPlan(EducationProgram program, LocalDateTime sessionStart) {
         List<ProgramSectionMapping> sectionMappings =
                 programSectionMappingRepository.findByEducationProgramId(program.getId());
         sectionMappings.sort(Comparator.comparingInt(ProgramSectionMapping::getOrderIndex));
@@ -132,61 +132,45 @@ public class SprintService {
                 .build();
         sprintsToSave.add(programSprint);
 
-        updateSprintsStartDates(sprintsToSave);
+        updateSprintsStartDates(sprintsToSave, sessionStart);
         return sprintsToSave;
     }
 
-    public List<Sprint> adjustSprintsDurations(List<SprintAdjustmentRequest> adjustments, UUID sessionId) {
-        //todo do check if session hasnt started yet
-        //
-
-        List<Sprint> foundSprints = sprintRepository.findAllBySession_Id(sessionId);
+    public List<Sprint> adjustSprintsDurations(List<SprintAdjustmentRequest> adjustments, EducationSession session) {
+        List<Sprint> foundSprints = sprintRepository.findAllBySession_Id(session.getId());
         List<Sprint> adjustedSprintsDurationInDays = foundSprints.stream()
                 .peek(sprint -> {
                     SprintAdjustmentRequest adjustment = adjustments.stream()
                             .filter(adj -> adj.getNewDurationInDays() != null)
-                            .filter(adj -> adj.getSprintId()!= null)
+                            .filter(adj -> adj.getSprintId() != null)
                             .filter(adj -> sprint.getId().equals(adj.getSprintId()))
                             .findFirst()
-                            //todo better exc
-                            .orElse(null);
-                    if(ObjectUtils.isNotEmpty(adjustment)) {
+                            .orElseThrow(() -> new SprintException(
+                                    "Sprint not found according to adjustment request"
+                            ));
+                    if (ObjectUtils.isNotEmpty(adjustment)) {
                         sprint.setDurationInDays(adjustment.getNewDurationInDays());
                     }
                 })
                 .collect(Collectors.toList());
 
-        List<Sprint> sprintsToSave = updateSprintsStartDates(adjustedSprintsDurationInDays);
+        List<Sprint> sprintsToSave = updateSprintsStartDates(adjustedSprintsDurationInDays, session.getStartDate());
         sortSprintByOrderIndex(sprintsToSave);
 
         return sprintRepository.saveAll(sprintsToSave);
     }
 
-//    public Sprint get(UUID sprintId, int orderIndex) {
-//        return sprintRepository.findBySession_IdAndOrderIndex(sprintId, orderIndex)
-//                //todo better exc
-//                .orElseThrow(() -> new RuntimeException("Sprint not found"));
-//    }
-//
-//    public Sprint get(UUID sprintId) {
-//        return sprintRepository.findById(sprintId)
-//                //todo better exc
-//                .orElseThrow(() -> new RuntimeException("Sprint not found"));
-//    }
-
-    private List<Sprint> updateSprintsStartDates(List<Sprint> sprints) {
-        //todo get from request
-        LocalDateTime sessionStart = LocalDateTime.now();
+    private List<Sprint> updateSprintsStartDates(List<Sprint> sprints, LocalDateTime sessionStart) {
         sortSprintByOrderIndex(sprints);
 
         LocalDateTime currentStart = sessionStart;
         for (Sprint sprint : sprints) {
             sprint.setStartDate(currentStart);
             currentStart = currentStart.plusDays(sprint.getDurationInDays());
-            if(sprint.getType() == SprintType.MODULE_FINAL) {
+            if (sprint.getType() == SprintType.MODULE_FINAL) {
                 currentStart = currentStart.plusDays(moduleEndStaleTimeInDays);
             }
-            if(sprint.getType() == SprintType.SECTION_FINAL) {
+            if (sprint.getType() == SprintType.SECTION_FINAL) {
                 currentStart = currentStart.plusDays(sectionEndStaleTimeInDays);
             }
         }

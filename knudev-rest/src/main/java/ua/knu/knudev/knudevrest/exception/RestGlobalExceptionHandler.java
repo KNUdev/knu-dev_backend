@@ -35,6 +35,11 @@ public class RestGlobalExceptionHandler {
         return new ResponseEntity<>(exception.getMessage(), exception.getStatus());
     }
 
+//    @ExceptionHandler
+//    public ResponseEntity<String> handleAccountException(SprintException exception) {
+//        return new ResponseEntity<>(exception.getMessage(), exception.getStatus());
+//    }
+
     @ExceptionHandler(DepartmentException.class)
     public ResponseEntity<String> handleDepartmentException(DepartmentException exception) {
         MediaType mediaType = new MediaType(MediaType.TEXT_PLAIN, StandardCharsets.UTF_8);

@@ -5,6 +5,7 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import ua.knu.knudev.education.domain.session.EducationSession;
+import ua.knu.knudev.educationapi.enums.SessionStatus;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -15,4 +16,6 @@ public interface EducationSessionRepository extends JpaRepository<EducationSessi
     @Query("update EducationSession s set s.estimatedEndDate = :endDate where s.id = :id")
     void updateEstimatedEndDateById(@Param(value = "id") UUID id,
                                     @Param(value = "endDate") LocalDateTime estimatedEndDate);
+
+    boolean existsByIdAndStatus(UUID id, SessionStatus status);
 }

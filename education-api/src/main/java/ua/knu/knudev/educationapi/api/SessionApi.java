@@ -1,6 +1,5 @@
 package ua.knu.knudev.educationapi.api;
 
-import ua.knu.knudev.educationapi.dto.session.SessionFullDto;
 import ua.knu.knudev.educationapi.dto.session.SessionSprintPlanDto;
 import ua.knu.knudev.educationapi.request.SessionCreationRequest;
 import ua.knu.knudev.educationapi.request.SprintAdjustmentRequest;
@@ -13,5 +12,5 @@ public interface SessionApi {
 //    List<SprintDto> generateSprintsForProgram(UUID programId);
     SessionSprintPlanDto createSession(SessionCreationRequest request);
     void adjustSprintsDurations(List<SprintAdjustmentRequest> adjustments, UUID sessionId);
-    void extendCurrentSprintDuration(UUID sprintId, Integer extensionDays);
+    void extendSprintDuration(UUID sprintId, Integer extensionDays);
 }

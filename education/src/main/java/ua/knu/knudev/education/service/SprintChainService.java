@@ -1,15 +1,13 @@
 package ua.knu.knudev.education.service;
 
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.cglib.core.Local;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.stereotype.Service;
 import ua.knu.knudev.education.domain.session.Sprint;
-import ua.knu.knudev.education.repository.EducationSessionRepository;
 import ua.knu.knudev.education.repository.SprintRepository;
 import ua.knu.knudev.educationapi.enums.SprintStatus;
+import ua.knu.knudev.educationapi.exception.SprintException;
 
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -18,24 +16,19 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ScheduledFuture;
 
-//todo use sprint service
 @Service
 @Slf4j
 public class SprintChainService {
 
     private final TaskScheduler taskScheduler;
     private final SprintRepository sprintRepository;
-    private final EducationSessionRepository sessionRepository;
+    private final ConcurrentHashMap<UUID, ScheduledFuture<?>> scheduledTasks = new ConcurrentHashMap<>();
 
     public SprintChainService(@Qualifier("educationTaskScheduler") TaskScheduler taskScheduler,
-                              SprintRepository sprintRepository,
-                              EducationSessionRepository sessionRepository) {
+                              SprintRepository sprintRepository) {
         this.taskScheduler = taskScheduler;
         this.sprintRepository = sprintRepository;
-        this.sessionRepository = sessionRepository;
     }
-
-    private final ConcurrentHashMap<UUID, ScheduledFuture<?>> scheduledTasks = new ConcurrentHashMap<>();
 
     public void launchSprintChain(UUID sessionId) {
         Sprint firstSprint = sprintRepository.findBySession_IdAndOrderIndex(sessionId, 1);
@@ -48,45 +41,50 @@ public class SprintChainService {
         Sprint currentSprint = sprintRepository.findById(sprintId)
                 .orElseThrow(() -> new RuntimeException("Sprint not found"));
 
-        int newDuration = currentSprint.getDurationInDays() + additionalDays;
-        currentSprint.setDurationInDays(newDuration);
-        sprintRepository.save(currentSprint);
+        boolean statusIsValid = currentSprint.getStatus() == SprintStatus.FUTURE
+                || currentSprint.getStatus() == SprintStatus.ACTIVE;
+        if (statusIsValid) {
+            int newDuration = currentSprint.getDurationInDays() + additionalDays;
+            currentSprint.setDurationInDays(newDuration);
+            sprintRepository.save(currentSprint);
 
-        UUID sessionId = currentSprint.getSession().getId();
-        int nextOrderIndex = currentSprint.getOrderIndex() + 1;
-        Sprint nextSprint = sprintRepository.findBySession_IdAndOrderIndex(sessionId, nextOrderIndex);
+            UUID sessionId = currentSprint.getSession().getId();
+            int nextOrderIndex = currentSprint.getOrderIndex() + 1;
+            Sprint nextSprint = sprintRepository.findBySession_IdAndOrderIndex(sessionId, nextOrderIndex);
 
-        if (nextSprint != null) {
-            LocalDateTime newNextStartDate = currentSprint.getStartDate().plusDays(newDuration);
-            nextSprint.setStartDate(newNextStartDate);
-            sprintRepository.save(nextSprint);
+            if (nextSprint != null) {
+                LocalDateTime newNextStartDate = currentSprint.getStartDate().plusDays(newDuration);
+                nextSprint.setStartDate(newNextStartDate);
+                sprintRepository.save(nextSprint);
 
-            ScheduledFuture<?> existingTask = scheduledTasks.get(nextSprint.getId());
-            if (existingTask != null && !existingTask.isDone()) {
-                existingTask.cancel(false);
+                ScheduledFuture<?> existingTask = scheduledTasks.get(nextSprint.getId());
+                if (existingTask != null && !existingTask.isDone()) {
+                    existingTask.cancel(false);
+                }
+                scheduleSprint(nextSprint);
             }
-            scheduleSprint(nextSprint);
+            sprintRepository.updateSprintStartDates(
+                    currentSprint.getSession().getId(),
+                    currentSprint.getOrderIndex(),
+                    additionalDays
+            );
+        } else {
+            throw new SprintException(
+                    "Spring with id: " + currentSprint.getId() + "has status " + currentSprint.getStatus()
+            );
         }
-        sprintRepository.updateSprintStartDates(
-                currentSprint.getSession().getId(),
-                currentSprint.getOrderIndex(),
-                additionalDays
-        );
     }
 
     private void scheduleSprint(Sprint sprint) {
-        Instant startInstant = LocalDateTime.now().plusSeconds(60)
+        Instant startInstant = sprint.getStartDate()
                 .atZone(ZoneId.systemDefault())
                 .toInstant();
-//        Instant startInstant = sprint.getStartDate()
-//                .atZone(ZoneId.systemDefault())
-//                .toInstant();
 
         Runnable safeTask = () -> {
             try {
                 startSprint(sprint);
             } catch (Exception e) {
-                // Handle error accordingly.
+                throw new SprintException(e.getMessage());
             }
         };
 
@@ -105,7 +103,7 @@ public class SprintChainService {
 
         completePreviousSprint(currentSprint);
 
-        // Launch the sprint's business logic here.
+        // Todo logic to start sprint
         // runSprintBusinessLogic(currentSprint);
 
         Sprint nextSprint = sprintRepository.findBySession_IdAndOrderIndex(
@@ -131,7 +129,6 @@ public class SprintChainService {
             }
         }
     }
-
 
 }
 
