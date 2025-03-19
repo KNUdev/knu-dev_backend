@@ -32,12 +32,10 @@ import ua.knu.knudev.knudevsecurityapi.response.AuthAccountCreationResponse;
 import ua.knu.knudev.teammanager.domain.AccountProfile;
 import ua.knu.knudev.teammanager.domain.Department;
 import ua.knu.knudev.teammanager.domain.Specialty;
-import ua.knu.knudev.teammanager.mapper.AccountProfileMapper;
 import ua.knu.knudev.teammanager.mapper.MultiLanguageFieldMapper;
 import ua.knu.knudev.teammanager.mapper.ShortDepartmentMapper;
 import ua.knu.knudev.teammanager.mapper.SpecialtyMapper;
 import ua.knu.knudev.teammanager.repository.AccountProfileRepository;
-import ua.knu.knudev.teammanager.repository.SpecialtyRepository;
 import ua.knu.knudev.teammanager.service.api.GithubManagementApi;
 import ua.knu.knudev.teammanagerapi.api.AccountProfileApi;
 import ua.knu.knudev.teammanagerapi.constant.AccountsCriteriaFilterOption;
@@ -65,6 +63,7 @@ public class AccountProfileService implements AccountProfileApi {
     private final DepartmentService departmentService;
     private final SpecialtyService specialtyService;
     private final ShortDepartmentMapper shortDepartmentMapper;
+    private final MultiLanguageFieldMapper multiLanguageFieldMapper;
     private final SpecialtyMapper specialtyMapper;
     private final GithubManagementApi gitHubManagementApi;
     private final Environment environment;
@@ -230,16 +229,20 @@ public class AccountProfileService implements AccountProfileApi {
         Pageable paging = PageRequest.of(pageNumber, pageSize);
         Map<AccountsCriteriaFilterOption, Object> filtersMap = buildAccountsFiltersMap(accountSearchCriteria);
         Page<AccountProfile> searchedAccountsPage = accountProfileRepository.findAllAccountsByFilters(filtersMap, paging);
+
         return searchedAccountsPage.map(accountProfile -> {
             String avatarFilename = accountProfile.getAvatarFilename();
+            String bannerFilename = accountProfile.getBannerFilename();
+
             String avatarUrl = StringUtils.isNotEmpty(avatarFilename) ? imageServiceApi.getPathByFilename(
                     avatarFilename, ImageSubfolder.ACCOUNT_AVATARS
             ) : null;
-
-            String bannerFilename = accountProfile.getBannerFilename();
             String bannerUrl = StringUtils.isNotEmpty(bannerFilename) ? imageServiceApi.getPathByFilename(
-                    avatarFilename, ImageSubfolder.ACCOUNT_BANNERS
+                    bannerFilename, ImageSubfolder.ACCOUNT_BANNERS
             ) : null;
+
+            MultiLanguageFieldDto departmentName = multiLanguageFieldMapper.toDto(accountProfile.getDepartment().getName());
+            MultiLanguageFieldDto specialtyName = multiLanguageFieldMapper.toDto(accountProfile.getSpecialty().getName());
             return AccountProfileDto.builder()
                     .id(accountProfile.getId())
                     .fullName(new FullName(
@@ -257,11 +260,12 @@ public class AccountProfileService implements AccountProfileApi {
                             .specialtyCodename(accountProfile.getSpecialty().getCodeName())
                             .build())
                     .githubAccountUsername(accountProfile.getGithubAccountUsername())
-                    .bannerFilename(accountProfile.getBannerFilename())
                     .expertise(accountProfile.getExpertise())
-                    .yearOfStudyOnRegistration(accountProfile.getYearOfStudyOnRegistration())
+                    .universityStudyYear(accountProfile.getCurrentYearOfStudy())
                     .lastRoleUpdateDate(accountProfile.getLastRoleUpdateDate())
                     .registeredAt(accountProfile.getRegistrationDate())
+                    .departmentName(departmentName)
+                    .specialtyName(specialtyName)
                     .build();
         });
     }
@@ -361,13 +365,13 @@ public class AccountProfileService implements AccountProfileApi {
         checkIfEmailIsInvalid(email);
 
         if (request.getDeleteAvatar() != null && request.getDeleteAvatar()) {
-            accountProfile.setAvatarFilename(null);
+            removeAvatar(accountProfile.getId());
         }
         if (request.getDeleteBanner() != null && request.getDeleteBanner()) {
-            accountProfile.setBannerFilename(null);
+            removeBanner(accountProfile.getId());
         }
 
-        updateSpecialtyAndDepartmentIfItsValid(request.getSpecialtyCodeName(), request.getDepartmentName(), accountProfile);
+        updateSpecialtyAndDepartmentIfItsValid(request.getSpecialtyCodename(), request.getDepartmentId(), accountProfile);
         updateField(request.getFirstName(), accountProfile::setFirstName);
         updateField(request.getLastName(), accountProfile::setLastName);
         updateField(request.getMiddleName(), accountProfile::setMiddleName);
@@ -376,6 +380,7 @@ public class AccountProfileService implements AccountProfileApi {
         updateField(request.getUnit(), accountProfile::setUnit);
         updateField(gitHubAccountUsername, accountProfile::setGithubAccountUsername);
         updateField(request.getTechnicalRole(), accountProfile::setTechnicalRole);
+        updateField(request.getExpertise(), accountProfile::setExpertise);
 
         if (request.getTechnicalRole() != null) {
             accountProfile.setLastRoleUpdateDate(LocalDateTime.now());
@@ -403,16 +408,15 @@ public class AccountProfileService implements AccountProfileApi {
         }
     }
 
-    private void updateSpecialtyAndDepartmentIfItsValid(Double specialtyCodeName, MultiLanguageFieldDto departmentName,
-                                                        AccountProfile accountProfile) {
+    private void updateSpecialtyAndDepartmentIfItsValid(Double specialtyCodename, UUID departmentId, AccountProfile accountProfile) {
         boolean isSpecialtyUpdated = false;
-        if (departmentName != null) {
-            Department department = departmentService.getDepartmentByName(departmentName.getEn(), departmentName.getUk());
-            departmentService.validateAcademicUnitExistence(department.getId(),
-                    specialtyCodeName != null ? specialtyCodeName : accountProfile.getSpecialty().getCodeName());
+        if (departmentId != null) {
+            Department department = departmentService.getById(departmentId);
+            departmentService.validateAcademicUnitExistence(departmentId,
+                    specialtyCodename != null ? specialtyCodename : accountProfile.getSpecialty().getCodeName());
 
-            if (specialtyCodeName != null) {
-                Specialty specialty = specialtyService.getByCodeName(specialtyCodeName);
+            if (specialtyCodename != null) {
+                Specialty specialty = specialtyService.getByCodeName(specialtyCodename);
                 accountProfile.setSpecialty(specialty);
                 isSpecialtyUpdated = true;
             }
@@ -420,15 +424,18 @@ public class AccountProfileService implements AccountProfileApi {
             accountProfile.setDepartment(department);
         }
 
-        if (!isSpecialtyUpdated && specialtyCodeName != null) {
-            Specialty specialty = specialtyService.getByCodeName(specialtyCodeName);
-            departmentService.validateAcademicUnitExistence(accountProfile.getDepartment().getId(), specialtyCodeName);
+        if (!isSpecialtyUpdated && specialtyCodename != null) {
+            Specialty specialty = specialtyService.getByCodeName(specialtyCodename);
+            departmentService.validateAcademicUnitExistence(accountProfile.getDepartment().getId(), specialtyCodename);
             accountProfile.setSpecialty(specialty);
         }
 
     }
 
     private AccountProfileDto mapAccountProfileToDto(AccountProfile accountProfile) {
+        MultiLanguageFieldDto departmentName = multiLanguageFieldMapper.toDto(accountProfile.getDepartment().getName());
+        MultiLanguageFieldDto specialtyName = multiLanguageFieldMapper.toDto(accountProfile.getSpecialty().getName());
+
         return AccountProfileDto.builder()
                 .id(accountProfile.getId())
                 .email(accountProfile.getEmail())
@@ -445,8 +452,10 @@ public class AccountProfileService implements AccountProfileApi {
                 .githubAccountUsername(accountProfile.getGithubAccountUsername())
                 .expertise(accountProfile.getExpertise())
                 .registeredAt(accountProfile.getRegistrationDate())
-                .yearOfStudyOnRegistration(accountProfile.getYearOfStudyOnRegistration())
+                .universityStudyYear(accountProfile.getCurrentYearOfStudy())
                 .lastRoleUpdateDate(accountProfile.getLastRoleUpdateDate())
+                .departmentName(departmentName)
+                .specialtyName(specialtyName)
                 .unit(accountProfile.getUnit())
                 .build();
     }
@@ -541,14 +550,14 @@ public class AccountProfileService implements AccountProfileApi {
     protected Map<AccountsCriteriaFilterOption, Object> buildAccountsFiltersMap(AccountSearchCriteria accountSearchCriteria) {
 
         Map<AccountsCriteriaFilterOption, Object> filters = new EnumMap<>(AccountsCriteriaFilterOption.class);
-        addFilter2Map(filters, AccountsCriteriaFilterOption.USER_INITIALS_OR_EMAIL, accountSearchCriteria.searchQuery());
+        addFilter2Map(filters, AccountsCriteriaFilterOption.USER_INITIALS_OR_GITHUB_OR_EMAIL, accountSearchCriteria.searchQuery());
         addFilter2Map(filters, AccountsCriteriaFilterOption.REGISTERED_AT, accountSearchCriteria.registeredAt());
         addFilter2Map(filters, AccountsCriteriaFilterOption.REGISTERED_BEFORE, accountSearchCriteria.registeredBefore());
         addFilter2Map(filters, AccountsCriteriaFilterOption.UNIT, accountSearchCriteria.unit());
         addFilter2Map(filters, AccountsCriteriaFilterOption.EXPERTISE, accountSearchCriteria.expertise());
         addFilter2Map(filters, AccountsCriteriaFilterOption.DEPARTMENT, accountSearchCriteria.departmentId());
         addFilter2Map(filters, AccountsCriteriaFilterOption.SPECIALTY, accountSearchCriteria.specialtyCodeName());
-        addFilter2Map(filters, AccountsCriteriaFilterOption.UNIVERSITY_STUDY_YEAR, accountSearchCriteria.universityStudyYear());
+        addFilter2Map(filters, AccountsCriteriaFilterOption.UNIVERSITY_STUDY_YEARS, accountSearchCriteria.universityStudyYear());
         addFilter2Map(filters, AccountsCriteriaFilterOption.RECRUITMENT_ORIGIN, accountSearchCriteria.recruitmentId());
         addFilter2Map(filters, AccountsCriteriaFilterOption.TECHNICAL_ROLE, accountSearchCriteria.technicalRole());
 

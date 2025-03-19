@@ -3,8 +3,8 @@ package ua.knu.knudev.teammanagerapi.request;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import ua.knu.knudev.knudevcommon.constant.AccountTechnicalRole;
+import ua.knu.knudev.knudevcommon.constant.Expertise;
 import ua.knu.knudev.knudevcommon.constant.KNUdevUnit;
-import ua.knu.knudev.knudevcommon.dto.MultiLanguageFieldDto;
 
 import java.util.UUID;
 
@@ -35,14 +35,17 @@ public class AccountUpdateRequest {
         @Schema(description = "KNUdev unit")
         private KNUdevUnit unit;
 
+        @Schema(description = "Account profile expertise")
+        private Expertise expertise;
+
         @Schema(description = "GitHub account username", example = "johndoe")
         private String gitHubAccountUsername;
 
         @Schema(description = "Specialty code", example = "121.0")
-        private Double specialtyCodeName;
+        private Double specialtyCodename;
 
-        @Schema(description = "Department name", implementation = MultiLanguageFieldDto.class)
-        private MultiLanguageFieldDto departmentName;
+        @Schema(description = "Department id", example = "550e8400-e29b-41d4-a716-446655440000")
+        private UUID departmentId;
 
         @Schema(description = "Is need to delete avatar", example = "true")
         private Boolean deleteAvatar;

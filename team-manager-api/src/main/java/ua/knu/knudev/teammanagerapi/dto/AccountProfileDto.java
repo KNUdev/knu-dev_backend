@@ -6,6 +6,7 @@ import lombok.Builder;
 import ua.knu.knudev.knudevcommon.constant.AccountTechnicalRole;
 import ua.knu.knudev.knudevcommon.constant.Expertise;
 import ua.knu.knudev.knudevcommon.constant.KNUdevUnit;
+import ua.knu.knudev.knudevcommon.dto.MultiLanguageFieldDto;
 import ua.knu.knudev.knudevcommon.utils.AcademicUnitsIds;
 import ua.knu.knudev.knudevcommon.utils.FullName;
 
@@ -35,6 +36,12 @@ public record AccountProfileDto(
                 requiredMode = Schema.RequiredMode.REQUIRED)
         AcademicUnitsIds academicUnitsIds,
 
+        @Schema(description = "Department`s name in which user are", implementation = MultiLanguageFieldDto.class)
+        MultiLanguageFieldDto departmentName,
+
+        @Schema(description = "Specialty`s name in which user are", implementation = MultiLanguageFieldDto.class)
+        MultiLanguageFieldDto specialtyName,
+
         @Schema(description = "Avatar filename of the user", example = "avatar.png")
         String avatarFilename,
 
@@ -56,7 +63,7 @@ public record AccountProfileDto(
         LocalDateTime registeredAt,
 
         @Schema(description = "Account(student) university course when registered", example = "2")
-        int yearOfStudyOnRegistration,
+        int universityStudyYear,
 
         @JsonFormat(
                 shape = JsonFormat.Shape.STRING,

@@ -8,6 +8,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import ua.knu.knudev.educationapi.api.DevProfileEducationApi;
+import ua.knu.knudev.educationapi.dto.EducationProgramDto;
 import ua.knu.knudev.teammanagerapi.devprofile.DevProfileTeamManagerApi;
 import ua.knu.knudev.teammanagerapi.dto.ActiveRecruitmentDto;
 import ua.knu.knudev.teammanagerapi.dto.ClosedRecruitmentDto;
@@ -22,6 +24,7 @@ import java.util.List;
 @Profile("dev")
 public class DevProfileController {
     private final DevProfileTeamManagerApi devProfileTeamManagerApi;
+    private final DevProfileEducationApi devProfileEducationApi;
 
     @Operation(summary = "Create Test Departments",
             description = "Creates test departments with specialties for development purposes.")
@@ -59,4 +62,9 @@ public class DevProfileController {
     public List<ClosedRecruitmentDto> createClosedRecruitments() {
         return devProfileTeamManagerApi.createClosedRecruitments();
     }
+    @PostMapping("/program/create")
+    public EducationProgramDto createProgram() {
+        return devProfileEducationApi.createTestProgram();
+    }
+
 }

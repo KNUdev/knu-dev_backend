@@ -6,7 +6,6 @@ import org.springframework.data.repository.query.Param;
 import ua.knu.knudev.teammanager.domain.Department;
 import ua.knu.knudev.teammanager.domain.Specialty;
 
-import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
@@ -23,7 +22,5 @@ public interface DepartmentRepository extends JpaRepository<Department, UUID> {
     boolean existsByName_En(String enName);
 
     boolean existsByName_Uk(String ukName);
-
-    Optional<Department> getDepartmentByName_EnAndName_Uk(String enName, String ukName);
 
 }

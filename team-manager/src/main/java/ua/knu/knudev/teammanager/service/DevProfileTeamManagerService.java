@@ -48,26 +48,26 @@ public class DevProfileTeamManagerService implements DevProfileTeamManagerApi {
 
     @Override
     public List<DepartmentWithSpecialtiesDto> createTestDepartments() {
-        SpecialtyCreationDto s1 = new SpecialtyCreationDto(123.0, "Computer Engineering", "Комп'ютерна інженерія");
-        SpecialtyCreationDto s2 = new SpecialtyCreationDto(172.0, "Radiotechnics", "Радіотехніка");
-        SpecialtyCreationDto s3 = new SpecialtyCreationDto(105.0, "Applied Physics", "Прикладна фізика");
+        SpecialtyCreationDto s1 = new SpecialtyCreationDto(123.0, "Комп'ютерна інженерія", "Computer Engineering");
+        SpecialtyCreationDto s2 = new SpecialtyCreationDto(172.0, "Радіотехніка", "Radiotechnics");
+        SpecialtyCreationDto s3 = new SpecialtyCreationDto(105.0, "Прикладна фізика", "Applied Physics");
         DepartmentCreationRequest dcr = new DepartmentCreationRequest(
                 "Faculty of Radiophysics, Electronics and Computer Systems",
                 "Факультет Радіофізики, Електроніки та Комп'юторних систем",
                 Set.of(s1, s2, s3)
         );
 
-        SpecialtyCreationDto s11 = new SpecialtyCreationDto(124.0, "System Analytics", "Системна Аналітика");
-        SpecialtyCreationDto s22 = new SpecialtyCreationDto(125.0, "Cybersecurity", "Кібербезпека");
-        SpecialtyCreationDto s33 = new SpecialtyCreationDto(122.0, "Computer Science", "Комп'ютерні науки");
+        SpecialtyCreationDto s11 = new SpecialtyCreationDto(124.0, "Системна аналітика", "System Analytics");
+        SpecialtyCreationDto s22 = new SpecialtyCreationDto(125.0, "Кібербезпека", "Cybersecurity");
+        SpecialtyCreationDto s33 = new SpecialtyCreationDto(122.0, "Комп'ютерні науки", "Computer Science");
 
-        SpecialtyCreationDto s44 = new SpecialtyCreationDto(127.0, "Data Analytics", "Аналіз даних");
-        SpecialtyCreationDto s55 = new SpecialtyCreationDto(128.0, "Artificial Intelligence", "Штучний інтелект");
-        SpecialtyCreationDto s66 = new SpecialtyCreationDto(129.0, "Bioinformatics", "Біоінформатика");
-        SpecialtyCreationDto s77 = new SpecialtyCreationDto(130.0, "Quantum Computing", "Квантові обчислення");
-        SpecialtyCreationDto s88 = new SpecialtyCreationDto(131.0, "Network Administration", "Адміністрування мереж");
-        SpecialtyCreationDto s99 = new SpecialtyCreationDto(132.0, "Cloud Computing", "Хмарні обчислення");
-        SpecialtyCreationDto s100 = new SpecialtyCreationDto(133.0, "Project Management", "Управління проєктами");
+        SpecialtyCreationDto s44 = new SpecialtyCreationDto(127.0, "Аналіз даних", "Data Analytics");
+        SpecialtyCreationDto s55 = new SpecialtyCreationDto(128.0, "Штучний інтелект", "Artificial Intelligence");
+        SpecialtyCreationDto s66 = new SpecialtyCreationDto(129.0, "Біоінформатика", "Bioinformatics");
+        SpecialtyCreationDto s77 = new SpecialtyCreationDto(130.0, "Квантові обчислення", "Quantum Computing");
+        SpecialtyCreationDto s88 = new SpecialtyCreationDto(131.0, "Адміністрування мереж", "Network Administration");
+        SpecialtyCreationDto s99 = new SpecialtyCreationDto(132.0, "Хмарні обчислення", "Cloud Computing");
+        SpecialtyCreationDto s100 = new SpecialtyCreationDto(133.0, "Управління проєктами", "Project Management");
 
         DepartmentCreationRequest dcr2 = new DepartmentCreationRequest(
                 "Faculty of Informational Technologies",
@@ -80,7 +80,7 @@ public class DevProfileTeamManagerService implements DevProfileTeamManagerApi {
                 )
         );
         SpecialtyCreationDto s111 = new SpecialtyCreationDto(121.0, "Software Engineering", "Інженерія Програмного Забезпечення");
-        SpecialtyCreationDto s222 = new SpecialtyCreationDto(126.0, "Information systems and technologies", "Інформаційні системи та технології");
+        SpecialtyCreationDto s222 = new SpecialtyCreationDto(126.0, "Інформаційні системи та технології", "Information systems and technologies");
         SpecialtyCreationDto s333 = new SpecialtyCreationDto(138.1127, "Super Omega Giga Faculty", "Гіпер мега бляха факультет");
 
         DepartmentCreationRequest dcr3 = new DepartmentCreationRequest(

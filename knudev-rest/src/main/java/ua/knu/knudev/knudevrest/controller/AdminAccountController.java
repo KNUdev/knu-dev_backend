@@ -11,6 +11,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ua.knu.knudev.knudevcommon.constant.AccountTechnicalRole;
 import ua.knu.knudev.knudevcommon.constant.Expertise;
@@ -61,7 +62,7 @@ public class AdminAccountController {
             @Parameter(name = "unit", description = "Filter accounts by their unit.", example = "CAMPUS", schema = @Schema(implementation = KNUdevUnit.class)),
             @Parameter(name = "expertise", description = "Filter accounts by their area of expertise.", example = "FULLSTACK", schema = @Schema(implementation = Expertise.class)),
             @Parameter(name = "departmentId", description = "Filter accounts by department id.", example = "f47ac10b-58cc-4372-a567-0e02b2c3d479"),
-            @Parameter(name = "specialtyCodeName", description = "Filter accounts by specialty code name.", example = "123.0"),
+            @Parameter(name = "specialtyCodename", description = "Filter accounts by specialty code name.", example = "123.0"),
             @Parameter(name = "universityStudyYear", description = "Filter accounts by university study year.", example = "3"),
             @Parameter(name = "recruitmentId", description = "Filter accounts by recruitment id.", example = "f47ac10b-58cc-4372-a567-0e02b2c3d479"),
             @Parameter(name = "technicalRole", description = "Filter accounts by their technical role.", example = "INTERN", schema = @Schema(implementation = AccountTechnicalRole.class)),
@@ -75,8 +76,8 @@ public class AdminAccountController {
             @RequestParam(name = "registeredBefore", required = false) LocalDate registeredBefore,
             @RequestParam(name = "unit", required = false) KNUdevUnit unit,
             @RequestParam(name = "expertise", required = false) Expertise expertise,
-            @RequestParam(name = "departmentId", required = false) String departmentId,
-            @RequestParam(name = "specialtyCodeName", required = false) String specialtyCodeName,
+            @RequestParam(name = "departmentId", required = false) UUID departmentId,
+            @RequestParam(name = "specialtyCodename", required = false) Double specialtyCodename,
             @RequestParam(name = "universityStudyYear", required = false) Integer universityStudyYear,
             @RequestParam(name = "recruitmentId", required = false) UUID recruitmentId,
             @RequestParam(name = "technicalRole", required = false) AccountTechnicalRole technicalRole,
@@ -90,7 +91,7 @@ public class AdminAccountController {
                 .unit(unit)
                 .expertise(expertise)
                 .departmentId(departmentId)
-                .specialtyCodeName(specialtyCodeName)
+                .specialtyCodeName(specialtyCodename)
                 .universityStudyYear(universityStudyYear)
                 .recruitmentId(recruitmentId)
                 .technicalRole(technicalRole)
@@ -114,7 +115,7 @@ public class AdminAccountController {
                             ))
             })
     @PostMapping("/{accountId}/update")
-    public AccountProfileDto updateAccount(
+    public ResponseEntity<?> updateAccount(
             @PathVariable UUID accountId,
             @RequestBody @Parameter(
                     name = "AccountUpdateRequest",
@@ -123,7 +124,7 @@ public class AdminAccountController {
                     in = ParameterIn.HEADER
             ) AccountUpdateRequest request) {
         request.setAccountId(accountId);
-        return accountProfileApi.update(request);
+        return ResponseEntity.ok(accountProfileApi.update(request));
     }
 
 }

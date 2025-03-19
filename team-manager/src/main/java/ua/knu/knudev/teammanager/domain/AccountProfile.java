@@ -49,7 +49,7 @@ public class AccountProfile {
     private LocalDateTime registrationDate;
     private LocalDateTime lastRoleUpdateDate;
 
-    @Column(nullable = false, updatable = false)
+    @Column(nullable = false)
     private Integer yearOfStudyOnRegistration;
 
     @Column
@@ -67,7 +67,6 @@ public class AccountProfile {
     @JoinColumn(name = "specialty_code_name", referencedColumnName = "code_name", nullable = false)
     private Specialty specialty;
 
-    //    TODO TEST THIS METHOD
     public Integer getCurrentYearOfStudy() {
         Integer baseStudyYears = this.yearOfStudyOnRegistration;
         LocalDate registrationYearEndDate = determineAcademicYearEndDate(this.registrationDate);

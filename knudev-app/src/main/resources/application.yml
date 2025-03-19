@@ -43,6 +43,10 @@ spring:
     properties:
       hibernate:
         format_sql: true
+        jdbc:
+          batch_size: 50
+        order_updates: true
+        order_inserts: true
 
 logging:
   level:
@@ -99,6 +103,11 @@ application:
       tech-lead:
         duration-in-months-as-master: 6
         tech-lead-score: 8
+  session:
+    sprints:
+      defaultDurationInDays: 4
+      moduleEndStateTimeInDays: 2
+      sectionEndStaleTimeInDays: 1
 springdoc:
   swagger-ui:
     path: /api/documentation
