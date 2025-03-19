@@ -66,8 +66,8 @@ public class SectionSaveRequestValidatorTest {
     @Test
     public void should_ValidateSuccessfully_When_AllFieldsExceptExistingSectionIdAreProvided() {
         SectionSaveRequest request = SectionSaveRequest.builder()
-                .name(new MultiLanguageFieldDto())
-                .description(new MultiLanguageFieldDto())
+                .name(new MultiLanguageFieldDto("En", "Укр"))
+                .description(new MultiLanguageFieldDto("En", "Укр"))
                 .modules(Collections.emptyList())
                 .finalTask(new MockMultipartFile(
                         "file",
