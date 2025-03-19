@@ -42,7 +42,9 @@ public class TestSubmissionService implements TestSubmissionApi {
             return buildCancelledTest(testDomain, submissionRequest);
         }
 
-        List<UUID> questionIds = answers.stream().map(SubmittedAnswerDto::getQuestionId).toList();
+        List<UUID> questionIds = answers.stream()
+                .map(SubmittedAnswerDto::getQuestionId)
+                .toList();
 
         List<UUID> chosenVariantIds = answers.stream()
                 .flatMap(answer -> answer.getChosenVariantIds().stream())
@@ -194,7 +196,8 @@ public class TestSubmissionService implements TestSubmissionApi {
                                     .variantBody(variant.getEnVariantBody())
                                     .selectedByUser(chosenVariantIds.contains(variant.getId()))
                                     .correct(variant.getIsCorrectAnswer())
-                                    .build()).toList();
+                                    .build())
+                            .toList();
 
                     return TestQuestionResultDto.builder()
                             .questionId(question.getId())
