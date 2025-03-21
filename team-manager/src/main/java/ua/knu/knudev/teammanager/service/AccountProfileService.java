@@ -579,7 +579,7 @@ public class AccountProfileService implements AccountProfileApi {
 
     @SneakyThrows
     private void validateGithubUsername(BindException bindException, AccountCreationRequest request) {
-        if (Arrays.asList(environment.getActiveProfiles()).contains("test")) {
+        if (environment == null || Arrays.asList(environment.getActiveProfiles()).contains("test")) {
             return;
         }
 

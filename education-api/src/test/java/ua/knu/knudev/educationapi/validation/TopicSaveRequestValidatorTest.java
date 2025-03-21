@@ -51,17 +51,18 @@ public class TopicSaveRequestValidatorTest {
     @Test
     public void should_ValidateSuccessfully_When_AllFieldsExceptExistingTopicIdAreProvided() {
         TopicSaveRequest request = TopicSaveRequest.builder()
-                .name(new MultiLanguageFieldDto())
-                .description(new MultiLanguageFieldDto())
+                .name(new MultiLanguageFieldDto("En", "Укр"))
+                .description(new MultiLanguageFieldDto("En", "Укр"))
                 .finalTask(new MockMultipartFile(
                         "file",
                         "filename.txt",
                         "text/plain",
                         "content".getBytes()
                 ))
-                .learningResources(List.of("Material"))
+                .learningResources(List.of("https://google.com"))
                 .orderIndex(1)
                 .testId(UUID.randomUUID())
+                .difficulty(10)
                 .build();
 
         var violations = validator.validate(request);
