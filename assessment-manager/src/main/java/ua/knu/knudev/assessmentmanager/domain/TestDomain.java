@@ -3,6 +3,7 @@ package ua.knu.knudev.assessmentmanager.domain;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.UuidGenerator;
+import ua.knu.knudev.assessmentmanager.domain.embeddable.DurationConfig;
 
 import java.time.LocalDate;
 import java.util.HashSet;
@@ -27,6 +28,12 @@ public class TestDomain {
 
     @Column(nullable = false)
     private LocalDate createdAt;
+
+    @Column(nullable = false)
+    private Integer testDurationInMinutes;
+
+    @Embedded
+    private DurationConfig durationConfig;
 
     @OneToMany(mappedBy = "testDomain", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<TestQuestion> testQuestions = new HashSet<>();

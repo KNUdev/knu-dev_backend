@@ -11,6 +11,9 @@ public record FullTestDto(
         UUID id,
         String enName,
         LocalDate createdAt,
-        Set<TestQuestionDto> testQuestionDtos
+        Set<TestQuestionDto> testQuestionDtos,
+        Integer executionTimeInMinutes,
+        Integer timeUnitPerTextCharacter,
+        Integer extraTimePerCorrectAnswer
 ) {
 }
