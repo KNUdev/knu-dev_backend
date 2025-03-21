@@ -219,7 +219,7 @@ public class TestSubmissionServiceIntegrationTest {
 
     private TestSubmissionRequest createTestSubmissionRequest(TestSubmissionStatus status) {
 
-        Set<UUID> selectedAnswerVariants = Set.of(getAnswerVariantId(0, 1), getAnswerVariantId(1, 1));
+        Set<UUID> selectedAnswerVariants = Set.of(getAnswerVariantId(0), getAnswerVariantId(1));
 
         List<SubmittedAnswerDto> answers = testDomain.getTestQuestions().stream()
                 .map(testQuestion -> {
@@ -241,16 +241,15 @@ public class TestSubmissionServiceIntegrationTest {
                 .build();
     }
 
-    private UUID getAnswerVariantId(Integer questionIndex, Integer variantIndex) {
+    private UUID getAnswerVariantId(Integer questionIndex) {
         return testDomain.getTestQuestions().stream()
                 .toList()
                 .get(questionIndex)
                 .getAnswerVariants()
                 .stream()
                 .toList()
-                .get(variantIndex)
+                .get(1)
                 .getId();
-
     }
 
     @Nested
