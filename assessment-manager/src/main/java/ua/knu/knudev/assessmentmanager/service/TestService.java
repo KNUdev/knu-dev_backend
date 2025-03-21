@@ -232,6 +232,7 @@ public class TestService implements TestApi {
     }
 
     @Override
+    @Transactional
     public QuestionAnswerVariantDto changeQuestionAnswerVariantEnBody(UUID questionAnswerVariantId, String newEnBody) {
         QuestionAnswerVariant questionAnswerVariant = getQuestionAnswerVariantById(questionAnswerVariantId);
         String oldEnVariantBody = questionAnswerVariant.getEnVariantBody();
@@ -252,6 +253,7 @@ public class TestService implements TestApi {
     }
 
     @Override
+    @Transactional
     public QuestionAnswerVariantDto changeQuestionAnswerVariantCorrectness(UUID questionAnswerVariantId, Boolean newCorrectnessValue) {
         QuestionAnswerVariant questionAnswerVariant = getQuestionAnswerVariantById(questionAnswerVariantId);
         Boolean isCorrectAnswer = questionAnswerVariant.getIsCorrectAnswer();

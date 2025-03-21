@@ -125,7 +125,8 @@ public class TestSubmissionService implements TestSubmissionApi {
     private List<Double> calculatePercentageScoresPerAllQuestions(
             Map<TestQuestion, List<QuestionAnswerVariant>> questionsToAnswerVariants
     ) {
-        return questionsToAnswerVariants.entrySet().stream().map(entry -> {
+        return questionsToAnswerVariants.entrySet().stream()
+                .map(entry -> {
                     TestQuestion testQuestion = entry.getKey();
                     List<QuestionAnswerVariant> answerVariants = entry.getValue();
                     double correctAnswersAmount = Math.toIntExact(testQuestion.getAnswerVariants().stream()

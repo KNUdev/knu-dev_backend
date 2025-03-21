@@ -72,6 +72,7 @@ public class TestManagementServiceIntegrationTest {
                 .id(TEST_ID)
                 .createdAt(LocalDate.now())
                 .enName(TEST_EN_NAME)
+                .maxRawScore(100)
                 .build();
 
         Set<QuestionAnswerVariant> firstQuestionAnswerVariants = Set.of(
