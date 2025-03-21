@@ -24,7 +24,7 @@ public class QuestionAnswerVariant {
     @Column(nullable = false)
     private Boolean isCorrectAnswer;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "test_question_id", referencedColumnName = "id", nullable = false)
     private TestQuestion testQuestion;
 }

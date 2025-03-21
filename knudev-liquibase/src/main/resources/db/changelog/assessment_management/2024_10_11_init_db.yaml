@@ -139,6 +139,11 @@ databaseChangeLog:
                   defaultValueComputed: CURRENT_TIMESTAMP
                   constraints:
                     nullable: false
+              - column:
+                  name: max_raw_score
+                  type: int
+                  constraints:
+                    nullable: false
 
   - changeSet:
       id: create_test_question_table

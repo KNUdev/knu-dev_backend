@@ -28,7 +28,7 @@ public class TestQuestion {
     private Set<QuestionAnswerVariant> answerVariants = new HashSet<>();
 
     //todo maybe remove @JoinColumn
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "test_id", referencedColumnName = "id", nullable = false)
     private TestDomain testDomain;
 
