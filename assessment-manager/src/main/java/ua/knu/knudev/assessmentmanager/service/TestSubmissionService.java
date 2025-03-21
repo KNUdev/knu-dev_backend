@@ -57,17 +57,19 @@ public class TestSubmissionService implements TestSubmissionApi {
         List<TestQuestion> testQuestions = testQuestionRepository.findAllByIdIn(questionIds);
         List<QuestionAnswerVariant> chosenVariants = questionAnswerVariantRepository.findAllByIdIn(chosenVariantIds);
 
-        Map<TestQuestion, List<QuestionAnswerVariant>> question2AnswerVariants = buildQuestion2AnswerVariantsMap(chosenVariants, testQuestions);
+        Map<TestQuestion, List<QuestionAnswerVariant>> question2AnswerVariants = buildQuestion2AnswerVariantsMap(
+                chosenVariants, testQuestions
+        );
 
         TestScore rawToPercentageScore = calculateTestScore(question2AnswerVariants, testDomain.getMaxRawScore());
+        TestSubmission testSubmission = buildTestSubmission(
+                submissionRequest, testDomain, rawToPercentageScore.getRawScore(), rawToPercentageScore.getPercentageScore()
+        );
 
-        TestSubmission testSubmission = buildTestSubmission(submissionRequest, testDomain, rawToPercentageScore.getRawScore(),
-                rawToPercentageScore.getPercentageScore());
         Set<TestSubmissionAnswer> testSubmissionAnswers = buildTestSubmissionAnswers(question2AnswerVariants, testSubmission);
         testSubmission.addAnswers(testSubmissionAnswers);
 
         testSubmissionRepository.save(testSubmission);
-
         return getTestSubmissionResultsDto(testSubmission, testQuestions, chosenVariantIds);
     }
 
@@ -95,12 +97,11 @@ public class TestSubmissionService implements TestSubmissionApi {
     }
 
     private TestScore calculateTestScore(Map<TestQuestion, List<QuestionAnswerVariant>> questionsToAnswerVariants,
-                                         Integer maxRowScore) throws InterruptedException {
+                                         Integer maxRowScore) {
         double percentageScore = 0.0;
         double rawScore;
 
         List<Double> percentageScoresToAllQuestions = calculatePercentageScoresPerAllQuestions(questionsToAnswerVariants);
-        Thread.sleep(10);
 
         for (Double percentageScoresToAllQuestion : percentageScoresToAllQuestions) {
             percentageScore += percentageScoresToAllQuestion;
@@ -111,7 +112,6 @@ public class TestSubmissionService implements TestSubmissionApi {
         averagePercentageScore = new BigDecimal(averagePercentageScore)
                 .setScale(1, RoundingMode.HALF_UP)
                 .doubleValue();
-
         rawScore = BigDecimal.valueOf((maxRowScore * averagePercentageScore) / 100)
                 .setScale(1, RoundingMode.HALF_UP)
                 .doubleValue();
@@ -122,27 +122,29 @@ public class TestSubmissionService implements TestSubmissionApi {
                 .build();
     }
 
-    private List<Double> calculatePercentageScoresPerAllQuestions(Map<TestQuestion, List<QuestionAnswerVariant>> questionsToAnswerVariants) {
-        List<Double> percentageScoresToAllQuestions = new ArrayList<>();
+    private List<Double> calculatePercentageScoresPerAllQuestions(
+            Map<TestQuestion, List<QuestionAnswerVariant>> questionsToAnswerVariants
+    ) {
+        return questionsToAnswerVariants.entrySet().stream().map(entry -> {
+                    TestQuestion testQuestion = entry.getKey();
+                    List<QuestionAnswerVariant> answerVariants = entry.getValue();
+                    double correctAnswersAmount = Math.toIntExact(testQuestion.getAnswerVariants().stream()
+                            .filter(QuestionAnswerVariant::getIsCorrectAnswer)
+                            .count());
 
-        questionsToAnswerVariants.forEach((testQuestion, answerVariants) -> {
-            double correctAnswersAmount = Math.toIntExact(testQuestion.getAnswerVariants().stream()
-                    .filter(QuestionAnswerVariant::getIsCorrectAnswer)
-                    .count());
+                    int receivedCorrectAnswersAmount = Math.toIntExact(answerVariants.stream()
+                            .filter(QuestionAnswerVariant::getIsCorrectAnswer)
+                            .count());
 
-            int receivedCorrectAnswersAmount = Math.toIntExact(answerVariants.stream()
-                    .filter(QuestionAnswerVariant::getIsCorrectAnswer)
-                    .count());
-
-            double questionPercentageScore = (receivedCorrectAnswersAmount * 100) / correctAnswersAmount;
-            percentageScoresToAllQuestions.add(questionPercentageScore);
-        });
-
-        return percentageScoresToAllQuestions;
+                    return (receivedCorrectAnswersAmount * 100) / correctAnswersAmount;
+                })
+                .toList();
     }
 
-    private Set<TestSubmissionAnswer> buildTestSubmissionAnswers(Map<TestQuestion, List<QuestionAnswerVariant>> questionsToAnswerVariants,
-                                                                 TestSubmission testSubmission) {
+    private Set<TestSubmissionAnswer> buildTestSubmissionAnswers(
+            Map<TestQuestion, List<QuestionAnswerVariant>> questionsToAnswerVariants,
+            TestSubmission testSubmission
+    ) {
         return questionsToAnswerVariants.entrySet().stream()
                 .map(entry -> TestSubmissionAnswer.builder()
                         .testSubmission(testSubmission)
@@ -163,25 +165,36 @@ public class TestSubmissionService implements TestSubmissionApi {
                 () -> new TestException("Test with ID:" + id + " not found"));
     }
 
-    private Map<UUID, List<QuestionAnswerVariant>> buildQuestionId2AnswerVariantsMap(List<QuestionAnswerVariant> questionAnswerVariants) {
+    private Map<UUID, List<QuestionAnswerVariant>> buildQuestionId2AnswerVariantsMap(
+            List<QuestionAnswerVariant> questionAnswerVariants
+    ) {
         return questionAnswerVariants.stream().collect(Collectors.groupingBy(
                 variant -> variant.getTestQuestion().getId()));
 
     }
 
-    private Map<TestQuestion, List<QuestionAnswerVariant>> buildQuestion2AnswerVariantsMap(List<QuestionAnswerVariant> questionAnswerVariants,
-                                                                                           List<TestQuestion> testQuestions) {
-        Map<UUID, List<QuestionAnswerVariant>> questionId2AnswerVariants = buildQuestionId2AnswerVariantsMap(questionAnswerVariants);
+    private Map<TestQuestion, List<QuestionAnswerVariant>> buildQuestion2AnswerVariantsMap(
+            List<QuestionAnswerVariant> questionAnswerVariants,
+            List<TestQuestion> testQuestions
+    ) {
+        Map<UUID, List<QuestionAnswerVariant>> questionId2AnswerVariants = buildQuestionId2AnswerVariantsMap(
+                questionAnswerVariants
+        );
 
         return testQuestions.stream()
                 .collect(Collectors.toMap(
                         question -> question,
-                        question -> questionId2AnswerVariants.getOrDefault(question.getId(), Collections.emptyList())
+                        question -> questionId2AnswerVariants.getOrDefault(
+                                question.getId(),
+                                Collections.emptyList()
+                        )
                 ));
     }
 
-    private TestSubmission buildTestSubmission(TestSubmissionRequest submissionRequest, TestDomain testDomain,
-                                               Double rawScore, Double percentageScore) {
+    private TestSubmission buildTestSubmission(TestSubmissionRequest submissionRequest,
+                                               TestDomain testDomain,
+                                               Double rawScore,
+                                               Double percentageScore) {
         return TestSubmission.builder()
                 .submitterAccountId(submissionRequest.getSubmitterAccountId())
                 .testDomain(testDomain)
@@ -195,7 +208,8 @@ public class TestSubmissionService implements TestSubmissionApi {
                 .build();
     }
 
-    private List<TestQuestionResultDto> buildTestResultsResponse(List<TestQuestion> testQuestions, List<UUID> chosenVariantIds) {
+    private List<TestQuestionResultDto> buildTestResultsResponse(List<TestQuestion> testQuestions,
+                                                                 List<UUID> chosenVariantIds) {
         if (testQuestions == null) {
             return null;
         }
@@ -226,7 +240,8 @@ public class TestSubmissionService implements TestSubmissionApi {
                 .build();
     }
 
-    private TestSubmissionResultsDto getTestSubmissionResultsDto(TestSubmission submission, List<TestQuestion> testQuestions,
+    private TestSubmissionResultsDto getTestSubmissionResultsDto(TestSubmission submission,
+                                                                 List<TestQuestion> testQuestions,
                                                                  List<UUID> chosenVariantIds) {
         List<TestQuestionResultDto> questions = buildTestResultsResponse(testQuestions, chosenVariantIds);
 

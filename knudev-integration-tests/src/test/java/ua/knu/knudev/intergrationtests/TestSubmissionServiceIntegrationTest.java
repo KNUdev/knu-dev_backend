@@ -267,7 +267,7 @@ public class TestSubmissionServiceIntegrationTest {
 
         @Test
         @DisplayName("Should build canceled test when provided CANCELED test status")
-        void should_BuildCanceledTest_When_ProvidedCanceledTestStatus() throws InterruptedException {
+        void should_BuildCanceledTest_When_ProvidedCanceledTestStatus() {
             TestSubmissionRequest request = createTestSubmissionRequest(TestSubmissionStatus.CANCELED);
 
             TestSubmissionResultsDto response = testSubmissionService.submit(request);
@@ -283,7 +283,7 @@ public class TestSubmissionServiceIntegrationTest {
 
         @Test
         @DisplayName("Should successfully create test when provided valid data")
-        void should_SuccessfullyCreateTest_When_ProvidedValidData() throws InterruptedException {
+        void should_SuccessfullySubmitTest_When_ProvidedValidData() {
             TestSubmissionRequest request = createTestSubmissionRequest(TestSubmissionStatus.MANUAL);
 
             TestSubmissionResultsDto response = testSubmissionService.submit(request);
