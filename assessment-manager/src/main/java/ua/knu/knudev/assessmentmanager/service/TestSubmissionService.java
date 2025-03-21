@@ -1,6 +1,8 @@
 package ua.knu.knudev.assessmentmanager.service;
 
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 import org.springframework.stereotype.Service;
 import ua.knu.knudev.assessmentmanager.domain.*;
 import ua.knu.knudev.assessmentmanager.repository.QuestionAnswerVariantRepository;
@@ -32,7 +34,9 @@ public class TestSubmissionService implements TestSubmissionApi {
     private final QuestionAnswerVariantRepository questionAnswerVariantRepository;
     private final TestSubmissionRepository testSubmissionRepository;
 
+    @SneakyThrows
     @Override
+    @Transactional
     public TestSubmissionResultsDto submit(TestSubmissionRequest submissionRequest) {
         UUID submittedTestId = submissionRequest.getSubmittedTestId();
         List<SubmittedAnswerDto> answers = submissionRequest.getAnswers();
@@ -68,6 +72,7 @@ public class TestSubmissionService implements TestSubmissionApi {
     }
 
     @Override
+    @Transactional
     public TestSubmissionResultsDto getSubmissionResults(UUID submissionId, UUID submitterAccountId) {
         TestSubmission testSubmission = getById(submissionId);
 
@@ -90,27 +95,30 @@ public class TestSubmissionService implements TestSubmissionApi {
     }
 
     private TestScore calculateTestScore(Map<TestQuestion, List<QuestionAnswerVariant>> questionsToAnswerVariants,
-                                         Integer maxRowScore) {
+                                         Integer maxRowScore) throws InterruptedException {
         double percentageScore = 0.0;
         double rawScore;
 
         List<Double> percentageScoresToAllQuestions = calculatePercentageScoresPerAllQuestions(questionsToAnswerVariants);
+        Thread.sleep(10);
 
         for (Double percentageScoresToAllQuestion : percentageScoresToAllQuestions) {
             percentageScore += percentageScoresToAllQuestion;
         }
 
-        percentageScore = new BigDecimal(percentageScore)
+        double averagePercentageScore = percentageScore / percentageScoresToAllQuestions.size();
+
+        averagePercentageScore = new BigDecimal(averagePercentageScore)
                 .setScale(1, RoundingMode.HALF_UP)
                 .doubleValue();
 
-        rawScore = BigDecimal.valueOf((maxRowScore * percentageScore) / 100)
+        rawScore = BigDecimal.valueOf((maxRowScore * averagePercentageScore) / 100)
                 .setScale(1, RoundingMode.HALF_UP)
                 .doubleValue();
 
         return TestScore.builder()
                 .rawScore(rawScore)
-                .percentageScore(percentageScore)
+                .percentageScore(averagePercentageScore)
                 .build();
     }
 
@@ -188,6 +196,10 @@ public class TestSubmissionService implements TestSubmissionApi {
     }
 
     private List<TestQuestionResultDto> buildTestResultsResponse(List<TestQuestion> testQuestions, List<UUID> chosenVariantIds) {
+        if (testQuestions == null) {
+            return null;
+        }
+
         return testQuestions.stream()
                 .map(question -> {
                     List<AnswerVariantResultDto> answerVariants = question.getAnswerVariants().stream()

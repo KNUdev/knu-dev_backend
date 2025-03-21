@@ -164,7 +164,8 @@ public class TestSubmissionServiceIntegrationTest {
         TestDomain createdTestDomain = TestDomain.builder()
                 .id(TEST_ID)
                 .createdAt(LocalDate.now())
-                .enName(TEST_EN_NAME)
+                .enName(TEST_EN_NAME + " " + UUID.randomUUID())
+                .maxRawScore(100)
                 .build();
 
         Set<QuestionAnswerVariant> firstQuestionAnswerVariants = Set.of(
@@ -217,18 +218,15 @@ public class TestSubmissionServiceIntegrationTest {
     }
 
     private TestSubmissionRequest createTestSubmissionRequest(TestSubmissionStatus status) {
-        Set<UUID> selectedAnswerVariants = Set.of(SECOND_QUESTION_ANSWER_VARIANT_ID, FIFTH_QUESTION_ANSWER_VARIANT_ID);
+
+        Set<UUID> selectedAnswerVariants = Set.of(getAnswerVariantId(0, 1), getAnswerVariantId(1, 1));
 
         List<SubmittedAnswerDto> answers = testDomain.getTestQuestions().stream()
                 .map(testQuestion -> {
-                    QuestionAnswerVariant questionAnswerVariant = testQuestion.getAnswerVariants().stream()
-                            .filter(answer -> selectedAnswerVariants.contains(answer.getId()))
-                            .findFirst()
-                            .orElse(null);
-
-                    List<UUID> variantIds = questionAnswerVariant != null
-                            ? List.of(questionAnswerVariant.getId())
-                            : List.of();
+                    List<UUID> variantIds = testQuestion.getAnswerVariants().stream()
+                            .map(QuestionAnswerVariant::getId)
+                            .filter(selectedAnswerVariants::contains)
+                            .toList();
 
                     return createSubmittedAnswerDto(testQuestion.getId(), variantIds);
                 })
@@ -239,8 +237,20 @@ public class TestSubmissionServiceIntegrationTest {
                 .submitterAccountId(testAccountProfile.getId())
                 .submittedTestId(testDomain.getId())
                 .status(status)
-                .timeTakenInSeconds(TimeUnit.SECONDS.toSeconds(1000))
+                .timeTakenInSeconds(1000)
                 .build();
+    }
+
+    private UUID getAnswerVariantId(Integer questionIndex, Integer variantIndex) {
+        return testDomain.getTestQuestions().stream()
+                .toList()
+                .get(questionIndex)
+                .getAnswerVariants()
+                .stream()
+                .toList()
+                .get(variantIndex)
+                .getId();
+
     }
 
     @Nested
@@ -257,7 +267,7 @@ public class TestSubmissionServiceIntegrationTest {
 
         @Test
         @DisplayName("Should build canceled test when provided CANCELED test status")
-        void should_BuildCanceledTest_When_ProvidedCanceledTestStatus() {
+        void should_BuildCanceledTest_When_ProvidedCanceledTestStatus() throws InterruptedException {
             TestSubmissionRequest request = createTestSubmissionRequest(TestSubmissionStatus.CANCELED);
 
             TestSubmissionResultsDto response = testSubmissionService.submit(request);
@@ -273,7 +283,7 @@ public class TestSubmissionServiceIntegrationTest {
 
         @Test
         @DisplayName("Should successfully create test when provided valid data")
-        void should_SuccessfullyCreateTest_When_ProvidedValidData() {
+        void should_SuccessfullyCreateTest_When_ProvidedValidData() throws InterruptedException {
             TestSubmissionRequest request = createTestSubmissionRequest(TestSubmissionStatus.MANUAL);
 
             TestSubmissionResultsDto response = testSubmissionService.submit(request);
