@@ -2,6 +2,7 @@ package ua.knu.knudev.assessmentmanagerapi.request;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Pattern;
 import lombok.Builder;
@@ -31,6 +32,22 @@ public record TestCreationRequest(
                 requiredMode = Schema.RequiredMode.REQUIRED,
                 implementation = TestQuestionDto.class
         )
-        List<@Valid TestQuestionDto> questions
+        List<@Valid TestQuestionDto> questions,
+
+        @NotEmpty(message = "TimeUnitPerTextCharacter can not be 0")
+        @Schema(
+                description = "Constant. Time unit for text(question and answer) in seconds",
+                requiredMode = Schema.RequiredMode.REQUIRED
+        )
+        Integer timeUnitPerTextCharacter,
+
+        @NotEmpty(message = "ExtraTimePerCorrectAnswer can not be 0")
+        @Schema(
+                description = "Constant. Extra time added for each correct answer in seconds",
+                requiredMode = Schema.RequiredMode.REQUIRED
+        )
+        @Min(0)
+        Integer extraTimePerCorrectAnswer
+
 ) {
 }

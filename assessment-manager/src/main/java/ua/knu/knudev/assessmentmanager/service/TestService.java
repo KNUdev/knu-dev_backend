@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import ua.knu.knudev.assessmentmanager.domain.QuestionAnswerVariant;
 import ua.knu.knudev.assessmentmanager.domain.TestDomain;
 import ua.knu.knudev.assessmentmanager.domain.TestQuestion;
+import ua.knu.knudev.assessmentmanager.domain.embeddable.DurationConfig;
 import ua.knu.knudev.assessmentmanager.mapper.QuestionAnswerVariantMapper;
 import ua.knu.knudev.assessmentmanager.mapper.TestMapper;
 import ua.knu.knudev.assessmentmanager.mapper.TestQuestionMapper;
@@ -48,10 +49,16 @@ public class TestService implements TestApi {
         }
         Set<TestQuestion> testQuestions = new HashSet<>(testQuestionMapper.toDomains(testCreationRequest.questions()));
 
+        int extraTimePerCorrectAnswer = testCreationRequest.extraTimePerCorrectAnswer();
+        int timeUnitPerTextCharacter = testCreationRequest.timeUnitPerTextCharacter();
+        Integer testDurationInMinutes = calculateTestDurationTime(timeUnitPerTextCharacter, extraTimePerCorrectAnswer, testQuestions);
+
         TestDomain testDomain = TestDomain.builder()
                 .createdAt(LocalDate.now())
                 .testQuestions(testQuestions)
                 .enName(testCreationRequest.enName())
+                .durationConfig(buildDurationConfig(timeUnitPerTextCharacter, extraTimePerCorrectAnswer))
+                .testDurationInMinutes(testDurationInMinutes)
                 .build();
 
         testDomain.associateTestWithQuestionsAndVariants();
@@ -116,7 +123,11 @@ public class TestService implements TestApi {
         TestDomain testDomain = getTestById(testId);
         TestQuestion testQuestion = testQuestionMapper.toDomain(testQuestionDto);
 
-        List<String> questionsNames = testDomain.getTestQuestions().stream()
+        Set<TestQuestion> testQuestions = testDomain.getTestQuestions();
+        Integer timeUnitPerTextCharacter = testDomain.getDurationConfig().getTimeUnitPerTextCharacter();
+        Integer extraTimePerCorrectAnswer = testDomain.getDurationConfig().getExtraTimePerCorrectAnswer();
+
+        List<String> questionsNames = testQuestions.stream()
                 .map(TestQuestion::getEnQuestionBody)
                 .toList();
 
@@ -125,33 +136,46 @@ public class TestService implements TestApi {
             return testMapper.toDto(testDomain);
         }
 
-        testDomain.getTestQuestions().add(testQuestion);
+        testDomain.addQuestion(testQuestion);
         testDomain.associateTestWithQuestionsAndVariants();
+        Integer testDurationInMinutes = calculateTestDurationTime(timeUnitPerTextCharacter, extraTimePerCorrectAnswer, testQuestions);
+        testDomain.setTestDurationInMinutes(testDurationInMinutes);
+
         testDomain.updateMaxRawScore();
         TestDomain savedTestDomain = testRepository.save(testDomain);
         log.info("Added test question: {}", testQuestion);
+
         return testMapper.toDto(savedTestDomain);
     }
 
     @Override
+    @Transactional
     public FullTestDto deleteTestQuestion(UUID testId, UUID questionId) {
         TestDomain testDomain = getTestById(testId);
 
-        if (testDomain.getTestQuestions().size() < 2) {
+        Integer timeUnitPerTextCharacter = testDomain.getDurationConfig().getTimeUnitPerTextCharacter();
+        Integer extraTimePerCorrectAnswer = testDomain.getDurationConfig().getExtraTimePerCorrectAnswer();
+        Set<TestQuestion> testQuestions = testDomain.getTestQuestions();
+
+        if (testQuestions.size() < 2) {
             throw new TestException("Test must contain at least 1 question");
         }
 
-        TestQuestion questionToDelete = testDomain.getTestQuestions()
-                .stream()
+        TestQuestion questionToDelete = testQuestions.stream()
                 .filter(question -> question.getId().equals(questionId))
                 .findFirst()
                 .orElseThrow(() -> new TestException("Question with ID " + questionId + " does not exist in test " + testId));
 
         log.info("Removing question with id: {}", questionId);
-        testDomain.getTestQuestions().remove(questionToDelete);
+        testQuestions.remove(questionToDelete);
         testDomain.updateMaxRawScore();
         testQuestionRepository.delete(questionToDelete);
-        return testMapper.toDto(testDomain);
+
+        Integer testDurationInMinutes = calculateTestDurationTime(timeUnitPerTextCharacter, extraTimePerCorrectAnswer, testQuestions);
+        testDomain.setTestDurationInMinutes(testDurationInMinutes);
+
+        TestDomain savedTestDomain = testRepository.save(testDomain);
+        return testMapper.toDto(savedTestDomain);
     }
 
 
@@ -159,6 +183,12 @@ public class TestService implements TestApi {
     @Transactional
     public TestQuestionDto changeTestQuestionEnBody(UUID questionId, String newEnBody) {
         TestQuestion testQuestion = getTestQuestionById(questionId);
+        TestDomain testDomain = testQuestion.getTestDomain();
+
+        Integer timeUnitPerTextCharacter = testDomain.getDurationConfig().getTimeUnitPerTextCharacter();
+        Integer extraTimePerCorrectAnswer = testDomain.getDurationConfig().getExtraTimePerCorrectAnswer();
+        Set<TestQuestion> testQuestions = testDomain.getTestQuestions();
+
         List<String> questionsBodies = testQuestionRepository.findAll().stream()
                 .map(TestQuestion::getEnQuestionBody)
                 .toList();
@@ -173,6 +203,11 @@ public class TestService implements TestApi {
 
         testQuestion.setEnQuestionBody(newEnBody);
         TestQuestion savedTestQuestion = testQuestionRepository.save(testQuestion);
+
+        Integer testDurationInMinutes = calculateTestDurationTime(timeUnitPerTextCharacter, extraTimePerCorrectAnswer, testQuestions);
+        testDomain.setTestDurationInMinutes(testDurationInMinutes);
+        testRepository.save(testDomain);
+
         return testQuestionMapper.toDto(savedTestQuestion);
     }
 
@@ -180,6 +215,11 @@ public class TestService implements TestApi {
     @Transactional
     public TestQuestionDto addQuestionAnswerVariant(UUID questionId, QuestionAnswerVariantDto questionAnswerVariantDto) {
         TestQuestion testQuestion = getTestQuestionById(questionId);
+        TestDomain testDomain = testQuestion.getTestDomain();
+        Set<TestQuestion> testQuestions = testDomain.getTestQuestions();
+
+        Integer timeUnitPerTextCharacter = testDomain.getDurationConfig().getTimeUnitPerTextCharacter();
+        Integer extraTimePerCorrectAnswer = testDomain.getDurationConfig().getExtraTimePerCorrectAnswer();
         QuestionAnswerVariant questionAnswerVariant = questionAnswerVariantMapper.toDomain(questionAnswerVariantDto);
 
         List<String> variantsBody = testQuestion.getAnswerVariants().stream()
@@ -191,10 +231,10 @@ public class TestService implements TestApi {
             return testQuestionMapper.toDto(testQuestion);
         }
 
-        questionAnswerVariant.setTestQuestion(testQuestion);
-        testQuestion.getAnswerVariants().add(questionAnswerVariant);
+        testQuestion.addAnswerVariant(questionAnswerVariant);
         testQuestion.getTestDomain().updateMaxRawScore();
         TestQuestion savedTestQuestion = testQuestionRepository.save(testQuestion);
+        updateAndSaveTestDurationTime(testDomain, testQuestions, timeUnitPerTextCharacter, extraTimePerCorrectAnswer);
 
         log.info("Added question answer variant with id: {}", questionAnswerVariant.getId());
         return testQuestionMapper.toDto(savedTestQuestion);
@@ -204,6 +244,11 @@ public class TestService implements TestApi {
     @Transactional
     public TestQuestionDto deleteQuestionAnswerVariant(UUID questionId, UUID questionAnswerVariantId) {
         TestQuestion testQuestion = getTestQuestionById(questionId);
+        TestDomain testDomain = testQuestion.getTestDomain();
+        Set<TestQuestion> testQuestions = testDomain.getTestQuestions();
+
+        Integer timeUnitPerTextCharacter = testDomain.getDurationConfig().getTimeUnitPerTextCharacter();
+        Integer extraTimePerCorrectAnswer = testDomain.getDurationConfig().getExtraTimePerCorrectAnswer();
         List<UUID> answersId = testQuestion.getAnswerVariants().stream()
                 .map(QuestionAnswerVariant::getId)
                 .toList();
@@ -225,9 +270,12 @@ public class TestService implements TestApi {
                         + " does not exist in question " + questionId));
 
         log.info("Removing answerVariant with id: {}", questionAnswerVariantId);
+
         testQuestion.getAnswerVariants().remove(answerVariantToDelete);
         testQuestion.getTestDomain().updateMaxRawScore();
         questionAnswerVariantRepository.delete(answerVariantToDelete);
+        updateAndSaveTestDurationTime(testDomain, testQuestions, timeUnitPerTextCharacter, extraTimePerCorrectAnswer);
+
         return testQuestionMapper.toDto(testQuestion);
     }
 
@@ -235,6 +283,11 @@ public class TestService implements TestApi {
     @Transactional
     public QuestionAnswerVariantDto changeQuestionAnswerVariantEnBody(UUID questionAnswerVariantId, String newEnBody) {
         QuestionAnswerVariant questionAnswerVariant = getQuestionAnswerVariantById(questionAnswerVariantId);
+        TestDomain testDomain = questionAnswerVariant.getTestQuestion().getTestDomain();
+        Set<TestQuestion> testQuestions = testDomain.getTestQuestions();
+
+        Integer timeUnitPerTextCharacter = testDomain.getDurationConfig().getTimeUnitPerTextCharacter();
+        Integer extraTimePerCorrectAnswer = testDomain.getDurationConfig().getExtraTimePerCorrectAnswer();
         String oldEnVariantBody = questionAnswerVariant.getEnVariantBody();
 
         if (oldEnVariantBody.equals(newEnBody)) {
@@ -248,6 +301,8 @@ public class TestService implements TestApi {
         questionAnswerVariant.setEnVariantBody(newEnBody);
         questionAnswerVariant.getTestQuestion().getTestDomain().updateMaxRawScore();
         QuestionAnswerVariant savedQuestionAnswerVariant = questionAnswerVariantRepository.save(questionAnswerVariant);
+        updateAndSaveTestDurationTime(testDomain, testQuestions, timeUnitPerTextCharacter, extraTimePerCorrectAnswer);
+
         log.info("EnVariantBody: {}, was changed on: {}", oldEnVariantBody, newEnBody);
         return questionAnswerVariantMapper.toDto(savedQuestionAnswerVariant);
     }
@@ -256,6 +311,11 @@ public class TestService implements TestApi {
     @Transactional
     public QuestionAnswerVariantDto changeQuestionAnswerVariantCorrectness(UUID questionAnswerVariantId, Boolean newCorrectnessValue) {
         QuestionAnswerVariant questionAnswerVariant = getQuestionAnswerVariantById(questionAnswerVariantId);
+        TestDomain testDomain = questionAnswerVariant.getTestQuestion().getTestDomain();
+        Set<TestQuestion> testQuestions = testDomain.getTestQuestions();
+
+        Integer timeUnitPerTextCharacter = testDomain.getDurationConfig().getTimeUnitPerTextCharacter();
+        Integer extraTimePerCorrectAnswer = testDomain.getDurationConfig().getExtraTimePerCorrectAnswer();
         Boolean isCorrectAnswer = questionAnswerVariant.getIsCorrectAnswer();
 
         if (newCorrectnessValue == null) {
@@ -269,6 +329,8 @@ public class TestService implements TestApi {
         questionAnswerVariant.setIsCorrectAnswer(newCorrectnessValue);
         questionAnswerVariant.getTestQuestion().getTestDomain().updateMaxRawScore();
         QuestionAnswerVariant changedQuestionAnswerVariant = questionAnswerVariantRepository.save(questionAnswerVariant);
+        updateAndSaveTestDurationTime(testDomain, testQuestions, timeUnitPerTextCharacter, extraTimePerCorrectAnswer);
+
         log.info("Correctness value: {}, was changed on: {}", isCorrectAnswer, newCorrectnessValue);
         return questionAnswerVariantMapper.toDto(changedQuestionAnswerVariant);
     }
@@ -287,5 +349,48 @@ public class TestService implements TestApi {
         return questionAnswerVariantRepository.findById(questionAnswerVariantId).orElseThrow(
                 () -> new TestException("QuestionAnswerVariant with ID " + questionAnswerVariantId + " does not exist"));
     }
+
+    private DurationConfig buildDurationConfig(Integer timeUnitPerTextCharacter, Integer extraTimePerCorrectAnswer) {
+        return DurationConfig.builder()
+                .timeUnitPerTextCharacter(timeUnitPerTextCharacter)
+                .extraTimePerCorrectAnswer(extraTimePerCorrectAnswer)
+                .build();
+    }
+
+    private void updateAndSaveTestDurationTime(TestDomain testDomain, Set<TestQuestion> testQuestions, Integer timeUnitPerTextCharacter,
+                                               Integer extraTimePerCorrectAnswer) {
+        Integer testDurationInMinutes = calculateTestDurationTime(timeUnitPerTextCharacter, extraTimePerCorrectAnswer, testQuestions);
+        testDomain.setTestDurationInMinutes(testDurationInMinutes);
+        testRepository.save(testDomain);
+    }
+
+    private Integer calculateTestDurationTime(Integer timeUnitPerTextCharacter, Integer extraTimePerCorrectAnswer,
+                                              Set<TestQuestion> testQuestions) {
+        int testExecutionTime = 0;
+
+        for (TestQuestion question : testQuestions) {
+            Set<QuestionAnswerVariant> answerVariants = question.getAnswerVariants();
+
+            int questionBodyLength = question.getEnQuestionBody() != null ?
+                    question.getEnQuestionBody().length() : 0;
+
+            int variantsBodyLength = answerVariants.stream()
+                    .mapToInt(variant -> variant.getEnVariantBody() != null ?
+                            variant.getEnVariantBody().length() : 0)
+                    .sum();
+
+            int correctAnswersAmount = (int) answerVariants.stream()
+                    .filter(QuestionAnswerVariant::getIsCorrectAnswer)
+                    .count();
+
+            int timeForOneQuestion = timeUnitPerTextCharacter * (questionBodyLength + variantsBodyLength) +
+                    (extraTimePerCorrectAnswer * correctAnswersAmount);
+
+            testExecutionTime += timeForOneQuestion;
+        }
+
+        return testExecutionTime;
+    }
+
 
 }

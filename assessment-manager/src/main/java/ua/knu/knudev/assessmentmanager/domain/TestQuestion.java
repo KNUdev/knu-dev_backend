@@ -32,4 +32,9 @@ public class TestQuestion {
     @JoinColumn(name = "test_id", referencedColumnName = "id", nullable = false)
     private TestDomain testDomain;
 
+    public void addAnswerVariant(QuestionAnswerVariant questionAnswerVariant) {
+        questionAnswerVariant.setTestQuestion(this);
+        this.answerVariants.add(questionAnswerVariant);
+    }
+
 }

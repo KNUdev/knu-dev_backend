@@ -3,6 +3,7 @@ package ua.knu.knudev.assessmentmanager.domain;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.UuidGenerator;
+import ua.knu.knudev.assessmentmanager.domain.embeddable.DurationConfig;
 
 import java.time.LocalDate;
 import java.util.HashSet;
@@ -29,6 +30,12 @@ public class TestDomain {
     private LocalDate createdAt;
 
     @Column(nullable = false)
+    private Integer testDurationInMinutes;
+
+    @Embedded
+    private DurationConfig durationConfig;
+
+    @Column(nullable = false)
     private Integer maxRawScore;
 
     @OneToMany(mappedBy = "testDomain", cascade = CascadeType.ALL, orphanRemoval = true)
@@ -46,6 +53,11 @@ public class TestDomain {
 
     public void updateMaxRawScore() {
         this.maxRawScore = calculateMaxRawScore();
+    }
+
+    public void addQuestion(TestQuestion question) {
+        question.setTestDomain(this);
+        this.testQuestions.add(question);
     }
 
     private int calculateMaxRawScore() {

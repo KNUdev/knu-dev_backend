@@ -8,6 +8,7 @@ import org.springframework.test.context.ActiveProfiles;
 import ua.knu.knudev.assessmentmanager.domain.QuestionAnswerVariant;
 import ua.knu.knudev.assessmentmanager.domain.TestDomain;
 import ua.knu.knudev.assessmentmanager.domain.TestQuestion;
+import ua.knu.knudev.assessmentmanager.domain.embeddable.DurationConfig;
 import ua.knu.knudev.assessmentmanager.repository.QuestionAnswerVariantRepository;
 import ua.knu.knudev.assessmentmanager.repository.TestQuestionRepository;
 import ua.knu.knudev.assessmentmanager.repository.TestRepository;
@@ -73,6 +74,11 @@ public class TestManagementServiceIntegrationTest {
                 .createdAt(LocalDate.now())
                 .enName(TEST_EN_NAME)
                 .maxRawScore(100)
+                .durationConfig(DurationConfig.builder()
+                        .timeUnitPerTextCharacter(100)
+                        .extraTimePerCorrectAnswer(100)
+                        .build())
+                .testDurationInMinutes(1000)
                 .build();
 
         Set<QuestionAnswerVariant> firstQuestionAnswerVariants = Set.of(
@@ -138,6 +144,8 @@ public class TestManagementServiceIntegrationTest {
         return TestCreationRequest.builder()
                 .enName(enName)
                 .questions(questionDtos)
+                .timeUnitPerTextCharacter(100)
+                .extraTimePerCorrectAnswer(100)
                 .build();
     }
 
@@ -208,6 +216,10 @@ public class TestManagementServiceIntegrationTest {
 
             UUID questionId = testQuestionRepository.findAllByTestDomain_Id(response.id()).get(0).getId();
 
+            assertNotEquals(0, response.durationInMinutes());
+            assertNotNull(response.durationInMinutes());
+            assertNotNull(response.timeUnitPerTextCharacter());
+            assertNotNull(response.extraTimePerCorrectAnswer());
             assertEquals(2, response.testQuestionDtos().size());
             assertEquals(TEST_EN_NAME + " " + TEST_EN_NAME, response.enName());
             assertEquals(6, answersAmountPerAllQuestions.get());
@@ -298,6 +310,10 @@ public class TestManagementServiceIntegrationTest {
                 allAnswersQuantity.addAndGet(testQuestionDto.answerVariantDtos().size());
             });
             assertNotNull(response, "Response should not be null");
+            assertNotEquals(0, response.durationInMinutes());
+            assertNotNull(response.durationInMinutes());
+            assertNotNull(response.timeUnitPerTextCharacter());
+            assertNotNull(response.extraTimePerCorrectAnswer());
             assertEquals(3, response.testQuestionDtos().size());
             assertEquals(10, allAnswersQuantity.get());
             assertEquals(3, testQuestionRepository.findAllByTestDomain_Id(response.id()).size());
@@ -357,6 +373,10 @@ public class TestManagementServiceIntegrationTest {
                     .getTestQuestions()
                     .size();
 
+            assertNotEquals(0, response.durationInMinutes());
+            assertNotNull(response.durationInMinutes());
+            assertNotNull(response.timeUnitPerTextCharacter());
+            assertNotNull(response.extraTimePerCorrectAnswer());
             assertEquals(1, response.testQuestionDtos().size());
             assertEquals(1, testQuestionsAmount);
             assertEquals(1, testQuestionRepository.findAllByTestDomain_Id(response.id()).size());

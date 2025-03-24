@@ -12,6 +12,9 @@ public record FullTestDto(
         String enName,
         LocalDate createdAt,
         Integer maxRawScore,
-        Set<TestQuestionDto> testQuestionDtos
+        Set<TestQuestionDto> testQuestionDtos,
+        Integer durationInMinutes,
+        Integer timeUnitPerTextCharacter,
+        Integer extraTimePerCorrectAnswer
 ) {
 }
