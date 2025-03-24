@@ -55,6 +55,11 @@ public class TestDomain {
         this.maxRawScore = calculateMaxRawScore();
     }
 
+    public void addQuestion(TestQuestion question) {
+        question.setTestDomain(this);
+        this.testQuestions.add(question);
+    }
+
     private int calculateMaxRawScore() {
         return Math.toIntExact(
                 this.testQuestions.stream()

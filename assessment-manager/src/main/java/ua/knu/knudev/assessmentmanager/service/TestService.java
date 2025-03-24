@@ -136,7 +136,7 @@ public class TestService implements TestApi {
             return testMapper.toDto(testDomain);
         }
 
-        testQuestions.add(testQuestion);
+        testDomain.addQuestion(testQuestion);
         testDomain.associateTestWithQuestionsAndVariants();
         Integer testDurationInMinutes = calculateTestDurationTime(timeUnitPerTextCharacter, extraTimePerCorrectAnswer, testQuestions);
         testDomain.setTestDurationInMinutes(testDurationInMinutes);
@@ -149,6 +149,7 @@ public class TestService implements TestApi {
     }
 
     @Override
+    @Transactional
     public FullTestDto deleteTestQuestion(UUID testId, UUID questionId) {
         TestDomain testDomain = getTestById(testId);
 
@@ -230,8 +231,7 @@ public class TestService implements TestApi {
             return testQuestionMapper.toDto(testQuestion);
         }
 
-        questionAnswerVariant.setTestQuestion(testQuestion);
-        testQuestion.getAnswerVariants().add(questionAnswerVariant);
+        testQuestion.addAnswerVariant(questionAnswerVariant);
         testQuestion.getTestDomain().updateMaxRawScore();
         TestQuestion savedTestQuestion = testQuestionRepository.save(testQuestion);
         updateAndSaveTestDurationTime(testDomain, testQuestions, timeUnitPerTextCharacter, extraTimePerCorrectAnswer);

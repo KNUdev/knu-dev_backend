@@ -8,6 +8,7 @@ import org.springframework.test.context.ActiveProfiles;
 import ua.knu.knudev.assessmentmanager.domain.QuestionAnswerVariant;
 import ua.knu.knudev.assessmentmanager.domain.TestDomain;
 import ua.knu.knudev.assessmentmanager.domain.TestQuestion;
+import ua.knu.knudev.assessmentmanager.domain.embeddable.DurationConfig;
 import ua.knu.knudev.assessmentmanager.repository.QuestionAnswerVariantRepository;
 import ua.knu.knudev.assessmentmanager.repository.TestQuestionRepository;
 import ua.knu.knudev.assessmentmanager.repository.TestRepository;
@@ -73,6 +74,11 @@ public class TestManagementServiceIntegrationTest {
                 .createdAt(LocalDate.now())
                 .enName(TEST_EN_NAME)
                 .maxRawScore(100)
+                .durationConfig(DurationConfig.builder()
+                        .timeUnitPerTextCharacter(100)
+                        .extraTimePerCorrectAnswer(100)
+                        .build())
+                .testDurationInMinutes(1000)
                 .build();
 
         Set<QuestionAnswerVariant> firstQuestionAnswerVariants = Set.of(
@@ -138,6 +144,8 @@ public class TestManagementServiceIntegrationTest {
         return TestCreationRequest.builder()
                 .enName(enName)
                 .questions(questionDtos)
+                .timeUnitPerTextCharacter(100)
+                .extraTimePerCorrectAnswer(100)
                 .build();
     }
 
