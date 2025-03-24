@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import ua.knu.knudev.assessmentmanager.domain.*;
+import ua.knu.knudev.assessmentmanager.domain.embeddable.DurationConfig;
 import ua.knu.knudev.assessmentmanager.repository.TestRepository;
 import ua.knu.knudev.assessmentmanager.repository.TestSubmissionRepository;
 import ua.knu.knudev.assessmentmanager.service.TestSubmissionService;
@@ -91,6 +92,7 @@ public class TestSubmissionServiceIntegrationTest {
         accountProfileRepository.deleteAll();
         departmentRepository.deleteAll();
         specialtyRepository.deleteAll();
+        testRepository.deleteAll();
     }
 
     private TestSubmission createTestSubmissionAndSave() {
@@ -164,8 +166,13 @@ public class TestSubmissionServiceIntegrationTest {
         TestDomain createdTestDomain = TestDomain.builder()
                 .id(TEST_ID)
                 .createdAt(LocalDate.now())
-                .enName(TEST_EN_NAME + " " + UUID.randomUUID())
+                .enName(TEST_EN_NAME)
                 .maxRawScore(100)
+                .durationConfig(DurationConfig.builder()
+                        .timeUnitPerTextCharacter(100)
+                        .extraTimePerCorrectAnswer(100)
+                        .build())
+                .testDurationInMinutes(1000)
                 .build();
 
         Set<QuestionAnswerVariant> firstQuestionAnswerVariants = Set.of(

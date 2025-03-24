@@ -216,6 +216,10 @@ public class TestManagementServiceIntegrationTest {
 
             UUID questionId = testQuestionRepository.findAllByTestDomain_Id(response.id()).get(0).getId();
 
+            assertNotEquals(0, response.durationInMinutes());
+            assertNotNull(response.durationInMinutes());
+            assertNotNull(response.timeUnitPerTextCharacter());
+            assertNotNull(response.extraTimePerCorrectAnswer());
             assertEquals(2, response.testQuestionDtos().size());
             assertEquals(TEST_EN_NAME + " " + TEST_EN_NAME, response.enName());
             assertEquals(6, answersAmountPerAllQuestions.get());
@@ -306,6 +310,10 @@ public class TestManagementServiceIntegrationTest {
                 allAnswersQuantity.addAndGet(testQuestionDto.answerVariantDtos().size());
             });
             assertNotNull(response, "Response should not be null");
+            assertNotEquals(0, response.durationInMinutes());
+            assertNotNull(response.durationInMinutes());
+            assertNotNull(response.timeUnitPerTextCharacter());
+            assertNotNull(response.extraTimePerCorrectAnswer());
             assertEquals(3, response.testQuestionDtos().size());
             assertEquals(10, allAnswersQuantity.get());
             assertEquals(3, testQuestionRepository.findAllByTestDomain_Id(response.id()).size());
@@ -365,6 +373,10 @@ public class TestManagementServiceIntegrationTest {
                     .getTestQuestions()
                     .size();
 
+            assertNotEquals(0, response.durationInMinutes());
+            assertNotNull(response.durationInMinutes());
+            assertNotNull(response.timeUnitPerTextCharacter());
+            assertNotNull(response.extraTimePerCorrectAnswer());
             assertEquals(1, response.testQuestionDtos().size());
             assertEquals(1, testQuestionsAmount);
             assertEquals(1, testQuestionRepository.findAllByTestDomain_Id(response.id()).size());
