@@ -69,8 +69,8 @@ public class TestSubmissionService implements TestSubmissionApi {
         Set<TestSubmissionAnswer> testSubmissionAnswers = buildTestSubmissionAnswers(question2AnswerVariants, testSubmission);
         testSubmission.addAnswers(testSubmissionAnswers);
 
-        testSubmissionRepository.save(testSubmission);
-        return getTestSubmissionResultsDto(testSubmission, testQuestions, chosenVariantIds);
+        TestSubmission savedTestSubmission = testSubmissionRepository.save(testSubmission);
+        return getTestSubmissionResultsDto(savedTestSubmission, testQuestions, chosenVariantIds);
     }
 
     @Override
