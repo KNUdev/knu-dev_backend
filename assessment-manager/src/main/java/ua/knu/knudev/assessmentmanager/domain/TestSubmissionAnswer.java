@@ -29,7 +29,7 @@ public class TestSubmissionAnswer {
     @JoinColumn(name = "test_question_id", referencedColumnName = "id", nullable = false)
     private TestQuestion testQuestion;
 
-    @ManyToMany(fetch = FetchType.LAZY)
+    @ManyToMany(cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
     @JoinTable(
             schema = "assessment_management",
             name = "test_submission_answer_variant",

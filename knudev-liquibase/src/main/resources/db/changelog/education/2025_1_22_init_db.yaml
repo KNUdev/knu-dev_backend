@@ -58,7 +58,6 @@ databaseChangeLog:
                   constraints:
                     nullable: false
 
-        #todo test
         - createTable:
             tableName: section
             schemaName: education
@@ -149,7 +148,6 @@ databaseChangeLog:
                   constraints:
                     nullable: false
 
-        #todo tests
         - createTable:
             tableName: topic
             schemaName: education
@@ -213,7 +211,6 @@ databaseChangeLog:
             referencedColumnNames: id
             referencedTableSchemaName: assessment_management
 
-        # 4a) 'topic_learning_materials' table for collection
         - createTable:
             tableName: topic_learning_resources
             schemaName: education
@@ -240,7 +237,6 @@ databaseChangeLog:
             referencedColumnNames: id
             referencedTableSchemaName: education
 
-        # 5) bridging: `program_se`ction_mapping
         - createTable:
             tableName: program_section_mapping
             schemaName: education
@@ -293,8 +289,6 @@ databaseChangeLog:
             columnNames: "program_id, order_index"
             constraintName: uq_psm_program_order
 
-        # Create indexes for bridging:
-        # foreign key columns
         - createIndex:
             tableName: program_section_mapping
             schemaName: education
@@ -309,8 +303,6 @@ databaseChangeLog:
             columns:
               - column:
                   name: section_id
-
-        # multi-column (program_id, order_index)
         - createIndex:
             tableName: program_section_mapping
             schemaName: education
@@ -321,7 +313,6 @@ databaseChangeLog:
               - column:
                   name: order_index
 
-        # 6) bridging: section_module_mapping
         - createTable:
             tableName: section_module_mapping
             schemaName: education
@@ -387,7 +378,6 @@ databaseChangeLog:
             columnNames: "section_id, order_index"
             constraintName: uq_smm_section_order
 
-        # Create indexes for bridging:
         - createIndex:
             tableName: section_module_mapping
             schemaName: education
@@ -419,7 +409,6 @@ databaseChangeLog:
               - column:
                   name: order_index
 
-        # 7) bridging: module_topic_mapping
         - createTable:
             tableName: module_topic_mapping
             schemaName: education
@@ -498,7 +487,6 @@ databaseChangeLog:
             columnNames: "module_id, order_index"
             constraintName: uq_mtm_module_order
 
-        # Create indexes for bridging:
         - createIndex:
             tableName: module_topic_mapping
             schemaName: education
@@ -536,3 +524,223 @@ databaseChangeLog:
                   name: module_id
               - column:
                   name: order_index
+
+  - changeSet:
+      id: create_education_session_table
+      author: Vladyslav Shtaiier
+      changes:
+        - createTable:
+            tableName: education_session
+            schemaName: education
+            columns:
+              - column:
+                  name: id
+                  type: uuid
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: program_id
+                  type: uuid
+                  constraints:
+                    nullable: false
+              - column:
+                  name: start_date
+                  type: timestamp
+                  constraints:
+                    nullable: false
+              - column:
+                  name: estimated_end_date
+                  type: timestamp
+                  constraints:
+                    nullable: true
+              - column:
+                  name: status
+                  type: varchar(30)
+                  constraints:
+                    nullable: false
+        - addForeignKeyConstraint:
+            baseTableSchemaName: education
+            baseTableName: education_session
+            baseColumnNames: program_id
+            constraintName: fk_education_session_program_id
+            referencedTableName: program
+            referencedTableSchemaName: education
+            referencedColumnNames: id
+            onDelete: RESTRICT
+
+  - changeSet:
+      id: create_education_session_participants_table
+      author: Vladyslav Shtaiier
+      changes:
+        - createTable:
+            tableName: education_session_participants
+            schemaName: education
+            columns:
+              - column:
+                  name: session_id
+                  type: uuid
+                  constraints:
+                    nullable: false
+              - column:
+                  name: participant_id
+                  type: uuid
+                  constraints:
+                    nullable: false
+        - addPrimaryKey:
+            tableName: education_session_participants
+            schemaName: education
+            columnNames: session_id, participant_id
+            constraintName: pk_education_session_participants
+        - addForeignKeyConstraint:
+            baseTableSchemaName: education
+            baseTableName: education_session_participants
+            baseColumnNames: session_id
+            constraintName: fk_education_session_participants_session_id
+            referencedTableName: education_session
+            referencedTableSchemaName: education
+            referencedColumnNames: id
+            onDelete: CASCADE
+
+  - changeSet:
+      id: create_education_session_mentors_table
+      author: Vladyslav Shtaiier
+      changes:
+        - createTable:
+            tableName: education_session_mentors
+            schemaName: education
+            columns:
+              - column:
+                  name: session_id
+                  type: uuid
+                  constraints:
+                    nullable: false
+              - column:
+                  name: mentor_id
+                  type: uuid
+                  constraints:
+                    nullable: false
+        - addPrimaryKey:
+            schemaName: education
+            tableName: education_session_mentors
+            columnNames: session_id, mentor_id
+            constraintName: pk_education_session_mentors
+        - addForeignKeyConstraint:
+            baseTableSchemaName: education
+            baseTableName: education_session_mentors
+            baseColumnNames: session_id
+            constraintName: fk_education_session_mentors_session_id
+            referencedTableName: education_session
+            referencedColumnNames: id
+            referencedTableSchemaName: education
+            onDelete: CASCADE
+
+  - changeSet:
+      id: create_sprint_table
+      author: Vladyslav Shtaiier
+      changes:
+        - createTable:
+            tableName: sprint
+            schemaName: education
+            columns:
+              - column:
+                  name: id
+                  type: uuid
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: session_id
+                  type: uuid
+                  constraints:
+                    nullable: false
+              - column:
+                  name: order_index
+                  type: int
+                  constraints:
+                    nullable: false
+              - column:
+                  name: type
+                  type: varchar(30)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: duration_in_days
+                  type: int
+                  constraints:
+                    nullable: false
+              - column:
+                  name: start_date
+                  type: datetime
+                  constraints:
+                    nullable: false
+              - column:
+                  name: topic_id
+                  type: uuid
+                  constraints:
+                    nullable: true
+              - column:
+                  name: module_id
+                  type: uuid
+                  constraints:
+                    nullable: true
+              - column:
+                  name: section_id
+                  type: uuid
+                  constraints:
+                    nullable: true
+              - column:
+                  name: program_id
+                  type: uuid
+                  constraints:
+                    nullable: true
+              - column:
+                  name: status
+                  type: varchar(30)
+                  constraints:
+                    nullable: false
+        - addForeignKeyConstraint:
+            baseTableSchemaName: education
+            baseTableName: sprint
+            baseColumnNames: session_id
+            constraintName: fk_sprint__session_id
+            referencedTableName: education_session
+            referencedColumnNames: id
+            referencedTableSchemaName: education
+            onDelete: CASCADE
+        - addForeignKeyConstraint:
+            baseTableSchemaName: education
+            baseTableName: sprint
+            baseColumnNames: topic_id
+            constraintName: fk_sprint_topic_id
+            referencedTableName: topic
+            referencedTableSchemaName: education
+            referencedColumnNames: id
+            onDelete: RESTRICT
+        - addForeignKeyConstraint:
+            baseTableSchemaName: education
+            baseTableName: sprint
+            baseColumnNames: module_id
+            constraintName: fk_sprint_module_id
+            referencedTableName: module
+            referencedTableSchemaName: education
+            referencedColumnNames: id
+            onDelete: RESTRICT
+        - addForeignKeyConstraint:
+            baseTableSchemaName: education
+            baseTableName: sprint
+            baseColumnNames: section_id
+            constraintName: fk_sprint_section_id
+            referencedTableName: section
+            referencedTableSchemaName: education
+            referencedColumnNames: id
+            onDelete: RESTRICT
+        - addForeignKeyConstraint:
+            baseTableSchemaName: education
+            baseTableName: sprint
+            baseColumnNames: program_id
+            constraintName: fk_sprint_program_id
+            referencedTableName: program
+            referencedTableSchemaName: education
+            referencedColumnNames: id
+            onDelete: RESTRICT

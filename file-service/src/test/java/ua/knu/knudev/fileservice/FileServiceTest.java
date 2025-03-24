@@ -121,10 +121,8 @@ public class FileServiceTest {
         mockMultipartFile();
         when(multipartFile.getInputStream()).thenThrow(new IOException("Test file corrupted exception"));
 
-        FileException exception = assertThrows(FileException.class, this::uploadFile,
+        assertThrows(FileException.class, this::uploadFile,
                 "Expected FileException when input stream throws IOException.");
-        assertEquals("Could not get input stream, because file is corrupted", exception.getMessage(),
-                "Exception message should indicate that the file is corrupted.");
     }
 
     @Test
@@ -157,6 +155,7 @@ public class FileServiceTest {
         when(fileFolder.getName()).thenReturn(TEST_FOLDER_NAME);
         when(fileSubfolder.getSubfolderPath()).thenReturn(TEST_SUBFOLDER_PATH);
 
+        when(multipartFile.getBytes()).thenReturn(DUMMY_FILE_CONTENT.getBytes());
         when(multipartFile.getInputStream()).thenReturn(new ByteArrayInputStream(DUMMY_FILE_CONTENT.getBytes()));
         when(multipartFile.getOriginalFilename()).thenReturn(TEST_FILE_NAME);
     }

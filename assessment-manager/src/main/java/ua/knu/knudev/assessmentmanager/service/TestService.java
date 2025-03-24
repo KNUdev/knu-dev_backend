@@ -62,6 +62,7 @@ public class TestService implements TestApi {
                 .build();
 
         testDomain.associateTestWithQuestionsAndVariants();
+        testDomain.updateMaxRawScore();
         TestDomain savedTestDomain = testRepository.save(testDomain);
         log.info("Saved test: {}", savedTestDomain);
         return testMapper.toDto(savedTestDomain);
@@ -140,6 +141,7 @@ public class TestService implements TestApi {
         Integer testDurationInMinutes = calculateTestDurationTime(timeUnitPerTextCharacter, extraTimePerCorrectAnswer, testQuestions);
         testDomain.setTestDurationInMinutes(testDurationInMinutes);
 
+        testDomain.updateMaxRawScore();
         TestDomain savedTestDomain = testRepository.save(testDomain);
         log.info("Added test question: {}", testQuestion);
 
@@ -165,6 +167,7 @@ public class TestService implements TestApi {
 
         log.info("Removing question with id: {}", questionId);
         testQuestions.remove(questionToDelete);
+        testDomain.updateMaxRawScore();
         testQuestionRepository.delete(questionToDelete);
 
         Integer testDurationInMinutes = calculateTestDurationTime(timeUnitPerTextCharacter, extraTimePerCorrectAnswer, testQuestions);
@@ -173,7 +176,6 @@ public class TestService implements TestApi {
         TestDomain savedTestDomain = testRepository.save(testDomain);
         return testMapper.toDto(savedTestDomain);
     }
-
 
 
     @Override
@@ -230,6 +232,7 @@ public class TestService implements TestApi {
 
         questionAnswerVariant.setTestQuestion(testQuestion);
         testQuestion.getAnswerVariants().add(questionAnswerVariant);
+        testQuestion.getTestDomain().updateMaxRawScore();
         TestQuestion savedTestQuestion = testQuestionRepository.save(testQuestion);
         updateAndSaveTestDurationTime(testDomain, testQuestions, timeUnitPerTextCharacter, extraTimePerCorrectAnswer);
 
@@ -269,6 +272,7 @@ public class TestService implements TestApi {
         log.info("Removing answerVariant with id: {}", questionAnswerVariantId);
 
         testQuestion.getAnswerVariants().remove(answerVariantToDelete);
+        testQuestion.getTestDomain().updateMaxRawScore();
         questionAnswerVariantRepository.delete(answerVariantToDelete);
         updateAndSaveTestDurationTime(testDomain, testQuestions, timeUnitPerTextCharacter, extraTimePerCorrectAnswer);
 
@@ -276,6 +280,7 @@ public class TestService implements TestApi {
     }
 
     @Override
+    @Transactional
     public QuestionAnswerVariantDto changeQuestionAnswerVariantEnBody(UUID questionAnswerVariantId, String newEnBody) {
         QuestionAnswerVariant questionAnswerVariant = getQuestionAnswerVariantById(questionAnswerVariantId);
         TestDomain testDomain = questionAnswerVariant.getTestQuestion().getTestDomain();
@@ -294,6 +299,7 @@ public class TestService implements TestApi {
         }
 
         questionAnswerVariant.setEnVariantBody(newEnBody);
+        questionAnswerVariant.getTestQuestion().getTestDomain().updateMaxRawScore();
         QuestionAnswerVariant savedQuestionAnswerVariant = questionAnswerVariantRepository.save(questionAnswerVariant);
         updateAndSaveTestDurationTime(testDomain, testQuestions, timeUnitPerTextCharacter, extraTimePerCorrectAnswer);
 
@@ -302,6 +308,7 @@ public class TestService implements TestApi {
     }
 
     @Override
+    @Transactional
     public QuestionAnswerVariantDto changeQuestionAnswerVariantCorrectness(UUID questionAnswerVariantId, Boolean newCorrectnessValue) {
         QuestionAnswerVariant questionAnswerVariant = getQuestionAnswerVariantById(questionAnswerVariantId);
         TestDomain testDomain = questionAnswerVariant.getTestQuestion().getTestDomain();
@@ -320,6 +327,7 @@ public class TestService implements TestApi {
         }
 
         questionAnswerVariant.setIsCorrectAnswer(newCorrectnessValue);
+        questionAnswerVariant.getTestQuestion().getTestDomain().updateMaxRawScore();
         QuestionAnswerVariant changedQuestionAnswerVariant = questionAnswerVariantRepository.save(questionAnswerVariant);
         updateAndSaveTestDurationTime(testDomain, testQuestions, timeUnitPerTextCharacter, extraTimePerCorrectAnswer);
 

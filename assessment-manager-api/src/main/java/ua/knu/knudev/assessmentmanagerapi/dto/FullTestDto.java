@@ -11,6 +11,7 @@ public record FullTestDto(
         UUID id,
         String enName,
         LocalDate createdAt,
+        Integer maxRawScore,
         Set<TestQuestionDto> testQuestionDtos,
         Integer executionTimeInMinutes,
         Integer timeUnitPerTextCharacter,

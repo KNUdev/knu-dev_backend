@@ -140,6 +140,11 @@ databaseChangeLog:
                   constraints:
                     nullable: false
               - column:
+                  name: max_raw_score
+                  type: int
+                  constraints:
+                    nullable: false
+              - column:
                   name: test_duration_in_minutes
                   type: int
                   constraints:

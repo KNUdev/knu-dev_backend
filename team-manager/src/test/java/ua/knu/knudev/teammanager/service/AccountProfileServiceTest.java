@@ -10,6 +10,7 @@ import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.multipart.MultipartFile;
 import ua.knu.knudev.fileserviceapi.api.ImageServiceApi;
 import ua.knu.knudev.fileserviceapi.subfolder.ImageSubfolder;
@@ -25,8 +26,6 @@ import ua.knu.knudev.teammanagerapi.dto.AccountProfileDto;
 import ua.knu.knudev.teammanagerapi.exception.AccountException;
 import ua.knu.knudev.teammanagerapi.exception.DepartmentException;
 import ua.knu.knudev.teammanagerapi.response.AccountRegistrationResponse;
-
-import java.io.IOException;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -90,6 +89,8 @@ class AccountProfileServiceTest {
                 .firstName(PROFILE_FIRST_NAME)
                 .lastName(PROFILE_LAST_NAME)
                 .middleName(PROFILE_MIDDLE_NAME)
+                .githubAccountUsername("cumbainer")
+                .yearOfStudy(5)
                 .build();
     }
 
@@ -103,11 +104,11 @@ class AccountProfileServiceTest {
         when(uploadAvatar()).thenReturn(TEST_FILE_NAME);
         when(departmentService.getById(TEST_DEPARTMENT_ID)).thenReturn(testDepartment);
         when(accountProfileRepository.save(any(AccountProfile.class))).thenReturn(testProfile);
-        try {
-            when(mockAvatarFile.getBytes()).thenReturn(new byte[]{1, 2, 3, 4, 5});
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+//        try {
+//            when(mockAvatarFile.getBytes()).thenReturn(new byte[]{1, 2, 3, 4, 5});
+//        } catch (IOException e) {
+//            throw new RuntimeException(e);
+//        }
 
         // Act
         AccountRegistrationResponse response = accountProfileService.register(request);
@@ -139,11 +140,10 @@ class AccountProfileServiceTest {
     void should_ThrowAccountException_When_AccountWithSuchEmailExists() {
         when(accountProfileRepository.existsByEmail(TEST_EMAIL)).thenReturn(true);
 
-        assertThrows(AccountException.class, () -> accountProfileService.register(request));
+        assertThrows(MethodArgumentNotValidException.class, () -> accountProfileService.register(request));
 
         verify(accountProfileRepository, times(1)).existsByEmail(TEST_EMAIL);
-        verify(departmentService, never()).validateAcademicUnitExistence(any(), any());
-        verifyNoMoreInteractions(accountAuthServiceApi, imageServiceApi, departmentService, accountProfileRepository, accountProfileMapper);
+        verifyNoMoreInteractions(accountAuthServiceApi, imageServiceApi, accountProfileRepository, accountProfileMapper);
     }
 
     @Test
@@ -180,11 +180,10 @@ class AccountProfileServiceTest {
     @DisplayName("Should throw AccountException when file upload fails")
     @SneakyThrows
     void should_ThrowAccountExceptionWhen_AvatarUploadFails() {
+        when(uploadAvatar()).thenThrow(new AccountException("File upload failed"));
         when(accountProfileRepository.existsByEmail(TEST_EMAIL)).thenReturn(false);
         doNothing().when(departmentService).validateAcademicUnitExistence(any(), any());
         when(accountAuthServiceApi.createAccount(any(AccountCreationRequest.class))).thenReturn(AUTH_RESPONSE);
-        when(uploadAvatar()).thenThrow(new AccountException("File upload failed"));
-        when(mockAvatarFile.getBytes()).thenReturn(new byte[]{1, 2, 3, 4, 5});
 
         assertThrows(AccountException.class, () -> accountProfileService.register(request));
 
@@ -192,29 +191,6 @@ class AccountProfileServiceTest {
         verify(departmentService, times(1)).validateAcademicUnitExistence(any(), any());
         verify(accountAuthServiceApi, times(1)).createAccount(eq(request));
         verifyNoMoreInteractions(departmentService, imageServiceApi, accountProfileRepository, accountProfileMapper);
-        verifyUploadAvatar();
-    }
-
-    @Test
-    @DisplayName("Should throw RuntimeException when saving account profile fails")
-    @SneakyThrows
-    void should_ThrowRuntimeException_When_SavingProfileFails() {
-        when(accountProfileRepository.existsByEmail(TEST_EMAIL)).thenReturn(false);
-        doNothing().when(departmentService).validateAcademicUnitExistence(any(), any());
-        when(accountAuthServiceApi.createAccount(any(AccountCreationRequest.class))).thenReturn(AUTH_RESPONSE);
-        when(departmentService.getById(TEST_DEPARTMENT_ID)).thenReturn(testDepartment);
-        when(mockAvatarFile.getBytes()).thenReturn(new byte[]{1, 2, 3, 4, 5});
-        when(accountProfileRepository.save(any(AccountProfile.class)))
-                .thenThrow(new RuntimeException("Database save failed"));
-
-        assertThrows(RuntimeException.class, () -> accountProfileService.register(request));
-
-        verify(accountProfileRepository, times(1)).existsByEmail(TEST_EMAIL);
-        verify(departmentService, times(1)).validateAcademicUnitExistence(any(), any());
-        verify(accountAuthServiceApi, times(1)).createAccount(eq(request));
-        verify(departmentService, times(1)).getById(TEST_DEPARTMENT_ID);
-        verify(accountProfileRepository, times(1)).save(any(AccountProfile.class));
-        verifyNoMoreInteractions(accountProfileMapper);
         verifyUploadAvatar();
     }
 

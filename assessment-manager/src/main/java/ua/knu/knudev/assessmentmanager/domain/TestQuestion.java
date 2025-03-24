@@ -27,7 +27,8 @@ public class TestQuestion {
     @OneToMany(mappedBy = "testQuestion", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<QuestionAnswerVariant> answerVariants = new HashSet<>();
 
-    @ManyToOne
+    //todo maybe remove @JoinColumn
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "test_id", referencedColumnName = "id", nullable = false)
     private TestDomain testDomain;
 

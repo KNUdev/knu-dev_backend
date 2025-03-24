@@ -10,6 +10,6 @@ import java.util.UUID;
 public record DepartmentWithSpecialtiesDto(
         UUID id,
         MultiLanguageFieldDto name,
-        Set<SpecialtyCreationDto> specialties
+        Set<ShortSpecialtyDto> specialties
 ) {
 }
