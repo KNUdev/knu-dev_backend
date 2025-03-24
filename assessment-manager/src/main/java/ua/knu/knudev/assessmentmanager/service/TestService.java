@@ -55,6 +55,7 @@ public class TestService implements TestApi {
                 .build();
 
         testDomain.associateTestWithQuestionsAndVariants();
+        testDomain.updateMaxRawScore();
         TestDomain savedTestDomain = testRepository.save(testDomain);
         log.info("Saved test: {}", savedTestDomain);
         return testMapper.toDto(savedTestDomain);
@@ -126,6 +127,7 @@ public class TestService implements TestApi {
 
         testDomain.getTestQuestions().add(testQuestion);
         testDomain.associateTestWithQuestionsAndVariants();
+        testDomain.updateMaxRawScore();
         TestDomain savedTestDomain = testRepository.save(testDomain);
         log.info("Added test question: {}", testQuestion);
         return testMapper.toDto(savedTestDomain);
@@ -147,6 +149,7 @@ public class TestService implements TestApi {
 
         log.info("Removing question with id: {}", questionId);
         testDomain.getTestQuestions().remove(questionToDelete);
+        testDomain.updateMaxRawScore();
         testQuestionRepository.delete(questionToDelete);
         return testMapper.toDto(testDomain);
     }
@@ -190,6 +193,7 @@ public class TestService implements TestApi {
 
         questionAnswerVariant.setTestQuestion(testQuestion);
         testQuestion.getAnswerVariants().add(questionAnswerVariant);
+        testQuestion.getTestDomain().updateMaxRawScore();
         TestQuestion savedTestQuestion = testQuestionRepository.save(testQuestion);
 
         log.info("Added question answer variant with id: {}", questionAnswerVariant.getId());
@@ -222,11 +226,13 @@ public class TestService implements TestApi {
 
         log.info("Removing answerVariant with id: {}", questionAnswerVariantId);
         testQuestion.getAnswerVariants().remove(answerVariantToDelete);
+        testQuestion.getTestDomain().updateMaxRawScore();
         questionAnswerVariantRepository.delete(answerVariantToDelete);
         return testQuestionMapper.toDto(testQuestion);
     }
 
     @Override
+    @Transactional
     public QuestionAnswerVariantDto changeQuestionAnswerVariantEnBody(UUID questionAnswerVariantId, String newEnBody) {
         QuestionAnswerVariant questionAnswerVariant = getQuestionAnswerVariantById(questionAnswerVariantId);
         String oldEnVariantBody = questionAnswerVariant.getEnVariantBody();
@@ -240,12 +246,14 @@ public class TestService implements TestApi {
         }
 
         questionAnswerVariant.setEnVariantBody(newEnBody);
+        questionAnswerVariant.getTestQuestion().getTestDomain().updateMaxRawScore();
         QuestionAnswerVariant savedQuestionAnswerVariant = questionAnswerVariantRepository.save(questionAnswerVariant);
         log.info("EnVariantBody: {}, was changed on: {}", oldEnVariantBody, newEnBody);
         return questionAnswerVariantMapper.toDto(savedQuestionAnswerVariant);
     }
 
     @Override
+    @Transactional
     public QuestionAnswerVariantDto changeQuestionAnswerVariantCorrectness(UUID questionAnswerVariantId, Boolean newCorrectnessValue) {
         QuestionAnswerVariant questionAnswerVariant = getQuestionAnswerVariantById(questionAnswerVariantId);
         Boolean isCorrectAnswer = questionAnswerVariant.getIsCorrectAnswer();
@@ -259,6 +267,7 @@ public class TestService implements TestApi {
         }
 
         questionAnswerVariant.setIsCorrectAnswer(newCorrectnessValue);
+        questionAnswerVariant.getTestQuestion().getTestDomain().updateMaxRawScore();
         QuestionAnswerVariant changedQuestionAnswerVariant = questionAnswerVariantRepository.save(questionAnswerVariant);
         log.info("Correctness value: {}, was changed on: {}", isCorrectAnswer, newCorrectnessValue);
         return questionAnswerVariantMapper.toDto(changedQuestionAnswerVariant);
