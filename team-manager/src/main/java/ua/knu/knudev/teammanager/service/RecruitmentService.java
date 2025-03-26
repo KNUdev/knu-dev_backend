@@ -140,7 +140,7 @@ public class RecruitmentService implements RecruitmentApi {
     public Page<FullClosedRecruitmentDto> getClosedRecruitments(ClosedRecruitmentReceivingRequest req) {
         Pageable paging = PageRequest.of(req.pageNumber(), req.pageSize());
         Page<ClosedRecruitment> closedRecruitmentsPage = closedRecruitmentRepository.getAllClosedRecruitmentsByFilter(
-                paging, req.name(), req.expertise()
+                paging, req.name(), req.expertise(), req.startedAt(), req.closedAt()
         );
 
         return closedRecruitmentsPage.map(closedRecruitmentMapper::toDto);

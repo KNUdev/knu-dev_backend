@@ -14,6 +14,7 @@ import ua.knu.knudev.knudevcommon.constant.Expertise;
 import ua.knu.knudev.teammanager.domain.ClosedRecruitment;
 import ua.knu.knudev.teammanager.domain.QClosedRecruitment;
 
+import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.UUID;
 
@@ -32,7 +33,8 @@ public interface ClosedRecruitmentRepository extends JpaRepository<ClosedRecruit
             """)
     int countTotalRecruited(@Param("closedRecruitmentId") UUID closedRecruitmentId);
 
-    default Page<ClosedRecruitment> getAllClosedRecruitmentsByFilter(Pageable pageable, String title, Expertise expertise) {
+    default Page<ClosedRecruitment> getAllClosedRecruitmentsByFilter(Pageable pageable, String title, Expertise expertise,
+                                                                     LocalDateTime startedAt, LocalDateTime closedAt) {
         BooleanBuilder predicate = new BooleanBuilder();
 
         if (StringUtils.isNotBlank(title)) {
@@ -43,6 +45,10 @@ public interface ClosedRecruitmentRepository extends JpaRepository<ClosedRecruit
         }
         if (expertise != null) {
             predicate.and(qClosedRecruitment.expertise.eq(expertise));
+        } else if (startedAt != null) {
+            predicate.and(qClosedRecruitment.startedAt.eq(startedAt));
+        } else if (closedAt != null) {
+            predicate.and(qClosedRecruitment.closedAt.eq(closedAt));
         }
 
         JPAQuery<ClosedRecruitment> query = getQueryFactory().selectFrom(qClosedRecruitment)
