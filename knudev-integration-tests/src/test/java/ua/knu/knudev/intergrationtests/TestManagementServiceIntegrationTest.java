@@ -79,6 +79,8 @@ public class TestManagementServiceIntegrationTest {
                         .extraTimePerCorrectAnswer(100)
                         .build())
                 .testDurationInMinutes(1000)
+                .label(UUID.randomUUID().toString())
+                .creatorId(UUID.randomUUID())
                 .build();
 
         Set<QuestionAnswerVariant> firstQuestionAnswerVariants = Set.of(
@@ -146,6 +148,8 @@ public class TestManagementServiceIntegrationTest {
                 .questions(questionDtos)
                 .timeUnitPerTextCharacter(100)
                 .extraTimePerCorrectAnswer(100)
+                .creatorId(UUID.randomUUID())
+                .label(UUID.randomUUID().toString())
                 .build();
     }
 
@@ -220,6 +224,8 @@ public class TestManagementServiceIntegrationTest {
             assertNotNull(response.durationInMinutes());
             assertNotNull(response.timeUnitPerTextCharacter());
             assertNotNull(response.extraTimePerCorrectAnswer());
+            assertNotNull(response.label());
+            assertNotNull(response.creatorId());
             assertEquals(2, response.testQuestionDtos().size());
             assertEquals(TEST_EN_NAME + " " + TEST_EN_NAME, response.enName());
             assertEquals(6, answersAmountPerAllQuestions.get());

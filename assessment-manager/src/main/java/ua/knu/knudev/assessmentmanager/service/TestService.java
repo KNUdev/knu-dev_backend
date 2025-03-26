@@ -59,6 +59,8 @@ public class TestService implements TestApi {
                 .enName(testCreationRequest.enName())
                 .durationConfig(buildDurationConfig(timeUnitPerTextCharacter, extraTimePerCorrectAnswer))
                 .testDurationInMinutes(testDurationInMinutes)
+                .label(testCreationRequest.label())
+                .creatorId(testCreationRequest.creatorId())
                 .build();
 
         testDomain.associateTestWithQuestionsAndVariants();

@@ -159,6 +159,16 @@ databaseChangeLog:
                   type: int
                   constraints:
                     nullable: false
+              - column:
+                  name: label
+                  type: varchar(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: creator_id
+                  type: uuid
+                  constraints:
+                    nullable: false
 
   - changeSet:
       id: create_test_question_table
