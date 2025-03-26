@@ -38,6 +38,12 @@ public class TestDomain {
     @Column(nullable = false)
     private Integer maxRawScore;
 
+    @Column(nullable = false)
+    private String label;
+
+    @Column(nullable = false)
+    private UUID creatorId;
+
     @OneToMany(mappedBy = "testDomain", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<TestQuestion> testQuestions = new HashSet<>();
 
