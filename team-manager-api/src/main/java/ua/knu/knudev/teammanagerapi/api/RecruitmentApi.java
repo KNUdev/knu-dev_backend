@@ -1,5 +1,6 @@
 package ua.knu.knudev.teammanagerapi.api;
 
+import org.springframework.data.domain.Page;
 import ua.knu.knudev.teammanagerapi.dto.ActiveRecruitmentDto;
 import ua.knu.knudev.teammanagerapi.dto.ClosedRecruitmentDto;
 import ua.knu.knudev.teammanagerapi.dto.FullActiveRecruitmentDto;
@@ -19,7 +20,7 @@ public interface RecruitmentApi {
 
     void joinActiveRecruitment(RecruitmentJoinRequest joinRequest);
 
-    List<FullClosedRecruitmentDto> getClosedRecruitments(ClosedRecruitmentReceivingRequest getClosedRecruitmentsReq);
+    Page<FullClosedRecruitmentDto> getClosedRecruitments(ClosedRecruitmentReceivingRequest getClosedRecruitmentsReq);
 
     List<FullActiveRecruitmentDto> getAllActiveRecruitments();
 }

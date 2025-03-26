@@ -10,6 +10,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import ua.knu.knudev.knudevcommon.constant.Expertise;
@@ -93,7 +94,7 @@ public class RecruitmentController {
             )
     })
     @GetMapping("/closed")
-    public List<FullClosedRecruitmentDto> getAllClosedRecruitments(
+    public Page<FullClosedRecruitmentDto> getAllClosedRecruitments(
             @RequestParam(defaultValue = "") String name,
             @RequestParam(defaultValue = "") Expertise expertise,
             @RequestParam(defaultValue = "0") Integer pageNumber,
