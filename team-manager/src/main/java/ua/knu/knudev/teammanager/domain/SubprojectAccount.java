@@ -36,4 +36,11 @@ public class SubprojectAccount {
     private LocalDate lastCommitDate;
     private Integer totalCommits;
     private Integer totalLinesOfCodeWritten;
+
+    @PrePersist
+    @PreUpdate
+    private void setSubprojectId() {
+        this.id.setSubprojectId(this.subproject.getId());
+        this.id.setAccountId(this.accountProfile.getId());
+    }
 }

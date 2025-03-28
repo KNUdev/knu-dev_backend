@@ -46,10 +46,11 @@ public class GithubIntegrationService implements GithubManagementApi {
         repos.forEach(repo -> {
             String repoName = repo.get("name").textValue();
             String defaultBranch = detectDefaultBranch(repoName);
-            String commitsUrl = buildUrlForBranchCommits(repoName, commitsStartDate, commitsToDate, request.githubUsername(), request.isUndated(), defaultBranch);
 
-            JsonNode commits = githubApiClient.invokeApi(commitsUrl);
-            commitsFromAllReposAmount.addAndGet(commits.size());
+            List<JsonNode> allCommits = getAllCommitsForUser(repoName, request.githubUsername(), defaultBranch,
+                    commitsStartDate, commitsToDate, false);
+
+            commitsFromAllReposAmount.addAndGet(allCommits.size());
         });
 
         return commitsFromAllReposAmount.get();
@@ -92,14 +93,18 @@ public class GithubIntegrationService implements GithubManagementApi {
     @Override
     public UserCommitsDto getRepoUserCommitsCount(String username, String repoName) {
         String defaultBranch = detectDefaultBranch(repoName);
-        String commitsUrl = buildUrlForBranchCommits(repoName, null, null, username, true, defaultBranch);
+        List<JsonNode> allCommits = getAllCommitsForUser(repoName, username, defaultBranch,
+                null, null, true);
+        int totalCommits = allCommits.size();
 
-        JsonNode commits = githubApiClient.invokeApi(commitsUrl);
-        int totalCommits = commits.size();
         LocalDate lastCommitDate = null;
 
-        if (commits.isArray() && totalCommits > 0) {
-            String latestCommitDateStr = commits.get(0).get("commit").get("committer").get("date").asText();
+        if (!allCommits.isEmpty()) {
+            String latestCommitDateStr = allCommits.get(0)
+                    .get("commit")
+                    .get("committer")
+                    .get("date")
+                    .asText();
             lastCommitDate = LocalDate.parse(latestCommitDateStr.substring(0, 10));
         }
 
@@ -121,9 +126,7 @@ public class GithubIntegrationService implements GithubManagementApi {
 
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss'Z'");
 
-        Set<ReleaseDto> releaseDtos = releases
-                .findParents("id")
-                .stream()
+        return releases.findParents("id").stream()
                 .map(release -> {
                     LocalDateTime releaseStartDateTime = parseDate(release.get("created_at"), formatter);
                     LocalDateTime releaseFinishDateTime = parseDate(release.get("published_at"), formatter);
@@ -156,8 +159,6 @@ public class GithubIntegrationService implements GithubManagementApi {
                 })
                 .filter(Objects::nonNull)
                 .collect(Collectors.toSet());
-
-        return releaseDtos;
     }
 
     private LocalDateTime parseDate(JsonNode dateNode, DateTimeFormatter formatter) {
@@ -179,11 +180,30 @@ public class GithubIntegrationService implements GithubManagementApi {
         }
     }
 
-    private String buildUrlForBranchCommits(String repoName, String firstCommitDate, String lastCommitDate, String githubUsername, boolean isUndated, String branch) {
+    public List<JsonNode> getAllCommitsForUser(String repoName, String username, String branch, String firstCommitDate,
+                                               String lastCommitDate, boolean undated) {
+        List<JsonNode> allCommits = new ArrayList<>();
+        int page = 1;
+        while (true) {
+            String commitsUrl = buildUrlForBranchCommits(repoName, firstCommitDate, lastCommitDate, username, undated, branch, page);
+            JsonNode commits = githubApiClient.invokeApi(commitsUrl);
+            if (commits == null || commits.isEmpty()) {
+                break;
+            }
+            commits.forEach(allCommits::add);
+            page++;
+        }
+        return allCommits;
+    }
+
+    private String buildUrlForBranchCommits(String repoName, String firstCommitDate, String lastCommitDate, String githubUsername,
+                                            boolean isUndated, String branch, int page) {
         String allUserCommitsUrl = BASE_URL + "/repos/" + organizationName + "/" + repoName
                 + "/commits?author="
                 + githubUsername
-                + "&sha=" + branch;
+                + "&sha=" + branch
+                + "&per_page=100"
+                + "&page=" + page;
         if (!isUndated) {
             allUserCommitsUrl += "&since=" + firstCommitDate + "&until=" + lastCommitDate;
         }

@@ -5,6 +5,6 @@ import ua.knu.knudev.knudevcommon.mapper.BaseMapper;
 import ua.knu.knudev.teammanager.domain.AccountProfile;
 import ua.knu.knudev.teammanagerapi.dto.AccountProfileDto;
 
-@Mapper(componentModel = "spring")
+@Mapper(componentModel = "spring", uses = {SubprojectAccountMapper.class})
 public interface AccountProfileMapper extends BaseMapper<AccountProfile, AccountProfileDto> {
 }
