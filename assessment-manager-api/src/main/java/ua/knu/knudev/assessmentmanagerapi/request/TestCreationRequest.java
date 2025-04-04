@@ -4,11 +4,13 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import lombok.Builder;
 import ua.knu.knudev.assessmentmanagerapi.dto.TestQuestionDto;
 
 import java.util.List;
+import java.util.UUID;
 
 @Builder
 @Schema(description = "Request object for creating a test with name and questions")
@@ -47,7 +49,23 @@ public record TestCreationRequest(
                 requiredMode = Schema.RequiredMode.REQUIRED
         )
         @Min(0)
-        Integer extraTimePerCorrectAnswer
+        Integer extraTimePerCorrectAnswer,
+
+        @NotEmpty(message = "Label can not be empty")
+        @Schema(
+                description = "Label for the test",
+                example = "Topic",
+                requiredMode = Schema.RequiredMode.REQUIRED
+        )
+        String label,
+
+        @NotNull(message = "Creator ID can not be empty")
+        @Schema(
+                description = "Creator ID",
+                requiredMode = Schema.RequiredMode.REQUIRED,
+                example = "123e4567-e89b-12d3-a456-426614174000"
+        )
+        UUID creatorId
 
 ) {
 }
