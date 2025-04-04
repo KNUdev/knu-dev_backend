@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
 @Getter
@@ -34,4 +35,7 @@ public class ReleaseDto {
 
     @Schema(description = "Aggregated count of GitHub commits included in this release", example = "42")
     private Integer aggregatedGithubCommitCount;
+
+    @Schema(description = "Developers associated with this release")
+    private List<ReleaseParticipationDto> releaseDevelopers;
 }

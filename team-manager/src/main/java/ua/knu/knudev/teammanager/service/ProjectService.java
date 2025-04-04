@@ -49,7 +49,6 @@ public class ProjectService implements ProjectApi {
     private final AccountProfileMapper accountProfileMapper;
     private final SubprojectMapper subprojectMapper;
     private final SubprojectAccountMapper subprojectAccountMapper;
-
     private final GithubManagementApi gitHubManagementApi;
 
     @Scheduled(cron = "0 30 3 */3 * *")
@@ -256,9 +255,7 @@ public class ProjectService implements ProjectApi {
     }
 
     public void saveProjects(Set<Project> projectsToCreate) {
-        if (!projectsToCreate.isEmpty()) {
-            projectRepository.saveAll(projectsToCreate);
-        }
+        projectRepository.saveAll(projectsToCreate);
     }
 
     private SubprojectAccount createSubprojectAccount(String contributor, String repoName, Subproject subproject) {

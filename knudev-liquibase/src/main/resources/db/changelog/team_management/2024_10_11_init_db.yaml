@@ -751,12 +751,18 @@ databaseChangeLog:
 
   - changeSet:
       id: create-table-release_participation
-      author: yourname
+      author: DenysLeonenko
       changes:
         - createTable:
             schemaName: team_management
             tableName: release_participation
             columns:
+              - column:
+                  name: id
+                  type: UUID
+                  constraints:
+                    nullable: false
+                    primaryKey: true
               - column:
                   name: release_id
                   type: UUID
@@ -769,19 +775,14 @@ databaseChangeLog:
                     nullable: false
               - column:
                   name: role_snapshot
-                  type: VARCHAR(50)
+                  type: varchar(50)
                   constraints:
                     nullable: false
               - column:
                   name: commit_count
-                  type: INT
+                  type: int
                   constraints:
                     nullable: false
-        - addPrimaryKey:
-            columnNames: release_id,account_id
-            constraintName: pk_release_participation
-            tableName: release_participation
-            schemaName: team_management
         - addForeignKeyConstraint:
             constraintName: fk_release_participation_release
             baseTableName: release_participation

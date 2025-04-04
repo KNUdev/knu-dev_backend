@@ -5,6 +5,6 @@ import ua.knu.knudev.knudevcommon.mapper.BaseMapper;
 import ua.knu.knudev.teammanager.domain.Release;
 import ua.knu.knudev.teammanagerapi.dto.ReleaseDto;
 
-@Mapper(componentModel = "spring")
+@Mapper(componentModel = "spring", uses = {MultiLanguageFieldMapper.class, AccountProfileMapper.class, SubprojectMapper.class})
 public interface ReleaseMapper extends BaseMapper<Release, ReleaseDto> {
 }
