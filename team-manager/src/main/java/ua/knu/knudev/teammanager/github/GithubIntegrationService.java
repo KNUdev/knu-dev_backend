@@ -6,15 +6,22 @@ import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import ua.knu.knudev.teammanager.domain.AccountProfile;
 import ua.knu.knudev.teammanager.github.dto.GithubRepoDataDto;
+import ua.knu.knudev.teammanager.mapper.AccountProfileMapper;
+import ua.knu.knudev.teammanager.repository.AccountProfileRepository;
+import ua.knu.knudev.teammanagerapi.dto.AccountProfileDto;
 import ua.knu.knudev.teammanagerapi.dto.ReleaseDto;
 import ua.knu.knudev.teammanager.github.dto.UserCommitsDto;
 import ua.knu.knudev.teammanager.service.api.GithubManagementApi;
+import ua.knu.knudev.teammanagerapi.dto.ReleaseParticipationDto;
+import ua.knu.knudev.teammanagerapi.exception.AccountException;
 
 import java.net.URI;
 import java.net.http.HttpRequest;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -29,6 +36,8 @@ public class GithubIntegrationService implements GithubManagementApi {
     private String organizationName;
 
     private final GithubApiClient githubApiClient;
+    private final AccountProfileRepository accountProfileRepository;
+    private final AccountProfileMapper accountProfileMapper;
 
     private static final String BASE_URL = "https://api.github.com";
 
@@ -46,10 +55,11 @@ public class GithubIntegrationService implements GithubManagementApi {
         repos.forEach(repo -> {
             String repoName = repo.get("name").textValue();
             String defaultBranch = detectDefaultBranch(repoName);
-            String commitsUrl = buildUrlForBranchCommits(repoName, commitsStartDate, commitsToDate, request.githubUsername(), request.isUndated(), defaultBranch);
 
-            JsonNode commits = githubApiClient.invokeApi(commitsUrl);
-            commitsFromAllReposAmount.addAndGet(commits.size());
+            List<JsonNode> allCommits = getAllCommitsForUser(repoName, request.githubUsername(), defaultBranch,
+                    commitsStartDate, commitsToDate, false);
+
+            commitsFromAllReposAmount.addAndGet(allCommits.size());
         });
 
         return commitsFromAllReposAmount.get();
@@ -92,14 +102,18 @@ public class GithubIntegrationService implements GithubManagementApi {
     @Override
     public UserCommitsDto getRepoUserCommitsCount(String username, String repoName) {
         String defaultBranch = detectDefaultBranch(repoName);
-        String commitsUrl = buildUrlForBranchCommits(repoName, null, null, username, true, defaultBranch);
+        List<JsonNode> allCommits = getAllCommitsForUser(repoName, username, defaultBranch,
+                null, null, true);
+        int totalCommits = allCommits.size();
 
-        JsonNode commits = githubApiClient.invokeApi(commitsUrl);
-        int totalCommits = commits.size();
         LocalDate lastCommitDate = null;
 
-        if (commits.isArray() && totalCommits > 0) {
-            String latestCommitDateStr = commits.get(0).get("commit").get("committer").get("date").asText();
+        if (!allCommits.isEmpty()) {
+            String latestCommitDateStr = allCommits.get(0)
+                    .get("commit")
+                    .get("committer")
+                    .get("date")
+                    .asText();
             lastCommitDate = LocalDate.parse(latestCommitDateStr.substring(0, 10));
         }
 
@@ -113,49 +127,54 @@ public class GithubIntegrationService implements GithubManagementApi {
     public Set<ReleaseDto> getReleaseInfo(String repoName) {
         String releaseUrl = BASE_URL + "/repos/" + organizationName + "/" + repoName + "/releases";
         JsonNode releases = githubApiClient.invokeApi(releaseUrl);
+        AtomicInteger previousReleaseIndex = new AtomicInteger(1);
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss'Z'");
+        Set<ReleaseDto> releaseDtos = new HashSet<>();
 
         if (releases == null || releases.isEmpty()) {
             log.warn("No releases found for repository: {}", repoName);
             return Collections.emptySet();
         }
 
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss'Z'");
+        for (int i = 0; i < releases.size(); i++) {
+            JsonNode release = releases.get(i);
+            LocalDateTime releaseStartDateTime = parseDate(release.get("created_at"), formatter);
+            LocalDateTime releaseFinishDateTime = parseDate(release.get("published_at"), formatter);
+            String releaseFinishDate = transformLocalDateTimeToISO8601(releaseFinishDateTime);
+            String defaultBranch = detectDefaultBranch(repoName);
+            List<JsonNode> allCommitsInRelease;
 
-        Set<ReleaseDto> releaseDtos = releases
-                .findParents("id")
-                .stream()
-                .map(release -> {
-                    LocalDateTime releaseStartDateTime = parseDate(release.get("created_at"), formatter);
-                    LocalDateTime releaseFinishDateTime = parseDate(release.get("published_at"), formatter);
+            if (previousReleaseIndex.get() > releases.size() - 1) {
+                allCommitsInRelease = getAllCommitsForUser(repoName, null, defaultBranch,
+                        null, releaseFinishDate, false);
+            } else {
+                LocalDateTime previousReleasePublishedDate = parseDate(releases.get(previousReleaseIndex.get())
+                        .get("published_at"), formatter);
+                String releaseStartDate = transformLocalDateTimeToISO8601(previousReleasePublishedDate);
+                allCommitsInRelease = getAllCommitsForUser(repoName, null, defaultBranch,
+                        releaseStartDate, releaseFinishDate, false);
+            }
+            if (releaseStartDateTime == null) {
+                log.warn("Skipping release due to missing dates in repository: {}", repoName);
+                return null;
+            }
 
-                    if (releaseStartDateTime == null || releaseFinishDateTime == null) {
-                        log.warn("Skipping release due to missing dates in repository: {}", repoName);
-                        return null;
-                    }
+            int aggregatedGitHubCommitCount = allCommitsInRelease.size();
+            String version = Optional.ofNullable(release.get("name")).map(JsonNode::textValue).orElse("Unknown");
+            String changeLogEn = Optional.ofNullable(release.get("body")).map(JsonNode::textValue).orElse("No changelog available.");
+            List<ReleaseParticipationDto> releaseDevelopers = getReleaseParticipationDtos(allCommitsInRelease);
+            previousReleaseIndex.getAndIncrement();
 
-                    LocalDate releaseStartDate = releaseStartDateTime.toLocalDate();
-                    LocalDate releaseFinishDate = releaseFinishDateTime.toLocalDate();
-
-                    String allCommitsPerPeriodUrl = BASE_URL + "/repos/" + organizationName + "/" + repoName + "/commits" +
-                            "?since=" + releaseStartDate + "T00:00:00Z" +
-                            "&until=" + releaseFinishDate + "T23:59:59Z";
-
-                    JsonNode commitsPerPeriod = githubApiClient.invokeApi(allCommitsPerPeriodUrl);
-                    int aggregatedGitHubCommitCount = (commitsPerPeriod != null) ? commitsPerPeriod.size() : 0;
-
-                    String version = Optional.ofNullable(release.get("name")).map(JsonNode::textValue).orElse("Unknown");
-                    String changeLogEn = Optional.ofNullable(release.get("body")).map(JsonNode::textValue).orElse("No changelog available.");
-
-                    return ReleaseDto.builder()
-                            .initializedAt(releaseStartDateTime)
-                            .releaseFinishDate(releaseFinishDateTime)
-                            .version(version)
-                            .changesLogEn(changeLogEn)
-                            .aggregatedGithubCommitCount(aggregatedGitHubCommitCount)
-                            .build();
-                })
-                .filter(Objects::nonNull)
-                .collect(Collectors.toSet());
+            ReleaseDto releaseDto = ReleaseDto.builder()
+                    .initializedAt(releaseStartDateTime)
+                    .releaseFinishDate(releaseFinishDateTime)
+                    .version(version)
+                    .changesLogEn(changeLogEn)
+                    .aggregatedGithubCommitCount(aggregatedGitHubCommitCount)
+                    .releaseDevelopers(releaseDevelopers)
+                    .build();
+            releaseDtos.add(releaseDto);
+        }
 
         return releaseDtos;
     }
@@ -179,13 +198,62 @@ public class GithubIntegrationService implements GithubManagementApi {
         }
     }
 
-    private String buildUrlForBranchCommits(String repoName, String firstCommitDate, String lastCommitDate, String githubUsername, boolean isUndated, String branch) {
+    private List<ReleaseParticipationDto> getReleaseParticipationDtos(List<JsonNode> allCommitsInRelease) {
+        Map<String, List<JsonNode>> githubUsername2Commits = allCommitsInRelease.stream()
+                .collect(Collectors.groupingBy(
+                        commit -> commit.get("author").get("login").textValue()
+                ));
+
+        return githubUsername2Commits.entrySet()
+                .stream().map(entrySet -> {
+                    int commitsCount = entrySet.getValue().size();
+                    String githubUsername = entrySet.getKey();
+                    AccountProfile accountProfile = accountProfileRepository.findAccountProfileByGithubAccountUsername(githubUsername)
+                            .orElseThrow(() -> new AccountException("Account not found for GitHub username: " + githubUsername));
+                    AccountProfileDto accountProfileDto = accountProfileMapper.toDto(accountProfile);
+
+                    return ReleaseParticipationDto.builder()
+                            .accountProfile(accountProfileDto)
+                            .roleSnapshot(accountProfileDto.technicalRole())
+                            .commitCount(commitsCount)
+                            .build();
+                }).toList();
+    }
+
+    public List<JsonNode> getAllCommitsForUser(String repoName, String username, String branch, String firstCommitDate,
+                                               String lastCommitDate, boolean undated) {
+        List<JsonNode> allCommits = new ArrayList<>();
+        final int MAX_PAGES = 500;
+        int page = 1;
+        while (true) {
+            String commitsUrl = buildUrlForBranchCommits(repoName, firstCommitDate, lastCommitDate, username, undated, branch, page);
+            JsonNode commits = githubApiClient.invokeApi(commitsUrl);
+            if (commits == null || commits.isEmpty() || page == MAX_PAGES) {
+                break;
+            }
+            commits.forEach(allCommits::add);
+            page++;
+        }
+        return allCommits;
+    }
+
+    private String buildUrlForBranchCommits(String repoName, String firstCommitDate, String lastCommitDate, String githubUsername,
+                                            boolean isUndated, String branch, int page) {
         String allUserCommitsUrl = BASE_URL + "/repos/" + organizationName + "/" + repoName
-                + "/commits?author="
-                + githubUsername
-                + "&sha=" + branch;
+                + "/commits?sha="
+                + branch
+                + "&per_page=100"
+                + "&page=" + page;
+
+        if (githubUsername != null) {
+            allUserCommitsUrl += "&author=" + githubUsername;
+        }
         if (!isUndated) {
-            allUserCommitsUrl += "&since=" + firstCommitDate + "&until=" + lastCommitDate;
+            if (firstCommitDate != null) {
+                allUserCommitsUrl += "&since=" + firstCommitDate + "&until=" + lastCommitDate;
+            } else {
+                allUserCommitsUrl += "&until=" + lastCommitDate;
+            }
         }
         return allUserCommitsUrl;
     }
@@ -204,6 +272,11 @@ public class GithubIntegrationService implements GithubManagementApi {
 
     private String transformLocalDateToISO8601(LocalDate date) {
         return date.atStartOfDay() + "Z";
+    }
+
+    private String transformLocalDateTimeToISO8601(LocalDateTime dateTime) {
+        return dateTime.atOffset(ZoneOffset.UTC)
+                .format(DateTimeFormatter.ISO_OFFSET_DATE_TIME);
     }
 
     private List<String> getRepositoryContributorsByRepoName(String repoName) {

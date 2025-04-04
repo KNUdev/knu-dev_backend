@@ -11,10 +11,7 @@ import org.springframework.stereotype.Service;
 import ua.knu.knudev.knudevcommon.constant.ProjectStatus;
 import ua.knu.knudev.knudevcommon.constant.SubprojectType;
 import ua.knu.knudev.knudevcommon.dto.MultiLanguageFieldDto;
-import ua.knu.knudev.teammanager.domain.Project;
-import ua.knu.knudev.teammanager.domain.Release;
-import ua.knu.knudev.teammanager.domain.Subproject;
-import ua.knu.knudev.teammanager.domain.SubprojectAccount;
+import ua.knu.knudev.teammanager.domain.*;
 import ua.knu.knudev.teammanager.github.dto.GithubRepoDataDto;
 import ua.knu.knudev.teammanager.github.dto.UserCommitsDto;
 import ua.knu.knudev.teammanager.mapper.*;
@@ -52,10 +49,9 @@ public class ProjectService implements ProjectApi {
     private final AccountProfileMapper accountProfileMapper;
     private final SubprojectMapper subprojectMapper;
     private final SubprojectAccountMapper subprojectAccountMapper;
-
     private final GithubManagementApi gitHubManagementApi;
 
-    @Scheduled(cron = "0 0 0 */3 * *")
+    @Scheduled(cron = "0 30 3 */3 * *")
     @Transactional
     public void createOrModifyProject() {
         List<GithubRepoDataDto> allGitHubRepos = gitHubManagementApi.getAllGithubRepos();
@@ -161,12 +157,11 @@ public class ProjectService implements ProjectApi {
         SubprojectType subprojectType = detectSubprojectType(repoNameParts[1]);
 
         Project project2Modify = findExistProject2Modify(projectName, projectsToCreate);
-        Set<SubprojectAccount> subprojectAccounts = getSubprojectAccounts(contributors, repo.name());
 
         if (project2Modify != null) {
-            addSubprojectIfNotExists(project2Modify, subprojectType, resourceUrl, subprojectAccounts, repo.name());
+            addSubprojectIfNotExists(project2Modify, subprojectType, resourceUrl, contributors, repo.name());
         } else {
-            createNewProject(projectName, subprojectType, resourceUrl, repo.name(), subprojectAccounts, projectsToCreate, repo);
+            createNewProject(projectName, subprojectType, resourceUrl, repo.name(), contributors, projectsToCreate, repo);
         }
     }
 
@@ -184,31 +179,27 @@ public class ProjectService implements ProjectApi {
                         .orElse(null));
     }
 
-    private Set<SubprojectAccount> getSubprojectAccounts(List<String> contributors, String repoName) {
+    private Set<SubprojectAccount> getSubprojectAccounts(List<String> contributors, String repoName, Subproject subproject) {
         return contributors.stream()
-                .map(contributor -> createSubprojectAccount(contributor, repoName))
+                .map(contributor -> createSubprojectAccount(contributor, repoName, subproject))
                 .filter(Objects::nonNull)
                 .collect(Collectors.toSet());
     }
 
     private void addSubprojectIfNotExists(Project project, SubprojectType subprojectType, String resourceUrl,
-                                          Set<SubprojectAccount> subprojectAccounts, String repoName) {
+                                          List<String> contributors, String repoName) {
         Optional<Subproject> existingSubproject = project.getSubprojects().stream()
                 .filter(subproject -> subproject.getType().equals(subprojectType))
                 .findFirst();
 
+        Subproject modifiedSubproject;
+
         if (existingSubproject.isEmpty()) {
             Subproject newSubproject = buildSubproject(project, subprojectType, resourceUrl, repoName);
-            newSubproject.getAllDevelopers().addAll(subprojectAccounts);
             project.getSubprojects().add(newSubproject);
+            modifiedSubproject = newSubproject;
         } else {
             Subproject subproject = existingSubproject.get();
-
-            Set<SubprojectAccount> existingAccounts = subproject.getAllDevelopers();
-            Set<SubprojectAccount> newAccounts = subprojectAccounts.stream()
-                    .filter(account -> !existingAccounts.contains(account))
-                    .collect(Collectors.toSet());
-            existingAccounts.addAll(newAccounts);
 
             Set<ReleaseDto> newReleasesDtos = gitHubManagementApi.getReleaseInfo(repoName);
             Set<Release> newReleases = releaseMapper.toDomains(newReleasesDtos);
@@ -223,11 +214,30 @@ public class ProjectService implements ProjectApi {
                         release.setSubproject(subproject);
                         subproject.getReleases().add(release);
                     });
+            modifiedSubproject = subproject;
         }
+
+        Set<SubprojectAccount> subprojectAccounts = getSubprojectAccounts(contributors, repoName, modifiedSubproject);
+
+        Set<SubprojectAccount> existingAccounts = modifiedSubproject.getAllDevelopers();
+        List<UUID> existingAccountsIds = existingAccounts.stream()
+                .map(SubprojectAccount::getId)
+                .map(SubprojectAccountId::getAccountId)
+                .toList();
+
+        Set<SubprojectAccount> newAccounts = subprojectAccounts.stream()
+                .filter(account2Create -> !existingAccountsIds.contains(account2Create.getId().getAccountId()))
+                .collect(Collectors.toSet());
+
+        if (!newAccounts.isEmpty()) {
+            existingAccounts.addAll(newAccounts);
+            modifiedSubproject.setAllDevelopers(existingAccounts);
+        }
+
     }
 
     private void createNewProject(String projectName, SubprojectType subprojectType, String resourceUrl, String repoName,
-                                  Set<SubprojectAccount> subprojectAccounts, Set<Project> projectsToCreate, GithubRepoDataDto repo) {
+                                  List<String> contributors, Set<Project> projectsToCreate, GithubRepoDataDto repo) {
         Project newProject = new Project();
 
         newProject.setName(projectName);
@@ -236,23 +246,27 @@ public class ProjectService implements ProjectApi {
         newProject.setStatus(ProjectStatus.UNDER_DEVELOPMENT);
 
         Subproject subproject = buildSubproject(newProject, subprojectType, resourceUrl, repoName);
-        subproject.getAllDevelopers().addAll(subprojectAccounts);
         newProject.getSubprojects().add(subproject);
+
+        Set<SubprojectAccount> subprojectAccounts = getSubprojectAccounts(contributors, repoName, subproject);
+        subproject.getAllDevelopers().addAll(subprojectAccounts);
 
         projectsToCreate.add(newProject);
     }
 
     public void saveProjects(Set<Project> projectsToCreate) {
-        if (!projectsToCreate.isEmpty()) {
-            projectRepository.saveAll(projectsToCreate);
-        }
+        projectRepository.saveAll(projectsToCreate);
     }
 
-    private SubprojectAccount createSubprojectAccount(String contributor, String repoName) {
+    private SubprojectAccount createSubprojectAccount(String contributor, String repoName, Subproject subproject) {
         UserCommitsDto userCommitsDto = gitHubManagementApi.getRepoUserCommitsCount(contributor, repoName);
         return accountProfileRepository.findAccountProfileByGithubAccountUsername(contributor)
                 .map(accountProfile -> SubprojectAccount.builder()
-                        .subproject(null)
+                        .id(SubprojectAccountId.builder()
+                                .subprojectId(subproject.getId())
+                                .accountId(accountProfile.getId())
+                                .build())
+                        .subproject(subproject)
                         .accountProfile(accountProfile)
                         .dateJoined(LocalDate.now())
                         .lastCommitDate(userCommitsDto.lastCommitDate())
