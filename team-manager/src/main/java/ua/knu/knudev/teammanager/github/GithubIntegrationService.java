@@ -223,11 +223,12 @@ public class GithubIntegrationService implements GithubManagementApi {
     public List<JsonNode> getAllCommitsForUser(String repoName, String username, String branch, String firstCommitDate,
                                                String lastCommitDate, boolean undated) {
         List<JsonNode> allCommits = new ArrayList<>();
+        final int MAX_PAGES = 500;
         int page = 1;
         while (true) {
             String commitsUrl = buildUrlForBranchCommits(repoName, firstCommitDate, lastCommitDate, username, undated, branch, page);
             JsonNode commits = githubApiClient.invokeApi(commitsUrl);
-            if (commits == null || commits.isEmpty()) {
+            if (commits == null || commits.isEmpty() || page == MAX_PAGES) {
                 break;
             }
             commits.forEach(allCommits::add);
