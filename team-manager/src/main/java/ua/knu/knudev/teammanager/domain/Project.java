@@ -54,7 +54,7 @@ public class Project {
     private ProjectStatus status;
 
     @BatchSize(size = 40)
-    @ElementCollection(targetClass = ProjectTag.class)
+    @ElementCollection(targetClass = ProjectTag.class, fetch = FetchType.EAGER)
     @CollectionTable(schema = "team_management", name = "tag", joinColumns = @JoinColumn(name = "project_id"))
     @Enumerated(EnumType.STRING)
     @Column(name = "tags", nullable = false)
@@ -70,5 +70,16 @@ public class Project {
 
     @OneToMany(mappedBy = "project", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<Subproject> subprojects = new HashSet<>();
+
+    private void addSubproject(Subproject subproject) {
+        subprojects.add(subproject);
+        subproject.setProject(this);
+    }
+
+    public void addSubprojects(Set<Subproject> subprojects) {
+        for (Subproject subproject : subprojects) {
+            addSubproject(subproject);
+        }
+    }
 
 }
