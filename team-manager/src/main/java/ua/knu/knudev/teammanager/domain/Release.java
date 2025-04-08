@@ -52,4 +52,10 @@ public class Release {
             participation.setRelease(this);
         }
     }
+
+    public void associateReleaseWithParticipations(Set<ReleaseParticipation> participations) {
+        for (ReleaseParticipation participation : participations) {
+            participation.setRelease(this);
+        }
+    }
 }

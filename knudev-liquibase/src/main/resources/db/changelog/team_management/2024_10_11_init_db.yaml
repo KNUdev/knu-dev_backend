@@ -750,7 +750,7 @@ databaseChangeLog:
                   name: subproject_id
 
   - changeSet:
-      id: create-table-release_participation
+      id: create_table_release_participation
       author: DenysLeonenko
       changes:
         - createTable:

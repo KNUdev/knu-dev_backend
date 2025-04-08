@@ -162,7 +162,10 @@ public class GithubIntegrationService implements GithubManagementApi {
             int aggregatedGitHubCommitCount = allCommitsInRelease.size();
             String version = Optional.ofNullable(release.get("name")).map(JsonNode::textValue).orElse("Unknown");
             String changeLogEn = Optional.ofNullable(release.get("body")).map(JsonNode::textValue).orElse("No changelog available.");
-            List<ReleaseParticipationDto> releaseDevelopers = getReleaseParticipationDtos(allCommitsInRelease);
+            List<ReleaseParticipationDto> releaseDevelopers = getReleaseParticipationDtos(allCommitsInRelease)
+                    .stream()
+                    .filter(Objects::nonNull)
+                    .toList();
             previousReleaseIndex.getAndIncrement();
 
             ReleaseDto releaseDto = ReleaseDto.builder()
@@ -209,7 +212,11 @@ public class GithubIntegrationService implements GithubManagementApi {
                     int commitsCount = entrySet.getValue().size();
                     String githubUsername = entrySet.getKey();
                     AccountProfile accountProfile = accountProfileRepository.findAccountProfileByGithubAccountUsername(githubUsername)
-                            .orElseThrow(() -> new AccountException("Account not found for GitHub username: " + githubUsername));
+                            .orElse(null);
+                    if (accountProfile == null) {
+                        log.warn("No account profile found for github account username: {}", githubUsername);
+                        return null;
+                    }
                     AccountProfileDto accountProfileDto = accountProfileMapper.toDto(accountProfile);
 
                     return ReleaseParticipationDto.builder()

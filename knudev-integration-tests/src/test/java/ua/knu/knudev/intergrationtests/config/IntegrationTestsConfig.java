@@ -11,7 +11,6 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
         "ua.knu.knudev.assessmentmanager",
         "ua.knu.knudev.intergrationtests"
 })
-@EnableJpaRepositories(basePackages = {"ua.knu.knudev.intergrationtests"})
 public class IntegrationTestsConfig {
 
 }
