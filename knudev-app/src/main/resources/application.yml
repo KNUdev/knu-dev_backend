@@ -17,6 +17,11 @@ server:
 #    health:
 #      show-details: always
 spring:
+  datasource:
+    url: ${DB_URI:jdbc:postgresql://localhost:5432/knudev_db}
+    username: ${POSTGRES_USERNAME:postgres}
+    password: ${POSTGRES_PASSWORD:knudevpass}
+    driver-class-name: org.postgresql.Driver
   servlet:
     multipart:
       max-file-size: 10MB
@@ -25,11 +30,6 @@ spring:
     active: dev
   config:
     import: optional:file:.env[.properties]
-  datasource:
-    url: ${DB_URI:jdbc:postgresql://localhost:5432/knudev_db}
-    username: ${POSTGRES_USERNAME:postgres}
-    password: ${POSTGRES_PASSWORD:knudevpass}
-    driver-class-name: org.postgresql.Driver
   liquibase:
     default-schema: liquibase
     change-log: classpath:db/master.yaml

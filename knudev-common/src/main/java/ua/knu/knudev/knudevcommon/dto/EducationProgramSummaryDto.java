@@ -1,8 +1,7 @@
-package ua.knu.knudev.educationapi.dto;
+package ua.knu.knudev.knudevcommon.dto;
 
 import lombok.Builder;
 import ua.knu.knudev.knudevcommon.constant.Expertise;
-import ua.knu.knudev.knudevcommon.dto.MultiLanguageFieldDto;
 
 @Builder
 public record EducationProgramSummaryDto(

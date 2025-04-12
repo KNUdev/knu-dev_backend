@@ -21,6 +21,11 @@ public class AdminEducationSessionController {
         sessionApi.createSession(sessionCreationRequest);
     }
 
+    @GetMapping
+    public void get() {
+
+    }
+
     @PostMapping("/mentors/update")
     public void updateMentors() {
         //todo
@@ -35,9 +40,10 @@ public class AdminEducationSessionController {
     @PatchMapping("/sprints/{sprintId}/extend")
     public void extendSprintDeadline(@PathVariable UUID sprintId,
                                      @RequestBody Integer extensionDays) {
-
-
+        sessionApi.extendSprintDuration(sprintId, extensionDays);
     }
+
+
 
 
 }

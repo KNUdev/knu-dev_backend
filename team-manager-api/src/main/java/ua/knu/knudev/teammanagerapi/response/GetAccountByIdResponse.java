@@ -2,9 +2,9 @@ package ua.knu.knudev.teammanagerapi.response;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Builder;
-import ua.knu.knudev.educationapi.dto.EducationProgramSummaryDto;
 import ua.knu.knudev.knudevcommon.constant.AccountTechnicalRole;
 import ua.knu.knudev.knudevcommon.constant.Expertise;
+import ua.knu.knudev.knudevcommon.dto.EducationProgramSummaryDto;
 import ua.knu.knudev.teammanagerapi.dto.ShortDepartmentDto;
 import ua.knu.knudev.teammanagerapi.dto.ShortProjectDto;
 import ua.knu.knudev.teammanagerapi.dto.ShortSpecialtyDto;
