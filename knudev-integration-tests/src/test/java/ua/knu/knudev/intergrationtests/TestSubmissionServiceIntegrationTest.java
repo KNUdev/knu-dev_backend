@@ -173,6 +173,8 @@ public class TestSubmissionServiceIntegrationTest {
                         .extraTimePerCorrectAnswer(100)
                         .build())
                 .testDurationInMinutes(1000)
+                .creatorId(UUID.randomUUID())
+                .label("Test Label")
                 .build();
 
         Set<QuestionAnswerVariant> firstQuestionAnswerVariants = Set.of(
