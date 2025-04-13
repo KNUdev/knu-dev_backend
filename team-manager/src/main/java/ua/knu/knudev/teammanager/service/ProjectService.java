@@ -139,6 +139,7 @@ public class ProjectService implements ProjectApi {
     }
 
     @Override
+    @Transactional
     public List<ShortProjectDto> getAllByAccountId(UUID accountId) {
         if (Objects.isNull(accountId)) {
             throw new ProjectException("Account id cannot be null!");

@@ -1,10 +1,7 @@
 package ua.knu.knudev.intergrationtests;
 
 import lombok.extern.slf4j.Slf4j;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Page;
@@ -265,23 +262,27 @@ public class ProjectServiceIntegrationTest {
                 .build();
     }
 
-    @Test
-    @DisplayName("Should successfully get project by id when provided valid id")
-    void should_SuccessfullyGetProjectById_When_ProvidedValidId() {
-        FullProjectDto response = projectService.getById(testProject.getId());
+    @Nested
+    @DisplayName("Get by id scenarios")
+    class GetByIdScenarios {
+        @Test
+        @DisplayName("Should successfully get project by id when provided valid id")
+        void should_SuccessfullyGetProjectById_When_ProvidedValidId() {
+            FullProjectDto response = projectService.getById(testProject.getId());
 
-        assertNotNull(response);
-        assertEquals(testProject.getName(), response.getName());
-        assertEquals(testProject.getTags(), response.getTags());
-        assertEquals(testProject.getArchitect().getId(), response.getArchitect().id());
-        assertEquals(testProject.getStatus(), response.getStatus());
-        assertEquals(testProject.getSubprojects().size(), response.getSubprojects().size());
-    }
+            assertNotNull(response);
+            assertEquals(testProject.getName(), response.getName());
+            assertEquals(testProject.getTags(), response.getTags());
+            assertEquals(testProject.getArchitect().getId(), response.getArchitect().id());
+            assertEquals(testProject.getStatus(), response.getStatus());
+            assertEquals(testProject.getSubprojects().size(), response.getSubprojects().size());
+        }
 
-    @Test
-    @DisplayName("Should throw exception when provided not valid project id")
-    void should_ThrowException_When_ProvidedNotValidProjectId() {
-        assertThrows(ProjectException.class, () -> projectService.getById(UUID.randomUUID()));
+        @Test
+        @DisplayName("Should throw exception when provided not valid project id")
+        void should_ThrowException_When_ProvidedNotValidProjectId() {
+            assertThrows(ProjectException.class, () -> projectService.getById(UUID.randomUUID()));
+        }
     }
 
     @Test
@@ -302,66 +303,98 @@ public class ProjectServiceIntegrationTest {
         assertEquals(testProject.getBanner(), firstResponseShortDto.getBanner());
     }
 
-    @Test
-    @DisplayName("Should successfully update project when provided valid data")
-    void should_SuccessfullyUpdateProject_When_ProvidedValidData() {
-        ProjectUpdateRequest request = createTestProjectUpdateRequest(testProject.getId());
-        FullProjectDto response = projectService.updateProject(request);
+    @Nested
+    @DisplayName("Update project scenarios")
+    class UpdateProjectScenarios {
+        @Test
+        @DisplayName("Should successfully update project when provided valid data")
+        void should_SuccessfullyUpdateProject_When_ProvidedValidData() {
+            ProjectUpdateRequest request = createTestProjectUpdateRequest(testProject.getId());
+            FullProjectDto response = projectService.updateProject(request);
 
-        assertNotNull(response);
-        assertEquals("Updated name", response.getName());
-        assertEquals("Updated banner", response.getBanner());
-        assertEquals("Updated description", response.getDescription().getEn());
-        assertEquals("Оновлений опис", response.getDescription().getUk());
-        assertEquals(ProjectStatus.MAINTENANCE, response.getStatus());
-        assertTrue(response.getTags().contains(ProjectTag.FINANCES));
-        assertNotNull(response.getSubprojects());
+            assertNotNull(response);
+            assertEquals("Updated name", response.getName());
+            assertEquals("Updated banner", response.getBanner());
+            assertEquals("Updated description", response.getDescription().getEn());
+            assertEquals("Оновлений опис", response.getDescription().getUk());
+            assertEquals(ProjectStatus.MAINTENANCE, response.getStatus());
+            assertTrue(response.getTags().contains(ProjectTag.FINANCES));
+            assertNotNull(response.getSubprojects());
+        }
+
+        @Test
+        @DisplayName("Should throw exception when provided not valid project id in update request")
+        void should_ThrowException_When_ProvidedNotValidProjectIdInUpdateRequest() {
+            ProjectUpdateRequest request = createTestProjectUpdateRequest(UUID.randomUUID());
+
+            assertThrows(ProjectException.class, () -> projectService.updateProject(request));
+        }
     }
 
-    @Test
-    @DisplayName("Should throw exception when provided not valid project id in update request")
-    void should_ThrowException_When_ProvidedNotValidProjectIdInUpdateRequest() {
-        ProjectUpdateRequest request = createTestProjectUpdateRequest(UUID.randomUUID());
+    @Nested
+    @DisplayName("Update subproject scenarios")
+    class UpdateSubprojectScenarios {
+        @Test
+        @DisplayName("Should successfully update subproject when provided valid data")
+        void should_SuccessfullyUpdateSubproject_When_ProvidedValidData() {
+            SubprojectUpdateRequest request = createTestSubprojectUpdateRequest(testProject.getSubprojects().iterator().next().getId());
 
-        assertThrows(ProjectException.class, () -> projectService.updateProject(request));
+            SubprojectDto response = projectService.updateSubproject(request);
+
+            assertNotNull(response);
+            assertNotNull(response.getId());
+            assertNotNull(response.getAllDevelopers());
+
+            List<UUID> accountIds = response.getAllDevelopers().stream()
+                    .map(SubprojectAccountDto::getSubprojectAccountIdDto)
+                    .map(SubprojectAccountIdDto::getAccountId)
+                    .toList();
+            List<UUID> subprojectIds = response.getAllDevelopers().stream()
+                    .map(SubprojectAccountDto::getSubprojectAccountIdDto)
+                    .map(SubprojectAccountIdDto::getSubprojectId)
+                    .toList();
+
+            assertTrue(accountIds.contains(request.subprojectAccountDtos().iterator().next().getSubprojectAccountIdDto().getAccountId()));
+            assertTrue(subprojectIds.contains(request.subprojectAccountDtos().iterator().next().getSubprojectAccountIdDto().getSubprojectId()));
+        }
+
+        @Test
+        @DisplayName("Should throw exception when provided not valid subproject id in update request")
+        void should_ThrowException_When_ProvidedNotValidSubprojectIdInUpdateRequest() {
+            SubprojectUpdateRequest request = createTestSubprojectUpdateRequest(UUID.randomUUID());
+
+            assertThrows(ProjectException.class, () -> projectService.updateSubproject(request));
+        }
     }
 
-    @Test
-    @DisplayName("Should successfully update subproject when provided valid data")
-    void should_SuccessfullyUpdateSubproject_When_ProvidedValidData() {
-        SubprojectUpdateRequest request = createTestSubprojectUpdateRequest(testProject.getSubprojects().iterator().next().getId());
+    @Nested
+    @DisplayName("Get all projects by account id scenarios")
+    class getAllProjectsByAccountIdScenarios {
+        @Test
+        @DisplayName("SShould throw exception when provided nullable account id")
+        void should_ThrowException_When_ProvidedNullableAccountId() {
+            assertThrows(ProjectException.class, () -> projectService.getAllByAccountId(null));
+        }
 
-        SubprojectDto response = projectService.updateSubproject(request);
+        @Test
+        @DisplayName("Should successfully get all projects by account id when provided valid data")
+        void should_SuccessfullyGetAllProjectsByAccountId_When_ProvidedValidData() {
+            for (int i = 0; i < 9; i++) {
+                createTestProjectAndSave();
+            }
 
-        assertNotNull(response);
-        assertNotNull(response.getId());
-        assertNotNull(response.getAllDevelopers());
+            List<ShortProjectDto> response = projectService.getAllByAccountId(testAccountProfile.getId());
+            ShortProjectDto firstResponseShortDto = response.get(0);
 
-        List<UUID> accountIds = response.getAllDevelopers().stream()
-                .map(SubprojectAccountDto::getSubprojectAccountIdDto)
-                .map(SubprojectAccountIdDto::getAccountId)
-                .toList();
-        List<UUID> subprojectIds = response.getAllDevelopers().stream()
-                .map(SubprojectAccountDto::getSubprojectAccountIdDto)
-                .map(SubprojectAccountIdDto::getSubprojectId)
-                .toList();
-
-        assertTrue(accountIds.contains(request.subprojectAccountDtos().iterator().next().getSubprojectAccountIdDto().getAccountId()));
-        assertTrue(subprojectIds.contains(request.subprojectAccountDtos().iterator().next().getSubprojectAccountIdDto().getSubprojectId()));
-    }
-
-    @Test
-    @DisplayName("Should throw exception when provided not valid subproject id in update request")
-    void should_ThrowException_When_ProvidedNotValidSubprojectIdInUpdateRequest() {
-        SubprojectUpdateRequest request = createTestSubprojectUpdateRequest(UUID.randomUUID());
-
-        assertThrows(ProjectException.class, () -> projectService.updateSubproject(request));
-    }
-
-    @Test
-    @DisplayName("SShould throw exception when provided nullable account id")
-    void should_ThrowException_When_ProvidedNullableAccountId() {
-        assertThrows(ProjectException.class, () -> projectService.getAllByAccountId(null));
+            assertNotNull(response);
+            assertEquals(testProject.getName(), firstResponseShortDto.getName());
+            assertEquals(testProject.getDescription().getUk(), firstResponseShortDto.getDescription().getUk());
+            assertEquals(testProject.getDescription().getEn(), firstResponseShortDto.getDescription().getEn());
+            assertEquals(testProject.getTags(), firstResponseShortDto.getTags());
+            assertEquals(testProject.getStatus(), firstResponseShortDto.getStatus());
+            assertEquals(testProject.getLastUpdatedAt(), firstResponseShortDto.getLastUpdate());
+            assertEquals(testProject.getBanner(), firstResponseShortDto.getBanner());
+        }
     }
 
 }
