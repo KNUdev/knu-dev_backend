@@ -57,4 +57,4 @@ Follow these steps to set up and run the project locally:
 If you have any questions or need further assistance, feel free to reach out:
 
 - **Maintainer**: DenysLnk
-- **Email**: [ds.leonenko@gmail.com]
+- **Email**: [ds.leonenko@gmail.com] 
