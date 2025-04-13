@@ -53,11 +53,12 @@ public class ProjectService implements ProjectApi {
 
     @Scheduled(cron = "0 30 3 */3 * *")
     @Transactional
-    public void createOrModifyProject() {
+    public List<FullProjectDto> createOrModifyProject() {
         List<GithubRepoDataDto> allGitHubRepos = gitHubManagementApi.getAllGithubRepos();
         Set<Project> projectsToCreate = new HashSet<>();
         allGitHubRepos.forEach(repo -> processRepository(repo, projectsToCreate));
-        saveProjects(projectsToCreate);
+        List<Project> projects = saveProjects(projectsToCreate);
+        return projectMapper.toDtos(projects);
     }
 
     @Override
@@ -91,6 +92,7 @@ public class ProjectService implements ProjectApi {
     }
 
     @Override
+    @Transactional
     public FullProjectDto updateProject(ProjectUpdateRequest request) {
         Project project = projectRepository.findById(request.id())
                 .orElseThrow(() -> new ProjectException("Project with id: " + request.id() + " not found!"));
@@ -108,7 +110,16 @@ public class ProjectService implements ProjectApi {
         }
 
         if (request.subprojects() != null) {
-            project.getSubprojects().addAll(subprojectMapper.toDomains(request.subprojects()));
+            Set<Subproject> subprojects = subprojectMapper.toDomains(request.subprojects());
+            subprojects.forEach(subproject -> {
+                subproject.associateReleasesWithSubproject(subproject.getReleases());
+                subproject.associateDevelopersWithSubproject(subproject.getAllDevelopers());
+                subproject.getReleases().forEach(release -> {
+                    release.associateReleaseWithParticipations(release.getReleaseDevelopers());
+                });
+            });
+
+            project.addSubprojects(subprojects);
         }
 
         project = projectRepository.save(project);
@@ -116,22 +127,24 @@ public class ProjectService implements ProjectApi {
     }
 
     @Override
+    @Transactional
     public SubprojectDto updateSubproject(SubprojectUpdateRequest request) {
         Subproject subproject = subprojectRepository.findById(request.id())
                 .orElseThrow(() -> new ProjectException("Subproject with id: " + request.id() + " not found!"));
 
-        subproject.getAllDevelopers().addAll(subprojectAccountMapper.toDomains(request.subprojectAccountDtos()));
+        subproject.addDevelopers(subprojectAccountMapper.toDomains(request.subprojectAccountDtos()));
 
         subproject = subprojectRepository.save(subproject);
         return subprojectMapper.toDto(subproject);
     }
 
     @Override
+    @Transactional
     public List<ShortProjectDto> getAllByAccountId(UUID accountId) {
         if (Objects.isNull(accountId)) {
             throw new ProjectException("Account id cannot be null!");
         }
-        List<Subproject> subprojects = subprojectRepository.retrieveAllSubprojectsByDeveloperIn(accountId);
+        List<Subproject> subprojects = subprojectRepository.findAllByAccountId(accountId);
 
         return subprojects.stream()
                 .map(Subproject::getProject)
@@ -221,12 +234,12 @@ public class ProjectService implements ProjectApi {
 
         Set<SubprojectAccount> existingAccounts = modifiedSubproject.getAllDevelopers();
         List<UUID> existingAccountsIds = existingAccounts.stream()
-                .map(SubprojectAccount::getId)
-                .map(SubprojectAccountId::getAccountId)
+                .map(SubprojectAccount::getAccountProfile)
+                .map(AccountProfile::getId)
                 .toList();
 
         Set<SubprojectAccount> newAccounts = subprojectAccounts.stream()
-                .filter(account2Create -> !existingAccountsIds.contains(account2Create.getId().getAccountId()))
+                .filter(account2Create -> !existingAccountsIds.contains(account2Create.getAccountProfile().getId()))
                 .collect(Collectors.toSet());
 
         if (!newAccounts.isEmpty()) {
@@ -254,8 +267,8 @@ public class ProjectService implements ProjectApi {
         projectsToCreate.add(newProject);
     }
 
-    public void saveProjects(Set<Project> projectsToCreate) {
-        projectRepository.saveAll(projectsToCreate);
+    public List<Project> saveProjects(Set<Project> projectsToCreate) {
+        return projectRepository.saveAll(projectsToCreate);
     }
 
     private SubprojectAccount createSubprojectAccount(String contributor, String repoName, Subproject subproject) {

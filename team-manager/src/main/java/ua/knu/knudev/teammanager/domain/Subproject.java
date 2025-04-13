@@ -39,4 +39,23 @@ public class Subproject {
 
     @OneToMany(mappedBy = "subproject", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<SubprojectAccount> allDevelopers = new HashSet<>();
+
+    public void associateDevelopersWithSubproject(Set<SubprojectAccount> subprojectAccounts) {
+        for (SubprojectAccount subprojectAccount : subprojectAccounts) {
+            subprojectAccount.setSubproject(this);
+        }
+    }
+
+    public void associateReleasesWithSubproject(Set<Release> releases) {
+        for (Release release : releases) {
+            release.setSubproject(this);
+        }
+    }
+
+    public void addDevelopers(Set<SubprojectAccount> subprojectAccounts) {
+        for (SubprojectAccount subprojectAccount : subprojectAccounts) {
+            this.allDevelopers.add(subprojectAccount);
+            subprojectAccount.setSubproject(this);
+        }
+    }
 }
