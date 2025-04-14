@@ -71,13 +71,14 @@ public class RolePromotionService implements RolePromotionApi {
         RolePromotionCheckResponse rolePromotionCheckResponse = checkOnRolePromotionAbility(accountId);
         if (rolePromotionCheckResponse.canPromote()) {
             AccountProfile accountProfile = accountProfileService.getDomainById(accountId);
-            AccountTechnicalRole newTechnicalRole = accountProfile.getTechnicalRole().getNextRole();
+            AccountTechnicalRole originalTechnicalRole = accountProfile.getTechnicalRole();
+            AccountTechnicalRole newTechnicalRole = originalTechnicalRole.getNextRole();
             if (newTechnicalRole == null) {
                 throw new SubprojectAccountException("No higher role available for promotion!");
             }
             accountProfile.setTechnicalRole(newTechnicalRole);
             accountProfileRepository.save(accountProfile);
-            log.info("Promoting user {} from {} to {}", accountId, accountProfile.getTechnicalRole(), newTechnicalRole);
+            log.info("Promoting user {} from {} to {}", accountId, originalTechnicalRole, newTechnicalRole);
             return accountProfileMapper.toDto(accountProfile);
         } else {
             throw new SubprojectAccountException("You are not eligible for promotion!");
