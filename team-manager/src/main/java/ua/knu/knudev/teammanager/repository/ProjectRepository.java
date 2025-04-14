@@ -10,4 +10,8 @@ public interface ProjectRepository extends JpaRepository<Project, UUID> {
 
     Optional<Project> findProjectByName(String nameEn);
 
+    Boolean existsProjectByArchitectId(UUID architectId);
+
+    Boolean existsProjectBySupervisorId(UUID supervisorId);
+
 }

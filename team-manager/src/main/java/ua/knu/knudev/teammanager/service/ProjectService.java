@@ -159,6 +159,14 @@ public class ProjectService implements ProjectApi {
                 .collect(Collectors.toList());
     }
 
+    protected Boolean existsBySupervisorId(UUID supervisorId) {
+        return projectRepository.existsProjectBySupervisorId(supervisorId);
+    }
+
+    protected Boolean existsByArchitectId(UUID architectId) {
+        return projectRepository.existsProjectByArchitectId(architectId);
+    }
+
     private void processRepository(GithubRepoDataDto repo, Set<Project> projectsToCreate) {
         String resourceUrl = repo.resourceUrl();
         List<String> contributors = repo.contributors();

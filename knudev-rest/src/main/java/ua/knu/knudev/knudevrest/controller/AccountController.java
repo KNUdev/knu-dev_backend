@@ -16,8 +16,11 @@ import org.springframework.web.multipart.MultipartFile;
 import ua.knu.knudev.knudevsecurityapi.request.AccountCreationRequest;
 import ua.knu.knudev.knudevsecurityapi.response.ErrorResponse;
 import ua.knu.knudev.teammanagerapi.api.AccountProfileApi;
+import ua.knu.knudev.teammanagerapi.api.RolePromotionApi;
+import ua.knu.knudev.teammanagerapi.dto.AccountProfileDto;
 import ua.knu.knudev.teammanagerapi.response.AccountRegistrationResponse;
 import ua.knu.knudev.teammanagerapi.response.GetAccountByIdResponse;
+import ua.knu.knudev.teammanagerapi.response.RolePromotionCheckResponse;
 
 import java.util.UUID;
 
@@ -27,6 +30,7 @@ import java.util.UUID;
 public class AccountController {
 
     private final AccountProfileApi accountProfileApi;
+    private final RolePromotionApi rolePromotionApi;
 
     @Operation(
             summary = "Register a new account",
@@ -87,5 +91,44 @@ public class AccountController {
     @DeleteMapping("/{accountId}/banner/remove")
     public void removeBanner(@PathVariable UUID accountId) {
         accountProfileApi.removeBanner(accountId);
+    }
+
+
+    @Operation(
+            summary = "Check if the account is eligible for role promotion",
+            description = "Returns detailed promotion checklist and eligibility status for the given account",
+            responses = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "Promotion eligibility checked successfully",
+                            content = @Content(schema = @Schema(implementation = RolePromotionCheckResponse.class))
+                    ),
+                    @ApiResponse(responseCode = "404", description = "Account not found"),
+                    @ApiResponse(responseCode = "500", description = "Internal server error")
+            }
+    )
+    @GetMapping("/{accountId}/promotion/check")
+    public RolePromotionCheckResponse checkOnRolePromotionAbility(@PathVariable UUID accountId) {
+        return rolePromotionApi.checkOnRolePromotionAbility(accountId);
+    }
+
+    @Operation(
+            summary = "Promote the account to the next technical role",
+            description = "Performs role promotion if the account meets the required conditions. " +
+                    "Returns updated account profile.",
+            responses = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "Account successfully promoted",
+                            content = @Content(schema = @Schema(implementation = AccountProfileDto.class))
+                    ),
+                    @ApiResponse(responseCode = "400", description = "Promotion conditions not met"),
+                    @ApiResponse(responseCode = "404", description = "Account not found"),
+                    @ApiResponse(responseCode = "500", description = "Internal server error")
+            }
+    )
+    @PatchMapping("/{accountId}/promotion")
+    public AccountProfileDto promote(@PathVariable UUID accountId) {
+        return rolePromotionApi.promoteAccountProfileRole(accountId);
     }
 }

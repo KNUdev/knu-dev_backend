@@ -45,6 +45,16 @@ public enum AccountTechnicalRole implements AccountRole {
         throw new IllegalArgumentException("No AccountTechnicalRole found for id: " + id);
     }
 
+    public AccountTechnicalRole getNextRole() {
+        return switch (this) {
+            case INTERN -> DEVELOPER;
+            case DEVELOPER -> PREMASTER;
+            case PREMASTER -> MASTER;
+            case MASTER -> TECHLEAD;
+            case TECHLEAD -> null;
+        };
+    }
+
     @Override
     public String getDisplayName() {
         return displayName;
