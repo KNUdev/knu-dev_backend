@@ -17,6 +17,7 @@ import ua.knu.knudev.teammanagerapi.api.RolePromotionApi;
 import ua.knu.knudev.teammanagerapi.dto.AccountProfileDto;
 import ua.knu.knudev.teammanagerapi.dto.RolePromotionConditions;
 import ua.knu.knudev.teammanagerapi.dto.ShortProjectDto;
+import ua.knu.knudev.teammanagerapi.exception.AccountException;
 import ua.knu.knudev.teammanagerapi.exception.SubprojectAccountException;
 import ua.knu.knudev.teammanagerapi.response.RolePromotionCheckResponse;
 
@@ -54,15 +55,11 @@ public class RolePromotionService implements RolePromotionApi {
             return RolePromotionCheckResponse.builder()
                     .checkList(checkList)
                     .canPromote(canPromote)
-                    .message(canPromote ? "You are eligible for promotion to " +
-                            accountProfile.getTechnicalRole().getNextRole() + "!"
-                            : "You are not eligible for promotion!")
                     .build();
         }
         return RolePromotionCheckResponse.builder()
                 .checkList(Map.of())
                 .canPromote(false)
-                .message("You are not eligible for promotion!")
                 .build();
     }
 
@@ -72,12 +69,13 @@ public class RolePromotionService implements RolePromotionApi {
         if (rolePromotionCheckResponse.canPromote()) {
             AccountProfile accountProfile = accountProfileService.getDomainById(accountId);
             AccountTechnicalRole originalTechnicalRole = accountProfile.getTechnicalRole();
-            AccountTechnicalRole newTechnicalRole = originalTechnicalRole.getNextRole();
-            if (newTechnicalRole == null) {
-                throw new SubprojectAccountException("No higher role available for promotion!");
-            }
+
+            AccountTechnicalRole newTechnicalRole = AccountTechnicalRole.getNextRole(originalTechnicalRole)
+                    .orElseThrow(() -> new AccountException("Account technical role can not be promoted!"));
+
             accountProfile.setTechnicalRole(newTechnicalRole);
             accountProfileRepository.save(accountProfile);
+
             log.info("Promoting user {} from {} to {}", accountId, originalTechnicalRole, newTechnicalRole);
             return accountProfileMapper.toDto(accountProfile);
         } else {

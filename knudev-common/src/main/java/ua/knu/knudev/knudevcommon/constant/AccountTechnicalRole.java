@@ -5,28 +5,31 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 
+import java.util.Optional;
+
 @Schema(description = "Enum that represent role`s types")
 @RequiredArgsConstructor
 @Getter
 public enum AccountTechnicalRole implements AccountRole {
     //Todo add role, which represent that account can do nothing (not in campus\precampus)
     @Schema(description = "Role for users who is not in campus")
-    INTERN("Intern", "INTERN ID"),
+    INTERN("Intern", "INTERN ID", 1),
 
     @Schema(description = "Role for users who has passed pre-campus tests and can work in campus")
-    DEVELOPER("Developer", "DEVELOPER ID"),
+    DEVELOPER("Developer", "DEVELOPER ID", 2),
 
     @Schema(description = "Role for users who can lead developers")
-    PREMASTER("Premaster", "PREMASTER ID"),
+    PREMASTER("Premaster", "PREMASTER ID", 3),
 
     @Schema(description = "Role for users who can lead projects and can be mentors in pre-campus")
-    MASTER("Master", "MASTER ID"),
+    MASTER("Master", "MASTER ID", 4),
 
     @Schema(description = "Role for users who can lead projects and has almost full access to organization resources")
-    TECHLEAD("Technical Lead", "TECHLEAD ID");
+    TECHLEAD("Technical Lead", "TECHLEAD ID", 5);
 
     private final String displayName;
     private final String roleId;
+    private final Integer index;
 
     public static AccountTechnicalRole getFromString(String stringAccountTechnicalRole) {
         //todo checks
@@ -45,14 +48,16 @@ public enum AccountTechnicalRole implements AccountRole {
         throw new IllegalArgumentException("No AccountTechnicalRole found for id: " + id);
     }
 
-    public AccountTechnicalRole getNextRole() {
-        return switch (this) {
-            case INTERN -> DEVELOPER;
-            case DEVELOPER -> PREMASTER;
-            case PREMASTER -> MASTER;
-            case MASTER -> TECHLEAD;
-            case TECHLEAD -> null;
-        };
+    public static Optional<AccountTechnicalRole> getNextRole(AccountTechnicalRole role) {
+        if (role == null) {
+            throw new IllegalArgumentException("AccountTechnicalRole is null");
+        }
+        for (AccountTechnicalRole accountTechnicalRole : values()) {
+            if (accountTechnicalRole.index == role.index + 1) {
+                return Optional.of(accountTechnicalRole);
+            }
+        }
+        return Optional.empty();
     }
 
     @Override

@@ -1,11 +1,13 @@
 package ua.knu.knudev.teammanager.service.promotionProcessor;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 import ua.knu.knudev.knudevcommon.constant.RolePromotionCondition;
 import ua.knu.knudev.teammanagerapi.dto.RolePromotionConditions;
 
 import java.util.Map;
 
+@Component
 public class MasterToTechLeadRequirement implements PromotionRequirement {
 
     @Value("${application.promotion.conditions.tech-lead.was-a-supervisor}")
@@ -18,7 +20,7 @@ public class MasterToTechLeadRequirement implements PromotionRequirement {
     @Override
     public Map<String, Boolean> getCheckListMap(RolePromotionConditions conditions) {
         return Map.of(
-                RolePromotionCondition.COMMITS_AS_MASTER.getDisplayBody(),
+                RolePromotionCondition.COMMITS_AS_MASTER.getDisplayBody() + commitsInCampusAmount,
                 conditions.commitsInCampusAmount() >= commitsInCampusAmount,
                 RolePromotionCondition.WAS_A_SUPERVISOR.getDisplayBody(),
                 conditions.wasASupervisor() == wasASupervisor,

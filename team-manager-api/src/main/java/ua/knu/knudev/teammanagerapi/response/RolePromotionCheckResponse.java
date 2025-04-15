@@ -7,7 +7,6 @@ import java.util.Map;
 @Builder
 public record RolePromotionCheckResponse(
         Boolean canPromote,
-        Map<String, Boolean> checkList,
-        String message
+        Map<String, Boolean> checkList
 ) {
 }
