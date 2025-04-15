@@ -9,9 +9,9 @@ import java.util.UUID;
 
 @Data
 public class SprintDto {
-    private UUID sprintId;           // Unique identifier (generated for preview)
-    private int orderIndex;          // Global order index
-    private SprintType sprintType;       // "TOPIC", "MODULE_FINAL", "SECTION_FINAL", "PROGRAM_FINAL"
+    private UUID sprintId;
+    private int orderIndex;
+    private SprintType sprintType;
     private int durationInDays;
     private MultiLanguageFieldDto name;
     private MultiLanguageFieldDto description;

@@ -13,4 +13,6 @@ public interface SessionApi {
     void adjustSprintsDurations(List<SprintAdjustmentRequest> adjustments, UUID sessionId);
 
     void extendSprintDuration(UUID sprintId, Integer extensionDays);
+
+//    List<>
 }
