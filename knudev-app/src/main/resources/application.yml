@@ -87,22 +87,20 @@ application:
         maximum-size-in-kilobytes: 5120
   assignments:
     activation-expiry-in-days: 7
-  recruitment:
-    requirements:
-      developer:
-        pre-campus-projects-amount: 1
-        pre-campus-duration: 6
-      pre-master-developer:
-        tech-lead-score: 7
-        developing-time-in-campus: 9
-      master-developer:
-        duration-in-months-as-pre-master: 12
-        managed-students-in-pre-campus-amount: 2
-        pre-master-projects-amount: 1
-        tech-lead-score: 7
+  promotion:
+#    todo add more conditions
+    conditions:
+      pre-master:
+        participation-in-projects: 1
+        commits-amount-in-master: 20
+      master:
+        participation-in-projects: 2
+        commits-amount-in-master: 40
       tech-lead:
-        duration-in-months-as-master: 6
-        tech-lead-score: 8
+        was-a-supervisor: true
+        was-an-architect: true
+        commits-amount-in-master: 60
+
   session:
     sprints:
       defaultDurationInDays: 4
