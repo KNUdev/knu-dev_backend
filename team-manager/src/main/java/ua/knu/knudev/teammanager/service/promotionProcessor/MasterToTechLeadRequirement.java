@@ -20,11 +20,11 @@ public class MasterToTechLeadRequirement implements PromotionRequirement {
     @Override
     public Map<String, Boolean> getCheckListMap(RolePromotionConditions conditions) {
         return Map.of(
-                RolePromotionCondition.COMMITS_AS_MASTER.getDisplayBody() + commitsInCampusAmount,
+                RolePromotionCondition.COMMITS_COUNT_KEY_CONSTANT + " " + commitsInCampusAmount,
                 conditions.commitsInCampusAmount() >= commitsInCampusAmount,
-                RolePromotionCondition.WAS_A_SUPERVISOR.getDisplayBody(),
+                RolePromotionCondition.WAS_A_SUPERVISOR_KEY_CONSTANT.toString(),
                 conditions.wasASupervisor() == wasASupervisor,
-                RolePromotionCondition.WAS_AN_ARCHITECT.getDisplayBody(),
+                RolePromotionCondition.WAS_AN_ARCHITECT_KEY_CONSTANT.toString(),
                 conditions.wasAnArchitect() == wasAnArchitect
         );
     }

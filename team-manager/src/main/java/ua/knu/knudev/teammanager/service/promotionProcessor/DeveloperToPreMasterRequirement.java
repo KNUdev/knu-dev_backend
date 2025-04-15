@@ -18,9 +18,9 @@ public class DeveloperToPreMasterRequirement implements PromotionRequirement {
     @Override
     public Map<String, Boolean> getCheckListMap(RolePromotionConditions conditions) {
         return Map.of(
-                RolePromotionCondition.PROJECT_AS_DEVELOPER.getDisplayBody() + (projectsInCampusAmount - 1),
+                RolePromotionCondition.PROJECTS_COUNT_KEY_CONSTANT + " " + (projectsInCampusAmount - 1),
                 conditions.projectsInCampusAmount() >= projectsInCampusAmount,
-                RolePromotionCondition.COMMITS_AS_DEVELOPER.getDisplayBody() + commitsInCampusAmount,
+                RolePromotionCondition.COMMITS_COUNT_KEY_CONSTANT + " " + commitsInCampusAmount,
                 conditions.commitsInCampusAmount() >= commitsInCampusAmount
         );
     }
