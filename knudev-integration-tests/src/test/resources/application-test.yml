@@ -70,5 +70,5 @@ application:
 
 github:
   api:
-    access-token: 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
+    access-token: test
     organization-name: KNUdev
