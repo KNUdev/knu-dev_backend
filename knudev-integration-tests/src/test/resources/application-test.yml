@@ -70,5 +70,5 @@ application:
 
 github:
   api:
-    access-token: fjsofirjfirjmfirmjg
+    access-token: TEST
     organization-name: KNUdev
