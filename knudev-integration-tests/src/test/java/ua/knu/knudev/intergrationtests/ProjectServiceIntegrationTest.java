@@ -56,6 +56,8 @@ public class ProjectServiceIntegrationTest {
     @Autowired
     private SpecialtyRepository specialtyRepository;
     @Autowired
+    private SubprojectRepository subprojectRepository;
+    @Autowired
     private AccountProfileMapper accountProfileMapper;
     @Autowired
     private SubprojectMapper subprojectMapper;
@@ -66,8 +68,6 @@ public class ProjectServiceIntegrationTest {
     private Department testDepartment;
     private Specialty testSpecialty;
     private AccountProfile testAccountProfile;
-    @Autowired
-    private SubprojectRepository subprojectRepository;
 
     @BeforeEach
     public void setUp() {
