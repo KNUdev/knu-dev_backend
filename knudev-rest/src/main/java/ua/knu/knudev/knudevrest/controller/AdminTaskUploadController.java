@@ -75,7 +75,13 @@ public class AdminTaskUploadController {
                     name = "Multipart file",
                     description = "File with task for user",
                     in = ParameterIn.HEADER
-            ) MultipartFile taskFile) {
-        return taskUploadAPI.uploadTaskForRole(accountRole, taskFile);
+            ) MultipartFile taskFile,
+            @RequestParam("accountEmail") @NotNull
+            @Parameter(
+                    name = "Account email",
+                    description = "Email of the account which was uploaded task",
+                    in = ParameterIn.HEADER
+            ) String accountEmail) {
+        return taskUploadAPI.uploadTaskForRole(accountRole, taskFile, accountEmail);
     }
 }

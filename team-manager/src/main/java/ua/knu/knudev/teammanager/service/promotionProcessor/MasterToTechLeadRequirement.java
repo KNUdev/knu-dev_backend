@@ -16,6 +16,8 @@ public class MasterToTechLeadRequirement implements PromotionRequirement {
     private Boolean wasAnArchitect;
     @Value("${application.promotion.conditions.tech-lead.commits-amount-in-master}")
     private Integer commitsInCampusAmount;
+    @Value("${application.promotion.conditions.tech-lead.created-tasks-in-campus-amount}")
+    private Integer createdTasksInCampusAmount;
 
     @Override
     public Map<String, Boolean> getCheckListMap(RolePromotionConditions conditions) {
@@ -25,7 +27,9 @@ public class MasterToTechLeadRequirement implements PromotionRequirement {
                 RolePromotionCondition.WAS_A_SUPERVISOR_KEY_CONSTANT.toString(),
                 conditions.wasASupervisor() == wasASupervisor,
                 RolePromotionCondition.WAS_AN_ARCHITECT_KEY_CONSTANT.toString(),
-                conditions.wasAnArchitect() == wasAnArchitect
+                conditions.wasAnArchitect() == wasAnArchitect,
+                RolePromotionCondition.CREATED_TASKS_IN_CAMPUS_AMOUNT_KEY_CONSTANT + " " + createdTasksInCampusAmount,
+                conditions.createdTasksInCampusAmount() >= createdTasksInCampusAmount
         );
     }
 }

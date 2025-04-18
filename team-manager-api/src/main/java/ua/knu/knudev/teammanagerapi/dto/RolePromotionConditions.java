@@ -6,7 +6,8 @@ import lombok.Builder;
 public record RolePromotionConditions(
         Integer projectsInCampusAmount,
         Integer commitsInCampusAmount,
-//        todo add more fields
+        Integer createdTasksInCampusAmount,
+        Integer mentoredSessionsAmount,
         Boolean wasASupervisor,
         Boolean wasAnArchitect
 ) {

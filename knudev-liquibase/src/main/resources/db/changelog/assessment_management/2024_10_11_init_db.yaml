@@ -35,6 +35,11 @@ databaseChangeLog:
                   type: varchar(20)
                   constraints:
                     nullable: false
+              - column:
+                  name: creator_account_email
+                  type: varchar(255)
+                  constraints:
+                    nullable: false
         - createIndex:
             indexName: idx_target_technical_role
             tableName: role_promotion_task
