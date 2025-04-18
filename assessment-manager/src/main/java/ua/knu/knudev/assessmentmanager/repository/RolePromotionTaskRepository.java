@@ -9,6 +9,7 @@ import ua.knu.knudev.assessmentmanager.domain.RolePromotionTask;
 import ua.knu.knudev.knudevcommon.constant.AccountTechnicalRole;
 
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 
 public interface RolePromotionTaskRepository extends JpaRepository<RolePromotionTask, UUID> {
@@ -19,4 +20,6 @@ public interface RolePromotionTaskRepository extends JpaRepository<RolePromotion
     Optional<RolePromotionTask> findRandomNotAssignedTaskByTechnicalRole(@Param("role") AccountTechnicalRole role);
 
     boolean existsByTaskFilename(String taskFilename);
+
+    Optional<Set<RolePromotionTask>> getAllByCreatorAccountEmail(String creatorAccountEmail);
 }

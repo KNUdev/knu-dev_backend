@@ -20,8 +20,10 @@ import ua.knu.knudev.assessmentmanagerapi.response.TaskAssignmentResponse;
 import ua.knu.knudev.intergrationtests.config.IntegrationTestsConfig;
 import ua.knu.knudev.knudevcommon.constant.AccountTechnicalRole;
 import ua.knu.knudev.knudevcommon.constant.Expertise;
+import ua.knu.knudev.knudevcommon.constant.KNUdevUnit;
 import ua.knu.knudev.knudevsecurity.repository.AccountAuthRepository;
 import ua.knu.knudev.knudevsecurityapi.request.AccountCreationRequest;
+import ua.knu.knudev.teammanager.domain.AccountProfile;
 import ua.knu.knudev.teammanager.domain.Department;
 import ua.knu.knudev.teammanager.domain.Specialty;
 import ua.knu.knudev.teammanager.domain.embeddable.MultiLanguageField;
@@ -34,6 +36,7 @@ import ua.knu.knudev.teammanagerapi.response.AccountRegistrationResponse;
 
 import java.time.LocalDateTime;
 import java.util.Optional;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -71,17 +74,19 @@ public class TaskAssignmentServiceIntegrationTest {
     private Department testDepartment;
     private Specialty testSpecialty;
     private String accountEmail;
+    private AccountProfile testAccountProfile;
 
     @BeforeEach
     public void setup() {
         testDepartment = createTestDepartmentWithSpecialties();
         testSpecialty = testDepartment.getSpecialties().iterator().next();
+        testAccountProfile = createAndSaveTestAccountProfile();
 
         AccountCreationRequest validAccountCreationReq = getValidAccountCreationReq();
         AccountRegistrationResponse register = accountProfileService.register(validAccountCreationReq);
         accountEmail = register.accountProfile().email();
 
-        taskUploadService.uploadTaskForRole(AccountTechnicalRole.INTERN.name(), getPdfFile());
+        taskUploadService.uploadTaskForRole(AccountTechnicalRole.INTERN.name(), getPdfFile(), testAccountProfile.getEmail());
     }
 
     @AfterEach
@@ -107,6 +112,29 @@ public class TaskAssignmentServiceIntegrationTest {
         department.addSpecialty(s3);
 
         return departmentRepository.save(department);
+    }
+
+    private AccountProfile createAndSaveTestAccountProfile() {
+        AccountProfile accountProfile = AccountProfile.builder()
+                .id(UUID.randomUUID())
+                .firstName("FirstName")
+                .lastName("LastName")
+                .middleName("MiddleName")
+                .email("email@email.com")
+                .avatarFilename(getMockMultipartFile().getName())
+                .bannerFilename("bannerFilename")
+                .technicalRole(AccountTechnicalRole.DEVELOPER)
+                .expertise(Expertise.BACKEND)
+                .registrationDate(LocalDateTime.of(2021, 1, 1, 1, 1))
+                .lastRoleUpdateDate(LocalDateTime.of(2022, 1, 1, 1, 2))
+                .yearOfStudyOnRegistration(2)
+                .unit(KNUdevUnit.CAMPUS)
+                .githubAccountUsername("DenysLnk")
+                .department(testDepartment)
+                .specialty(testSpecialty)
+                .build();
+
+        return accountProfileRepository.save(accountProfile);
     }
 
     private AccountCreationRequest getValidAccountCreationReq() {
@@ -244,12 +272,27 @@ public class TaskAssignmentServiceIntegrationTest {
         @DisplayName("Should not assign task if account technical role does not match any task")
         public void should_NotAssignTask_When_ThereIsNoMatchingTaskForTechnicalRole() {
             taskRepository.deleteAll();
-            taskUploadService.uploadTaskForRole(AccountTechnicalRole.DEVELOPER.name(), getPdfFile());
+            taskUploadService.uploadTaskForRole(AccountTechnicalRole.DEVELOPER.name(), getPdfFile(), testAccountProfile.getEmail());
 
             assertThrows(
                     TaskException.class,
                     () -> taskAssignmentService.assignTaskToAccount(accountEmail)
             );
         }
+
+        @Test
+        @DisplayName("Should not upload task if account email is not valid")
+        public void should_NotAssignTask_When_AccountEmailIsNotValid() {
+            String invalidEmail = "invalid-email";
+            taskRepository.deleteAll();
+            assertThrows(
+                    AccountException.class, () -> taskUploadService.uploadTaskForRole(
+                            AccountTechnicalRole.DEVELOPER.name(),
+                            getPdfFile(),
+                            invalidEmail
+                    )
+            );
+        }
+
     }
 }

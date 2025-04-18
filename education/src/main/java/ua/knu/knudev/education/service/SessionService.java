@@ -9,9 +9,11 @@ import org.springframework.stereotype.Service;
 import ua.knu.knudev.education.domain.EducationProgram;
 import ua.knu.knudev.education.domain.session.EducationSession;
 import ua.knu.knudev.education.domain.session.Sprint;
+import ua.knu.knudev.education.mapper.SessionMapper;
 import ua.knu.knudev.education.mapper.SprintMapper;
 import ua.knu.knudev.education.repository.EducationSessionRepository;
 import ua.knu.knudev.educationapi.api.SessionApi;
+import ua.knu.knudev.educationapi.dto.session.SessionFullDto;
 import ua.knu.knudev.educationapi.dto.session.SessionSprintPlanDto;
 import ua.knu.knudev.educationapi.dto.session.SprintSummaryDto;
 import ua.knu.knudev.educationapi.enums.SessionStatus;
@@ -35,19 +37,22 @@ public class SessionService implements SessionApi {
     private final TaskScheduler taskScheduler;
     private final SprintChainService sprintChainService;
     private final SprintMapper sprintMapper;
+    private final SessionMapper sessionMapper;
 
     public SessionService(ProgramService programService,
                           SprintService sprintService,
                           EducationSessionRepository sessionRepository,
                           @Qualifier(value = "educationTaskScheduler") TaskScheduler taskScheduler,
                           SprintChainService sprintChainService,
-                          SprintMapper sprintMapper) {
+                          SprintMapper sprintMapper,
+                          SessionMapper sessionMapper) {
         this.programService = programService;
         this.sprintService = sprintService;
         this.sessionRepository = sessionRepository;
         this.taskScheduler = taskScheduler;
         this.sprintChainService = sprintChainService;
         this.sprintMapper = sprintMapper;
+        this.sessionMapper = sessionMapper;
     }
 
     @Override
@@ -100,6 +105,17 @@ public class SessionService implements SessionApi {
     @Override
     public void extendSprintDuration(UUID sprintId, Integer extensionDays) {
         sprintChainService.extendCurrentSprintDuration(sprintId, extensionDays);
+    }
+
+    @Override
+    public List<SessionFullDto> getAllSessionsByMentorId(UUID mentorId) {
+        List<EducationSession> educationSessions = sessionRepository.findAllByMentorId(mentorId).orElseThrow(
+                () -> new EducationSessionException(
+                        "Sessions with mentor id " + mentorId + " does not exist",
+                        HttpStatus.BAD_REQUEST
+                )
+        );
+        return sessionMapper.toDtos(educationSessions);
     }
 
     private void startSession(UUID scheduledSessionId) {

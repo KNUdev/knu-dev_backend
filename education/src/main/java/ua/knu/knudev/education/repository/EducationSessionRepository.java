@@ -8,6 +8,8 @@ import ua.knu.knudev.education.domain.session.EducationSession;
 import ua.knu.knudev.educationapi.enums.SessionStatus;
 
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 public interface EducationSessionRepository extends JpaRepository<EducationSession, UUID> {
@@ -18,4 +20,7 @@ public interface EducationSessionRepository extends JpaRepository<EducationSessi
                                     @Param(value = "endDate") LocalDateTime estimatedEndDate);
 
     boolean existsByIdAndStatus(UUID id, SessionStatus status);
+
+    @Query("SELECT s FROM EducationSession s WHERE :mentorId MEMBER OF s.mentorIds")
+    Optional<List<EducationSession>> findAllByMentorId(UUID mentorId);
 }
