@@ -3,6 +3,8 @@ package ua.knu.knudev.teammanager.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import ua.knu.knudev.assessmentmanagerapi.api.RolePromotionTaskApi;
+import ua.knu.knudev.educationapi.api.SessionApi;
 import ua.knu.knudev.knudevcommon.constant.AccountTechnicalRole;
 import ua.knu.knudev.teammanager.domain.AccountProfile;
 import ua.knu.knudev.teammanager.domain.SubprojectAccount;
@@ -36,6 +38,8 @@ public class RolePromotionService implements RolePromotionApi {
     private final SubprojectAccountRepository subprojectAccountRepository;
     private final AccountProfileRepository accountProfileRepository;
     private final AccountProfileMapper accountProfileMapper;
+    private final RolePromotionTaskApi rolePromotionTaskApi;
+    private final SessionApi sessionApi;
 
     private final Map<AccountTechnicalRole, PromotionRequirement> requirementMap = Map.of(
             AccountTechnicalRole.DEVELOPER, new DeveloperToPreMasterRequirement(),
@@ -86,6 +90,10 @@ public class RolePromotionService implements RolePromotionApi {
     private RolePromotionConditions getRolePromotionConditions(UUID accountId) {
         List<ShortProjectDto> authorsProjects = projectService.getAllByAccountId(accountId);
 
+        AccountProfile accountProfile = accountProfileRepository.findById(accountId).orElseThrow(
+                () -> new AccountException("Account with id: " + accountId + " not found!")
+        );
+
         Set<SubprojectAccount> subprojectAccounts = subprojectAccountRepository.findAllById_AccountId(accountId)
                 .orElseThrow(() -> new SubprojectAccountException(
                         "Subproject account with id: " + accountId + " not found!")
@@ -95,9 +103,14 @@ public class RolePromotionService implements RolePromotionApi {
                 .mapToInt(SubprojectAccount::getTotalCommits)
                 .sum();
 
+        int createdTasksInPreCampus = rolePromotionTaskApi.getAllTasksByAccountEmail(accountProfile.getEmail()).size();
+        int mentoredSessionsAmount = sessionApi.getAllSessionsByMentorId(accountId).size();
+
         return RolePromotionConditions.builder()
                 .projectsInCampusAmount(authorsProjects.isEmpty() ? 0 : authorsProjects.size())
                 .commitsInCampusAmount(commitsAmountByAuthor)
+                .createdTasksInCampusAmount(createdTasksInPreCampus)
+                .mentoredSessionsAmount(mentoredSessionsAmount)
                 .wasASupervisor(projectService.existsBySupervisorId(accountId))
                 .wasAnArchitect(projectService.existsByArchitectId(accountId))
                 .build();

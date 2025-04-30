@@ -25,4 +25,7 @@ public class RolePromotionTask extends BaseTask {
     @Enumerated(EnumType.STRING)
     @Column(name = "target_technical_role", nullable = false)
     private AccountTechnicalRole targetTechnicalRole;
+
+    @Column(name = "creator_account_email", nullable = false)
+    private String creatorAccountEmail;
 }
