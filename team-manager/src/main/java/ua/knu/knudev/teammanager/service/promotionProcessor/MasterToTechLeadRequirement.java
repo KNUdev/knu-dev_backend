@@ -1,35 +1,33 @@
 package ua.knu.knudev.teammanager.service.promotionProcessor;
 
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-import ua.knu.knudev.knudevcommon.constant.RolePromotionCondition;
-import ua.knu.knudev.teammanagerapi.dto.RolePromotionConditions;
+import ua.knu.knudev.knudevcommon.constant.RolePromotionConditionSignature;
+import ua.knu.knudev.teammanagerapi.dto.AccountRolePromotionConditions;
+import ua.knu.knudev.teammanagerapi.dto.RolePromotionConditionDto;
 
 import java.util.Map;
 
 @Component
 public class MasterToTechLeadRequirement implements PromotionRequirement {
 
-    @Value("${application.promotion.conditions.tech-lead.was-a-supervisor}")
-    private Boolean wasASupervisor;
-    @Value("${application.promotion.conditions.tech-lead.was-an-architect}")
-    private Boolean wasAnArchitect;
-    @Value("${application.promotion.conditions.tech-lead.commits-amount-in-master}")
-    private Integer commitsInCampusAmount;
-    @Value("${application.promotion.conditions.tech-lead.created-tasks-in-campus-amount}")
-    private Integer createdTasksInCampusAmount;
-
     @Override
-    public Map<String, Boolean> getCheckListMap(RolePromotionConditions conditions) {
+    public Map<String, Boolean> getCheckListMap(AccountRolePromotionConditions accountConditions,
+                                                RolePromotionConditionDto requiredConditions) {
+
+        Integer requiredCommitsQuantity = requiredConditions.toTechLeadCommitsQuantity();
+        Boolean wasSupervisor = requiredConditions.wasSupervisor();
+        Boolean wasArchitect = requiredConditions.wasArchitect();
+        Integer requiredCreatedTasksQuantity = requiredConditions.toTechLeadCreatedCampusTasksQuantity();
+
         return Map.of(
-                RolePromotionCondition.COMMITS_COUNT_KEY_CONSTANT + " " + commitsInCampusAmount,
-                conditions.commitsInCampusAmount() >= commitsInCampusAmount,
-                RolePromotionCondition.WAS_A_SUPERVISOR_KEY_CONSTANT.toString(),
-                conditions.wasASupervisor() == wasASupervisor,
-                RolePromotionCondition.WAS_AN_ARCHITECT_KEY_CONSTANT.toString(),
-                conditions.wasAnArchitect() == wasAnArchitect,
-                RolePromotionCondition.CREATED_TASKS_IN_CAMPUS_AMOUNT_KEY_CONSTANT + " " + createdTasksInCampusAmount,
-                conditions.createdTasksInCampusAmount() >= createdTasksInCampusAmount
+                RolePromotionConditionSignature.COMMITS_COUNT_KEY_CONSTANT + " " + requiredCommitsQuantity,
+                accountConditions.commitsInCampusAmount() >= requiredCommitsQuantity,
+                RolePromotionConditionSignature.WAS_A_SUPERVISOR_KEY_CONSTANT.toString(),
+                accountConditions.wasASupervisor() == wasSupervisor,
+                RolePromotionConditionSignature.WAS_AN_ARCHITECT_KEY_CONSTANT.toString(),
+                accountConditions.wasAnArchitect() == wasArchitect,
+                RolePromotionConditionSignature.CREATED_TASKS_IN_CAMPUS_AMOUNT_KEY_CONSTANT + " " + requiredCreatedTasksQuantity,
+                accountConditions.createdTasksInCampusAmount() >= requiredCreatedTasksQuantity
         );
     }
 }

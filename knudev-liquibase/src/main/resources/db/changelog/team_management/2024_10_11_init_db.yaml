@@ -813,3 +813,83 @@ databaseChangeLog:
             columns:
               - column:
                   name: account_id
+
+  - changeSet:
+      id: create_role_promotion_conditions_table
+      author: DenysLeonenko
+      changes:
+        - createTable:
+            schemaName: team_management
+            tableName: role_promotion_conditions
+            columns:
+              - column:
+                  name: id
+                  type: uuid
+                  constraints:
+                    nullable: false
+                    primaryKey: true
+              - column:
+                  name: to_premaster_project_quantity
+                  type: int
+                  constraints:
+                    nullable: false
+              - column:
+                  name: to_premaster_commits_quantity
+                  type: int
+                  constraints:
+                    nullable: false
+              - column:
+                  name: to_master_project_quantity
+                  type: int
+                  constraints:
+                    nullable: false
+              - column:
+                  name: to_master_commits_quantity
+                  type: int
+                  constraints:
+                    nullable: false
+              - column:
+                  name: to_master_created_campus_tasks_quantity
+                  type: int
+                  constraints:
+                    nullable: false
+              - column:
+                  name: to_master_mentored_sessions_quantity
+                  type: int
+                  constraints:
+                    nullable: false
+              - column:
+                  name: to_tech_lead_created_campus_tasks_quantity
+                  type: int
+                  constraints:
+                    nullable: false
+              - column:
+                  name: to_tech_lead_commits_quantity
+                  type: int
+                  constraints:
+                    nullable: false
+              - column:
+                  name: was_supervisor
+                  type: boolean
+                  constraints:
+                    nullable: false
+              - column:
+                  name: was_architect
+                  type: boolean
+                  constraints:
+                    nullable: false
+              - column:
+                  name: created_at
+                  type: datetime
+                  constraints:
+                    nullable: false
+              - column:
+                  name: updated_at
+                  type: datetime
+              - column:
+                  name: singleton
+                  type: boolean
+                  defaultValueBoolean: true
+                  constraints:
+                    nullable: false
+                    unique: true

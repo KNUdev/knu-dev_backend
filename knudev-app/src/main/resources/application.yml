@@ -87,23 +87,6 @@ application:
         maximum-size-in-kilobytes: 5120
   assignments:
     activation-expiry-in-days: 7
-  promotion:
-#    todo add more conditions
-    conditions:
-      pre-master:
-        participation-in-projects: 1
-        commits-amount-in-master: 20
-      master:
-        participation-in-projects: 2
-        commits-amount-in-master: 40
-        created-tasks-in-campus-amount: 5
-        mentored-sessions-amount: 1
-      tech-lead:
-        created-tasks-in-campus-amount: 7
-        was-a-supervisor: true
-        was-an-architect: true
-        commits-amount-in-master: 60
-
   session:
     sprints:
       defaultDurationInDays: 4
