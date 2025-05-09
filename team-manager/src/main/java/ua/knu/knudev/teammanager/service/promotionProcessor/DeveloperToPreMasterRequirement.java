@@ -1,27 +1,27 @@
 package ua.knu.knudev.teammanager.service.promotionProcessor;
 
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-import ua.knu.knudev.knudevcommon.constant.RolePromotionCondition;
-import ua.knu.knudev.teammanagerapi.dto.RolePromotionConditions;
+import ua.knu.knudev.knudevcommon.constant.RolePromotionConditionSignature;
+import ua.knu.knudev.teammanagerapi.dto.AccountRolePromotionConditions;
+import ua.knu.knudev.teammanagerapi.dto.RolePromotionConditionDto;
 
 import java.util.Map;
 
 @Component
 public class DeveloperToPreMasterRequirement implements PromotionRequirement {
 
-    @Value("${application.promotion.conditions.pre-master.participation-in-projects}")
-    private Integer projectsInCampusAmount;
-    @Value("${application.promotion.conditions.pre-master.commits-amount-in-master}")
-    private Integer commitsInCampusAmount;
-
     @Override
-    public Map<String, Boolean> getCheckListMap(RolePromotionConditions conditions) {
+    public Map<String, Boolean> getCheckListMap(AccountRolePromotionConditions accountConditions,
+                                                RolePromotionConditionDto requiredConditions) {
+
+        Integer requiredCommitsQuantity = requiredConditions.toPremasterCommitsQuantity();
+        Integer requiredProjectsQuantity = requiredConditions.toPremasterProjectQuantity();
+
         return Map.of(
-                RolePromotionCondition.PROJECTS_COUNT_KEY_CONSTANT + " " + (projectsInCampusAmount - 1),
-                conditions.projectsInCampusAmount() >= projectsInCampusAmount,
-                RolePromotionCondition.COMMITS_COUNT_KEY_CONSTANT + " " + commitsInCampusAmount,
-                conditions.commitsInCampusAmount() >= commitsInCampusAmount
+                RolePromotionConditionSignature.PROJECTS_COUNT_KEY_CONSTANT + " " + (requiredProjectsQuantity - 1),
+                accountConditions.projectsInCampusAmount() >= requiredProjectsQuantity,
+                RolePromotionConditionSignature.COMMITS_COUNT_KEY_CONSTANT + " " + requiredCommitsQuantity,
+                accountConditions.commitsInCampusAmount() >= requiredCommitsQuantity
         );
     }
 }

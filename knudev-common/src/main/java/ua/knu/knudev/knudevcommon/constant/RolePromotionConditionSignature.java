@@ -1,6 +1,6 @@
 package ua.knu.knudev.knudevcommon.constant;
 
-public enum RolePromotionCondition {
+public enum RolePromotionConditionSignature {
     PROJECTS_COUNT_KEY_CONSTANT,
     COMMITS_COUNT_KEY_CONSTANT,
     CREATED_TASKS_IN_CAMPUS_AMOUNT_KEY_CONSTANT,
